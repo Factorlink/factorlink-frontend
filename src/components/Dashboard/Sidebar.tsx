@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   List,
@@ -9,6 +10,7 @@ import {
   InputAdornment,
   Typography,
   useTheme,
+  IconButton,
 } from "@mui/material";
 import {
   GridView,
@@ -38,18 +40,22 @@ const Sidebar = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
+
+  const sidebarWidth = collapsed ? 72 : 260;
 
   return (
     <Box
       sx={{
-        width: 260,
+        width: sidebarWidth,
         minHeight: "100vh",
         backgroundColor: "background.paper",
         borderRight: `1px solid ${theme.palette.divider}`,
         display: "flex",
         flexDirection: "column",
+        transition: "width 0.2s ease-in-out",
       }}
     >
       {/* Logo */}
@@ -60,9 +66,10 @@ const Sidebar = () => {
           gap: 1,
           p: 2,
           pb: 3,
+          justifyContent: collapsed ? "center" : "flex-start",
         }}
       >
-        <Box sx={{ position: "relative", width: 32, height: 32 }}>
+        <Box sx={{ position: "relative", width: 32, height: 32, flexShrink: 0 }}>
           <Box
             sx={{
               position: "absolute",
@@ -86,41 +93,65 @@ const Sidebar = () => {
             }}
           />
         </Box>
-        <Typography
-          sx={{
-            fontWeight: 300,
-            fontSize: "1.4rem",
-            letterSpacing: "-0.5px",
-          }}
+        {!collapsed && (
+          <Typography
+            sx={{
+              fontWeight: 300,
+              fontSize: "1.4rem",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            <span style={{ color: theme.palette.primary.main }}>factor</span>
+            <span style={{ fontWeight: 500, color: theme.palette.text.secondary }}>
+              link
+            </span>
+          </Typography>
+        )}
+        <IconButton
+          onClick={() => setCollapsed(!collapsed)}
+          sx={{ ml: collapsed ? 0 : "auto", color: "text.secondary" }}
+          size="small"
         >
-          <span style={{ color: theme.palette.primary.main }}>factor</span>
-          <span style={{ fontWeight: 500, color: theme.palette.text.secondary }}>
-            link
-          </span>
-        </Typography>
-        <Menu sx={{ ml: "auto", color: "text.secondary" }} />
+          <Menu />
+        </IconButton>
       </Box>
 
       {/* Search */}
-      <Box sx={{ px: 2, pb: 2 }}>
-        <TextField
-          size="small"
-          placeholder="Buscar"
-          fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Search sx={{ color: "primary.main" }} />
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
+      <Box sx={{ px: collapsed ? 1 : 2, pb: 2 }}>
+        {collapsed ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
               backgroundColor: "background.default",
               borderRadius: 2,
-            },
-          }}
-        />
+              p: 1,
+              border: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Search sx={{ color: "primary.main" }} />
+          </Box>
+        ) : (
+          <TextField
+            size="small"
+            placeholder="Buscar"
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Search sx={{ color: "primary.main" }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "background.default",
+                borderRadius: 2,
+              },
+            }}
+          />
+        )}
       </Box>
 
       {/* Main Menu */}
@@ -137,9 +168,11 @@ const Sidebar = () => {
                 "&:hover": {
                   backgroundColor: "rgba(0, 188, 212, 0.12)",
                 },
+                justifyContent: collapsed ? "center" : "flex-start",
+                px: collapsed ? 1 : 2,
               }}
             >
-              <ListItemIcon sx={{ minWidth: 40 }}>
+              <ListItemIcon sx={{ minWidth: collapsed ? 0 : 40, justifyContent: "center" }}>
                 <item.icon
                   sx={{
                     color: isActive(item.path)
@@ -148,18 +181,20 @@ const Sidebar = () => {
                   }}
                 />
               </ListItemIcon>
-              <ListItemText
-                primary={item.text}
-                sx={{
-                  "& .MuiTypography-root": {
-                    fontWeight: isActive(item.path) ? 600 : 400,
-                    color: isActive(item.path)
-                      ? "text.primary"
-                      : "text.secondary",
-                    fontSize: "0.95rem",
-                  },
-                }}
-              />
+              {!collapsed && (
+                <ListItemText
+                  primary={item.text}
+                  sx={{
+                    "& .MuiTypography-root": {
+                      fontWeight: isActive(item.path) ? 600 : 400,
+                      color: isActive(item.path)
+                        ? "text.primary"
+                        : "text.secondary",
+                      fontSize: "0.95rem",
+                    },
+                  }}
+                />
+              )}
             </ListItemButton>
           </ListItem>
         ))}
@@ -176,20 +211,24 @@ const Sidebar = () => {
                 "&:hover": {
                   backgroundColor: "rgba(0, 188, 212, 0.12)",
                 },
+                justifyContent: collapsed ? "center" : "flex-start",
+                px: collapsed ? 1 : 2,
               }}
             >
-              <ListItemIcon sx={{ minWidth: 40 }}>
+              <ListItemIcon sx={{ minWidth: collapsed ? 0 : 40, justifyContent: "center" }}>
                 <item.icon sx={{ color: "primary.main" }} />
               </ListItemIcon>
-              <ListItemText
-                primary={item.text}
-                sx={{
-                  "& .MuiTypography-root": {
-                    color: "primary.main",
-                    fontSize: "0.95rem",
-                  },
-                }}
-              />
+              {!collapsed && (
+                <ListItemText
+                  primary={item.text}
+                  sx={{
+                    "& .MuiTypography-root": {
+                      color: "primary.main",
+                      fontSize: "0.95rem",
+                    },
+                  }}
+                />
+              )}
             </ListItemButton>
           </ListItem>
         ))}
