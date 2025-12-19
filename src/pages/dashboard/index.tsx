@@ -1,10 +1,10 @@
 import { Box, Grid } from "@mui/material";
-import Sidebar from "../../components/Dashboard/Sidebar";
-import Header from "../../components/Dashboard/Header";
-import InvoiceBanner from "../../components/Dashboard/InvoiceBanner";
-import RetainedInvoicesCard from "../../components/Dashboard/RetainedInvoicesCard";
-import DueInvoicesCard from "../../components/Dashboard/DueInvoicesCard";
-import PendingInvoicesTabs from "../../components/Dashboard/PendingInvoicesTabs";
+import Sidebar from "../../components/dashboard/Sidebar";
+import Header from "../../components/dashboard/Header";
+import InvoiceBanner from "../../components/dashboard/InvoiceBanner";   
+import RetainedInvoicesCard from "../../components/dashboard/RetainedInvoicesCard"; 
+import DueInvoicesCard from "../../components/dashboard/DueInvoicesCard";
+import PendingInvoicesTabs from "../../components/dashboard/PendingInvoicesTabs";
 
 const Dashboard = () => {
   return (
