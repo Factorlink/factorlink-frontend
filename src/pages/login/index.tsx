@@ -13,7 +13,7 @@ import {
 
 const Login = () => {
   const theme = useTheme();
-  const [rut, setRut] = useState("");
+  const [rut, setRut] = useState("76.453.189-2");
   const [password, setPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
@@ -21,7 +21,7 @@ const Login = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundColor: theme.palette.primary.dark,
+        backgroundColor: "primary.dark",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -31,21 +31,22 @@ const Login = () => {
       <Container maxWidth="md">
         <Box
           sx={{
-            backgroundColor: "white",
+            backgroundColor: "background.paper",
             borderRadius: 3,
             overflow: "hidden",
             boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
           }}
         >
+          {/* Suite Empresa Tab */}
           <Box
             sx={{
-              backgroundColor: theme.palette.primary.main,
-              color: "white",
-              padding: "12px 24px",
+              backgroundColor: "primary.main",
+              color: "common.white",
+              padding: "12px 28px",
               width: "fit-content",
               borderRadius: "0 0 16px 0",
               fontWeight: 500,
-              fontSize: "0.95rem",
+              fontSize: "1rem",
             }}
           >
             Suite Empresa
@@ -58,169 +59,164 @@ const Login = () => {
               gap: 4,
               padding: { xs: 3, md: 5 },
               alignItems: "center",
+              minHeight: 400,
             }}
           >
+            {/* Left Side - Factorlink Logo */}
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
+                borderRight: { xs: "none", md: `1px solid ${theme.palette.divider}` },
+                paddingRight: { md: 4 },
+                height: "100%",
               }}
             >
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
+                  gap: 1.5,
                 }}
               >
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    backgroundColor: theme.palette.primary.main,
-                    borderRadius: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transform: "rotate(45deg)",
-                  }}
-                >
+                {/* Diamond Logo */}
+                <Box sx={{ position: "relative", width: 45, height: 45 }}>
                   <Box
                     sx={{
-                      width: 28,
-                      height: 28,
-                      backgroundColor: "white",
-                      borderRadius: 0.5,
-                      transform: "rotate(-45deg)",
+                      position: "absolute",
+                      width: 30,
+                      height: 30,
+                      border: `3px solid ${theme.palette.primary.main}`,
+                      transform: "rotate(45deg)",
+                      top: 0,
+                      left: 8,
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      width: 30,
+                      height: 30,
+                      border: `3px solid ${theme.palette.primary.main}`,
+                      transform: "rotate(45deg)",
+                      top: 12,
+                      left: 8,
                     }}
                   />
                 </Box>
                 <Typography
-                  variant="h5"
                   sx={{
-                    fontWeight: 400,
-                    color: theme.palette.primary.main,
-                    fontSize: "1.8rem",
+                    fontWeight: 300,
+                    fontSize: "2rem",
+                    letterSpacing: "-0.5px",
                   }}
                 >
-                  <span style={{ fontWeight: 300 }}>factor</span>
-                  <span
-                    style={{
-                      fontWeight: 500,
-                      color: theme.palette.text.secondary,
-                    }}
-                  >
-                    link
-                  </span>
+                  <span style={{ color: theme.palette.primary.main }}>factor</span>
+                  <span style={{ fontWeight: 500, color: theme.palette.text.secondary }}>link</span>
                 </Typography>
               </Box>
             </Box>
 
-            <Box
-              sx={{
-                borderLeft: {
-                  xs: "none",
-                  md: `1px solid ${theme.palette.divider}`,
-                },
-                paddingLeft: { md: 4 },
-              }}
-            >
+            {/* Right Side - Form */}
+            <Box sx={{ paddingLeft: { md: 2 } }}>
+              {/* SII Logo and Description */}
               <Box
-                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
+                sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 3 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                  }}
-                >
-                  <Box
+                {/* SII Logo */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <Typography
                     sx={{
-                      width: 8,
-                      height: 24,
-                      backgroundColor: theme.palette.error.main,
-                      borderRadius: 0.5,
+                      fontWeight: 700,
+                      fontSize: "2.2rem",
+                      color: "primary.dark",
+                      lineHeight: 1,
                     }}
-                  />
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 24,
-                      backgroundColor: theme.palette.primary.main,
-                      borderRadius: 0.5,
-                    }}
-                  />
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 24,
-                      backgroundColor: theme.palette.warning.main,
-                      borderRadius: 0.5,
-                    }}
-                  />
+                  >
+                    Sii
+                  </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "column", ml: 1 }}>
+                    <Typography
+                      sx={{
+                        fontSize: "0.65rem",
+                        fontWeight: 600,
+                        color: "primary.dark",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Servicio de
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "0.65rem",
+                        fontWeight: 600,
+                        color: "error.main",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Impuestos
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "0.65rem",
+                        fontWeight: 600,
+                        color: "primary.dark",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Internos
+                    </Typography>
+                  </Box>
                 </Box>
+
                 <Typography
                   variant="body2"
                   sx={{
-                    fontWeight: 600,
-                    color: theme.palette.text.primary,
-                    fontSize: "0.85rem",
+                    color: "text.secondary",
+                    fontSize: "0.9rem",
+                    lineHeight: 1.5,
+                    flex: 1,
                   }}
                 >
-                  Servicio de
+                  Ingresa tu rut y contraseña de SII para sincronizar la
+                  información de tus facturas.
                   <br />
-                  Impuestos
-                  <br />
-                  Internos
+                  <Link
+                    href="#"
+                    sx={{
+                      color: "success.main",
+                      textDecoration: "none",
+                      "&:hover": {
+                        textDecoration: "underline",
+                      },
+                    }}
+                  >
+                    Más detalles del proceso.
+                  </Link>
                 </Typography>
               </Box>
 
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 0.5,
-                  color: theme.palette.text.primary,
-                  lineHeight: 1.5,
-                }}
-              >
-                Ingresa tu rut y contraseña de SII para sincronizar la
-                información de tus facturas.
-              </Typography>
-
-              <Link
-                href="#"
-                sx={{
-                  color: theme.palette.primary.main,
-                  fontSize: "0.875rem",
-                  textDecoration: "none",
-                  mb: 3,
-                  display: "inline-block",
-                  "&:hover": {
-                    textDecoration: "underline",
-                  },
-                }}
-              >
-                Más detalles del proceso
-              </Link>
-
-              <Box sx={{ mt: 3 }}>
+              {/* Form Fields */}
+              <Box>
                 <TextField
                   fullWidth
                   variant="outlined"
-                  placeholder="Rut Empresa"
+                  placeholder="76.453.189-2"
                   value={rut}
                   onChange={(e) => setRut(e.target.value)}
                   sx={{
                     mb: 2,
                     "& .MuiOutlinedInput-root": {
-                      backgroundColor: theme.palette.background.default,
+                      backgroundColor: "background.default",
                       "& fieldset": {
-                        borderColor: theme.palette.divider,
+                        borderColor: "divider",
                       },
                       "&:hover fieldset": {
-                        borderColor: theme.palette.text.secondary,
+                        borderColor: "text.disabled",
+                      },
+                      "& input": {
+                        color: "text.secondary",
                       },
                     },
                   }}
@@ -236,12 +232,16 @@ const Login = () => {
                   sx={{
                     mb: 2,
                     "& .MuiOutlinedInput-root": {
-                      backgroundColor: theme.palette.background.default,
+                      backgroundColor: "background.default",
                       "& fieldset": {
-                        borderColor: theme.palette.divider,
+                        borderColor: "divider",
                       },
                       "&:hover fieldset": {
-                        borderColor: theme.palette.text.secondary,
+                        borderColor: "text.disabled",
+                      },
+                      "& input::placeholder": {
+                        color: "text.disabled",
+                        opacity: 1,
                       },
                     },
                   }}
@@ -254,9 +254,9 @@ const Login = () => {
                       onChange={(e) => setAcceptedTerms(e.target.checked)}
                       size="small"
                       sx={{
-                        color: theme.palette.text.disabled,
+                        color: "text.disabled",
                         "&.Mui-checked": {
-                          color: theme.palette.primary.main,
+                          color: "success.main",
                         },
                       }}
                     />
@@ -266,14 +266,14 @@ const Login = () => {
                       variant="body2"
                       sx={{
                         fontSize: "0.875rem",
-                        color: theme.palette.text.secondary,
+                        color: "text.secondary",
                       }}
                     >
                       He leído y acepto los{" "}
                       <Link
                         href="#"
                         sx={{
-                          color: theme.palette.primary.main,
+                          color: "success.main",
                           textDecoration: "none",
                           "&:hover": {
                             textDecoration: "underline",
@@ -292,15 +292,17 @@ const Login = () => {
                     variant="contained"
                     fullWidth
                     sx={{
-                      backgroundColor: theme.palette.secondary.main,
+                      backgroundColor: "secondary.main",
                       color: "white",
                       textTransform: "none",
-                      padding: "10px",
-                      fontSize: "0.95rem",
+                      padding: "12px",
+                      fontSize: "1rem",
                       fontWeight: 500,
                       borderRadius: 2,
+                      boxShadow: "none",
                       "&:hover": {
-                        backgroundColor: theme.palette.secondary.dark,
+                        backgroundColor: "secondary.dark",
+                        boxShadow: "none",
                       },
                     }}
                   >
@@ -311,15 +313,17 @@ const Login = () => {
                     variant="contained"
                     fullWidth
                     sx={{
-                      backgroundColor: theme.palette.success.main,
+                      backgroundColor: "success.main",
                       color: "white",
                       textTransform: "none",
-                      padding: "10px",
-                      fontSize: "0.95rem",
+                      padding: "12px",
+                      fontSize: "1rem",
                       fontWeight: 500,
                       borderRadius: 2,
+                      boxShadow: "none",
                       "&:hover": {
-                        backgroundColor: theme.palette.success.dark,
+                        backgroundColor: "success.dark",
+                        boxShadow: "none",
                       },
                     }}
                   >
