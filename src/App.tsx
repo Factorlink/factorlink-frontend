@@ -5,6 +5,7 @@ import { theme } from "./theme/theme";
 import Login from "./pages/login";
 import Dashboard from "./pages/dashboard";
 import Facturas from "./pages/facturas";
+import Operaciones from "./pages/operaciones";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/facturas" element={<Facturas />} />
+          <Route path="/operaciones" element={<Operaciones />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
