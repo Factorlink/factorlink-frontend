@@ -10,6 +10,8 @@ import {
   Container,
   useTheme,
 } from "@mui/material";
+import logo from "../../assets/png/factorlink-logo.png";
+import siiLogo from "../../assets/png/sii-logo.png";
 
 const Login = () => {
   const theme = useTheme();
@@ -68,7 +70,10 @@ const Login = () => {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                borderRight: { xs: "none", md: `1px solid ${theme.palette.divider}` },
+                borderRight: {
+                  xs: "none",
+                  md: `1px solid ${theme.palette.divider}`,
+                },
                 paddingRight: { md: 4 },
                 height: "100%",
               }}
@@ -81,40 +86,11 @@ const Login = () => {
                 }}
               >
                 {/* Diamond Logo */}
-                <Box sx={{ position: "relative", width: 45, height: 45 }}>
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      width: 30,
-                      height: 30,
-                      border: `3px solid ${theme.palette.primary.main}`,
-                      transform: "rotate(45deg)",
-                      top: 0,
-                      left: 8,
-                    }}
-                  />
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      width: 30,
-                      height: 30,
-                      border: `3px solid ${theme.palette.primary.main}`,
-                      transform: "rotate(45deg)",
-                      top: 12,
-                      left: 8,
-                    }}
-                  />
-                </Box>
-                <Typography
-                  sx={{
-                    fontWeight: 300,
-                    fontSize: "2rem",
-                    letterSpacing: "-0.5px",
-                  }}
-                >
-                  <span style={{ color: theme.palette.primary.main }}>factor</span>
-                  <span style={{ fontWeight: 500, color: theme.palette.text.secondary }}>link</span>
-                </Typography>
+                <img
+                  src={logo}
+                  alt="Factorlink Logo"
+                  style={{ maxWidth: 250 }}
+                />
               </Box>
             </Box>
 
@@ -122,52 +98,16 @@ const Login = () => {
             <Box sx={{ paddingLeft: { md: 2 } }}>
               {/* SII Logo and Description */}
               <Box
-                sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 3 }}
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  mb: 3,
+                }}
               >
                 {/* SII Logo */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <Typography
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: "2.2rem",
-                      color: "primary.dark",
-                      lineHeight: 1,
-                    }}
-                  >
-                    Sii
-                  </Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column", ml: 1 }}>
-                    <Typography
-                      sx={{
-                        fontSize: "0.65rem",
-                        fontWeight: 600,
-                        color: "primary.dark",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      Servicio de
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: "0.65rem",
-                        fontWeight: 600,
-                        color: "error.main",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      Impuestos
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: "0.65rem",
-                        fontWeight: 600,
-                        color: "primary.dark",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      Internos
-                    </Typography>
-                  </Box>
+                  <img src={siiLogo} alt="SII Logo" style={{ maxWidth: 150 }} />
                 </Box>
 
                 <Typography
@@ -312,6 +252,7 @@ const Login = () => {
                   <Button
                     variant="contained"
                     fullWidth
+                    href="/dashboard"
                     sx={{
                       backgroundColor: "success.main",
                       color: "white",

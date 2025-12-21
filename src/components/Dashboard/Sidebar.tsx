@@ -8,7 +8,6 @@ import {
   ListItemText,
   TextField,
   InputAdornment,
-  Typography,
   useTheme,
   IconButton,
 } from "@mui/material";
@@ -23,12 +22,13 @@ import {
   Menu,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
+import logo from "../../assets/png/factorlink-logo.png";
 
 const menuItems = [
   { text: "Inicio / Dashboard", icon: GridView, path: "/dashboard" },
   { text: "Control de Facturas", icon: Description, path: "/facturas" },
   { text: "Operaciones", icon: SwapHoriz, path: "/operaciones" },
-  { text: "Riesgo / Scoring", icon: Assessment, path: "/riesgo" },
+  { text: "Riesgo / Scoring", icon: Assessment, path: "/#" },
 ];
 
 const bottomItems = [
@@ -69,43 +69,8 @@ const Sidebar = () => {
           justifyContent: collapsed ? "center" : "flex-start",
         }}
       >
-        <Box sx={{ position: "relative", width: 32, height: 32, flexShrink: 0 }}>
-          <Box
-            sx={{
-              position: "absolute",
-              width: 20,
-              height: 20,
-              border: `2px solid ${theme.palette.primary.main}`,
-              transform: "rotate(45deg)",
-              top: 0,
-              left: 6,
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              width: 20,
-              height: 20,
-              border: `2px solid ${theme.palette.primary.main}`,
-              transform: "rotate(45deg)",
-              top: 8,
-              left: 6,
-            }}
-          />
-        </Box>
         {!collapsed && (
-          <Typography
-            sx={{
-              fontWeight: 300,
-              fontSize: "1.4rem",
-              letterSpacing: "-0.5px",
-            }}
-          >
-            <span style={{ color: theme.palette.primary.main }}>factor</span>
-            <span style={{ fontWeight: 500, color: theme.palette.text.secondary }}>
-              link
-            </span>
-          </Typography>
+          <img src={logo} alt="factorlink-logo" style={{ maxWidth: 150 }} />
         )}
         <IconButton
           onClick={() => setCollapsed(!collapsed)}
@@ -172,7 +137,9 @@ const Sidebar = () => {
                 px: collapsed ? 1 : 2,
               }}
             >
-              <ListItemIcon sx={{ minWidth: collapsed ? 0 : 40, justifyContent: "center" }}>
+              <ListItemIcon
+                sx={{ minWidth: collapsed ? 0 : 40, justifyContent: "center" }}
+              >
                 <item.icon
                   sx={{
                     color: isActive(item.path)
@@ -215,7 +182,9 @@ const Sidebar = () => {
                 px: collapsed ? 1 : 2,
               }}
             >
-              <ListItemIcon sx={{ minWidth: collapsed ? 0 : 40, justifyContent: "center" }}>
+              <ListItemIcon
+                sx={{ minWidth: collapsed ? 0 : 40, justifyContent: "center" }}
+              >
                 <item.icon sx={{ color: "primary.main" }} />
               </ListItemIcon>
               {!collapsed && (
