@@ -72,43 +72,6 @@ const Operaciones = () => {
               Operaciones/Marketplace
             </Typography>
           </Box>
-
-          {/* Decorative circles */}
-          <Box sx={{ position: "relative", width: 80, height: 60 }}>
-            <Box
-              sx={{
-                position: "absolute",
-                width: 50,
-                height: 50,
-                borderRadius: "50%",
-                backgroundColor: "success.main",
-                right: 0,
-                top: 0,
-              }}
-            />
-            <Box
-              sx={{
-                position: "absolute",
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                backgroundColor: "primary.main",
-                right: 25,
-                top: 15,
-              }}
-            />
-            <Box
-              sx={{
-                position: "absolute",
-                width: 30,
-                height: 30,
-                borderRadius: "50%",
-                backgroundColor: "#FFB74D",
-                right: 45,
-                top: 25,
-              }}
-            />
-          </Box>
         </Box>
 
         {/* Operaciones Content */}

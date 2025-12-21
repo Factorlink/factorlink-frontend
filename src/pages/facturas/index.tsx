@@ -1,5 +1,5 @@
-import { Box, Typography, useTheme } from "@mui/material";
-import { Description } from "@mui/icons-material";
+import { Box, Typography, useTheme, FormControl, Select, MenuItem, IconButton } from "@mui/material";
+import { Description, KeyboardArrowDown, FileDownload } from "@mui/icons-material";
 import Layout from "../../components/Layout";
 import OperationsTabs from "../../components/Dashboard/OperationsTabs";
 
@@ -129,42 +129,7 @@ const Facturas = () => {
             </Typography>
           </Box>
 
-          {/* Decorative circles */}
-          <Box sx={{ position: "relative", width: 80, height: 60 }}>
-            <Box
-              sx={{
-                position: "absolute",
-                width: 50,
-                height: 50,
-                borderRadius: "50%",
-                backgroundColor: "success.main",
-                right: 0,
-                top: 0,
-              }}
-            />
-            <Box
-              sx={{
-                position: "absolute",
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                backgroundColor: "primary.main",
-                right: 25,
-                top: 15,
-              }}
-            />
-            <Box
-              sx={{
-                position: "absolute",
-                width: 30,
-                height: 30,
-                borderRadius: "50%",
-                backgroundColor: "#FFB74D",
-                right: 45,
-                top: 25,
-              }}
-            />
-          </Box>
+          
         </Box>
 
         <Box
@@ -175,6 +140,65 @@ const Facturas = () => {
             boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
           }}
         >
+          {/* Filters Row */}
+          <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+            <FormControl size="small" sx={{ minWidth: 200 }}>
+              <Select
+                defaultValue="fecha"
+                IconComponent={KeyboardArrowDown}
+                sx={{
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "divider",
+                  },
+                }}
+              >
+                <MenuItem value="fecha">01/08/2023 - 29/08/2024</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <Select
+                defaultValue="filtro"
+                IconComponent={KeyboardArrowDown}
+                sx={{
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "divider",
+                  },
+                }}
+              >
+                <MenuItem value="filtro">Filtro</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <Select
+                defaultValue="condicional"
+                IconComponent={KeyboardArrowDown}
+                sx={{
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "divider",
+                  },
+                }}
+              >
+                <MenuItem value="condicional">Condicional</MenuItem>
+              </Select>
+            </FormControl>
+
+            <IconButton
+              sx={{
+                backgroundColor: "primary.main",
+                color: "white",
+                borderRadius: 2,
+                "&:hover": {
+                  backgroundColor: "primary.dark",
+                },
+              }}
+            >
+              <FileDownload />
+            </IconButton>
+          </Box>
           <OperationsTabs tabLabels={tabLabels} data={invoicesData} />
         </Box>
       </Box>

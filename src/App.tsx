@@ -3,6 +3,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { theme } from "./theme/theme";
 import Login from "./pages/login";
+import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
 import Facturas from "./pages/facturas";
 import Operaciones from "./pages/operaciones";
@@ -13,8 +14,9 @@ function App() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/facturas" element={<Facturas />} />
           <Route path="/operaciones" element={<Operaciones />} />
