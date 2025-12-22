@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useFormik } from "formik";
+import { validationSchema } from "./validation-schema";
+
 import {
   Box,
-  TextField,
+  MenuItem,
   Button,
   Checkbox,
   FormControlLabel,
@@ -10,16 +12,29 @@ import {
   Container,
   useTheme,
 } from "@mui/material";
+import { StyledTextField } from "./styles";
 import logo from "../../assets/png/factorlink-logo.png";
 
 const Register = () => {
   const theme = useTheme();
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [password, setPassword] = useState("");
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  const formik = useFormik({
+    initialValues: {
+      tipoEntidad: "",
+      nombre: "",
+      apellido: "",
+      rut: "",
+      email: "",
+      telefono: "",
+      password: "",
+      confirmPassword: "",
+      acceptedTerms: false,
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      console.log(values);
+    },
+  });
 
   return (
     <Box
@@ -41,7 +56,7 @@ const Register = () => {
             boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
           }}
         >
-          {/* Suite Empresa Tab */}
+          {/* Suite Tab */}
           <Box
             sx={{
               backgroundColor: "primary.main",
@@ -53,7 +68,7 @@ const Register = () => {
               fontSize: "1rem",
             }}
           >
-            Suite Empresa
+            Registro
           </Box>
 
           <Box
@@ -99,145 +114,138 @@ const Register = () => {
             <Box sx={{ paddingLeft: { md: 2 } }}>
               {/* Form Fields */}
               <Box>
-                {/* Nombre y Apellido Row */}
-                <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Nombre"
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "background.default",
-                        "& fieldset": {
-                          borderColor: "divider",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "text.disabled",
-                        },
-                        "& input": {
-                          color: "text.secondary",
-                        },
-                        "& input::placeholder": {
-                          color: "text.disabled",
-                          opacity: 1,
-                        },
-                      },
-                    }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Apellido"
-                    value={apellido}
-                    onChange={(e) => setApellido(e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "background.default",
-                        "& fieldset": {
-                          borderColor: "divider",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "text.disabled",
-                        },
-                        "& input": {
-                          color: "text.secondary",
-                        },
-                        "& input::placeholder": {
-                          color: "text.disabled",
-                          opacity: 1,
-                        },
-                      },
-                    }}
-                  />
-                </Box>
+                <StyledTextField
+                  select
+                  fullWidth
+                  defaultValue=""
+                  label="Tipo de entidad"
+                  id="tipoEntidad"
+                  name="tipoEntidad"
+                  error={
+                    formik.touched.tipoEntidad &&
+                    Boolean(formik.errors.tipoEntidad)
+                  }
+                  helperText={
+                    formik.touched.tipoEntidad && formik.errors.tipoEntidad
+                  }
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                >
+                  <MenuItem value="EMPRESA">Empresa</MenuItem>
+                  <MenuItem value="FACTORING">Factoring</MenuItem>
+                </StyledTextField>
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Nombre"
+                  id="nombre"
+                  name="nombre"
+                  value={formik.values.nombre}
+                  error={formik.touched.nombre && Boolean(formik.errors.nombre)}
+                  helperText={formik.touched.nombre && formik.errors.nombre}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Apellido"
+                  id="apellido"
+                  name="apellido"
+                  value={formik.values.apellido}
+                  error={
+                    formik.touched.apellido && Boolean(formik.errors.apellido)
+                  }
+                  helperText={formik.touched.apellido && formik.errors.apellido}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="RUT"
+                  id="rut"
+                  name="rut"
+                  value={formik.values.rut}
+                  error={formik.touched.rut && Boolean(formik.errors.rut)}
+                  helperText={formik.touched.rut && formik.errors.rut}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
 
-                <TextField
+                <StyledTextField
                   fullWidth
                   variant="outlined"
                   placeholder="Email"
+                  id="email"
+                  name="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  sx={{
-                    mb: 2,
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "background.default",
-                      "& fieldset": {
-                        borderColor: "divider",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "text.disabled",
-                      },
-                      "& input": {
-                        color: "text.secondary",
-                      },
-                      "& input::placeholder": {
-                        color: "text.disabled",
-                        opacity: 1,
-                      },
-                    },
-                  }}
+                  value={formik.values.email}
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                 />
 
-                <TextField
+                <StyledTextField
                   fullWidth
                   variant="outlined"
                   placeholder="Telefono móvil"
-                  value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
-                  sx={{
-                    mb: 2,
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "background.default",
-                      "& fieldset": {
-                        borderColor: "divider",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "text.disabled",
-                      },
-                      "& input": {
-                        color: "text.secondary",
-                      },
-                      "& input::placeholder": {
-                        color: "text.disabled",
-                        opacity: 1,
-                      },
-                    },
-                  }}
+                  type="tel"
+                  id="telefono"
+                  name="telefono"
+                  value={formik.values.telefono}
+                  error={
+                    formik.touched.telefono && Boolean(formik.errors.telefono)
+                  }
+                  helperText={formik.touched.telefono && formik.errors.telefono}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                 />
 
-                <TextField
+                <StyledTextField
                   fullWidth
                   variant="outlined"
                   type="password"
                   placeholder="Contraseña"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  sx={{
-                    mb: 2,
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "background.default",
-                      "& fieldset": {
-                        borderColor: "divider",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "text.disabled",
-                      },
-                      "& input::placeholder": {
-                        color: "text.disabled",
-                        opacity: 1,
-                      },
-                    },
-                  }}
+                  id="password"
+                  name="password"
+                  value={formik.values.password}
+                  error={
+                    formik.touched.password && Boolean(formik.errors.password)
+                  }
+                  helperText={formik.touched.password && formik.errors.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  type="confirmPassword"
+                  placeholder="Confirmar contraseña"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formik.values.confirmPassword}
+                  error={
+                    formik.touched.confirmPassword &&
+                    Boolean(formik.errors.confirmPassword)
+                  }
+                  helperText={
+                    formik.touched.confirmPassword &&
+                    formik.errors.confirmPassword
+                  }
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                 />
 
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={acceptedTerms}
-                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      id="acceptedTerms"
+                      name="acceptedTerms"
+                      checked={formik.values.acceptedTerms}
+                      onChange={formik.handleChange}
                       size="small"
                       sx={{
                         color: "text.disabled",
@@ -299,7 +307,9 @@ const Register = () => {
                   <Button
                     variant="contained"
                     fullWidth
-                    href="/dashboard"
+                    type="submit"
+                    onClick={() => formik.handleSubmit()}
+                    disabled={!formik.isValid}
                     sx={{
                       backgroundColor: "success.main",
                       color: "white",
