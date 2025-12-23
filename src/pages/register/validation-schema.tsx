@@ -1,16 +1,16 @@
 import * as yup from "yup";
 
 export const validationSchema = yup.object({
-  tipoEntidad: yup
+  roleType: yup
     .string()
     .oneOf(["EMPRESA", "FACTORING"], "El tipo de entidad debe ser Empresa o Factoring")
     .required("El tipo de entidad es obligatorio"),
-  nombre: yup
+  firstName: yup
     .string()
     .min(2, "El nombre debe tener al menos 2 caracteres")
     .max(50, "El nombre no puede exceder 50 caracteres")
     .required("El nombre es obligatorio"),
-  apellido: yup
+  lastName: yup
     .string()
     .min(2, "El apellido debe tener al menos 2 caracteres")
     .max(50, "El apellido no puede exceder 50 caracteres")
@@ -26,7 +26,7 @@ export const validationSchema = yup.object({
     .string()
     .email("Email inválido")
     .required("El email es obligatorio"),
-  telefono: yup
+  phone: yup
     .string()
     .required("El teléfono es obligatorio")
     .matches(/^\+?[1-9]\d{1,14}$/, "El teléfono debe tener un formato válido ejemplo: +56999650987"),

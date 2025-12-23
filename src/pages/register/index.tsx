@@ -1,5 +1,7 @@
 import { useFormik } from "formik";
+import type { RegisterFormData } from "../../types/outgoing/register-form-data";
 import { validationSchema } from "./validation-schema";
+import { useAuth } from "../../hooks/useAuth";
 
 import {
   Box,
@@ -17,22 +19,33 @@ import logo from "../../assets/png/factorlink-logo.png";
 
 const Register = () => {
   const theme = useTheme();
+  const { register } = useAuth();
 
-  const formik = useFormik({
+  const handleRegister = async (values: RegisterFormData) => {
+    console.log(values);
+    try {
+      await register(values);
+      // Manejar éxito, por ejemplo, redirigir a la página de inicio de sesión
+    } catch (error) {
+      // Manejar error, por ejemplo, mostrar un mensaje de error al usuario
+    }
+  };
+
+  const formik = useFormik<RegisterFormData>({
     initialValues: {
-      tipoEntidad: "",
-      nombre: "",
-      apellido: "",
+      roleType: "",
+      firstName: "",
+      lastName: "",
       rut: "",
       email: "",
-      telefono: "",
+      phone: "",
       password: "",
       confirmPassword: "",
-      acceptedTerms: false,
+      termsConditions: false,
     },
     validationSchema,
     onSubmit: (values) => {
-      console.log(values);
+      handleRegister(values);
     },
   });
 
@@ -119,15 +132,12 @@ const Register = () => {
                   fullWidth
                   defaultValue=""
                   label="Tipo de entidad"
-                  id="tipoEntidad"
-                  name="tipoEntidad"
+                  id="roleType"
+                  name="roleType"
                   error={
-                    formik.touched.tipoEntidad &&
-                    Boolean(formik.errors.tipoEntidad)
+                    formik.touched.roleType && Boolean(formik.errors.roleType)
                   }
-                  helperText={
-                    formik.touched.tipoEntidad && formik.errors.tipoEntidad
-                  }
+                  helperText={formik.touched.roleType && formik.errors.roleType}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 >
@@ -138,11 +148,15 @@ const Register = () => {
                   fullWidth
                   variant="outlined"
                   placeholder="Nombre"
-                  id="nombre"
-                  name="nombre"
-                  value={formik.values.nombre}
-                  error={formik.touched.nombre && Boolean(formik.errors.nombre)}
-                  helperText={formik.touched.nombre && formik.errors.nombre}
+                  id="firstName"
+                  name="firstName"
+                  value={formik.values.firstName}
+                  error={
+                    formik.touched.firstName && Boolean(formik.errors.firstName)
+                  }
+                  helperText={
+                    formik.touched.firstName && formik.errors.firstName
+                  }
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
@@ -150,13 +164,13 @@ const Register = () => {
                   fullWidth
                   variant="outlined"
                   placeholder="Apellido"
-                  id="apellido"
-                  name="apellido"
-                  value={formik.values.apellido}
+                  id="lastName"
+                  name="lastName"
+                  value={formik.values.lastName}
                   error={
-                    formik.touched.apellido && Boolean(formik.errors.apellido)
+                    formik.touched.lastName && Boolean(formik.errors.lastName)
                   }
-                  helperText={formik.touched.apellido && formik.errors.apellido}
+                  helperText={formik.touched.lastName && formik.errors.lastName}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
@@ -192,13 +206,11 @@ const Register = () => {
                   variant="outlined"
                   placeholder="Telefono móvil"
                   type="tel"
-                  id="telefono"
-                  name="telefono"
-                  value={formik.values.telefono}
-                  error={
-                    formik.touched.telefono && Boolean(formik.errors.telefono)
-                  }
-                  helperText={formik.touched.telefono && formik.errors.telefono}
+                  id="phone"
+                  name="phone"
+                  value={formik.values.phone}
+                  error={formik.touched.phone && Boolean(formik.errors.phone)}
+                  helperText={formik.touched.phone && formik.errors.phone}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
@@ -222,7 +234,7 @@ const Register = () => {
                 <StyledTextField
                   fullWidth
                   variant="outlined"
-                  type="confirmPassword"
+                  type="password"
                   placeholder="Confirmar contraseña"
                   id="confirmPassword"
                   name="confirmPassword"
@@ -243,8 +255,8 @@ const Register = () => {
                   control={
                     <Checkbox
                       id="acceptedTerms"
-                      name="acceptedTerms"
-                      checked={formik.values.acceptedTerms}
+                      name="termsConditions"
+                      checked={formik.values.termsConditions}
                       onChange={formik.handleChange}
                       size="small"
                       sx={{
@@ -309,7 +321,7 @@ const Register = () => {
                     fullWidth
                     type="submit"
                     onClick={() => formik.handleSubmit()}
-                    disabled={!formik.isValid}
+                    disabled={!formik.isValid || formik.isSubmitting}
                     sx={{
                       backgroundColor: "success.main",
                       color: "white",
