@@ -25,6 +25,40 @@ import { useAuth } from "../../hooks/useAuth";
 import useAuthStore from "../../store/authStore";
 import { loginValidationSchema } from "./validation-schema";
 
+// Mapeo de errores del backend a mensajes amigables
+const mapLoginError = (error: unknown): string => {
+  if (error && typeof error === "object" && "response" in error) {
+    const axiosError = error as {
+      response?: { status?: number; data?: { message?: string } };
+    };
+    const status = axiosError.response?.status;
+
+    switch (status) {
+      case 401:
+        return "Email o contraseña incorrectos";
+      case 403:
+        return "Tu cuenta se encuentra inactiva. Contacta al administrador";
+      case 404:
+        return "Usuario no encontrado";
+      case 429:
+        return "Demasiados intentos. Espera unos minutos e intenta nuevamente";
+      case 500:
+      case 502:
+      case 503:
+        return "Error en el servidor. Intenta nuevamente más tarde";
+      default:
+        return "Ocurrió un error. Intenta nuevamente";
+    }
+  }
+  
+  // Error de red (sin respuesta del servidor)
+  if (error && typeof error === "object" && "request" in error) {
+    return "Error de conexión. Verifica tu conexión a internet";
+  }
+
+  return "Ocurrió un error. Intenta nuevamente";
+};
+
 const Login = () => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -53,16 +87,7 @@ const Login = () => {
         useAuthStore.getState().setUser(response.user);
       } catch (error: unknown) {
         setModalStatus("error");
-        if (error && typeof error === "object" && "response" in error) {
-          const axiosError = error as {
-            response?: { data?: { message?: string } };
-          };
-          setErrorMessage(
-            axiosError.response?.data?.message || "Error al iniciar sesión"
-          );
-        } else {
-          setErrorMessage("Error al iniciar sesión");
-        }
+        setErrorMessage(mapLoginError(error));
         setModalOpen(true);
       }
     },
