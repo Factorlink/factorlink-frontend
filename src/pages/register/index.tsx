@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { useFormik } from "formik";
+import { useNavigate } from "react-router-dom";
 import type { RegisterFormData } from "../../types/outgoing/register-form-data";
 import { validationSchema } from "./validation-schema";
 import { useAuth } from "../../hooks/useAuth";
+import useAuthStore from "../../store/authStore";
 
 import {
   Box,
@@ -13,21 +16,45 @@ import {
   Link,
   Container,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { StyledTextField } from "./styles";
 import logo from "../../assets/png/factorlink-logo.png";
 
 const Register = () => {
   const theme = useTheme();
-  const { register } = useAuth();
+  const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(true);
+  const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
+  const [errorMessage, setErrorMessage] = useState("");
+  const { register, loading } = useAuth();
+
+  const handleCloseModal = () => setModalOpen(false);
+
+  const handleContinue = () => {
+    setModalOpen(false);
+    navigate("/dashboard");
+  };
 
   const handleRegister = async (values: RegisterFormData) => {
-    console.log(values);
     try {
-      await register(values);
-      // Manejar éxito, por ejemplo, redirigir a la página de inicio de sesión
-    } catch (error) {
-      // Manejar error, por ejemplo, mostrar un mensaje de error al usuario
+      const response = await register(values);
+      setModalStatus("success");
+      setModalOpen(true);
+      debugger;
+      useAuthStore.getState().setAccessToken(response.accessToken);
+      useAuthStore.getState().setRefreshToken(response.refreshToken);
+      useAuthStore.getState().setUser(response.user);
+
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message[0] || "Error al registrar usuario");
+      setModalStatus("error");
+      setModalOpen(true);
     }
   };
 
@@ -115,11 +142,7 @@ const Register = () => {
                   gap: 1.5,
                 }}
               >
-                <img
-                  src={logo}
-                  alt="Factorlink Logo"
-                  style={{ maxWidth: 250 }}
-                />
+                <img src={logo} alt="Factorlink Logo" style={{ maxWidth: 250 }} />
               </Box>
             </Box>
 
@@ -134,9 +157,7 @@ const Register = () => {
                   label="Tipo de entidad"
                   id="roleType"
                   name="roleType"
-                  error={
-                    formik.touched.roleType && Boolean(formik.errors.roleType)
-                  }
+                  error={formik.touched.roleType && Boolean(formik.errors.roleType)}
                   helperText={formik.touched.roleType && formik.errors.roleType}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -151,12 +172,8 @@ const Register = () => {
                   id="firstName"
                   name="firstName"
                   value={formik.values.firstName}
-                  error={
-                    formik.touched.firstName && Boolean(formik.errors.firstName)
-                  }
-                  helperText={
-                    formik.touched.firstName && formik.errors.firstName
-                  }
+                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                  helperText={formik.touched.firstName && formik.errors.firstName}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
@@ -167,9 +184,7 @@ const Register = () => {
                   id="lastName"
                   name="lastName"
                   value={formik.values.lastName}
-                  error={
-                    formik.touched.lastName && Boolean(formik.errors.lastName)
-                  }
+                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
                   helperText={formik.touched.lastName && formik.errors.lastName}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -223,9 +238,7 @@ const Register = () => {
                   id="password"
                   name="password"
                   value={formik.values.password}
-                  error={
-                    formik.touched.password && Boolean(formik.errors.password)
-                  }
+                  error={formik.touched.password && Boolean(formik.errors.password)}
                   helperText={formik.touched.password && formik.errors.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -239,14 +252,8 @@ const Register = () => {
                   id="confirmPassword"
                   name="confirmPassword"
                   value={formik.values.confirmPassword}
-                  error={
-                    formik.touched.confirmPassword &&
-                    Boolean(formik.errors.confirmPassword)
-                  }
-                  helperText={
-                    formik.touched.confirmPassword &&
-                    formik.errors.confirmPassword
-                  }
+                  error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+                  helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
@@ -321,7 +328,7 @@ const Register = () => {
                     fullWidth
                     type="submit"
                     onClick={() => formik.handleSubmit()}
-                    disabled={!formik.isValid || formik.isSubmitting}
+                    disabled={!formik.values.termsConditions || loading}
                     sx={{
                       backgroundColor: "success.main",
                       color: "white",
@@ -345,6 +352,86 @@ const Register = () => {
           </Box>
         </Box>
       </Container>
+
+      <Dialog
+        open={modalOpen}
+        onClose={handleCloseModal}
+        aria-labelledby="register-modal-title"
+        aria-describedby="register-modal-description"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            minWidth: 360,
+            overflow: "hidden",
+          },
+        }}
+      >
+        <DialogTitle id="register-modal-title" sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+          >
+            {modalStatus === "success" ? (
+              <CheckCircleOutlineIcon sx={{ fontSize: 64, color: "success.main", display: "block" }} />
+            ) : (
+              <ErrorOutlineIcon sx={{ fontSize: 64, color: "error.main", display: "block" }} />
+            )}
+            <Typography variant="h5" fontWeight={600} component="span">
+              {modalStatus === "success" ? "¡Registro exitoso!" : "Error en el registro"}
+            </Typography>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent sx={{ textAlign: "center", px: 3, pt: 0, pb: 0 }}>
+          <Typography id="register-modal-description" variant="body1" color="text.secondary">
+            {modalStatus === "success"
+              ? "Tu cuenta ha sido creada correctamente. Ya puedes acceder a todas las funcionalidades de la plataforma."
+              : errorMessage}
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: "center", px: 3, pt: 2, pb: 3 }}>
+          {modalStatus === "success" ? (
+            <Button
+              variant="contained"
+              onClick={handleContinue}
+              sx={{
+                backgroundColor: "success.main",
+                textTransform: "none",
+                px: 4,
+                py: 1,
+                borderRadius: 2,
+                "&:hover": {
+                  backgroundColor: "success.dark",
+                },
+              }}
+            >
+              Continuar
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={handleCloseModal}
+              sx={{
+                backgroundColor: "error.main",
+                textTransform: "none",
+                px: 4,
+                py: 1,
+                borderRadius: 2,
+                "&:hover": {
+                  backgroundColor: "error.dark",
+                },
+              }}
+            >
+              Cerrar
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
