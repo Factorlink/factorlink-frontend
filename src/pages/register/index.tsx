@@ -34,7 +34,13 @@ const Register = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const { register, loading } = useAuth();
 
-  const handleCloseModal = () => setModalOpen(false);
+  const handleCloseModal = (
+    _event?: unknown,
+    reason?: "backdropClick" | "escapeKeyDown"
+  ) => {
+    if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+    setModalOpen(false);
+  };
 
   const handleContinue = () => {
     setModalOpen(false);
@@ -356,6 +362,7 @@ const Register = () => {
       <Dialog
         open={modalOpen}
         onClose={handleCloseModal}
+        disableEscapeKeyDown
         aria-labelledby="register-modal-title"
         aria-describedby="register-modal-description"
         PaperProps={{
@@ -401,6 +408,7 @@ const Register = () => {
               onClick={handleContinue}
               sx={{
                 backgroundColor: "success.main",
+                color: "common.white",
                 textTransform: "none",
                 px: 4,
                 py: 1,
@@ -418,6 +426,7 @@ const Register = () => {
               onClick={handleCloseModal}
               sx={{
                 backgroundColor: "error.main",
+                color: "common.white",
                 textTransform: "none",
                 px: 4,
                 py: 1,
