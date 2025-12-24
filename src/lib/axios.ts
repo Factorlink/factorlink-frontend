@@ -26,8 +26,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Limpiar estado de autenticación
+    const isLoginRequest = error.config?.url?.includes("auth/login");
+    
+    if (error.response?.status === 401 && !isLoginRequest) {
+      // Limpiar estado de autenticación solo si NO es una petición de login
       useAuthStore.getState().setAccessToken("");
       useAuthStore.getState().setRefreshToken("");
       useAuthStore.getState().setUser(null);

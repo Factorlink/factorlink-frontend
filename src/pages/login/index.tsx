@@ -50,7 +50,7 @@ const mapLoginError = (error: unknown): string => {
         return "Ocurrió un error. Intenta nuevamente";
     }
   }
-  
+
   // Error de red (sin respuesta del servidor)
   if (error && typeof error === "object" && "request" in error) {
     return "Error de conexión. Verifica tu conexión a internet";
@@ -63,7 +63,9 @@ const Login = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
+  const [modalStatus, setModalStatus] = useState<"success" | "error">(
+    "success"
+  );
   const [errorMessage, setErrorMessage] = useState("");
   const { login, loading } = useAuth();
   const { accessToken } = useAuthStore();
@@ -227,7 +229,7 @@ const Login = () => {
               </Box>
 
               {/* Form Fields */}
-              <Box component="form" onSubmit={formik.handleSubmit}>
+              <Box component="form">
                 <TextField
                   fullWidth
                   variant="outlined"
@@ -267,7 +269,9 @@ const Login = () => {
                   value={formik.values.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  error={formik.touched.password && Boolean(formik.errors.password)}
+                  error={
+                    formik.touched.password && Boolean(formik.errors.password)
+                  }
                   helperText={formik.touched.password && formik.errors.password}
                   disabled={loading}
                   sx={{
@@ -332,9 +336,11 @@ const Login = () => {
                       variant="body2"
                       sx={{
                         fontSize: "0.875rem",
-                        color: formik.touched.acceptedTerms && formik.errors.acceptedTerms
-                          ? "error.main"
-                          : "text.secondary",
+                        color:
+                          formik.touched.acceptedTerms &&
+                          formik.errors.acceptedTerms
+                            ? "error.main"
+                            : "text.secondary",
                       }}
                     >
                       He leído y acepto los{" "}
@@ -354,11 +360,16 @@ const Login = () => {
                   }
                   sx={{ mb: 1 }}
                 />
-                {formik.touched.acceptedTerms && formik.errors.acceptedTerms && (
-                  <Typography variant="caption" color="error" sx={{ display: "block", mb: 2, ml: 2 }}>
-                    {formik.errors.acceptedTerms}
-                  </Typography>
-                )}
+                {formik.touched.acceptedTerms &&
+                  formik.errors.acceptedTerms && (
+                    <Typography
+                      variant="caption"
+                      color="error"
+                      sx={{ display: "block", mb: 2, ml: 2 }}
+                    >
+                      {formik.errors.acceptedTerms}
+                    </Typography>
+                  )}
 
                 <Box sx={{ display: "flex", gap: 2 }}>
                   <Button
@@ -388,6 +399,7 @@ const Login = () => {
                     variant="contained"
                     fullWidth
                     type="submit"
+                    onClick={() => formik.handleSubmit()}
                     disabled={loading || !formik.isValid || !formik.dirty}
                     sx={{
                       backgroundColor: "success.main",
@@ -404,7 +416,11 @@ const Login = () => {
                       },
                     }}
                   >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : "Siguiente"}
+                    {loading ? (
+                      <CircularProgress size={24} color="inherit" />
+                    ) : (
+                      "Siguiente"
+                    )}
                   </Button>
                 </Box>
               </Box>
@@ -431,14 +447,25 @@ const Login = () => {
         }}
       >
         <DialogTitle sx={{ textAlign: "center", pb: 1 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
             {modalStatus === "success" ? (
-              <CheckCircleOutlineIcon sx={{ fontSize: 48, color: "success.main" }} />
+              <CheckCircleOutlineIcon
+                sx={{ fontSize: 48, color: "success.main" }}
+              />
             ) : (
               <ErrorOutlineIcon sx={{ fontSize: 48, color: "error.main" }} />
             )}
             <Typography variant="h6" component="span">
-              {modalStatus === "success" ? "¡Inicio de sesión exitoso!" : "Error en el inicio de sesión"}
+              {modalStatus === "success"
+                ? "¡Inicio de sesión exitoso!"
+                : "Error en el inicio de sesión"}
             </Typography>
           </Box>
         </DialogTitle>
@@ -454,12 +481,14 @@ const Login = () => {
             variant="contained"
             onClick={handleCloseModal}
             sx={{
-              backgroundColor: modalStatus === "success" ? "success.main" : "error.main",
+              backgroundColor:
+                modalStatus === "success" ? "success.main" : "error.main",
               color: "white",
               textTransform: "none",
               px: 4,
               "&:hover": {
-                backgroundColor: modalStatus === "success" ? "success.dark" : "error.dark",
+                backgroundColor:
+                  modalStatus === "success" ? "success.dark" : "error.dark",
               },
             }}
           >
