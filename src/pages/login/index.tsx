@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -66,6 +66,14 @@ const Login = () => {
   const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
   const [errorMessage, setErrorMessage] = useState("");
   const { login, loading } = useAuth();
+  const { accessToken } = useAuthStore();
+
+  // Redirigir si el usuario ya está autenticado
+  useEffect(() => {
+    if (accessToken) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [accessToken, navigate]);
 
   const formik = useFormik({
     initialValues: {
