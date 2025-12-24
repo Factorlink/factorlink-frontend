@@ -9,15 +9,57 @@ import {
   Link,
   Container,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
 } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { useNavigate } from "react-router-dom";
 import logo from "../../assets/png/factorlink-logo.png";
 import siiLogo from "../../assets/png/sii-logo.png";
+import { useAuth } from "../../hooks/useAuth";
+import useAuthStore from "../../store/authStore";
 
 const Login = () => {
   const theme = useTheme();
-  const [rut, setRut] = useState("76.453.189-2");
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
+  const [errorMessage, setErrorMessage] = useState("");
+  const { login, loading } = useAuth();
+
+  const handleLogin = async () => {
+    try {
+      const response = await login({ email, password });
+      setModalStatus("success");
+      setModalOpen(true);
+      useAuthStore.getState().setAccessToken(response.accessToken);
+      useAuthStore.getState().setRefreshToken(response.refreshToken);
+      useAuthStore.getState().setUser(response.user);
+    } catch (error: unknown) {
+      setModalStatus("error");
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        setErrorMessage(axiosError.response?.data?.message || "Error al iniciar sesión");
+      } else {
+        setErrorMessage("Error al iniciar sesión");
+      }
+      setModalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    if (modalStatus === "success") {
+      navigate("/dashboard");
+    }
+  };
 
   return (
     <Box
@@ -142,9 +184,9 @@ const Login = () => {
                 <TextField
                   fullWidth
                   variant="outlined"
-                  placeholder="76.453.189-2"
-                  value={rut}
-                  onChange={(e) => setRut(e.target.value)}
+                  placeholder="correo@ejemplo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   sx={{
                     mb: 2,
                     "& .MuiOutlinedInput-root": {
@@ -252,7 +294,8 @@ const Login = () => {
                   <Button
                     variant="contained"
                     fullWidth
-                    href="/dashboard"
+                    onClick={handleLogin}
+                    disabled={loading || !email || !password || !acceptedTerms}
                     sx={{
                       backgroundColor: "success.main",
                       color: "white",
@@ -268,7 +311,7 @@ const Login = () => {
                       },
                     }}
                   >
-                    Siguiente
+                    {loading ? <CircularProgress size={24} color="inherit" /> : "Siguiente"}
                   </Button>
                 </Box>
               </Box>
@@ -276,6 +319,61 @@ const Login = () => {
           </Box>
         </Box>
       </Container>
+
+      {/* Modal de resultado */}
+      <Dialog
+        open={modalOpen}
+        onClose={(_, reason) => {
+          if (reason !== "backdropClick" && reason !== "escapeKeyDown") {
+            handleCloseModal();
+          }
+        }}
+        disableEscapeKeyDown
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            minWidth: 350,
+            padding: 2,
+          },
+        }}
+      >
+        <DialogTitle sx={{ textAlign: "center", pb: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+            {modalStatus === "success" ? (
+              <CheckCircleOutlineIcon sx={{ fontSize: 48, color: "success.main" }} />
+            ) : (
+              <ErrorOutlineIcon sx={{ fontSize: 48, color: "error.main" }} />
+            )}
+            <Typography variant="h6" component="span">
+              {modalStatus === "success" ? "¡Inicio de sesión exitoso!" : "Error en el inicio de sesión"}
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "center", py: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            {modalStatus === "success"
+              ? "Has iniciado sesión correctamente."
+              : errorMessage}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", pt: 1, pb: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleCloseModal}
+            sx={{
+              backgroundColor: modalStatus === "success" ? "success.main" : "error.main",
+              color: "white",
+              textTransform: "none",
+              px: 4,
+              "&:hover": {
+                backgroundColor: modalStatus === "success" ? "success.dark" : "error.dark",
+              },
+            }}
+          >
+            {modalStatus === "success" ? "Continuar" : "Cerrar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
