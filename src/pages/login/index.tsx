@@ -18,41 +18,55 @@ import {
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
 import logo from "../../assets/png/factorlink-logo.png";
 import siiLogo from "../../assets/png/sii-logo.png";
 import { useAuth } from "../../hooks/useAuth";
 import useAuthStore from "../../store/authStore";
+import { loginValidationSchema } from "./validation-schema";
 
 const Login = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
   const [errorMessage, setErrorMessage] = useState("");
   const { login, loading } = useAuth();
 
-  const handleLogin = async () => {
-    try {
-      const response = await login({ email, password });
-      setModalStatus("success");
-      setModalOpen(true);
-      useAuthStore.getState().setAccessToken(response.accessToken);
-      useAuthStore.getState().setRefreshToken(response.refreshToken);
-      useAuthStore.getState().setUser(response.user);
-    } catch (error: unknown) {
-      setModalStatus("error");
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data?: { message?: string } } };
-        setErrorMessage(axiosError.response?.data?.message || "Error al iniciar sesión");
-      } else {
-        setErrorMessage("Error al iniciar sesión");
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+      acceptedTerms: false,
+    },
+    validationSchema: loginValidationSchema,
+    onSubmit: async (values) => {
+      try {
+        const response = await login({
+          email: values.email.trim().toLowerCase(),
+          password: values.password,
+        });
+        setModalStatus("success");
+        setModalOpen(true);
+        useAuthStore.getState().setAccessToken(response.accessToken);
+        useAuthStore.getState().setRefreshToken(response.refreshToken);
+        useAuthStore.getState().setUser(response.user);
+      } catch (error: unknown) {
+        setModalStatus("error");
+        if (error && typeof error === "object" && "response" in error) {
+          const axiosError = error as {
+            response?: { data?: { message?: string } };
+          };
+          setErrorMessage(
+            axiosError.response?.data?.message || "Error al iniciar sesión"
+          );
+        } else {
+          setErrorMessage("Error al iniciar sesión");
+        }
+        setModalOpen(true);
       }
-      setModalOpen(true);
-    }
-  };
+    },
+  });
 
   const handleCloseModal = () => {
     setModalOpen(false);
@@ -180,13 +194,19 @@ const Login = () => {
               </Box>
 
               {/* Form Fields */}
-              <Box>
+              <Box component="form" onSubmit={formik.handleSubmit}>
                 <TextField
                   fullWidth
                   variant="outlined"
+                  label="Correo electrónico"
                   placeholder="correo@ejemplo.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  name="email"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                  disabled={loading}
                   sx={{
                     mb: 2,
                     "& .MuiOutlinedInput-root": {
@@ -208,9 +228,15 @@ const Login = () => {
                   fullWidth
                   variant="outlined"
                   type="password"
+                  label="Contraseña"
                   placeholder="Contraseña"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  name="password"
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.password && Boolean(formik.errors.password)}
+                  helperText={formik.touched.password && formik.errors.password}
+                  disabled={loading}
                   sx={{
                     mb: 2,
                     "& .MuiOutlinedInput-root": {
@@ -232,9 +258,12 @@ const Login = () => {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={acceptedTerms}
-                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      name="acceptedTerms"
+                      checked={formik.values.acceptedTerms}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       size="small"
+                      disabled={loading}
                       sx={{
                         color: "text.disabled",
                         "&.Mui-checked": {
@@ -248,7 +277,9 @@ const Login = () => {
                       variant="body2"
                       sx={{
                         fontSize: "0.875rem",
-                        color: "text.secondary",
+                        color: formik.touched.acceptedTerms && formik.errors.acceptedTerms
+                          ? "error.main"
+                          : "text.secondary",
                       }}
                     >
                       He leído y acepto los{" "}
@@ -266,13 +297,19 @@ const Login = () => {
                       </Link>
                     </Typography>
                   }
-                  sx={{ mb: 3 }}
+                  sx={{ mb: 1 }}
                 />
+                {formik.touched.acceptedTerms && formik.errors.acceptedTerms && (
+                  <Typography variant="caption" color="error" sx={{ display: "block", mb: 2, ml: 2 }}>
+                    {formik.errors.acceptedTerms}
+                  </Typography>
+                )}
 
                 <Box sx={{ display: "flex", gap: 2 }}>
                   <Button
                     variant="contained"
                     fullWidth
+                    disabled={loading}
                     sx={{
                       backgroundColor: "secondary.main",
                       color: "white",
@@ -294,8 +331,8 @@ const Login = () => {
                   <Button
                     variant="contained"
                     fullWidth
-                    onClick={handleLogin}
-                    disabled={loading || !email || !password || !acceptedTerms}
+                    type="submit"
+                    disabled={loading || !formik.isValid || !formik.dirty}
                     sx={{
                       backgroundColor: "success.main",
                       color: "white",
