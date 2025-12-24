@@ -47,7 +47,6 @@ export const useAuth = () => {
       
       return response.data;
     } catch (error) {
-      console.error("Error en el login:", error);
       throw error;
     } finally {
       setLoading(false);
