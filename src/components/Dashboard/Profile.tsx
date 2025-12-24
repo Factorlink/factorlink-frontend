@@ -20,10 +20,13 @@ import {
   Chip,
   Divider,
 } from "@mui/material";
+import useAuthStore  from "../../store/authStore";
 
 const Profile = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const { user } = useAuthStore();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -81,7 +84,7 @@ const Profile = () => {
           <Typography
             sx={{ fontWeight: 600, fontSize: "0.95rem", color: "text.primary" }}
           >
-            Felipe Ortega
+            { user?.firstName } {user?.lastName }
           </Typography>
           <Typography
             variant="body2"

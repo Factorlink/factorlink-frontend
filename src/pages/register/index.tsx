@@ -1,7 +1,14 @@
 import { useState } from "react";
+import { useFormik } from "formik";
+import { useNavigate } from "react-router-dom";
+import type { RegisterFormData } from "../../types/outgoing/register-form-data";
+import { validationSchema } from "./validation-schema";
+import { useAuth } from "../../hooks/useAuth";
+import useAuthStore from "../../store/authStore";
+
 import {
   Box,
-  TextField,
+  MenuItem,
   Button,
   Checkbox,
   FormControlLabel,
@@ -9,17 +16,71 @@ import {
   Link,
   Container,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
 } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { StyledTextField } from "./styles";
 import logo from "../../assets/png/factorlink-logo.png";
 
 const Register = () => {
   const theme = useTheme();
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [password, setPassword] = useState("");
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
+  const [errorMessage, setErrorMessage] = useState("");
+  const { register, loading } = useAuth();
+
+  const handleCloseModal = (
+    _event?: unknown,
+    reason?: "backdropClick" | "escapeKeyDown"
+  ) => {
+    if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+    setModalOpen(false);
+  };
+
+  const handleContinue = () => {
+    setModalOpen(false);
+    navigate("/dashboard");
+  };
+
+  const handleRegister = async (values: RegisterFormData) => {
+    try {
+      const response = await register(values);
+      setModalStatus("success");
+      setModalOpen(true);
+      useAuthStore.getState().setAccessToken(response.accessToken);
+      useAuthStore.getState().setRefreshToken(response.refreshToken);
+      useAuthStore.getState().setUser(response.user);
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string[] } } };
+      setErrorMessage(axiosError?.response?.data?.message?.[0] || "Ocurrió un error, intenta nuevamente");
+      setModalStatus("error");
+      setModalOpen(true);
+    }
+  };
+
+  const formik = useFormik<RegisterFormData>({
+    initialValues: {
+      roleType: "",
+      firstName: "",
+      lastName: "",
+      rut: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      termsConditions: false,
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      handleRegister(values);
+    },
+  });
 
   return (
     <Box
@@ -41,7 +102,7 @@ const Register = () => {
             boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
           }}
         >
-          {/* Suite Empresa Tab */}
+          {/* Suite Tab */}
           <Box
             sx={{
               backgroundColor: "primary.main",
@@ -53,7 +114,7 @@ const Register = () => {
               fontSize: "1rem",
             }}
           >
-            Suite Empresa
+            Registro
           </Box>
 
           <Box
@@ -87,11 +148,7 @@ const Register = () => {
                   gap: 1.5,
                 }}
               >
-                <img
-                  src={logo}
-                  alt="Factorlink Logo"
-                  style={{ maxWidth: 250 }}
-                />
+                <img src={logo} alt="Factorlink Logo" style={{ maxWidth: 250 }} />
               </Box>
             </Box>
 
@@ -99,145 +156,130 @@ const Register = () => {
             <Box sx={{ paddingLeft: { md: 2 } }}>
               {/* Form Fields */}
               <Box>
-                {/* Nombre y Apellido Row */}
-                <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Nombre"
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "background.default",
-                        "& fieldset": {
-                          borderColor: "divider",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "text.disabled",
-                        },
-                        "& input": {
-                          color: "text.secondary",
-                        },
-                        "& input::placeholder": {
-                          color: "text.disabled",
-                          opacity: 1,
-                        },
-                      },
-                    }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Apellido"
-                    value={apellido}
-                    onChange={(e) => setApellido(e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "background.default",
-                        "& fieldset": {
-                          borderColor: "divider",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "text.disabled",
-                        },
-                        "& input": {
-                          color: "text.secondary",
-                        },
-                        "& input::placeholder": {
-                          color: "text.disabled",
-                          opacity: 1,
-                        },
-                      },
-                    }}
-                  />
-                </Box>
+                <StyledTextField
+                  select
+                  fullWidth
+                  defaultValue=""
+                  label="Tipo de entidad"
+                  id="roleType"
+                  name="roleType"
+                  disabled={loading}
+                  error={formik.touched.roleType && Boolean(formik.errors.roleType)}
+                  helperText={formik.touched.roleType && formik.errors.roleType}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                >
+                  <MenuItem value="EMPRESA">Empresa</MenuItem>
+                  <MenuItem value="FACTORING">Factoring</MenuItem>
+                </StyledTextField>
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Nombre"
+                  id="firstName"
+                  name="firstName"
+                  disabled={loading}
+                  value={formik.values.firstName}
+                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                  helperText={formik.touched.firstName && formik.errors.firstName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Apellido"
+                  id="lastName"
+                  name="lastName"
+                  disabled={loading}
+                  value={formik.values.lastName}
+                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                  helperText={formik.touched.lastName && formik.errors.lastName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="RUT"
+                  id="rut"
+                  name="rut"
+                  disabled={loading}
+                  value={formik.values.rut}
+                  error={formik.touched.rut && Boolean(formik.errors.rut)}
+                  helperText={formik.touched.rut && formik.errors.rut}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
 
-                <TextField
+                <StyledTextField
                   fullWidth
                   variant="outlined"
                   placeholder="Email"
+                  id="email"
+                  name="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  sx={{
-                    mb: 2,
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "background.default",
-                      "& fieldset": {
-                        borderColor: "divider",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "text.disabled",
-                      },
-                      "& input": {
-                        color: "text.secondary",
-                      },
-                      "& input::placeholder": {
-                        color: "text.disabled",
-                        opacity: 1,
-                      },
-                    },
-                  }}
+                  disabled={loading}
+                  value={formik.values.email}
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                 />
 
-                <TextField
+                <StyledTextField
                   fullWidth
                   variant="outlined"
                   placeholder="Telefono móvil"
-                  value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
-                  sx={{
-                    mb: 2,
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "background.default",
-                      "& fieldset": {
-                        borderColor: "divider",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "text.disabled",
-                      },
-                      "& input": {
-                        color: "text.secondary",
-                      },
-                      "& input::placeholder": {
-                        color: "text.disabled",
-                        opacity: 1,
-                      },
-                    },
-                  }}
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  disabled={loading}
+                  value={formik.values.phone}
+                  error={formik.touched.phone && Boolean(formik.errors.phone)}
+                  helperText={formik.touched.phone && formik.errors.phone}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                 />
 
-                <TextField
+                <StyledTextField
                   fullWidth
                   variant="outlined"
                   type="password"
                   placeholder="Contraseña"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  sx={{
-                    mb: 2,
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "background.default",
-                      "& fieldset": {
-                        borderColor: "divider",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "text.disabled",
-                      },
-                      "& input::placeholder": {
-                        color: "text.disabled",
-                        opacity: 1,
-                      },
-                    },
-                  }}
+                  id="password"
+                  name="password"
+                  disabled={loading}
+                  value={formik.values.password}
+                  error={formik.touched.password && Boolean(formik.errors.password)}
+                  helperText={formik.touched.password && formik.errors.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  type="password"
+                  placeholder="Confirmar contraseña"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  disabled={loading}
+                  value={formik.values.confirmPassword}
+                  error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+                  helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                 />
 
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={acceptedTerms}
-                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      id="acceptedTerms"
+                      name="termsConditions"
+                      checked={formik.values.termsConditions}
+                      onChange={formik.handleChange}
+                      disabled={loading}
                       size="small"
                       sx={{
                         color: "text.disabled",
@@ -299,7 +341,9 @@ const Register = () => {
                   <Button
                     variant="contained"
                     fullWidth
-                    href="/dashboard"
+                    type="submit"
+                    onClick={() => formik.handleSubmit()}
+                    disabled={!formik.isValid || !formik.dirty || loading}
                     sx={{
                       backgroundColor: "success.main",
                       color: "white",
@@ -315,7 +359,11 @@ const Register = () => {
                       },
                     }}
                   >
-                    Crear cuenta
+                    {loading ? (
+                      <CircularProgress size={24} sx={{ color: "white" }} />
+                    ) : (
+                      "Crear cuenta"
+                    )}
                   </Button>
                 </Box>
               </Box>
@@ -323,6 +371,89 @@ const Register = () => {
           </Box>
         </Box>
       </Container>
+
+      <Dialog
+        open={modalOpen}
+        onClose={handleCloseModal}
+        disableEscapeKeyDown
+        aria-labelledby="register-modal-title"
+        aria-describedby="register-modal-description"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            minWidth: 360,
+            overflow: "hidden",
+          },
+        }}
+      >
+        <DialogTitle id="register-modal-title" sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+          >
+            {modalStatus === "success" ? (
+              <CheckCircleOutlineIcon sx={{ fontSize: 64, color: "success.main", display: "block" }} />
+            ) : (
+              <ErrorOutlineIcon sx={{ fontSize: 64, color: "error.main", display: "block" }} />
+            )}
+            <Typography variant="h5" fontWeight={600} component="span">
+              {modalStatus === "success" ? "¡Registro exitoso!" : "Error en el registro"}
+            </Typography>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent sx={{ textAlign: "center", px: 3, pt: 0, pb: 0 }}>
+          <Typography id="register-modal-description" variant="body1" color="text.secondary">
+            {modalStatus === "success"
+              ? "Tu cuenta ha sido creada correctamente. Ya puedes acceder a todas las funcionalidades de la plataforma."
+              : errorMessage}
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: "center", px: 3, pt: 2, pb: 3 }}>
+          {modalStatus === "success" ? (
+            <Button
+              variant="contained"
+              onClick={handleContinue}
+              sx={{
+                backgroundColor: "success.main",
+                color: "common.white",
+                textTransform: "none",
+                px: 4,
+                py: 1,
+                borderRadius: 2,
+                "&:hover": {
+                  backgroundColor: "success.dark",
+                },
+              }}
+            >
+              Continuar
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={handleCloseModal}
+              sx={{
+                backgroundColor: "error.main",
+                color: "common.white",
+                textTransform: "none",
+                px: 4,
+                py: 1,
+                borderRadius: 2,
+                "&:hover": {
+                  backgroundColor: "error.dark",
+                },
+              }}
+            >
+              Cerrar
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
