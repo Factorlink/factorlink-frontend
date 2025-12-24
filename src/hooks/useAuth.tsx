@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../lib/axios";
 import type { RegisterFormData } from "../types/outgoing/register-form-data";
 
 interface LoginData {
@@ -13,19 +13,9 @@ export const useAuth = () => {
   const register = async (formData: RegisterFormData) => {
     try {
       setLoading(true);
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}auth/register`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      
+      const response = await api.post("auth/register", formData);
       return response.data;
     } catch (error) {
-      console.error("Error en el registro:", error);
       throw error;
     } finally {
       setLoading(false);
@@ -35,16 +25,7 @@ export const useAuth = () => {
   const login = async (data: LoginData) => {
     try {
       setLoading(true);
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}auth/login`,
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      
+      const response = await api.post("auth/login", data);
       return response.data;
     } catch (error) {
       throw error;
