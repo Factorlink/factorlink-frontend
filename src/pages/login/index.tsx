@@ -238,7 +238,7 @@ const Login = () => {
                   helperText={formik.touched.password && formik.errors.password}
                   disabled={loading}
                   sx={{
-                    mb: 2,
+                    mb: 1,
                     "& .MuiOutlinedInput-root": {
                       backgroundColor: "background.default",
                       "& fieldset": {
@@ -254,6 +254,28 @@ const Login = () => {
                     },
                   }}
                 />
+
+                {/* Link de recuperar contraseña */}
+                <Box sx={{ textAlign: "right", mb: 2 }}>
+                  <Link
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                    }}
+                    sx={{
+                      color: "success.main",
+                      textDecoration: "none",
+                      fontSize: "0.875rem",
+                      cursor: "pointer",
+                      "&:hover": {
+                        textDecoration: "underline",
+                      },
+                    }}
+                    title="Próximamente"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </Box>
 
                 <FormControlLabel
                   control={
@@ -310,6 +332,7 @@ const Login = () => {
                     variant="contained"
                     fullWidth
                     disabled={loading}
+                    onClick={() => navigate("/register")}
                     sx={{
                       backgroundColor: "secondary.main",
                       color: "white",
@@ -325,7 +348,7 @@ const Login = () => {
                       },
                     }}
                   >
-                    Cerrar Sesión
+                    Registrarse
                   </Button>
 
                   <Button
