@@ -29,7 +29,7 @@ import logo from "../../assets/png/factorlink-logo.png";
 const Register = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const [modalOpen, setModalOpen] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
   const [errorMessage, setErrorMessage] = useState("");
   const { register, loading } = useAuth();
