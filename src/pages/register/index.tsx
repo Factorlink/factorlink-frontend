@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  CircularProgress,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
@@ -52,13 +53,12 @@ const Register = () => {
       const response = await register(values);
       setModalStatus("success");
       setModalOpen(true);
-      debugger;
       useAuthStore.getState().setAccessToken(response.accessToken);
       useAuthStore.getState().setRefreshToken(response.refreshToken);
       useAuthStore.getState().setUser(response.user);
-
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message[0] || "Error al registrar usuario");
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string[] } } };
+      setErrorMessage(axiosError?.response?.data?.message?.[0] || "Ocurrió un error, intenta nuevamente");
       setModalStatus("error");
       setModalOpen(true);
     }
@@ -163,6 +163,7 @@ const Register = () => {
                   label="Tipo de entidad"
                   id="roleType"
                   name="roleType"
+                  disabled={loading}
                   error={formik.touched.roleType && Boolean(formik.errors.roleType)}
                   helperText={formik.touched.roleType && formik.errors.roleType}
                   onChange={formik.handleChange}
@@ -177,6 +178,7 @@ const Register = () => {
                   placeholder="Nombre"
                   id="firstName"
                   name="firstName"
+                  disabled={loading}
                   value={formik.values.firstName}
                   error={formik.touched.firstName && Boolean(formik.errors.firstName)}
                   helperText={formik.touched.firstName && formik.errors.firstName}
@@ -189,6 +191,7 @@ const Register = () => {
                   placeholder="Apellido"
                   id="lastName"
                   name="lastName"
+                  disabled={loading}
                   value={formik.values.lastName}
                   error={formik.touched.lastName && Boolean(formik.errors.lastName)}
                   helperText={formik.touched.lastName && formik.errors.lastName}
@@ -201,6 +204,7 @@ const Register = () => {
                   placeholder="RUT"
                   id="rut"
                   name="rut"
+                  disabled={loading}
                   value={formik.values.rut}
                   error={formik.touched.rut && Boolean(formik.errors.rut)}
                   helperText={formik.touched.rut && formik.errors.rut}
@@ -215,6 +219,7 @@ const Register = () => {
                   id="email"
                   name="email"
                   type="email"
+                  disabled={loading}
                   value={formik.values.email}
                   error={formik.touched.email && Boolean(formik.errors.email)}
                   helperText={formik.touched.email && formik.errors.email}
@@ -229,6 +234,7 @@ const Register = () => {
                   type="tel"
                   id="phone"
                   name="phone"
+                  disabled={loading}
                   value={formik.values.phone}
                   error={formik.touched.phone && Boolean(formik.errors.phone)}
                   helperText={formik.touched.phone && formik.errors.phone}
@@ -243,6 +249,7 @@ const Register = () => {
                   placeholder="Contraseña"
                   id="password"
                   name="password"
+                  disabled={loading}
                   value={formik.values.password}
                   error={formik.touched.password && Boolean(formik.errors.password)}
                   helperText={formik.touched.password && formik.errors.password}
@@ -257,6 +264,7 @@ const Register = () => {
                   placeholder="Confirmar contraseña"
                   id="confirmPassword"
                   name="confirmPassword"
+                  disabled={loading}
                   value={formik.values.confirmPassword}
                   error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
                   helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
@@ -271,6 +279,7 @@ const Register = () => {
                       name="termsConditions"
                       checked={formik.values.termsConditions}
                       onChange={formik.handleChange}
+                      disabled={loading}
                       size="small"
                       sx={{
                         color: "text.disabled",
@@ -334,7 +343,7 @@ const Register = () => {
                     fullWidth
                     type="submit"
                     onClick={() => formik.handleSubmit()}
-                    disabled={!formik.values.termsConditions || loading}
+                    disabled={!formik.isValid || !formik.dirty || loading}
                     sx={{
                       backgroundColor: "success.main",
                       color: "white",
@@ -350,7 +359,11 @@ const Register = () => {
                       },
                     }}
                   >
-                    Crear cuenta
+                    {loading ? (
+                      <CircularProgress size={24} sx={{ color: "white" }} />
+                    ) : (
+                      "Crear cuenta"
+                    )}
                   </Button>
                 </Box>
               </Box>
