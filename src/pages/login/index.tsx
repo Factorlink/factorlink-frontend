@@ -72,7 +72,7 @@ const Login = () => {
 
   // Redirigir si el usuario ya está autenticado
   useEffect(() => {
-    if (accessToken) {
+    if (accessToken && !modalOpen) {
       navigate("/dashboard", { replace: true });
     }
   }, [accessToken, navigate]);
