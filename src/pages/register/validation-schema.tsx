@@ -1,10 +1,49 @@
 import * as yup from "yup";
 
+const validateRutVerifier = (rut: string): boolean => {
+  // Limpiar el RUT de puntos y guiones
+  const cleanRut = rut.replace(/\./g, "").replace(/-/g, "");
+
+  if (cleanRut.length < 2) return false;
+
+  const body = cleanRut.slice(0, -1);
+  const verifier = cleanRut.slice(-1).toUpperCase();
+
+  // Validar que el cuerpo sean solo números
+  if (!/^\d+$/.test(body)) return false;
+
+  // Calcular dígito verificador usando módulo 11
+  let sum = 0;
+  let multiplier = 2;
+
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i], 10) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+
+  const remainder = sum % 11;
+  const calculatedVerifier = 11 - remainder;
+
+  let expectedVerifier: string;
+  if (calculatedVerifier === 11) {
+    expectedVerifier = "0";
+  } else if (calculatedVerifier === 10) {
+    expectedVerifier = "K";
+  } else {
+    expectedVerifier = calculatedVerifier.toString();
+  }
+
+  return verifier === expectedVerifier;
+};
+
 export const validationSchema = yup.object({
   roleType: yup
     .string()
     .trim()
-    .oneOf(["EMPRESA", "FACTORING"], "El tipo de entidad debe ser Empresa o Factoring")
+    .oneOf(
+      ["EMPRESA", "FACTORING"],
+      "El tipo de entidad debe ser Empresa o Factoring"
+    )
     .required("El tipo de entidad es obligatorio"),
   firstName: yup
     .string()
@@ -25,7 +64,11 @@ export const validationSchema = yup.object({
     .matches(
       /^(\d{1,3}(?:\.\d{3}){2}-[\dkK])|(\d{7,8}-[\dkK])$/,
       "Formato de RUT inválido (ej: 12.345.678-9 o 12345678-9)"
-    ),
+    )
+    .test("rut-verifier", "El RUT ingresado no es válido", (value) => {
+      if (!value) return false;
+      return validateRutVerifier(value);
+    }),
   email: yup
     .string()
     .trim()
@@ -36,7 +79,10 @@ export const validationSchema = yup.object({
     .string()
     .trim()
     .required("El teléfono es obligatorio")
-    .matches(/^\+?[1-9]\d{1,14}$/, "El teléfono debe tener un formato válido ejemplo: +56999650987"),
+    .matches(
+      /^\+?[1-9]\d{1,14}$/,
+      "El teléfono debe tener un formato válido ejemplo: +56999650987"
+    ),
   password: yup
     .string()
     .required("La contraseña es obligatoria")
