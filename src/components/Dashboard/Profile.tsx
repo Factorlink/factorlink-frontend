@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   KeyboardArrowDown,
   Notifications,
@@ -20,13 +21,16 @@ import {
   Chip,
   Divider,
 } from "@mui/material";
-import useAuthStore  from "../../store/authStore";
+import useAuthStore from "../../store/authStore";
+import { useAuth } from "../../hooks/useAuth";
 
 const Profile = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
   const { user } = useAuthStore();
+  const { logout, loading } = useAuth();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -36,12 +40,18 @@ const Profile = () => {
     setAnchorEl(null);
   };
 
+  const handleLogout = async () => {
+    handleClose();
+    await logout();
+    navigate("/login");
+  };
+
   const menuItems = [
-    { icon: <Person fontSize="small" />, text: "Suite Factoring" },
-    { icon: <Business fontSize="small" />, text: "Suite Empresa" },
-    { icon: <SwapHoriz fontSize="small" />, text: "Cambiar Empresa" },
-    { icon: <Settings fontSize="small" />, text: "Configuración" },
-    { icon: <Logout fontSize="small" />, text: "Logout" },
+    { icon: <Person fontSize="small" />, text: "Suite Factoring", action: handleClose },
+    { icon: <Business fontSize="small" />, text: "Suite Empresa", action: handleClose },
+    { icon: <SwapHoriz fontSize="small" />, text: "Cambiar Empresa", action: handleClose },
+    { icon: <Settings fontSize="small" />, text: "Configuración", action: handleClose },
+    { icon: <Logout fontSize="small" />, text: "Logout", action: handleLogout },
   ];
 
   return (
@@ -141,7 +151,8 @@ const Profile = () => {
         {menuItems.map((item, index) => (
           <MenuItem
             key={index}
-            onClick={handleClose}
+            onClick={item.action}
+            disabled={item.text === "Logout" && loading}
             sx={{
               py: 1.5,
               "&:hover": {
@@ -153,7 +164,7 @@ const Profile = () => {
               {item.icon}
             </ListItemIcon>
             <ListItemText
-              primary={item.text}
+              primary={item.text === "Logout" && loading ? "Cerrando sesión..." : item.text}
               primaryTypographyProps={{
                 fontSize: "0.9rem",
                 color: "text.primary",

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../lib/axios";
+import useAuthStore from "../store/authStore";
 import type { RegisterFormData } from "../types/outgoing/register-form-data";
 
 interface LoginData {
@@ -9,6 +10,7 @@ interface LoginData {
 
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
+  const { logout: clearAuth } = useAuthStore();
 
   const register = async (formData: RegisterFormData) => {
     try {
@@ -34,9 +36,20 @@ export const useAuth = () => {
     }
   };
 
+  const logout = async () => {
+    try {
+      setLoading(true);
+      await api.post("auth/logout");
+    } finally {
+      clearAuth();
+      setLoading(false);
+    }
+  };
+
   return {
     register,
     login,
+    logout,
     loading,
   };
 };
