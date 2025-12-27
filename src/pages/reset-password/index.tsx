@@ -27,9 +27,12 @@ import { useAuth } from "../../hooks/useAuth";
 
 const validationSchema = Yup.object({
   password: Yup.string()
+    .trim()
     .min(8, "La contraseña debe tener al menos 8 caracteres")
     .matches(/[A-Z]/, "Debe contener al menos una mayúscula")
+    .matches(/[a-z]/, "Debe contener al menos una minúscula")
     .matches(/[0-9]/, "Debe contener al menos un número")
+    .matches(/[!@#$%^&*(),.?":{}|<>]/, "Debe contener al menos un carácter especial")
     .required("La contraseña es requerida"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
@@ -73,9 +76,11 @@ const ResetPassword = () => {
 
     try {
       setLoading(true);
-      await resetPassword(token, values.password);
+      const cleanPassword = values.password.trim();
+      await resetPassword(token, cleanPassword);
       setModalStatus("success");
       setModalOpen(true);
+      formik.resetForm();
     } catch (error: unknown) {
       const axiosError = error as { response?: { status?: number; data?: { message?: string[] } } };
       
@@ -244,7 +249,7 @@ const ResetPassword = () => {
                   fullWidth
                   variant="outlined"
                   label="Nueva contraseña"
-                  placeholder="********"
+                  placeholder="Nueva contraseña"
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
@@ -273,7 +278,7 @@ const ResetPassword = () => {
                   fullWidth
                   variant="outlined"
                   label="Confirmar contraseña"
-                  placeholder="********"
+                  placeholder="Confirmar contraseña"
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
@@ -418,23 +423,43 @@ const ResetPassword = () => {
               Ir al login
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              onClick={handleCloseModal}
-              sx={{
-                backgroundColor: "error.main",
-                color: "common.white",
-                textTransform: "none",
-                px: 4,
-                py: 1,
-                borderRadius: 2,
-                "&:hover": {
-                  backgroundColor: "error.dark",
-                },
-              }}
-            >
-              Cerrar
-            </Button>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={handleCloseModal}
+                sx={{
+                  borderColor: "grey.400",
+                  color: "text.primary",
+                  textTransform: "none",
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  "&:hover": {
+                    borderColor: "grey.600",
+                    backgroundColor: "grey.50",
+                  },
+                }}
+              >
+                Cerrar
+              </Button>
+              <Button
+                variant="contained"
+                href="/forgot-password"
+                sx={{
+                  backgroundColor: "primary.main",
+                  color: "common.white",
+                  textTransform: "none",
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  "&:hover": {
+                    backgroundColor: "primary.dark",
+                  },
+                }}
+              >
+                Solicitar nuevo enlace
+              </Button>
+            </Box>
           )}
         </DialogActions>
       </Dialog>
