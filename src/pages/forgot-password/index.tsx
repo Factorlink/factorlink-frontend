@@ -52,13 +52,22 @@ const ForgotPassword = () => {
   const handleForgotPassword = async (values: { email: string }) => {
     try {
       setLoading(true);
-      await forgotPassword(values.email);
+      const normalizedEmail = values.email.trim().toLowerCase();
+      await forgotPassword(normalizedEmail);
       setModalStatus("success");
       setModalOpen(true);
     } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string[] } } };
-      setErrorMessage(axiosError?.response?.data?.message?.[0] || "Ocurrió un error, intenta nuevamente");
-      setModalStatus("error");
+      const axiosError = error as { response?: { status?: number } };
+      
+      // Solo mostrar error si es un problema de red/servidor (5xx)
+      // Para errores 4xx mostrar mensaje genérico como si fuera éxito (seguridad)
+      if (axiosError?.response?.status && axiosError.response.status >= 500) {
+        setErrorMessage("Ocurrió un error de conexión. Intenta nuevamente.");
+        setModalStatus("error");
+      } else {
+        // Simular éxito para no revelar si el email existe
+        setModalStatus("success");
+      }
       setModalOpen(true);
     } finally {
       setLoading(false);
@@ -267,7 +276,7 @@ const ForgotPassword = () => {
         <DialogContent sx={{ textAlign: "center", px: 3, pt: 0, pb: 0 }}>
           <Typography id="forgot-password-modal-description" variant="body1" color="text.secondary">
             {modalStatus === "success"
-              ? "Revisa tu bandeja de entrada. Te hemos enviado las instrucciones para restablecer tu contraseña."
+              ? "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña."
               : errorMessage}
           </Typography>
         </DialogContent>
