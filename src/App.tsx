@@ -7,6 +7,7 @@ import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
 import Facturas from "./pages/facturas";
 import Operaciones from "./pages/operaciones";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -14,12 +15,15 @@ function App() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/facturas" element={<Facturas />} />
-          <Route path="/operaciones" element={<Operaciones />} />
+          
+          {/* Protected routes */}
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/facturas" element={<ProtectedRoute><Facturas /></ProtectedRoute>} />
+          <Route path="/operaciones" element={<ProtectedRoute><Operaciones /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

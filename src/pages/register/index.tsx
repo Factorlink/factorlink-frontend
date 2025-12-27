@@ -175,6 +175,7 @@ const Register = () => {
                 <StyledTextField
                   fullWidth
                   variant="outlined"
+                  label="Nombre"
                   placeholder="Nombre"
                   id="firstName"
                   name="firstName"
@@ -188,6 +189,7 @@ const Register = () => {
                 <StyledTextField
                   fullWidth
                   variant="outlined"
+                  label="Apellido"
                   placeholder="Apellido"
                   id="lastName"
                   name="lastName"
@@ -201,7 +203,8 @@ const Register = () => {
                 <StyledTextField
                   fullWidth
                   variant="outlined"
-                  placeholder="RUT"
+                  label="RUT"
+                  placeholder="12.345.678-9"
                   id="rut"
                   name="rut"
                   disabled={loading}
@@ -215,7 +218,8 @@ const Register = () => {
                 <StyledTextField
                   fullWidth
                   variant="outlined"
-                  placeholder="Email"
+                  label="Correo electrónico"
+                  placeholder="correo@ejemplo.com"
                   id="email"
                   name="email"
                   type="email"
@@ -230,7 +234,8 @@ const Register = () => {
                 <StyledTextField
                   fullWidth
                   variant="outlined"
-                  placeholder="Telefono móvil"
+                  label="Teléfono móvil"
+                  placeholder="+56999650987"
                   type="tel"
                   id="phone"
                   name="phone"
@@ -246,7 +251,8 @@ const Register = () => {
                   fullWidth
                   variant="outlined"
                   type="password"
-                  placeholder="Contraseña"
+                  label="Contraseña"
+                  placeholder="Mínimo 8 caracteres"
                   id="password"
                   name="password"
                   disabled={loading}
@@ -261,7 +267,8 @@ const Register = () => {
                   fullWidth
                   variant="outlined"
                   type="password"
-                  placeholder="Confirmar contraseña"
+                  label="Confirmar contraseña"
+                  placeholder="Repite tu contraseña"
                   id="confirmPassword"
                   name="confirmPassword"
                   disabled={loading}
