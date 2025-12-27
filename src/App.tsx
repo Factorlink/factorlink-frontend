@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { theme } from "./theme/theme";
 import Login from "./pages/login";
 import Register from "./pages/register";
+import ForgotPassword from "./pages/forgot-password";
 import Dashboard from "./pages/dashboard";
 import Facturas from "./pages/facturas";
 import Operaciones from "./pages/operaciones";
@@ -19,6 +20,7 @@ function App() {
           <Route path="/" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           
           {/* Protected routes */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
