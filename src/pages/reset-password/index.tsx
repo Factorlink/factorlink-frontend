@@ -1,19 +1,12 @@
 import { useState } from "react";
 import { useFormik } from "formik";
-import { useNavigate } from "react-router-dom";
-import type { RegisterFormData } from "../../types/outgoing/register-form-data";
-import { validationSchema } from "./validation-schema";
-import { useAuth } from "../../hooks/useAuth";
-import useAuthStore from "../../store/authStore";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import * as Yup from "yup";
 
 import {
   Box,
-  MenuItem,
   Button,
-  Checkbox,
-  FormControlLabel,
   Typography,
-  Link,
   Container,
   useTheme,
   Dialog,
@@ -28,18 +21,37 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { StyledTextField } from "./styles";
+import { StyledTextField } from "../register/styles";
 import logo from "../../assets/png/factorlink-logo.png";
+import { useAuth } from "../../hooks/useAuth";
 
-const Register = () => {
+const validationSchema = Yup.object({
+  password: Yup.string()
+    .trim()
+    .min(8, "La contraseña debe tener al menos 8 caracteres")
+    .matches(/[A-Z]/, "Debe contener al menos una mayúscula")
+    .matches(/[a-z]/, "Debe contener al menos una minúscula")
+    .matches(/[0-9]/, "Debe contener al menos un número")
+    .matches(/[!@#$%^&*(),.?":{}|<>]/, "Debe contener al menos un carácter especial")
+    .required("La contraseña es requerida"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
+    .required("Confirma tu contraseña"),
+});
+
+const ResetPassword = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register, loading } = useAuth();
+  const { resetPassword } = useAuth();
 
   const handleCloseModal = (
     _event?: unknown,
@@ -51,42 +63,105 @@ const Register = () => {
 
   const handleContinue = () => {
     setModalOpen(false);
-    navigate("/dashboard");
+    navigate("/login");
   };
 
-  const handleRegister = async (values: RegisterFormData) => {
-    try {
-      const response = await register(values);
-      setModalStatus("success");
-      setModalOpen(true);
-      useAuthStore.getState().setAccessToken(response.accessToken);
-      useAuthStore.getState().setRefreshToken(response.refreshToken);
-      useAuthStore.getState().setUser(response.user);
-    } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string[] } } };
-      setErrorMessage(axiosError?.response?.data?.message?.[0] || "Ocurrió un error, intenta nuevamente");
+  const handleResetPassword = async (values: { password: string; confirmPassword: string }) => {
+    if (!token) {
+      setErrorMessage("Token de recuperación no válido o expirado.");
       setModalStatus("error");
       setModalOpen(true);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const cleanPassword = values.password.trim();
+      await resetPassword(token, cleanPassword);
+      setModalStatus("success");
+      setModalOpen(true);
+      formik.resetForm();
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { status?: number; data?: { message?: string[] } } };
+      
+      if (axiosError?.response?.status === 400 || axiosError?.response?.status === 401) {
+        setErrorMessage("El enlace de recuperación no es válido o ha expirado.");
+      } else if (axiosError?.response?.status && axiosError.response.status >= 500) {
+        setErrorMessage("Ocurrió un error de conexión. Intenta nuevamente.");
+      } else {
+        setErrorMessage("Ocurrió un error al restablecer la contraseña.");
+      }
+      setModalStatus("error");
+      setModalOpen(true);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const formik = useFormik<RegisterFormData>({
+  const formik = useFormik({
     initialValues: {
-      roleType: "",
-      firstName: "",
-      lastName: "",
-      rut: "",
-      email: "",
-      phone: "",
       password: "",
       confirmPassword: "",
-      termsConditions: false,
     },
     validationSchema,
     onSubmit: (values) => {
-      handleRegister(values);
+      handleResetPassword(values);
     },
   });
+
+  // Si no hay token, mostrar mensaje de error
+  if (!token) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundColor: "primary.dark",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 2,
+        }}
+      >
+        <Container maxWidth="sm">
+          <Box
+            sx={{
+              backgroundColor: "background.paper",
+              borderRadius: 3,
+              overflow: "hidden",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              textAlign: "center",
+              p: 4,
+            }}
+          >
+            <ErrorOutlineIcon sx={{ fontSize: 64, color: "error.main", mb: 2 }} />
+            <Typography variant="h5" fontWeight={600} sx={{ mb: 2 }}>
+              Enlace inválido
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+              El enlace de recuperación no es válido o ha expirado.
+            </Typography>
+            <Button
+              variant="contained"
+              href="/forgot-password"
+              sx={{
+                backgroundColor: "primary.main",
+                color: "white",
+                textTransform: "none",
+                px: 4,
+                py: 1,
+                borderRadius: 2,
+                "&:hover": {
+                  backgroundColor: "primary.dark",
+                },
+              }}
+            >
+              Solicitar nuevo enlace
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -120,7 +195,7 @@ const Register = () => {
               fontSize: "1rem",
             }}
           >
-            Registro
+            Restablecer contraseña
           </Box>
 
           <Box
@@ -130,7 +205,7 @@ const Register = () => {
               gap: 4,
               padding: { xs: 3, md: 5 },
               alignItems: "center",
-              minHeight: 400,
+              minHeight: 300,
             }}
           >
             {/* Left Side - Factorlink Logo */}
@@ -160,107 +235,24 @@ const Register = () => {
 
             {/* Right Side - Form */}
             <Box sx={{ paddingLeft: { md: 2 } }}>
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ mb: 3 }}
+              >
+                Ingresa tu nueva contraseña para restablecer el acceso a tu cuenta.
+              </Typography>
+
               {/* Form Fields */}
               <Box>
                 <StyledTextField
-                  select
-                  fullWidth
-                  defaultValue=""
-                  label="Tipo de entidad"
-                  id="roleType"
-                  name="roleType"
-                  disabled={loading}
-                  error={formik.touched.roleType && Boolean(formik.errors.roleType)}
-                  helperText={formik.touched.roleType && formik.errors.roleType}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                >
-                  <MenuItem value="EMPRESA_ADMIN">Empresa</MenuItem>
-                  <MenuItem value="FACTORING_ADMIN">Factoring</MenuItem>
-                </StyledTextField>
-                <StyledTextField
                   fullWidth
                   variant="outlined"
-                  label="Nombre"
-                  placeholder="Nombre"
-                  id="firstName"
-                  name="firstName"
-                  disabled={loading}
-                  value={formik.values.firstName}
-                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-                  helperText={formik.touched.firstName && formik.errors.firstName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Apellido"
-                  placeholder="Apellido"
-                  id="lastName"
-                  name="lastName"
-                  disabled={loading}
-                  value={formik.values.lastName}
-                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-                  helperText={formik.touched.lastName && formik.errors.lastName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="RUT"
-                  placeholder="12.345.678-9"
-                  id="rut"
-                  name="rut"
-                  disabled={loading}
-                  value={formik.values.rut}
-                  error={formik.touched.rut && Boolean(formik.errors.rut)}
-                  helperText={formik.touched.rut && formik.errors.rut}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Correo electrónico"
-                  placeholder="correo@ejemplo.com"
-                  id="email"
-                  name="email"
-                  type="email"
-                  disabled={loading}
-                  value={formik.values.email}
-                  error={formik.touched.email && Boolean(formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Teléfono móvil"
-                  placeholder="+56999650987"
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  disabled={loading}
-                  value={formik.values.phone}
-                  error={formik.touched.phone && Boolean(formik.errors.phone)}
-                  helperText={formik.touched.phone && formik.errors.phone}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  type={showPassword ? "text" : "password"}
-                  label="Contraseña"
-                  placeholder="Mínimo 8 caracteres"
+                  label="Nueva contraseña"
+                  placeholder="Nueva contraseña"
                   id="password"
                   name="password"
+                  type={showPassword ? "text" : "password"}
                   disabled={loading}
                   value={formik.values.password}
                   error={formik.touched.password && Boolean(formik.errors.password)}
@@ -271,7 +263,6 @@ const Register = () => {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          aria-label="toggle password visibility"
                           onClick={() => setShowPassword(!showPassword)}
                           edge="end"
                           disabled={loading}
@@ -286,11 +277,11 @@ const Register = () => {
                 <StyledTextField
                   fullWidth
                   variant="outlined"
-                  type={showConfirmPassword ? "text" : "password"}
                   label="Confirmar contraseña"
-                  placeholder="Repite tu contraseña"
+                  placeholder="Confirmar contraseña"
                   id="confirmPassword"
                   name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
                   disabled={loading}
                   value={formik.values.confirmPassword}
                   error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
@@ -301,7 +292,6 @@ const Register = () => {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          aria-label="toggle confirm password visibility"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           edge="end"
                           disabled={loading}
@@ -313,54 +303,12 @@ const Register = () => {
                   }}
                 />
 
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      id="acceptedTerms"
-                      name="termsConditions"
-                      checked={formik.values.termsConditions}
-                      onChange={formik.handleChange}
-                      disabled={loading}
-                      size="small"
-                      sx={{
-                        color: "text.disabled",
-                        "&.Mui-checked": {
-                          color: "success.main",
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: "0.875rem",
-                        color: "text.secondary",
-                      }}
-                    >
-                      He leído y acepto los{" "}
-                      <Link
-                        href="#"
-                        sx={{
-                          color: "success.main",
-                          textDecoration: "none",
-                          "&:hover": {
-                            textDecoration: "underline",
-                          },
-                        }}
-                      >
-                        términos y condiciones de uso
-                      </Link>
-                    </Typography>
-                  }
-                  sx={{ mb: 3 }}
-                />
-
-                <Box sx={{ display: "flex", gap: 2 }}>
+                <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                   <Button
                     variant="contained"
                     fullWidth
                     href="/login"
+                    disabled={loading}
                     sx={{
                       backgroundColor: "secondary.main",
                       color: "white",
@@ -376,7 +324,7 @@ const Register = () => {
                       },
                     }}
                   >
-                    Ya tengo cuenta
+                    Cancelar
                   </Button>
 
                   <Button
@@ -403,7 +351,7 @@ const Register = () => {
                     {loading ? (
                       <CircularProgress size={24} sx={{ color: "white" }} />
                     ) : (
-                      "Crear cuenta"
+                      "Restablecer"
                     )}
                   </Button>
                 </Box>
@@ -417,8 +365,8 @@ const Register = () => {
         open={modalOpen}
         onClose={handleCloseModal}
         disableEscapeKeyDown
-        aria-labelledby="register-modal-title"
-        aria-describedby="register-modal-description"
+        aria-labelledby="reset-password-modal-title"
+        aria-describedby="reset-password-modal-description"
         PaperProps={{
           sx: {
             borderRadius: 3,
@@ -427,7 +375,7 @@ const Register = () => {
           },
         }}
       >
-        <DialogTitle id="register-modal-title" sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}>
+        <DialogTitle id="reset-password-modal-title" sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}>
           <Box
             sx={{
               display: "flex",
@@ -442,15 +390,15 @@ const Register = () => {
               <ErrorOutlineIcon sx={{ fontSize: 64, color: "error.main", display: "block" }} />
             )}
             <Typography variant="h5" fontWeight={600} component="span">
-              {modalStatus === "success" ? "¡Registro exitoso!" : "Error en el registro"}
+              {modalStatus === "success" ? "¡Contraseña actualizada!" : "Error"}
             </Typography>
           </Box>
         </DialogTitle>
 
         <DialogContent sx={{ textAlign: "center", px: 3, pt: 0, pb: 0 }}>
-          <Typography id="register-modal-description" variant="body1" color="text.secondary">
+          <Typography id="reset-password-modal-description" variant="body1" color="text.secondary">
             {modalStatus === "success"
-              ? "Tu cuenta ha sido creada correctamente. Ya puedes acceder a todas las funcionalidades de la plataforma."
+              ? "Tu contraseña ha sido restablecida exitosamente. Ya puedes iniciar sesión con tu nueva contraseña."
               : errorMessage}
           </Typography>
         </DialogContent>
@@ -472,26 +420,46 @@ const Register = () => {
                 },
               }}
             >
-              Continuar
+              Ir al login
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              onClick={handleCloseModal}
-              sx={{
-                backgroundColor: "error.main",
-                color: "common.white",
-                textTransform: "none",
-                px: 4,
-                py: 1,
-                borderRadius: 2,
-                "&:hover": {
-                  backgroundColor: "error.dark",
-                },
-              }}
-            >
-              Cerrar
-            </Button>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={handleCloseModal}
+                sx={{
+                  borderColor: "grey.400",
+                  color: "text.primary",
+                  textTransform: "none",
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  "&:hover": {
+                    borderColor: "grey.600",
+                    backgroundColor: "grey.50",
+                  },
+                }}
+              >
+                Cerrar
+              </Button>
+              <Button
+                variant="contained"
+                href="/forgot-password"
+                sx={{
+                  backgroundColor: "primary.main",
+                  color: "common.white",
+                  textTransform: "none",
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  "&:hover": {
+                    backgroundColor: "primary.dark",
+                  },
+                }}
+              >
+                Solicitar nuevo enlace
+              </Button>
+            </Box>
           )}
         </DialogActions>
       </Dialog>
@@ -499,4 +467,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default ResetPassword;

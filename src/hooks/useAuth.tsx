@@ -56,11 +56,22 @@ export const useAuth = () => {
     }
   };
 
+  const resetPassword = async (token: string, password: string) => {
+    try {
+      setLoading(true);
+      const response = await api.post("auth/reset-password", { token, newPassword: password });
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     register,
     login,
     logout,
     forgotPassword,
+    resetPassword,
     loading,
   };
 };
