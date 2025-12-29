@@ -41,7 +41,7 @@ export const validationSchema = yup.object({
     .string()
     .trim()
     .oneOf(
-      ["EMPRESA", "FACTORING"],
+      ["EMPRESA_ADMIN", "FACTORING_ADMIN"],
       "El tipo de entidad debe ser Empresa o Factoring"
     )
     .required("El tipo de entidad es obligatorio"),

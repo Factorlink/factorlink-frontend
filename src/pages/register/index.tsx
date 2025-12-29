@@ -175,8 +175,8 @@ const Register = () => {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 >
-                  <MenuItem value="EMPRESA">Empresa</MenuItem>
-                  <MenuItem value="FACTORING">Factoring</MenuItem>
+                  <MenuItem value="EMPRESA_ADMIN">Empresa</MenuItem>
+                  <MenuItem value="FACTORING_ADMIN">Factoring</MenuItem>
                 </StyledTextField>
                 <StyledTextField
                   fullWidth
