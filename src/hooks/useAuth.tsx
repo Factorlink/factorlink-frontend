@@ -46,10 +46,21 @@ export const useAuth = () => {
     }
   };
 
+  const forgotPassword = async (email: string) => {
+    try {
+      setLoading(true);
+      const response = await api.post("auth/forgot-password", { email });
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     register,
     login,
     logout,
+    forgotPassword,
     loading,
   };
 };

@@ -295,10 +295,7 @@ const Login = () => {
                 {/* Link de recuperar contraseña */}
                 <Box sx={{ textAlign: "right", mb: 2 }}>
                   <Link
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                    }}
+                    href="/forgot-password"
                     sx={{
                       color: "success.main",
                       textDecoration: "none",
