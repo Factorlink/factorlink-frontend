@@ -9,6 +9,7 @@ import ResetPassword from "./pages/reset-password";
 import Dashboard from "./pages/dashboard";
 import Facturas from "./pages/facturas";
 import Operaciones from "./pages/operaciones";
+import Profile from "./pages/profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/facturas" element={<ProtectedRoute><Facturas /></ProtectedRoute>} />
           <Route path="/operaciones" element={<ProtectedRoute><Operaciones /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

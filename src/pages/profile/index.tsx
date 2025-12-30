@@ -1,19 +1,14 @@
 import { useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
-import type { RegisterFormData } from "../../types/outgoing/register-form-data";
-import { validationSchema } from "./validation-schema";
-import { useAuth } from "../../hooks/useAuth";
+import * as Yup from "yup";
+import { useUser } from "../../hooks/useUser";
 import useAuthStore from "../../store/authStore";
 
 import {
   Box,
-  MenuItem,
   Button,
-  Checkbox,
-  FormControlLabel,
   Typography,
-  Link,
   Container,
   useTheme,
   Dialog,
@@ -21,25 +16,40 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
-  InputAdornment,
-  IconButton,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { StyledTextField } from "./styles";
+import { StyledTextField } from "../register/styles";
 import logo from "../../assets/png/factorlink-logo.png";
 
-const Register = () => {
+interface ProfileFormData {
+  firstName: string;
+  lastName: string;
+  phone: string;
+}
+
+const validationSchema = Yup.object({
+  firstName: Yup.string()
+    .required("El nombre es obligatorio")
+    .min(2, "El nombre debe tener al menos 2 caracteres")
+    .max(50, "El nombre no puede tener más de 50 caracteres"),
+  lastName: Yup.string()
+    .required("El apellido es obligatorio")
+    .min(2, "El apellido debe tener al menos 2 caracteres")
+    .max(50, "El apellido no puede tener más de 50 caracteres"),
+  phone: Yup.string()
+    .required("El teléfono es obligatorio")
+    .matches(/^\+?[0-9]{9,15}$/, "Ingresa un teléfono válido"),
+});
+
+const Profile = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
   const [errorMessage, setErrorMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register, loading } = useAuth();
+  const { updateUserProfile, loading } = useUser();
+  const { user } = useAuthStore();
 
   const handleCloseModal = (
     _event?: unknown,
@@ -54,38 +64,43 @@ const Register = () => {
     navigate("/dashboard");
   };
 
-  const handleRegister = async (values: RegisterFormData) => {
+  const handleUpdateProfile = async (values: ProfileFormData) => {
     try {
-      const response = await register(values);
+      const response = await updateUserProfile({
+        firstName: values.firstName.trim(),
+        lastName: values.lastName.trim(),
+        phone: values.phone.trim(),
+      });
+      
+      // Update user in store
+      useAuthStore.getState().setUser({
+        ...user!,
+        firstName: response.firstName || values.firstName.trim(),
+        lastName: response.lastName || values.lastName.trim(),
+        phone: response.phone || values.phone.trim(),
+      });
+      
       setModalStatus("success");
       setModalOpen(true);
-      useAuthStore.getState().setAccessToken(response.accessToken);
-      useAuthStore.getState().setRefreshToken(response.refreshToken);
-      useAuthStore.getState().setUser(response.user);
     } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      setErrorMessage(axiosError?.response?.data?.message || "Ocurrió un error, intenta nuevamente");
+      const axiosError = error as { response?: { data?: { message?: string[] } } };
+      setErrorMessage(axiosError?.response?.data?.message?.[0] || "Ocurrió un error, intenta nuevamente");
       setModalStatus("error");
       setModalOpen(true);
     }
   };
 
-  const formik = useFormik<RegisterFormData>({
+  const formik = useFormik<ProfileFormData>({
     initialValues: {
-      roleType: "",
-      firstName: "",
-      lastName: "",
-      rut: "",
-      email: "",
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
       phone: "",
-      password: "",
-      confirmPassword: "",
-      termsConditions: false,
     },
     validationSchema,
     onSubmit: (values) => {
-      handleRegister(values);
+      handleUpdateProfile(values);
     },
+    enableReinitialize: true,
   });
 
   return (
@@ -120,7 +135,7 @@ const Register = () => {
               fontSize: "1rem",
             }}
           >
-            Registro
+            Editar Perfil
           </Box>
 
           <Box
@@ -160,24 +175,19 @@ const Register = () => {
 
             {/* Right Side - Form */}
             <Box sx={{ paddingLeft: { md: 2 } }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: "text.primary",
+                  fontWeight: 600,
+                  mb: 3,
+                }}
+              >
+                Actualiza tu información personal
+              </Typography>
+
               {/* Form Fields */}
               <Box>
-                <StyledTextField
-                  select
-                  fullWidth
-                  defaultValue=""
-                  label="Tipo de entidad"
-                  id="roleType"
-                  name="roleType"
-                  disabled={loading}
-                  error={formik.touched.roleType && Boolean(formik.errors.roleType)}
-                  helperText={formik.touched.roleType && formik.errors.roleType}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                >
-                  <MenuItem value="EMPRESA_ADMIN">Empresa</MenuItem>
-                  <MenuItem value="FACTORING_ADMIN">Factoring</MenuItem>
-                </StyledTextField>
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -206,36 +216,6 @@ const Register = () => {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="RUT"
-                  placeholder="12.345.678-9"
-                  id="rut"
-                  name="rut"
-                  disabled={loading}
-                  value={formik.values.rut}
-                  error={formik.touched.rut && Boolean(formik.errors.rut)}
-                  helperText={formik.touched.rut && formik.errors.rut}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Correo electrónico"
-                  placeholder="correo@ejemplo.com"
-                  id="email"
-                  name="email"
-                  type="email"
-                  disabled={loading}
-                  value={formik.values.email}
-                  error={formik.touched.email && Boolean(formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
 
                 <StyledTextField
                   fullWidth
@@ -253,114 +233,12 @@ const Register = () => {
                   onBlur={formik.handleBlur}
                 />
 
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  type={showPassword ? "text" : "password"}
-                  label="Contraseña"
-                  placeholder="Mínimo 8 caracteres"
-                  id="password"
-                  name="password"
-                  disabled={loading}
-                  value={formik.values.password}
-                  error={formik.touched.password && Boolean(formik.errors.password)}
-                  helperText={formik.touched.password && formik.errors.password}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                          disabled={loading}
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  type={showConfirmPassword ? "text" : "password"}
-                  label="Confirmar contraseña"
-                  placeholder="Repite tu contraseña"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  disabled={loading}
-                  value={formik.values.confirmPassword}
-                  error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
-                  helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle confirm password visibility"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          edge="end"
-                          disabled={loading}
-                        >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      id="acceptedTerms"
-                      name="termsConditions"
-                      checked={formik.values.termsConditions}
-                      onChange={formik.handleChange}
-                      disabled={loading}
-                      size="small"
-                      sx={{
-                        color: "text.disabled",
-                        "&.Mui-checked": {
-                          color: "success.main",
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: "0.875rem",
-                        color: "text.secondary",
-                      }}
-                    >
-                      He leído y acepto los{" "}
-                      <Link
-                        href="#"
-                        sx={{
-                          color: "success.main",
-                          textDecoration: "none",
-                          "&:hover": {
-                            textDecoration: "underline",
-                          },
-                        }}
-                      >
-                        términos y condiciones de uso
-                      </Link>
-                    </Typography>
-                  }
-                  sx={{ mb: 3 }}
-                />
-
-                <Box sx={{ display: "flex", gap: 2 }}>
+                <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                   <Button
                     variant="contained"
                     fullWidth
-                    href="/login"
+                    onClick={() => navigate("/dashboard")}
+                    disabled={loading}
                     sx={{
                       backgroundColor: "secondary.main",
                       color: "white",
@@ -376,7 +254,7 @@ const Register = () => {
                       },
                     }}
                   >
-                    Ya tengo cuenta
+                    Cancelar
                   </Button>
 
                   <Button
@@ -403,7 +281,7 @@ const Register = () => {
                     {loading ? (
                       <CircularProgress size={24} sx={{ color: "white" }} />
                     ) : (
-                      "Crear cuenta"
+                      "Guardar cambios"
                     )}
                   </Button>
                 </Box>
@@ -417,8 +295,8 @@ const Register = () => {
         open={modalOpen}
         onClose={handleCloseModal}
         disableEscapeKeyDown
-        aria-labelledby="register-modal-title"
-        aria-describedby="register-modal-description"
+        aria-labelledby="profile-modal-title"
+        aria-describedby="profile-modal-description"
         PaperProps={{
           sx: {
             borderRadius: 3,
@@ -427,7 +305,7 @@ const Register = () => {
           },
         }}
       >
-        <DialogTitle id="register-modal-title" sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}>
+        <DialogTitle id="profile-modal-title" sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}>
           <Box
             sx={{
               display: "flex",
@@ -442,15 +320,15 @@ const Register = () => {
               <ErrorOutlineIcon sx={{ fontSize: 64, color: "error.main", display: "block" }} />
             )}
             <Typography variant="h5" fontWeight={600} component="span">
-              {modalStatus === "success" ? "¡Registro exitoso!" : "Error en el registro"}
+              {modalStatus === "success" ? "¡Perfil actualizado!" : "Error al actualizar"}
             </Typography>
           </Box>
         </DialogTitle>
 
         <DialogContent sx={{ textAlign: "center", px: 3, pt: 0, pb: 0 }}>
-          <Typography id="register-modal-description" variant="body1" color="text.secondary">
+          <Typography id="profile-modal-description" variant="body1" color="text.secondary">
             {modalStatus === "success"
-              ? "Tu cuenta ha sido creada correctamente. Ya puedes acceder a todas las funcionalidades de la plataforma."
+              ? "Tu información ha sido actualizada correctamente."
               : errorMessage}
           </Typography>
         </DialogContent>
@@ -499,4 +377,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Profile;
