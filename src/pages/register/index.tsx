@@ -63,8 +63,8 @@ const Register = () => {
       useAuthStore.getState().setRefreshToken(response.refreshToken);
       useAuthStore.getState().setUser(response.user);
     } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string[] } } };
-      setErrorMessage(axiosError?.response?.data?.message?.[0] || "Ocurrió un error, intenta nuevamente");
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setErrorMessage(axiosError?.response?.data?.message || "Ocurrió un error, intenta nuevamente");
       setModalStatus("error");
       setModalOpen(true);
     }
