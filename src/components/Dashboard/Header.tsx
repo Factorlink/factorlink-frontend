@@ -3,8 +3,12 @@ import {
 } from "@mui/material";
 
 import Profile from "./Profile";
+import useAuthStore from "../../store/authStore";
+import { capitalizeString } from "../../utils/utils";
 
 const Header = () => {
+
+  const { currentRole } = useAuthStore();
 
   return (
     <Box
@@ -16,7 +20,6 @@ const Header = () => {
         backgroundColor: "background.paper",
       }}
     >
-      {/* Left - Suite Empresa */}
       <Box
         sx={{
           backgroundColor: "primary.main",
@@ -27,7 +30,7 @@ const Header = () => {
           fontWeight: 500,
         }}
       >
-        Suite Empresa
+        Suite { capitalizeString(currentRole?.contexto || "") }
       </Box>
 
       <Profile />

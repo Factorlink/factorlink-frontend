@@ -20,7 +20,6 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import logo from "../../assets/png/factorlink-logo.png";
-import siiLogo from "../../assets/png/sii-logo.png";
 import { useAuth } from "../../hooks/useAuth";
 import useAuthStore from "../../store/authStore";
 import { loginValidationSchema } from "./validation-schema";
@@ -90,8 +89,13 @@ const Login = () => {
           email: values.email.trim().toLowerCase(),
           password: values.password,
         });
+
+        if (response.user.roles.length === 1) {
+          useAuthStore.getState().setCurrentRole(response.user.roles[0]);
+        } 
+
         setModalStatus("success");
-        setModalOpen(true);
+        setModalOpen(true);     
         useAuthStore.getState().setAccessToken(response.accessToken);
         useAuthStore.getState().setRefreshToken(response.refreshToken);
         useAuthStore.getState().setUser(response.user);
@@ -142,7 +146,7 @@ const Login = () => {
               fontSize: "1rem",
             }}
           >
-            Suite Empresa
+            Inicio de sesión
           </Box>
 
           <Box
@@ -196,10 +200,7 @@ const Login = () => {
                   mb: 3,
                 }}
               >
-                {/* SII Logo */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <img src={siiLogo} alt="SII Logo" style={{ maxWidth: 150 }} />
-                </Box>
+                
 
                 <Typography
                   variant="body2"
@@ -210,21 +211,7 @@ const Login = () => {
                     flex: 1,
                   }}
                 >
-                  Ingresa tu rut y contraseña de SII para sincronizar la
-                  información de tus facturas.
-                  <br />
-                  <Link
-                    href="#"
-                    sx={{
-                      color: "success.main",
-                      textDecoration: "none",
-                      "&:hover": {
-                        textDecoration: "underline",
-                      },
-                    }}
-                  >
-                    Más detalles del proceso.
-                  </Link>
+                  Ingresa tu rut y contraseña para iniciar sesión
                 </Typography>
               </Box>
 
@@ -351,7 +338,7 @@ const Login = () => {
                           },
                         }}
                       >
-                        términos de SII
+                        términos y condiciones
                       </Link>
                     </Typography>
                   }
