@@ -9,6 +9,7 @@ import {
   Settings,
   Logout,
   Warning,
+  Edit,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -30,6 +31,7 @@ import {
 } from "@mui/material";
 import useAuthStore from "../../store/authStore";
 import { useAuth } from "../../hooks/useAuth";
+import { getRoleNameByCode } from "../../utils/utils";
 
 const Profile = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -37,7 +39,7 @@ const Profile = () => {
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
 
-  const { user } = useAuthStore();
+  const { user, currentRole } = useAuthStore();
   const { logout, loading } = useAuth();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -63,7 +65,13 @@ const Profile = () => {
     setLogoutDialogOpen(false);
   };
 
+  const handleEditProfile = () => {
+    handleClose();
+    navigate("/profile");
+  };
+
   const menuItems = [
+    { icon: <Edit fontSize="small" />, text: "Editar Perfil", action: handleEditProfile },
     { icon: <Person fontSize="small" />, text: "Suite Factoring", action: handleClose },
     { icon: <Business fontSize="small" />, text: "Suite Empresa", action: handleClose },
     { icon: <SwapHoriz fontSize="small" />, text: "Cambiar Empresa", action: handleClose },
@@ -156,7 +164,7 @@ const Profile = () => {
         >
           <Box sx={{ px: 2, py: 1.5, textAlign: "center" }}>
             <Chip
-              label="Superadmin"
+              label={getRoleNameByCode(currentRole?.role || "")}
               size="small"
               sx={{
                 backgroundColor: "primary.main",
