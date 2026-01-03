@@ -90,8 +90,13 @@ const Login = () => {
           email: values.email.trim().toLowerCase(),
           password: values.password,
         });
+
+        if (response.user.roles.length === 1) {
+          useAuthStore.getState().setCurrentRole(response.user.roles[0]);
+        } 
+
         setModalStatus("success");
-        setModalOpen(true);
+        setModalOpen(true);     
         useAuthStore.getState().setAccessToken(response.accessToken);
         useAuthStore.getState().setRefreshToken(response.refreshToken);
         useAuthStore.getState().setUser(response.user);
