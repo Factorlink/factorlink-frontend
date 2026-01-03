@@ -201,10 +201,7 @@ const Login = () => {
                   mb: 3,
                 }}
               >
-                {/* SII Logo */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <img src={siiLogo} alt="SII Logo" style={{ maxWidth: 150 }} />
-                </Box>
+                
 
                 <Typography
                   variant="body2"
@@ -215,21 +212,7 @@ const Login = () => {
                     flex: 1,
                   }}
                 >
-                  Ingresa tu rut y contraseña de SII para sincronizar la
-                  información de tus facturas.
-                  <br />
-                  <Link
-                    href="#"
-                    sx={{
-                      color: "success.main",
-                      textDecoration: "none",
-                      "&:hover": {
-                        textDecoration: "underline",
-                      },
-                    }}
-                  >
-                    Más detalles del proceso.
-                  </Link>
+                  Ingresa tu rut y contraseña para iniciar sesión
                 </Typography>
               </Box>
 
@@ -356,7 +339,7 @@ const Login = () => {
                           },
                         }}
                       >
-                        términos de SII
+                        términos y condiciones
                       </Link>
                     </Typography>
                   }
