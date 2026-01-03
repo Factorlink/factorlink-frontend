@@ -147,7 +147,7 @@ const Login = () => {
               fontSize: "1rem",
             }}
           >
-            Suite Empresa
+            Inicio de sesión
           </Box>
 
           <Box
