@@ -20,7 +20,6 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import logo from "../../assets/png/factorlink-logo.png";
-import siiLogo from "../../assets/png/sii-logo.png";
 import { useAuth } from "../../hooks/useAuth";
 import useAuthStore from "../../store/authStore";
 import { loginValidationSchema } from "./validation-schema";

@@ -114,7 +114,7 @@ const Profile = () => {
               backgroundColor: "primary.light",
             }}
           >
-            FO
+            { user?.firstName?.charAt(0).toUpperCase() || "" }{user?.lastName?.charAt(0).toUpperCase() || ""}
           </Avatar>
           <Box>
             <Typography
