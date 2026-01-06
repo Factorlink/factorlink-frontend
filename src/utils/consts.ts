@@ -1,5 +1,18 @@
 export const ROLES = {
-  EMPRESA_ADMIN: "Admin Empresa",
-  FACTORING_ADMIN: "Admin Factoring",
-  DEFAULT: "Default",
-}
+  EMPRESA_ADMIN: "EMPRESA_ADMIN",
+  EMPRESA_USUARIO: "EMPRESA_USUARIO",
+  FACTORING_ADMIN: "FACTORING_ADMIN",
+  FACTORING_ANALISTA: "FACTORING_ANALISTA",
+  DEFAULT: "DEFAULT",
+};
+
+export const FACTORING_TYPES = {
+  TRADICIONAL: "Tradicional",
+  DIGITAL: "Digital",
+  BANCARIO: "Bancario",
+} as const;
+
+export const ENTITY_TYPES = {
+  EMPRESA: "EMPRESA",
+  FACTORING: "FACTORING",
+} as const;

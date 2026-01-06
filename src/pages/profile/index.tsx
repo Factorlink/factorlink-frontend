@@ -94,7 +94,7 @@ const Profile = () => {
     initialValues: {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
-      phone: "",
+      phone: user?.phone || "",
     },
     validationSchema,
     onSubmit: (values) => {

@@ -3,8 +3,6 @@ import {
   Box,
   TextField,
   Button,
-  Checkbox,
-  FormControlLabel,
   Typography,
   Link,
   Container,
@@ -14,6 +12,8 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
@@ -23,6 +23,7 @@ import logo from "../../assets/png/factorlink-logo.png";
 import { useAuth } from "../../hooks/useAuth";
 import useAuthStore from "../../store/authStore";
 import { loginValidationSchema } from "./validation-schema";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 // Mapeo de errores del backend a mensajes amigables
 const mapLoginError = (error: unknown): string => {
@@ -61,6 +62,7 @@ const mapLoginError = (error: unknown): string => {
 const Login = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">(
     "success"
@@ -80,7 +82,6 @@ const Login = () => {
     initialValues: {
       email: "",
       password: "",
-      acceptedTerms: false,
     },
     validationSchema: loginValidationSchema,
     onSubmit: async (values) => {
@@ -249,7 +250,7 @@ const Login = () => {
                 <TextField
                   fullWidth
                   variant="outlined"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   label="Contraseña"
                   placeholder="Contraseña"
                   name="password"
@@ -277,6 +278,20 @@ const Login = () => {
                       },
                     },
                   }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                          disabled={loading}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
 
                 {/* Link de recuperar contraseña */}
@@ -297,63 +312,6 @@ const Login = () => {
                     ¿Olvidaste tu contraseña?
                   </Link>
                 </Box>
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="acceptedTerms"
-                      checked={formik.values.acceptedTerms}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      size="small"
-                      disabled={loading}
-                      sx={{
-                        color: "text.disabled",
-                        "&.Mui-checked": {
-                          color: "success.main",
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: "0.875rem",
-                        color:
-                          formik.touched.acceptedTerms &&
-                          formik.errors.acceptedTerms
-                            ? "error.main"
-                            : "text.secondary",
-                      }}
-                    >
-                      He leído y acepto los{" "}
-                      <Link
-                        href="#"
-                        sx={{
-                          color: "success.main",
-                          textDecoration: "none",
-                          "&:hover": {
-                            textDecoration: "underline",
-                          },
-                        }}
-                      >
-                        términos y condiciones
-                      </Link>
-                    </Typography>
-                  }
-                  sx={{ mb: 1 }}
-                />
-                {formik.touched.acceptedTerms &&
-                  formik.errors.acceptedTerms && (
-                    <Typography
-                      variant="caption"
-                      color="error"
-                      sx={{ display: "block", mb: 2, ml: 2 }}
-                    >
-                      {formik.errors.acceptedTerms}
-                    </Typography>
-                  )}
 
                 <Box sx={{ display: "flex", gap: 2 }}>
                   <Button
@@ -403,7 +361,7 @@ const Login = () => {
                     {loading ? (
                       <CircularProgress size={24} color="inherit" />
                     ) : (
-                      "Siguiente"
+                      "Iniciar sesión"
                     )}
                   </Button>
                 </Box>

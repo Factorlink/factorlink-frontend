@@ -24,12 +24,40 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          
+
           {/* Protected routes */}
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/facturas" element={<ProtectedRoute><Facturas /></ProtectedRoute>} />
-          <Route path="/operaciones" element={<ProtectedRoute><Operaciones /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/facturas"
+            element={
+              <ProtectedRoute>
+                <Facturas />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/operaciones"
+            element={
+              <ProtectedRoute>
+                <Operaciones />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
