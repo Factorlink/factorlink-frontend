@@ -97,6 +97,35 @@ const Register = () => {
     formik.setFieldValue(name, filteredValue);
   };
 
+  // Función para formatear teléfono chileno
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    
+    // Solo permitir números y el signo +
+    value = value.replace(/[^\d+]/g, '');
+    
+    // Asegurar que el + solo esté al inicio
+    const plusCount = (value.match(/\+/g) || []).length;
+    if (plusCount > 1) {
+      value = '+' + value.replace(/\+/g, '');
+    }
+    if (value.includes('+') && !value.startsWith('+')) {
+      value = '+' + value.replace(/\+/g, '');
+    }
+    
+    // Si el usuario empieza a escribir sin +56, agregarlo automáticamente
+    if (value && !value.startsWith('+')) {
+      value = '+56' + value;
+    }
+    
+    // Limitar a 12 caracteres (+56 + 9 dígitos)
+    if (value.length > 12) {
+      value = value.slice(0, 12);
+    }
+    
+    formik.setFieldValue('phone', value);
+  };
+
   return (
     <Box
       sx={{
@@ -258,7 +287,7 @@ const Register = () => {
                   value={formik.values.phone}
                   error={formik.touched.phone && Boolean(formik.errors.phone)}
                   helperText={formik.touched.phone && formik.errors.phone}
-                  onChange={formik.handleChange}
+                  onChange={handlePhoneChange}
                   onBlur={formik.handleBlur}
                 />
 
