@@ -81,12 +81,21 @@ const Register = () => {
       password: "",
       confirmPassword: "",
       termsConditions: false,
+      factoringRut: "",
+      factoringRazonSocial: "",
     },
     validationSchema,
     onSubmit: (values) => {
       handleRegister(values);
     },
   });
+
+  // Función para filtrar números del input
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/\d/g, '');
+    formik.setFieldValue(name, filteredValue);
+  };
 
   return (
     <Box
@@ -189,7 +198,7 @@ const Register = () => {
                   value={formik.values.firstName}
                   error={formik.touched.firstName && Boolean(formik.errors.firstName)}
                   helperText={formik.touched.firstName && formik.errors.firstName}
-                  onChange={formik.handleChange}
+                  onChange={handleNameChange}
                   onBlur={formik.handleBlur}
                 />
                 <StyledTextField
@@ -203,7 +212,7 @@ const Register = () => {
                   value={formik.values.lastName}
                   error={formik.touched.lastName && Boolean(formik.errors.lastName)}
                   helperText={formik.touched.lastName && formik.errors.lastName}
-                  onChange={formik.handleChange}
+                  onChange={handleNameChange}
                   onBlur={formik.handleBlur}
                 />
                 <StyledTextField
@@ -252,6 +261,51 @@ const Register = () => {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
+
+                {/* Campos adicionales para Factoring */}
+                {formik.values.roleType === "FACTORING_ADMIN" && (
+                  <>
+                    <StyledTextField
+                      fullWidth
+                      variant="outlined"
+                      label="RUT de Factoring"
+                      placeholder="12.345.678-9"
+                      id="factoringRut"
+                      name="factoringRut"
+                      disabled={loading}
+                      value={formik.values.factoringRut || ""}
+                      error={
+                        formik.touched.factoringRut &&
+                        Boolean(formik.errors.factoringRut)
+                      }
+                      helperText={
+                        formik.touched.factoringRut && formik.errors.factoringRut
+                      }
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                    />
+                    <StyledTextField
+                      fullWidth
+                      variant="outlined"
+                      label="Razón Social"
+                      placeholder="Nombre de la empresa"
+                      id="factoringRazonSocial"
+                      name="factoringRazonSocial"
+                      disabled={loading}
+                      value={formik.values.factoringRazonSocial || ""}
+                      error={
+                        formik.touched.factoringRazonSocial &&
+                        Boolean(formik.errors.factoringRazonSocial)
+                      }
+                      helperText={
+                        formik.touched.factoringRazonSocial &&
+                        formik.errors.factoringRazonSocial
+                      }
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                    />
+                  </>
+                )}
 
                 <StyledTextField
                   fullWidth

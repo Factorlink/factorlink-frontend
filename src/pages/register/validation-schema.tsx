@@ -48,12 +48,14 @@ export const validationSchema = yup.object({
   firstName: yup
     .string()
     .trim()
+    .matches(/^[^\d]*$/, "El nombre no puede contener números")
     .min(2, "El nombre debe tener al menos 2 caracteres")
     .max(50, "El nombre no puede exceder 50 caracteres")
     .required("El nombre es obligatorio"),
   lastName: yup
     .string()
     .trim()
+    .matches(/^[^\d]*$/, "El apellido no puede contener números")
     .min(2, "El apellido debe tener al menos 2 caracteres")
     .max(50, "El apellido no puede exceder 50 caracteres")
     .required("El apellido es obligatorio"),
@@ -97,4 +99,34 @@ export const validationSchema = yup.object({
     .boolean()
     .oneOf([true], "Debe aceptar los términos y condiciones")
     .required("Debe aceptar los términos y condiciones"),
+  factoringRut: yup
+    .string()
+    .trim()
+    .when("roleType", {
+      is: "FACTORING_ADMIN",
+      then: (schema) =>
+        schema
+          .required("El RUT de Factoring es obligatorio")
+          .matches(
+            /^(\d{1,3}(?:\.\d{3}){2}-[\dkK])|(\d{7,8}-[\dkK])$/,
+            "Formato de RUT inválido (ej: 12.345.678-9 o 12345678-9)"
+          )
+          .test("rut-verifier", "El RUT ingresado no es válido", (value) => {
+            if (!value) return false;
+            return validateRutVerifier(value);
+          }),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  factoringRazonSocial: yup
+    .string()
+    .trim()
+    .when("roleType", {
+      is: "FACTORING_ADMIN",
+      then: (schema) =>
+        schema
+          .required("La Razón Social es obligatoria")
+          .min(2, "La Razón Social debe tener al menos 2 caracteres")
+          .max(100, "La Razón Social no puede exceder 100 caracteres"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
 });
