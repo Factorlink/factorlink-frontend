@@ -1,4 +1,9 @@
 import * as yup from "yup";
+import {
+  firstNameValidation,
+  lastNameValidation,
+  phoneValidation,
+} from "../../utils/validations/shared-fields";
 
 const validateRutVerifier = (rut: string): boolean => {
   // Limpiar el RUT de puntos y guiones
@@ -45,20 +50,8 @@ export const validationSchema = yup.object({
       "El tipo de entidad debe ser Empresa o Factoring"
     )
     .required("El tipo de entidad es obligatorio"),
-  firstName: yup
-    .string()
-    .trim()
-    .matches(/^[^\d]*$/, "El nombre no puede contener números")
-    .min(2, "El nombre debe tener al menos 2 caracteres")
-    .max(50, "El nombre no puede exceder 50 caracteres")
-    .required("El nombre es obligatorio"),
-  lastName: yup
-    .string()
-    .trim()
-    .matches(/^[^\d]*$/, "El apellido no puede contener números")
-    .min(2, "El apellido debe tener al menos 2 caracteres")
-    .max(50, "El apellido no puede exceder 50 caracteres")
-    .required("El apellido es obligatorio"),
+  firstName: firstNameValidation,
+  lastName: lastNameValidation,
   rut: yup
     .string()
     .trim()
@@ -77,14 +70,7 @@ export const validationSchema = yup.object({
     .lowercase()
     .email("Email inválido")
     .required("El email es obligatorio"),
-  phone: yup
-    .string()
-    .trim()
-    .required("El teléfono es obligatorio")
-    .matches(
-      /^\+?[1-9]\d{1,14}$/,
-      "El teléfono debe tener un formato válido ejemplo: +56999650987"
-    ),
+  phone: phoneValidation,
   password: yup
     .string()
     .required("La contraseña es obligatoria")

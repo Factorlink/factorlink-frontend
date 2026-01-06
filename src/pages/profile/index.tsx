@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
-import * as Yup from "yup";
 import { useUser } from "../../hooks/useUser";
 import useAuthStore from "../../store/authStore";
+import {
+  profileFieldsSchema,
+  handleNameInputChange,
+  handlePhoneInputChange,
+} from "../../utils/validations/shared-fields";
 
 import {
   Box,
@@ -27,20 +31,6 @@ interface ProfileFormData {
   lastName: string;
   phone: string;
 }
-
-const validationSchema = Yup.object({
-  firstName: Yup.string()
-    .required("El nombre es obligatorio")
-    .min(2, "El nombre debe tener al menos 2 caracteres")
-    .max(50, "El nombre no puede tener más de 50 caracteres"),
-  lastName: Yup.string()
-    .required("El apellido es obligatorio")
-    .min(2, "El apellido debe tener al menos 2 caracteres")
-    .max(50, "El apellido no puede tener más de 50 caracteres"),
-  phone: Yup.string()
-    .required("El teléfono es obligatorio")
-    .matches(/^\+?[0-9]{9,15}$/, "Ingresa un teléfono válido"),
-});
 
 const Profile = () => {
   const theme = useTheme();
@@ -96,12 +86,21 @@ const Profile = () => {
       lastName: user?.lastName || "",
       phone: user?.phone || "",
     },
-    validationSchema,
+    validationSchema: profileFieldsSchema,
     onSubmit: (values) => {
       handleUpdateProfile(values);
     },
     enableReinitialize: true,
   });
+
+  // Handlers compartidos para filtrado de input
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleNameInputChange(e, formik.setFieldValue);
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handlePhoneInputChange(e, formik.setFieldValue);
+  };
 
   return (
     <Box
@@ -199,7 +198,7 @@ const Profile = () => {
                   value={formik.values.firstName}
                   error={formik.touched.firstName && Boolean(formik.errors.firstName)}
                   helperText={formik.touched.firstName && formik.errors.firstName}
-                  onChange={formik.handleChange}
+                  onChange={handleNameChange}
                   onBlur={formik.handleBlur}
                 />
                 <StyledTextField
@@ -213,7 +212,7 @@ const Profile = () => {
                   value={formik.values.lastName}
                   error={formik.touched.lastName && Boolean(formik.errors.lastName)}
                   helperText={formik.touched.lastName && formik.errors.lastName}
-                  onChange={formik.handleChange}
+                  onChange={handleNameChange}
                   onBlur={formik.handleBlur}
                 />
 
@@ -229,7 +228,7 @@ const Profile = () => {
                   value={formik.values.phone}
                   error={formik.touched.phone && Boolean(formik.errors.phone)}
                   helperText={formik.touched.phone && formik.errors.phone}
-                  onChange={formik.handleChange}
+                  onChange={handlePhoneChange}
                   onBlur={formik.handleBlur}
                 />
 
