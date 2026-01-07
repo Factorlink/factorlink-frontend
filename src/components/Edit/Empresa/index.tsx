@@ -122,6 +122,7 @@ const Empresa = () => {
         handleCreateEmpresa(values);
       }
     },
+    enableReinitialize: true,
   });
 
   return (
@@ -265,54 +266,100 @@ const Empresa = () => {
       <Dialog
         open={modalOpen}
         onClose={handleCloseModal}
+        disableEscapeKeyDown
+        aria-labelledby="empresa-modal-title"
+        aria-describedby="empresa-modal-description"
         PaperProps={{
           sx: {
             borderRadius: 3,
-            padding: 2,
-            minWidth: 300,
+            minWidth: 360,
+            overflow: "hidden",
           },
         }}
       >
         <DialogTitle
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            color: modalStatus === "success" ? "success.main" : "error.main",
-          }}
+          id="empresa-modal-title"
+          sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}
         >
-          {modalStatus === "success" ? (
-            <CheckCircleOutlineIcon />
-          ) : (
-            <ErrorOutlineIcon />
-          )}
-          {modalStatus === "success"
-            ? "¡Empresa creada!"
-            : "Error al crear empresa"}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+          >
+            {modalStatus === "success" ? (
+              <CheckCircleOutlineIcon
+                sx={{ fontSize: 64, color: "success.main", display: "block" }}
+              />
+            ) : (
+              <ErrorOutlineIcon
+                sx={{ fontSize: 64, color: "error.main", display: "block" }}
+              />
+            )}
+            <Typography variant="h5" fontWeight={600} component="span">
+              {modalStatus === "success"
+                ? currentRole?.empresa?.id
+                  ? "¡Empresa actualizada!"
+                  : "¡Empresa creada!"
+                : "Error al guardar"}
+            </Typography>
+          </Box>
         </DialogTitle>
-        <DialogContent>
-          <Typography>
+
+        <DialogContent sx={{ textAlign: "center", px: 3, pt: 0, pb: 0 }}>
+          <Typography
+            id="empresa-modal-description"
+            variant="body1"
+            color="text.secondary"
+          >
             {modalStatus === "success"
-              ? "La empresa ha sido registrada correctamente."
+              ? currentRole?.empresa?.id
+                ? "La información de la empresa ha sido actualizada correctamente."
+                : "La empresa ha sido registrada correctamente."
               : errorMessage}
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleContinue}
-            variant="contained"
-            sx={{
-              backgroundColor:
-                modalStatus === "success" ? "success.main" : "primary.main",
-              textTransform: "none",
-              "&:hover": {
-                backgroundColor:
-                  modalStatus === "success" ? "success.dark" : "primary.dark",
-              },
-            }}
-          >
-            Continuar
-          </Button>
+
+        <DialogActions sx={{ justifyContent: "center", px: 3, pt: 2, pb: 3 }}>
+          {modalStatus === "success" ? (
+            <Button
+              variant="contained"
+              onClick={handleContinue}
+              sx={{
+                backgroundColor: "success.main",
+                color: "common.white",
+                textTransform: "none",
+                px: 4,
+                py: 1,
+                borderRadius: 2,
+                "&:hover": {
+                  backgroundColor: "success.dark",
+                },
+              }}
+            >
+              Continuar
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={handleCloseModal}
+              sx={{
+                backgroundColor: "error.main",
+                color: "common.white",
+                textTransform: "none",
+                px: 4,
+                py: 1,
+                borderRadius: 2,
+                "&:hover": {
+                  backgroundColor: "error.dark",
+                },
+              }}
+            >
+              Cerrar
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </Container>
