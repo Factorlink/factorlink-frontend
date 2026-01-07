@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useFormik } from "formik";
-import { useNavigate } from "react-router-dom";
 import { useUser } from "../../../hooks/useUser";
 import useAuthStore from "../../../store/authStore";
 import {
@@ -31,7 +30,6 @@ interface ProfileFormData {
 }
 
 const Profile = () => {
-  const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">(
     "success"
@@ -194,14 +192,13 @@ const Profile = () => {
                 <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                   <Button
                     variant="contained"
-                    fullWidth
-                    onClick={() => navigate("/dashboard")}
-                    disabled={loading}
+                    onClick={() => formik.resetForm()}
+                    disabled={loading || !formik.dirty}
                     sx={{
                       backgroundColor: "secondary.main",
                       color: "white",
                       textTransform: "none",
-                      padding: "12px",
+                      padding: "12px 24px",
                       fontSize: "1rem",
                       fontWeight: 500,
                       borderRadius: 2,
@@ -212,12 +209,11 @@ const Profile = () => {
                       },
                     }}
                   >
-                    Volver al dashboard
+                    Cancelar
                   </Button>
 
                   <Button
                     variant="contained"
-                    fullWidth
                     type="submit"
                     onClick={() => formik.handleSubmit()}
                     disabled={!formik.isValid || !formik.dirty || loading}
@@ -225,7 +221,7 @@ const Profile = () => {
                       backgroundColor: "success.main",
                       color: "white",
                       textTransform: "none",
-                      padding: "12px",
+                      padding: "12px 24px",
                       fontSize: "1rem",
                       fontWeight: 500,
                       borderRadius: 2,
