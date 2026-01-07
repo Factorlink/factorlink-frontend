@@ -8,4 +8,7 @@ export interface RegisterFormData {
   confirmPassword: string;
   termsConditions: boolean;
   roleType: string;
+  factoringRut?: string;
+  factoringRazonSocial?: string;
+  factoringDireccion?: string;
 }

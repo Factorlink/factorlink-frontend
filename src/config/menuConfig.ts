@@ -17,6 +17,7 @@ export interface MenuItem {
 }
 
 const ALL_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN, ROLES.DEFAULT];
+const ADMIN_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN];
 
 export const mainMenuItems: MenuItem[] = [
   {
@@ -35,7 +36,7 @@ export const mainMenuItems: MenuItem[] = [
     text: "Operaciones",
     icon: SwapHoriz,
     path: "/operaciones",
-    roles: [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN],
+    roles: ADMIN_ROLES,
   },
   {
     text: "Riesgo / Scoring",
@@ -50,7 +51,7 @@ export const bottomMenuItems: MenuItem[] = [
     text: "Configuración",
     icon: Settings,
     path: "/configuracion",
-    roles: [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN],
+    roles: ADMIN_ROLES,
   },
   {
     text: "Logout",
