@@ -113,8 +113,12 @@ const Register = () => {
       value = '+' + value.replace(/\+/g, '');
     }
     
-    // Si el usuario empieza a escribir sin +56, agregarlo automáticamente
-    if (value && !value.startsWith('+')) {
+    // Validar que el código de país sea +56
+    if (value.startsWith('+') && !value.startsWith('+56')) {
+      // Si empieza con otro código, limpiar y forzar +56
+      value = '+56' + value.replace(/^\+\d*/, '');
+    } else if (value && !value.startsWith('+')) {
+      // Si el usuario empieza a escribir sin +56, agregarlo automáticamente
       value = '+56' + value;
     }
     
@@ -124,6 +128,13 @@ const Register = () => {
     }
     
     formik.setFieldValue('phone', value);
+    
+    // Mostrar mensaje de error si el campo está tocado y no empieza con +56
+    if (formik.touched.phone && !value.startsWith('+56')) {
+      formik.setFieldError('phone', 'El número debe comenzar con el código de país +56');
+    } else if (formik.touched.phone && value.startsWith('+56')) {
+      formik.setFieldError('phone', undefined);
+    }
   };
 
   return (
