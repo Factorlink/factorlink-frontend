@@ -212,7 +212,7 @@ const Login = () => {
                     flex: 1,
                   }}
                 >
-                  Ingresa tu rut y contraseña para iniciar sesión
+                  Ingresa tu correo o email y contraseña para iniciar sesión
                 </Typography>
               </Box>
 

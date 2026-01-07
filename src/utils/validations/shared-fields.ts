@@ -1,5 +1,48 @@
 import * as yup from "yup";
 
+// Función de validación del dígito verificador del RUT chileno
+export const validateRutVerifier = (rut: string): boolean => {
+  const cleanRut = rut.replace(/\./g, "").replace(/-/g, "");
+  if (cleanRut.length < 2) return false;
+
+  const body = cleanRut.slice(0, -1);
+  const verifier = cleanRut.slice(-1).toUpperCase();
+
+  if (!/^\d+$/.test(body)) return false;
+
+  let sum = 0;
+  let multiplier = 2;
+
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i], 10) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+
+  const remainder = sum % 11;
+  const calculatedVerifier = 11 - remainder;
+
+  let expectedVerifier: string;
+  if (calculatedVerifier === 11) expectedVerifier = "0";
+  else if (calculatedVerifier === 10) expectedVerifier = "K";
+  else expectedVerifier = calculatedVerifier.toString();
+
+  return verifier === expectedVerifier;
+};
+
+// Regex para formato RUT chileno
+export const RUT_REGEX = /^(\d{1,3}(?:\.\d{3}){2}-[\dkK])|(\d{7,8}-[\dkK])$/;
+
+// Validación de RUT requerido
+export const rutValidation = yup
+  .string()
+  .trim()
+  .required("El RUT es obligatorio")
+  .matches(RUT_REGEX, "Formato de RUT inválido (ej: 12.345.678-9)")
+  .test("rut-verifier", "El RUT ingresado no es válido", (value) => {
+    if (!value) return false;
+    return validateRutVerifier(value);
+  });
+
 // Validaciones de campos compartidos
 export const firstNameValidation = yup
   .string()

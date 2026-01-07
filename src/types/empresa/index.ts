@@ -1,9 +1,14 @@
 export interface Empresa {
-  rut: string;
-  razonSocial: string;
-  giro: string;
+  createdAt?: string;
   direccion?: string;
-  siiRut?: string;
+  estadoEnrolamiento?: string;
+  giro: string;
+  id?: string;
+  isActive?: boolean;
+  nivel?: string;
+  razonSocial: string;
+  rut: string;
   siiPassword?: string;
+  siiRut?: string;
   siiSyncEnabled?: boolean;
 }

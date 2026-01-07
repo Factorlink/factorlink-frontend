@@ -67,11 +67,11 @@ const Profile = () => {
 
   const handleEditProfile = () => {
     handleClose();
-    navigate("/profile");
+    navigate("/edit");
   };
 
   const menuItems = [
-    { icon: <Edit fontSize="small" />, text: "Editar Perfil", action: handleEditProfile },
+    { icon: <Edit fontSize="small" />, text: "Editar Información", action: handleEditProfile },
     { icon: <Person fontSize="small" />, text: "Suite Factoring", action: handleClose },
     { icon: <Business fontSize="small" />, text: "Suite Empresa", action: handleClose },
     { icon: <SwapHoriz fontSize="small" />, text: "Cambiar Empresa", action: handleClose },

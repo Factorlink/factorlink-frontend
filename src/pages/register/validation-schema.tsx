@@ -3,43 +3,10 @@ import {
   firstNameValidation,
   lastNameValidation,
   phoneValidation,
+  rutValidation,
+  validateRutVerifier,
+  RUT_REGEX,
 } from "../../utils/validations/shared-fields";
-
-const validateRutVerifier = (rut: string): boolean => {
-  // Limpiar el RUT de puntos y guiones
-  const cleanRut = rut.replace(/\./g, "").replace(/-/g, "");
-
-  if (cleanRut.length < 2) return false;
-
-  const body = cleanRut.slice(0, -1);
-  const verifier = cleanRut.slice(-1).toUpperCase();
-
-  // Validar que el cuerpo sean solo números
-  if (!/^\d+$/.test(body)) return false;
-
-  // Calcular dígito verificador usando módulo 11
-  let sum = 0;
-  let multiplier = 2;
-
-  for (let i = body.length - 1; i >= 0; i--) {
-    sum += parseInt(body[i], 10) * multiplier;
-    multiplier = multiplier === 7 ? 2 : multiplier + 1;
-  }
-
-  const remainder = sum % 11;
-  const calculatedVerifier = 11 - remainder;
-
-  let expectedVerifier: string;
-  if (calculatedVerifier === 11) {
-    expectedVerifier = "0";
-  } else if (calculatedVerifier === 10) {
-    expectedVerifier = "K";
-  } else {
-    expectedVerifier = calculatedVerifier.toString();
-  }
-
-  return verifier === expectedVerifier;
-};
 
 export const validationSchema = yup.object({
   roleType: yup
@@ -52,18 +19,7 @@ export const validationSchema = yup.object({
     .required("El tipo de entidad es obligatorio"),
   firstName: firstNameValidation,
   lastName: lastNameValidation,
-  rut: yup
-    .string()
-    .trim()
-    .required("El RUT es obligatorio")
-    .matches(
-      /^(\d{1,3}(?:\.\d{3}){2}-[\dkK])|(\d{7,8}-[\dkK])$/,
-      "Formato de RUT inválido (ej: 12.345.678-9 o 12345678-9)"
-    )
-    .test("rut-verifier", "El RUT ingresado no es válido", (value) => {
-      if (!value) return false;
-      return validateRutVerifier(value);
-    }),
+  rut: rutValidation,
   email: yup
     .string()
     .trim()
@@ -93,10 +49,7 @@ export const validationSchema = yup.object({
       then: (schema) =>
         schema
           .required("El RUT de Factoring es obligatorio")
-          .matches(
-            /^(\d{1,3}(?:\.\d{3}){2}-[\dkK])|(\d{7,8}-[\dkK])$/,
-            "Formato de RUT inválido (ej: 12.345.678-9 o 12345678-9)"
-          )
+          .matches(RUT_REGEX, "Formato de RUT inválido (ej: 12.345.678-9)")
           .test("rut-verifier", "El RUT ingresado no es válido", (value) => {
             if (!value) return false;
             return validateRutVerifier(value);
