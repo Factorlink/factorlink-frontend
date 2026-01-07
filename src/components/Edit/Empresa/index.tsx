@@ -32,12 +32,14 @@ const Empresa = () => {
     "success"
   );
   const [errorMessage, setErrorMessage] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   const { currentRole } = useAuthStore();
 
   const { createEmpresa, updateEmpresa, loading } = useEmpresa();
 
   const handleCreateEmpresa = async (values: EmpresaFormData) => {
+    setIsEditing(false);
     try {
       const response = await createEmpresa({
         rut: values.rut.trim(),
@@ -67,6 +69,7 @@ const Empresa = () => {
   };
 
   const handleUpdateEmpresa = async (values: EmpresaFormData) => {
+    setIsEditing(true);
     try {
       const response = await updateEmpresa(currentRole?.empresa?.id || "", {
         rut: values.rut.trim(),
@@ -88,7 +91,7 @@ const Empresa = () => {
       };
       setErrorMessage(
         axiosError?.response?.data?.message?.[0] ||
-          "Ocurrió un error al crear la empresa"
+          "Ocurrió un error al actualizar la empresa"
       );
       setModalStatus("error");
       setModalOpen(true);
@@ -300,10 +303,12 @@ const Empresa = () => {
             )}
             <Typography variant="h5" fontWeight={600} component="span">
               {modalStatus === "success"
-                ? currentRole?.empresa?.id
+                ? isEditing
                   ? "¡Empresa actualizada!"
                   : "¡Empresa creada!"
-                : "Error al guardar"}
+                : isEditing
+                  ? "Error al actualizar"
+                  : "Error al crear"}
             </Typography>
           </Box>
         </DialogTitle>
@@ -315,7 +320,7 @@ const Empresa = () => {
             color="text.secondary"
           >
             {modalStatus === "success"
-              ? currentRole?.empresa?.id
+              ? isEditing
                 ? "La información de la empresa ha sido actualizada correctamente."
                 : "La empresa ha sido registrada correctamente."
               : errorMessage}
