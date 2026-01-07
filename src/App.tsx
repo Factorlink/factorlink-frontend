@@ -9,7 +9,7 @@ import ResetPassword from "./pages/reset-password";
 import Dashboard from "./pages/dashboard";
 import Facturas from "./pages/facturas";
 import Operaciones from "./pages/operaciones";
-import Profile from "./pages/profile";
+import Edit from "./pages/edit";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -51,10 +51,10 @@ function App() {
             }
           />
           <Route
-            path="/profile"
+            path="/edit"
             element={
               <ProtectedRoute>
-                <Profile />
+                <Edit />
               </ProtectedRoute>
             }
           />
