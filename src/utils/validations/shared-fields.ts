@@ -1,5 +1,25 @@
 import * as yup from "yup";
 
+// Regex para caracteres especiales permitidos en contraseñas
+export const SPECIAL_CHARS_REGEX = /[!@#$%^&*(),.?":{}|<>]/;
+
+// Validación de contraseña robusta (para crear/cambiar contraseña)
+export const passwordValidation = yup
+  .string()
+  .required("La contraseña es obligatoria")
+  .min(8, "La contraseña debe tener al menos 8 caracteres")
+  .max(128, "La contraseña no puede exceder 128 caracteres")
+  .matches(/[A-Z]/, "La contraseña debe contener al menos una mayúscula")
+  .matches(/[a-z]/, "La contraseña debe contener al menos una minúscula")
+  .matches(/[0-9]/, "La contraseña debe contener al menos un número")
+  .matches(SPECIAL_CHARS_REGEX, "La contraseña debe contener al menos un carácter especial (!@#$%^&*(),.?\":{}|<>)");
+
+// Validación de confirmar contraseña
+export const confirmPasswordValidation = yup
+  .string()
+  .required("Confirmar contraseña es obligatorio")
+  .oneOf([yup.ref("password")], "Las contraseñas deben coincidir");
+
 // Función de validación del dígito verificador del RUT chileno
 export const validateRutVerifier = (rut: string): boolean => {
   const cleanRut = rut.replace(/\./g, "").replace(/-/g, "");
@@ -47,7 +67,7 @@ export const rutValidation = yup
 export const firstNameValidation = yup
   .string()
   .trim()
-  .matches(/^[^\d]*$/, "El nombre no puede contener números")
+  .matches(/^[A-Za-zÀ-ÿ\s]+$/, "El nombre solo puede contener letras y espacios")
   .min(2, "El nombre debe tener al menos 2 caracteres")
   .max(50, "El nombre no puede exceder 50 caracteres")
   .required("El nombre es obligatorio");
@@ -55,7 +75,7 @@ export const firstNameValidation = yup
 export const lastNameValidation = yup
   .string()
   .trim()
-  .matches(/^[^\d]*$/, "El apellido no puede contener números")
+  .matches(/^[A-Za-zÀ-ÿ\s]+$/, "El apellido solo puede contener letras y espacios")
   .min(2, "El apellido debe tener al menos 2 caracteres")
   .max(50, "El apellido no puede exceder 50 caracteres")
   .required("El apellido es obligatorio");
@@ -84,7 +104,18 @@ export const handleNameInputChange = (
   setFieldValue: (field: string, value: string) => void
 ) => {
   const { name, value } = e.target;
-  const filteredValue = value.replace(/\d/g, "");
+  const filteredValue = value.replace(/[^A-Za-zÀ-ÿ\s]/g, "");
+  setFieldValue(name, filteredValue);
+};
+
+// Handler para filtrar caracteres en campos de RUT
+// Solo permite: números (0-9), puntos (.), guión (-) y la letra K/k
+export const handleRutInputChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  setFieldValue: (field: string, value: string) => void
+) => {
+  const { name, value } = e.target;
+  const filteredValue = value.replace(/[^0-9.\-kK]/g, "");
   setFieldValue(name, filteredValue);
 };
 
@@ -109,7 +140,7 @@ export const handlePhoneInputChange = (
 
   // Si el usuario empieza a escribir sin +56, agregarlo automáticamente
   if (value && !value.startsWith("+")) {
-    value = "+56" + value;
+    value = "+569" + value;
   }
 
   // Limitar a 12 caracteres (+56 + 9 dígitos)

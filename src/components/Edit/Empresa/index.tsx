@@ -16,6 +16,7 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { useEmpresa } from "../../../hooks/useEmpresa";
 import { StyledTextField } from "../../../pages/register/styles";
 import { empresaFieldsSchema } from "../../../utils/validations/empresa-fields";
+import { handleRutInputChange } from "../../../utils/validations/shared-fields";
 import useAuthStore from "../../../store/authStore";
 import type { Role } from "../../../types/role";
 
@@ -110,6 +111,10 @@ const Empresa = () => {
     setModalOpen(false);
   };
 
+  const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleRutInputChange(e, formik.setFieldValue);
+  };
+
   const formik = useFormik<EmpresaFormData>({
     initialValues: {
       rut: currentRole?.empresa?.rut || "",
@@ -163,7 +168,7 @@ const Empresa = () => {
               value={formik.values.rut}
               error={formik.touched.rut && Boolean(formik.errors.rut)}
               helperText={formik.touched.rut && formik.errors.rut}
-              onChange={formik.handleChange}
+              onChange={handleRutChange}
               onBlur={formik.handleBlur}
               disabled={loading}
             />
