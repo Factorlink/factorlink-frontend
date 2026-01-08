@@ -33,6 +33,7 @@ import logo from "../../assets/png/factorlink-logo.png";
 import {
   handlePhoneInputChange,
   handleNameInputChange,
+  handleRutInputChange,
 } from "../../utils/validations/shared-fields";
 
 const Register = () => {
@@ -108,6 +109,10 @@ const Register = () => {
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handlePhoneInputChange(e, formik.setFieldValue);
+  };
+
+  const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleRutInputChange(e, formik.setFieldValue);
   };
 
   return (
@@ -249,11 +254,12 @@ const Register = () => {
                   placeholder="12.345.678-9"
                   id="rut"
                   name="rut"
+                  inputProps={{ maxLength: 20 }}
                   disabled={loading}
                   value={formik.values.rut}
                   error={formik.touched.rut && Boolean(formik.errors.rut)}
                   helperText={formik.touched.rut && formik.errors.rut}
-                  onChange={formik.handleChange}
+                  onChange={handleRutChange}
                   onBlur={formik.handleBlur}
                 />
 
@@ -266,6 +272,7 @@ const Register = () => {
                   name="email"
                   type="email"
                   disabled={loading}
+                  inputProps={{ maxLength: 100 }}
                   value={formik.values.email}
                   error={formik.touched.email && Boolean(formik.errors.email)}
                   helperText={formik.touched.email && formik.errors.email}
@@ -309,7 +316,7 @@ const Register = () => {
                         formik.touched.factoringRut &&
                         formik.errors.factoringRut
                       }
-                      onChange={formik.handleChange}
+                      onChange={handleRutChange}
                       onBlur={formik.handleBlur}
                     />
                     <StyledTextField
@@ -320,6 +327,7 @@ const Register = () => {
                       id="factoringRazonSocial"
                       name="factoringRazonSocial"
                       disabled={loading}
+                      inputProps={{ maxLength: 100 }}
                       value={formik.values.factoringRazonSocial || ""}
                       error={
                         formik.touched.factoringRazonSocial &&
@@ -343,6 +351,7 @@ const Register = () => {
                   placeholder="Mínimo 8 caracteres"
                   id="password"
                   name="password"
+                  inputProps={{ maxLength: 100 }}
                   disabled={loading}
                   value={formik.values.password}
                   error={
@@ -375,6 +384,7 @@ const Register = () => {
                   placeholder="Repite tu contraseña"
                   id="confirmPassword"
                   name="confirmPassword"
+                  inputProps={{ maxLength: 100 }}
                   disabled={loading}
                   value={formik.values.confirmPassword}
                   error={

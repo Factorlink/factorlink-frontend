@@ -24,19 +24,14 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { StyledTextField } from "../register/styles";
 import logo from "../../assets/png/factorlink-logo.png";
 import { useAuth } from "../../hooks/useAuth";
+import {
+  passwordValidation,
+  confirmPasswordValidation,
+} from "../../utils/validations/shared-fields";
 
 const validationSchema = Yup.object({
-  password: Yup.string()
-    .trim()
-    .min(8, "La contraseña debe tener al menos 8 caracteres")
-    .matches(/[A-Z]/, "Debe contener al menos una mayúscula")
-    .matches(/[a-z]/, "Debe contener al menos una minúscula")
-    .matches(/[0-9]/, "Debe contener al menos un número")
-    .matches(/[!@#$%^&*(),.?":{}|<>]/, "Debe contener al menos un carácter especial")
-    .required("La contraseña es requerida"),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
-    .required("Confirma tu contraseña"),
+  password: passwordValidation,
+  confirmPassword: confirmPasswordValidation,
 });
 
 const ResetPassword = () => {

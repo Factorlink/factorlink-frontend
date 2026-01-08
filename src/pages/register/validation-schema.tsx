@@ -6,6 +6,8 @@ import {
   rutValidation,
   validateRutVerifier,
   RUT_REGEX,
+  passwordValidation,
+  confirmPasswordValidation,
 } from "../../utils/validations/shared-fields";
 
 export const validationSchema = yup.object({
@@ -27,16 +29,8 @@ export const validationSchema = yup.object({
     .email("Email inválido")
     .required("El email es obligatorio"),
   phone: phoneValidation,
-  password: yup
-    .string()
-    .required("La contraseña es obligatoria")
-    .min(8, "La contraseña debe tener al menos 8 caracteres")
-    .matches(/[A-Z]/, "La contraseña debe contener al menos una mayúscula")
-    .matches(/[0-9]/, "La contraseña debe contener al menos un número"),
-  confirmPassword: yup
-    .string()
-    .required("Confirmar contraseña es obligatorio")
-    .oneOf([yup.ref("password")], "Las contraseñas deben coincidir"),
+  password: passwordValidation,
+  confirmPassword: confirmPasswordValidation,
   termsConditions: yup
     .boolean()
     .oneOf([true], "Debe aceptar los términos y condiciones")

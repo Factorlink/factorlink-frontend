@@ -1,5 +1,25 @@
 import * as yup from "yup";
 
+// Regex para caracteres especiales permitidos en contraseñas
+export const SPECIAL_CHARS_REGEX = /[!@#$%^&*(),.?":{}|<>]/;
+
+// Validación de contraseña robusta (para crear/cambiar contraseña)
+export const passwordValidation = yup
+  .string()
+  .required("La contraseña es obligatoria")
+  .min(8, "La contraseña debe tener al menos 8 caracteres")
+  .max(128, "La contraseña no puede exceder 128 caracteres")
+  .matches(/[A-Z]/, "La contraseña debe contener al menos una mayúscula")
+  .matches(/[a-z]/, "La contraseña debe contener al menos una minúscula")
+  .matches(/[0-9]/, "La contraseña debe contener al menos un número")
+  .matches(SPECIAL_CHARS_REGEX, "La contraseña debe contener al menos un carácter especial (!@#$%^&*(),.?\":{}|<>)");
+
+// Validación de confirmar contraseña
+export const confirmPasswordValidation = yup
+  .string()
+  .required("Confirmar contraseña es obligatorio")
+  .oneOf([yup.ref("password")], "Las contraseñas deben coincidir");
+
 // Función de validación del dígito verificador del RUT chileno
 export const validateRutVerifier = (rut: string): boolean => {
   const cleanRut = rut.replace(/\./g, "").replace(/-/g, "");
@@ -85,6 +105,17 @@ export const handleNameInputChange = (
 ) => {
   const { name, value } = e.target;
   const filteredValue = value.replace(/[^A-Za-zÀ-ÿ\s]/g, "");
+  setFieldValue(name, filteredValue);
+};
+
+// Handler para filtrar caracteres en campos de RUT
+// Solo permite: números (0-9), puntos (.), guión (-) y la letra K/k
+export const handleRutInputChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  setFieldValue: (field: string, value: string) => void
+) => {
+  const { name, value } = e.target;
+  const filteredValue = value.replace(/[^0-9.\-kK]/g, "");
   setFieldValue(name, filteredValue);
 };
 
