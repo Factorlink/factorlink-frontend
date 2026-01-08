@@ -35,7 +35,7 @@ const mapLoginError = (error: unknown): string => {
 
     switch (status) {
       case 401:
-        return "Email o contraseña incorrectos";
+        return axiosError.response?.data?.message || "Email o contraseña incorrectos";
       case 403:
         return "Tu cuenta se encuentra inactiva. Contacta al administrador";
       case 404:

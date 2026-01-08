@@ -30,12 +30,18 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { StyledTextField } from "./styles";
 import logo from "../../assets/png/factorlink-logo.png";
+import {
+  handlePhoneInputChange,
+  handleNameInputChange,
+} from "../../utils/validations/shared-fields";
 
 const Register = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
+  const [modalStatus, setModalStatus] = useState<"success" | "error">(
+    "success"
+  );
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,8 +69,13 @@ const Register = () => {
       useAuthStore.getState().setRefreshToken(response.refreshToken);
       useAuthStore.getState().setUser(response.user);
     } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      setErrorMessage(axiosError?.response?.data?.message || "Ocurrió un error, intenta nuevamente");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      setErrorMessage(
+        axiosError?.response?.data?.message ||
+          "Ocurrió un error, intenta nuevamente"
+      );
       setModalStatus("error");
       setModalOpen(true);
     }
@@ -92,49 +103,11 @@ const Register = () => {
 
   // Función para filtrar números del input
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    const filteredValue = value.replace(/\d/g, '');
-    formik.setFieldValue(name, filteredValue);
+    handleNameInputChange(e, formik.setFieldValue);
   };
 
-  // Función para formatear teléfono chileno
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
-    
-    // Solo permitir números y el signo +
-    value = value.replace(/[^\d+]/g, '');
-    
-    // Asegurar que el + solo esté al inicio
-    const plusCount = (value.match(/\+/g) || []).length;
-    if (plusCount > 1) {
-      value = '+' + value.replace(/\+/g, '');
-    }
-    if (value.includes('+') && !value.startsWith('+')) {
-      value = '+' + value.replace(/\+/g, '');
-    }
-    
-    // Validar que el código de país sea +56
-    if (value.startsWith('+') && !value.startsWith('+56')) {
-      // Si empieza con otro código, limpiar y forzar +56
-      value = '+56' + value.replace(/^\+\d*/, '');
-    } else if (value && !value.startsWith('+')) {
-      // Si el usuario empieza a escribir sin +56, agregarlo automáticamente
-      value = '+56' + value;
-    }
-    
-    // Limitar a 12 caracteres (+56 + 9 dígitos)
-    if (value.length > 12) {
-      value = value.slice(0, 12);
-    }
-    
-    formik.setFieldValue('phone', value);
-    
-    // Mostrar mensaje de error si el campo está tocado y no empieza con +56
-    if (formik.touched.phone && !value.startsWith('+56')) {
-      formik.setFieldError('phone', 'El número debe comenzar con el código de país +56');
-    } else if (formik.touched.phone && value.startsWith('+56')) {
-      formik.setFieldError('phone', undefined);
-    }
+    handlePhoneInputChange(e, formik.setFieldValue);
   };
 
   return (
@@ -203,7 +176,11 @@ const Register = () => {
                   gap: 1.5,
                 }}
               >
-                <img src={logo} alt="Factorlink Logo" style={{ maxWidth: 250 }} />
+                <img
+                  src={logo}
+                  alt="Factorlink Logo"
+                  style={{ maxWidth: 250 }}
+                />
               </Box>
             </Box>
 
@@ -219,7 +196,9 @@ const Register = () => {
                   id="roleType"
                   name="roleType"
                   disabled={loading}
-                  error={formik.touched.roleType && Boolean(formik.errors.roleType)}
+                  error={
+                    formik.touched.roleType && Boolean(formik.errors.roleType)
+                  }
                   helperText={formik.touched.roleType && formik.errors.roleType}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -234,10 +213,15 @@ const Register = () => {
                   placeholder="Nombre"
                   id="firstName"
                   name="firstName"
+                  inputProps={{ maxLength: 50 }}
                   disabled={loading}
                   value={formik.values.firstName}
-                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-                  helperText={formik.touched.firstName && formik.errors.firstName}
+                  error={
+                    formik.touched.firstName && Boolean(formik.errors.firstName)
+                  }
+                  helperText={
+                    formik.touched.firstName && formik.errors.firstName
+                  }
                   onChange={handleNameChange}
                   onBlur={formik.handleBlur}
                 />
@@ -248,9 +232,12 @@ const Register = () => {
                   placeholder="Apellido"
                   id="lastName"
                   name="lastName"
+                  inputProps={{ maxLength: 50 }}
                   disabled={loading}
                   value={formik.values.lastName}
-                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                  error={
+                    formik.touched.lastName && Boolean(formik.errors.lastName)
+                  }
                   helperText={formik.touched.lastName && formik.errors.lastName}
                   onChange={handleNameChange}
                   onBlur={formik.handleBlur}
@@ -319,7 +306,8 @@ const Register = () => {
                         Boolean(formik.errors.factoringRut)
                       }
                       helperText={
-                        formik.touched.factoringRut && formik.errors.factoringRut
+                        formik.touched.factoringRut &&
+                        formik.errors.factoringRut
                       }
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
@@ -357,7 +345,9 @@ const Register = () => {
                   name="password"
                   disabled={loading}
                   value={formik.values.password}
-                  error={formik.touched.password && Boolean(formik.errors.password)}
+                  error={
+                    formik.touched.password && Boolean(formik.errors.password)
+                  }
                   helperText={formik.touched.password && formik.errors.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -387,8 +377,14 @@ const Register = () => {
                   name="confirmPassword"
                   disabled={loading}
                   value={formik.values.confirmPassword}
-                  error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
-                  helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
+                  error={
+                    formik.touched.confirmPassword &&
+                    Boolean(formik.errors.confirmPassword)
+                  }
+                  helperText={
+                    formik.touched.confirmPassword &&
+                    formik.errors.confirmPassword
+                  }
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   InputProps={{
@@ -396,11 +392,17 @@ const Register = () => {
                       <InputAdornment position="end">
                         <IconButton
                           aria-label="toggle confirm password visibility"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                           edge="end"
                           disabled={loading}
                         >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                          {showConfirmPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -521,7 +523,10 @@ const Register = () => {
           },
         }}
       >
-        <DialogTitle id="register-modal-title" sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}>
+        <DialogTitle
+          id="register-modal-title"
+          sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}
+        >
           <Box
             sx={{
               display: "flex",
@@ -531,18 +536,28 @@ const Register = () => {
             }}
           >
             {modalStatus === "success" ? (
-              <CheckCircleOutlineIcon sx={{ fontSize: 64, color: "success.main", display: "block" }} />
+              <CheckCircleOutlineIcon
+                sx={{ fontSize: 64, color: "success.main", display: "block" }}
+              />
             ) : (
-              <ErrorOutlineIcon sx={{ fontSize: 64, color: "error.main", display: "block" }} />
+              <ErrorOutlineIcon
+                sx={{ fontSize: 64, color: "error.main", display: "block" }}
+              />
             )}
             <Typography variant="h5" fontWeight={600} component="span">
-              {modalStatus === "success" ? "¡Registro exitoso!" : "Error en el registro"}
+              {modalStatus === "success"
+                ? "¡Registro exitoso!"
+                : "Error en el registro"}
             </Typography>
           </Box>
         </DialogTitle>
 
         <DialogContent sx={{ textAlign: "center", px: 3, pt: 0, pb: 0 }}>
-          <Typography id="register-modal-description" variant="body1" color="text.secondary">
+          <Typography
+            id="register-modal-description"
+            variant="body1"
+            color="text.secondary"
+          >
             {modalStatus === "success"
               ? "Tu cuenta ha sido creada correctamente. Ya puedes acceder a todas las funcionalidades de la plataforma."
               : errorMessage}

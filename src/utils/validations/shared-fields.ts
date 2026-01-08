@@ -47,7 +47,7 @@ export const rutValidation = yup
 export const firstNameValidation = yup
   .string()
   .trim()
-  .matches(/^[^\d]*$/, "El nombre no puede contener números")
+  .matches(/^[A-Za-zÀ-ÿ\s]+$/, "El nombre solo puede contener letras y espacios")
   .min(2, "El nombre debe tener al menos 2 caracteres")
   .max(50, "El nombre no puede exceder 50 caracteres")
   .required("El nombre es obligatorio");
@@ -55,7 +55,7 @@ export const firstNameValidation = yup
 export const lastNameValidation = yup
   .string()
   .trim()
-  .matches(/^[^\d]*$/, "El apellido no puede contener números")
+  .matches(/^[A-Za-zÀ-ÿ\s]+$/, "El apellido solo puede contener letras y espacios")
   .min(2, "El apellido debe tener al menos 2 caracteres")
   .max(50, "El apellido no puede exceder 50 caracteres")
   .required("El apellido es obligatorio");
@@ -84,7 +84,7 @@ export const handleNameInputChange = (
   setFieldValue: (field: string, value: string) => void
 ) => {
   const { name, value } = e.target;
-  const filteredValue = value.replace(/\d/g, "");
+  const filteredValue = value.replace(/[^A-Za-zÀ-ÿ\s]/g, "");
   setFieldValue(name, filteredValue);
 };
 
@@ -109,7 +109,7 @@ export const handlePhoneInputChange = (
 
   // Si el usuario empieza a escribir sin +56, agregarlo automáticamente
   if (value && !value.startsWith("+")) {
-    value = "+56" + value;
+    value = "+569" + value;
   }
 
   // Limitar a 12 caracteres (+56 + 9 dígitos)
