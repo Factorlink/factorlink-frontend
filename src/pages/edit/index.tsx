@@ -3,6 +3,7 @@ import { Box, Tabs, Tab } from "@mui/material";
 import Layout from "../../components/Layout";
 import Profile from "../../components/Edit/Profile";
 import Empresa from "../../components/Edit/Empresa";
+import Factoring from "../../components/Edit/Factoring";
 import useAuthStore from "../../store/authStore";
 
 interface TabPanelProps {
@@ -52,7 +53,7 @@ const Edit = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>
-          {/* Contenido de Factoring */}
+          <Factoring />
         </TabPanel>
       </Box>
     </Layout>

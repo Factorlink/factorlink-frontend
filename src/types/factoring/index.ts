@@ -1,10 +1,10 @@
-import { FACTORING_TYPES } from "../../utils/consts";
-
-export type FactoringType = keyof typeof FACTORING_TYPES;
 
 export interface Factoring {
+  createdAt?: string;
+  direccion?: string;
+  estadoEnrolamiento?: string;
   id?: string;
-  rut: string;
+  isActive?: boolean;
   razonSocial: string;
-  tipo: FactoringType;
+  rut: string;
 }

@@ -1,4 +1,5 @@
 import type { Empresa } from "../empresa";
+import type { Factoring } from "../factoring";
 
 export interface Role {
     contexto: string;
@@ -7,4 +8,5 @@ export interface Role {
     nivel: number;
     role: string;
     empresa?: Empresa;
+    factoring?: Factoring;
 }
