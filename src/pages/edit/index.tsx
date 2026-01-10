@@ -4,6 +4,9 @@ import Layout from "../../components/Layout";
 import Profile from "../../components/Edit/Profile";
 import Empresa from "../../components/Edit/Empresa";
 import Factoring from "../../components/Edit/Factoring";
+import DocumentosLegales from "../../components/Edit/DocumentosLegales";
+import { ROLES } from "../../utils/consts";
+
 import useAuthStore from "../../store/authStore";
 
 interface TabPanelProps {
@@ -41,6 +44,14 @@ const Edit = () => {
               label="Factoring"
               disabled={currentRole?.contexto !== "factoring"}
             />
+            <Tab
+              label="Documentos Legales"
+              disabled={![
+                ROLES.EMPRESA_ADMIN,
+                ROLES.SUPER_ADMIN,
+                ROLES.FACTORING_ADMIN,
+              ].includes(currentRole?.role || "")}
+            />
           </Tabs>
         </Box>
 
@@ -54,6 +65,9 @@ const Edit = () => {
 
         <TabPanel value={tabValue} index={2}>
           <Factoring />
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <DocumentosLegales />
         </TabPanel>
       </Box>
     </Layout>
