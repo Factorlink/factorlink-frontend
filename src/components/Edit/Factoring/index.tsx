@@ -23,6 +23,7 @@ import type { Role } from "../../../types/role";
 interface FactoringFormData {
   rut: string;
   razonSocial: string;
+  direccion: string;
 }
 
 const Factoring = () => {
@@ -43,34 +44,7 @@ const Factoring = () => {
       const response = await createFactoring({
         rut: values.rut.trim(),
         razonSocial: values.razonSocial.trim(),
-      });
-
-      useAuthStore.getState().setCurrentRole({
-        ...currentRole,
-        factoring: response,
-      } as Role);
-
-      setModalStatus("success");
-      setModalOpen(true);
-    } catch (error: unknown) {
-      const axiosError = error as {
-        response?: { data?: { message?: string } };
-      };
-      setErrorMessage(
-        axiosError?.response?.data?.message ||
-          "Ocurrió un error al crear el factoring"
-      );
-      setModalStatus("error");
-      setModalOpen(true);
-    }
-  };
-
-  const handleUpdateFactoring = async (values: FactoringFormData) => {
-    setIsEditing(true);
-    try {
-      const response = await updateFactoring(currentRole?.factoring?.id || "", {
-        rut: values.rut.trim(),
-        razonSocial: values.razonSocial.trim(),
+        direccion: values.direccion.trim(),
       });
 
       useAuthStore.getState().setCurrentRole({
@@ -86,6 +60,35 @@ const Factoring = () => {
       };
       setErrorMessage(
         axiosError?.response?.data?.message?.[0] ||
+          "Ocurrió un error al crear el factoring"
+      );
+      setModalStatus("error");
+      setModalOpen(true);
+    }
+  };
+
+  const handleUpdateFactoring = async (values: FactoringFormData) => {
+    setIsEditing(true);
+    try {
+      const response = await updateFactoring(currentRole?.factoring?.id || "", {
+        rut: values.rut.trim(),
+        razonSocial: values.razonSocial.trim(),
+        direccion: values.direccion.trim(),
+      });
+
+      useAuthStore.getState().setCurrentRole({
+        ...currentRole,
+        factoring: response,
+      } as Role);
+
+      setModalStatus("success");
+      setModalOpen(true);
+    } catch (error: unknown) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      setErrorMessage(
+        axiosError?.response?.data?.message ||
           "Ocurrió un error al actualizar el factoring"
       );
       setModalStatus("error");
@@ -113,6 +116,7 @@ const Factoring = () => {
     initialValues: {
       rut: currentRole?.factoring?.rut || "",
       razonSocial: currentRole?.factoring?.razonSocial || "",
+      direccion: currentRole?.factoring?.direccion || "",
     },
     validationSchema: factoringFieldsSchema,
     onSubmit: (values) => {
@@ -178,6 +182,20 @@ const Factoring = () => {
               helperText={
                 formik.touched.razonSocial && formik.errors.razonSocial
               }
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={loading}
+            />
+
+            <StyledTextField
+              fullWidth
+              label="Dirección"
+              placeholder="Av. Principal 123, Santiago"
+              name="direccion"
+              inputProps={{ maxLength: 200 }}
+              value={formik.values.direccion}
+              error={formik.touched.direccion && Boolean(formik.errors.direccion)}
+              helperText={formik.touched.direccion && formik.errors.direccion}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
