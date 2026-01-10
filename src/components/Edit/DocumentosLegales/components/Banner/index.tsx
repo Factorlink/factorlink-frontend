@@ -59,12 +59,12 @@ const Banner = () => {
               >
                 Nivel:
               </Typography>
-              <Typography
-                variant="subtitle1"
-                sx={{ fontWeight: 600, color: "text.primary" }}
-              >
-                {currentRole?.nivel || "Nivel no especificado"}
-              </Typography>
+              <Chip
+                label={currentRole?.nivel || "No especificado"}
+                color="primary"
+                variant="filled"
+                size="medium"
+              />
             </Box>
           </Box>
         </>
