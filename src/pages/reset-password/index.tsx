@@ -27,6 +27,7 @@ import { useAuth } from "../../hooks/useAuth";
 import {
   passwordValidation,
   confirmPasswordValidation,
+  handlePasswordInputChange,
 } from "../../utils/validations/shared-fields";
 
 const validationSchema = Yup.object({
@@ -103,6 +104,10 @@ const ResetPassword = () => {
       handleResetPassword(values);
     },
   });
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handlePasswordInputChange(e, formik.setFieldValue);
+  };
 
   // Si no hay token, mostrar mensaje de error
   if (!token) {
@@ -252,7 +257,7 @@ const ResetPassword = () => {
                   value={formik.values.password}
                   error={formik.touched.password && Boolean(formik.errors.password)}
                   helperText={formik.touched.password && formik.errors.password}
-                  onChange={formik.handleChange}
+                  onChange={handlePasswordChange}
                   onBlur={formik.handleBlur}
                   InputProps={{
                     endAdornment: (
@@ -281,7 +286,7 @@ const ResetPassword = () => {
                   value={formik.values.confirmPassword}
                   error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
                   helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
-                  onChange={formik.handleChange}
+                  onChange={handlePasswordChange}
                   onBlur={formik.handleBlur}
                   InputProps={{
                     endAdornment: (

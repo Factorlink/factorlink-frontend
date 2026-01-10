@@ -150,3 +150,12 @@ export const handlePhoneInputChange = (
 
   setFieldValue("phone", value);
 };
+
+export const handlePasswordInputChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  setFieldValue: (field: string, value: string) => void
+) => {
+  const { name, value } = e.target;
+  const filteredValue = value.replace(/\s+/g, "");
+  setFieldValue(name, filteredValue);
+};
