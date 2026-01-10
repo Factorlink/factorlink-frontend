@@ -34,6 +34,7 @@ import {
   handlePhoneInputChange,
   handleNameInputChange,
   handleRutInputChange,
+  handlePasswordInputChange,
 } from "../../utils/validations/shared-fields";
 
 const Register = () => {
@@ -46,7 +47,7 @@ const Register = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register, loading } = useAuth();
+  const { register, login, loading } = useAuth();
 
   const handleCloseModal = (
     _event?: unknown,
@@ -63,7 +64,16 @@ const Register = () => {
 
   const handleRegister = async (values: RegisterFormData) => {
     try {
-      const response = await register(values);
+      await register(values);
+      const response = await login({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (response.user.roles.length === 1) {
+          useAuthStore.getState().setCurrentRole(response.user.roles[0]);
+        } 
+
       setModalStatus("success");
       setModalOpen(true);
       useAuthStore.getState().setAccessToken(response.accessToken);
@@ -113,6 +123,10 @@ const Register = () => {
 
   const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleRutInputChange(e, formik.setFieldValue);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handlePasswordInputChange(e, formik.setFieldValue);
   };
 
   return (
@@ -358,7 +372,7 @@ const Register = () => {
                     formik.touched.password && Boolean(formik.errors.password)
                   }
                   helperText={formik.touched.password && formik.errors.password}
-                  onChange={formik.handleChange}
+                  onChange={handlePasswordChange}
                   onBlur={formik.handleBlur}
                   InputProps={{
                     endAdornment: (
@@ -395,7 +409,7 @@ const Register = () => {
                     formik.touched.confirmPassword &&
                     formik.errors.confirmPassword
                   }
-                  onChange={formik.handleChange}
+                  onChange={handlePasswordChange}
                   onBlur={formik.handleBlur}
                   InputProps={{
                     endAdornment: (
