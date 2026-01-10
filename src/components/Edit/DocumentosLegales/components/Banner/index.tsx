@@ -36,17 +36,12 @@ const Banner = () => {
   return (
     <Box sx={{ flex: 1 }}>
       {currentRole?.contexto === "empresa" && (
-        <Typography variant="body1" color="text.secondary">
-          Sección de documentos legales para empresa.
-        </Typography>
-      )}
-
-      {currentRole?.contexto === "factoring" && (
-        <Box>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Gestión de documentos legales del factoring.
-          </Typography>
-
+        <>
+          <Box>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+              Gestión de documentos legales del factoring.
+            </Typography>
+          </Box>
           <Box
             sx={{
               backgroundColor: "background.default",
@@ -54,6 +49,7 @@ const Banner = () => {
               p: 3,
               border: "1px solid",
               borderColor: "divider",
+              marginBottom: 3,
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -61,19 +57,52 @@ const Banner = () => {
                 variant="subtitle1"
                 sx={{ fontWeight: 600, color: "text.primary" }}
               >
-                Estado de Enrolamiento:
+                Nivel:
               </Typography>
-              <Chip
-                icon={statusConfig[enrollmentStatus].icon}
-                label={statusConfig[enrollmentStatus].label}
-                color={statusConfig[enrollmentStatus].color}
-                variant="filled"
-                size="medium"
-              />
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: 600, color: "text.primary" }}
+              >
+                {currentRole?.nivel || "Nivel no especificado"}
+              </Typography>
             </Box>
           </Box>
+        </>
+      )}
+
+      {currentRole?.contexto === "factoring" && (
+        <Box>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Gestión de documentos legales del factoring.
+          </Typography>
         </Box>
       )}
+
+      <Box
+        sx={{
+          backgroundColor: "background.default",
+          borderRadius: 2,
+          p: 3,
+          border: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 600, color: "text.primary" }}
+          >
+            Estado de Enrolamiento:
+          </Typography>
+          <Chip
+            icon={statusConfig[enrollmentStatus].icon}
+            label={statusConfig[enrollmentStatus].label}
+            color={statusConfig[enrollmentStatus].color}
+            variant="filled"
+            size="medium"
+          />
+        </Box>
+      </Box>
     </Box>
   );
 };
