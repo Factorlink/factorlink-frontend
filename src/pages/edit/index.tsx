@@ -1,83 +1,56 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { Box, Tabs, Tab } from "@mui/material";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Layout from "../../components/Layout";
-import Profile from "../../components/Edit/Profile";
-import AccountLevels from "../../components/Edit/AccountLevels";
-import AccountStatus from "../../components/Edit/AccountStatus";
-import ChangePassword from "../../components/Edit/ChangePassword";
-import Empresa from "../../components/Edit/Empresa";
-import Factoring from "../../components/Edit/Factoring";
 import useAuthStore from "../../store/authStore";
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-const TabPanel = ({ children, value, index }: TabPanelProps) => (
-  <Box role="tabpanel" hidden={value !== index} sx={{ pt: 3 }}>
-    {value === index && children}
-  </Box>
-);
-
 const Edit = () => {
-  const [tabValue, setTabValue] = useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { currentRole } = useAuthStore();
 
-  const { currentRole, user } = useAuthStore();
+  const getTabValue = () => {
+    if (location.pathname.includes("/edit/empresa")) return 1;
+    if (location.pathname.includes("/edit/factoring")) return 1;
+    return 0;
+  };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+    if (newValue === 0) {
+      navigate("/edit/usuario");
+    } else if (newValue === 1) {
+      if (currentRole?.contexto === "empresa") {
+        navigate("/edit/empresa");
+      } else if (currentRole?.contexto === "factoring") {
+        navigate("/edit/factoring");
+      }
+    }
   };
+
+  useEffect(() => {
+    if (location.pathname === "/edit") {
+      navigate("/edit/usuario", { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   return (
     <Layout>
       <Box sx={{ p: 3, flex: 1 }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs value={tabValue} onChange={handleTabChange}>
+          <Tabs value={getTabValue()} onChange={handleTabChange}>
             <Tab label="Usuario" />
             {currentRole?.contexto === "empresa" && (
-              <Tab
-                label="Empresa"
-                disabled={currentRole?.contexto !== "empresa"}
-              />
+              <Tab label="Empresa" />
             )}
             {currentRole?.contexto === "factoring" && (
-              <Tab
-                label="Factoring"
-                disabled={currentRole?.contexto !== "factoring"}
-              />
+              <Tab label="Factoring" />
             )}
           </Tabs>
         </Box>
 
-        <TabPanel value={tabValue} index={0}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <AccountStatus isActive={user?.isActive} />
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-                gap: 3,
-                alignItems: "start",
-              }}
-            >
-              <Profile />
-              <ChangePassword />
-            </Box>
-          </Box>
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={1}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <AccountLevels currentLevel={currentRole?.nivel as 1 | 2 | 3 | undefined} />
-            <Empresa />
-          </Box>
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={2}>
-          <Factoring />
-        </TabPanel>
+        <Box sx={{ pt: 3 }}>
+          <Outlet />
+        </Box>
       </Box>
     </Layout>
   );
