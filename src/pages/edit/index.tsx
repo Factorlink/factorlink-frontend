@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Tabs, Tab, Container } from "@mui/material";
+import { Box, Tabs, Tab } from "@mui/material";
 import Layout from "../../components/Layout";
 import Profile from "../../components/Edit/Profile";
 import AccountLevels from "../../components/Edit/AccountLevels";
@@ -51,22 +51,20 @@ const Edit = () => {
         </Box>
 
         <TabPanel value={tabValue} index={0}>
-          <Container maxWidth="lg" disableGutters>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              <AccountLevels currentLevel={currentRole?.nivel as 1 | 2 | 3 | undefined} />
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-                  gap: 3,
-                  alignItems: "start",
-                }}
-              >
-                <Profile />
-                <ChangePassword />
-              </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <AccountLevels currentLevel={currentRole?.nivel as 1 | 2 | 3 | undefined} />
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+                gap: 3,
+                alignItems: "start",
+              }}
+            >
+              <Profile />
+              <ChangePassword />
             </Box>
-          </Container>
+          </Box>
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
