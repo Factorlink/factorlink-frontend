@@ -3,6 +3,7 @@ import { Box, Tabs, Tab } from "@mui/material";
 import Layout from "../../components/Layout";
 import Profile from "../../components/Edit/Profile";
 import AccountLevels from "../../components/Edit/AccountLevels";
+import AccountStatus from "../../components/Edit/AccountStatus";
 import ChangePassword from "../../components/Edit/ChangePassword";
 import Empresa from "../../components/Edit/Empresa";
 import Factoring from "../../components/Edit/Factoring";
@@ -23,7 +24,7 @@ const TabPanel = ({ children, value, index }: TabPanelProps) => (
 const Edit = () => {
   const [tabValue, setTabValue] = useState(0);
 
-  const { currentRole } = useAuthStore();
+  const { currentRole, user } = useAuthStore();
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -51,16 +52,19 @@ const Edit = () => {
         </Box>
 
         <TabPanel value={tabValue} index={0}>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-              gap: 3,
-              alignItems: "start",
-            }}
-          >
-            <Profile />
-            <ChangePassword />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <AccountStatus isActive={user?.isActive} />
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+                gap: 3,
+                alignItems: "start",
+              }}
+            >
+              <Profile />
+              <ChangePassword />
+            </Box>
           </Box>
         </TabPanel>
 

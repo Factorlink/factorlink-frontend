@@ -9,9 +9,9 @@ export interface User {
   phone: string;
   rut: string;
   roles: Role[];
-  // Campos adicionales del perfil
   direccion?: string;
   cargo?: string;
   fechaNacimiento?: string | Date;
   preferenciaContacto?: PreferenciaContacto;
+  isActive?: boolean;
 }
