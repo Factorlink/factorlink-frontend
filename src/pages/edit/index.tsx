@@ -51,24 +51,24 @@ const Edit = () => {
         </Box>
 
         <TabPanel value={tabValue} index={0}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <AccountLevels currentLevel={currentRole?.nivel as 1 | 2 | 3 | undefined} />
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-                gap: 3,
-                alignItems: "start",
-              }}
-            >
-              <Profile />
-              <ChangePassword />
-            </Box>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+              gap: 3,
+              alignItems: "start",
+            }}
+          >
+            <Profile />
+            <ChangePassword />
           </Box>
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          <Empresa />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <AccountLevels currentLevel={currentRole?.nivel as 1 | 2 | 3 | undefined} />
+            <Empresa />
+          </Box>
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>

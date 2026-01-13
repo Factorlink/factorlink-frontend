@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Typography,
-  Container,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -134,7 +133,7 @@ const Empresa = () => {
   });
 
   return (
-    <Container maxWidth="md">
+    <>
       <Box
         sx={{
           backgroundColor: "background.paper",
@@ -372,7 +371,7 @@ const Empresa = () => {
           )}
         </DialogActions>
       </Dialog>
-    </Container>
+    </>
   );
 };
 
