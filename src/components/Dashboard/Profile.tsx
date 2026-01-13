@@ -3,10 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   KeyboardArrowDown,
   Notifications,
-  Person,
-  Business,
-  SwapHoriz,
-  Settings,
   Logout,
   Warning,
   Edit,
@@ -72,8 +68,6 @@ const Profile = () => {
 
   const menuItems = [
     { icon: <Edit fontSize="small" />, text: "Editar Información", action: handleEditProfile },
-    { icon: <SwapHoriz fontSize="small" />, text: "Cambiar Empresa", action: handleClose },
-    { icon: <Settings fontSize="small" />, text: "Configuración", action: handleClose },
     { icon: <Logout fontSize="small" />, text: "Cerrar sesión", action: handleLogoutClick },
   ];
 
