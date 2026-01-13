@@ -33,14 +33,18 @@ const Edit = () => {
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab label="Usuario" />
-            <Tab
-              label="Empresa"
-              disabled={currentRole?.contexto !== "empresa"}
-            />
-            <Tab
-              label="Factoring"
-              disabled={currentRole?.contexto !== "factoring"}
-            />
+            {currentRole?.contexto === "empresa" && (
+              <Tab
+                label="Empresa"
+                disabled={currentRole?.contexto !== "empresa"}
+              />
+            )}
+            {currentRole?.contexto === "factoring" && (
+              <Tab
+                label="Factoring"
+                disabled={currentRole?.contexto !== "factoring"}
+              />
+            )}
           </Tabs>
         </Box>
 

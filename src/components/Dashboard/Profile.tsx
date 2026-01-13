@@ -27,7 +27,7 @@ import {
 } from "@mui/material";
 import useAuthStore from "../../store/authStore";
 import { useAuth } from "../../hooks/useAuth";
-import { getRoleNameByCode } from "../../utils/utils";
+import { capitalizeFirstLetter } from "../../utils/utils";
 
 const Profile = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -156,7 +156,7 @@ const Profile = () => {
         >
           <Box sx={{ px: 2, py: 1.5, textAlign: "center" }}>
             <Chip
-              label={getRoleNameByCode(currentRole?.role || "")}
+              label={capitalizeFirstLetter(currentRole?.contexto || "")}
               size="small"
               sx={{
                 backgroundColor: "primary.main",
