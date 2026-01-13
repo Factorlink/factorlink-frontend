@@ -3,6 +3,7 @@ import { Box, Tabs, Tab } from "@mui/material";
 import Layout from "../../components/Layout";
 import Profile from "../../components/Edit/Profile";
 import AccountLevels from "../../components/Edit/AccountLevels";
+import ChangePassword from "../../components/Edit/ChangePassword";
 import Empresa from "../../components/Edit/Empresa";
 import Factoring from "../../components/Edit/Factoring";
 import useAuthStore from "../../store/authStore";
@@ -53,6 +54,7 @@ const Edit = () => {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <AccountLevels currentLevel={currentRole?.nivel as 1 | 2 | 3 | undefined} />
             <Profile />
+            <ChangePassword />
           </Box>
         </TabPanel>
 
