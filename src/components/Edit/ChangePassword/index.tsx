@@ -11,7 +11,6 @@ import {
   Box,
   Button,
   Typography,
-  Container,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -107,15 +106,14 @@ const ChangePassword = () => {
 
   return (
     <>
-      <Container maxWidth="md">
-        <Box
-          sx={{
-            backgroundColor: "background.paper",
-            borderRadius: 3,
-            overflow: "hidden",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          }}
-        >
+      <Box
+        sx={{
+          backgroundColor: "background.paper",
+          borderRadius: 3,
+          overflow: "hidden",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        }}
+      >
           <Box
             sx={{
               display: "grid",
@@ -292,11 +290,10 @@ const ChangePassword = () => {
                     )}
                   </Button>
                 </Box>
-              </Box>
             </Box>
           </Box>
         </Box>
-      </Container>
+      </Box>
 
       <Dialog
         open={modalOpen}

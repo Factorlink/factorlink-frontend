@@ -220,8 +220,8 @@ const AccountLevels = ({ currentLevel = 1 }: AccountLevelsProps) => {
     <Box
       sx={{
         backgroundColor: "background.paper",
-        borderRadius: 2,
-        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.08)",
+        borderRadius: 3,
+        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
         p: 3,
       }}
     >
