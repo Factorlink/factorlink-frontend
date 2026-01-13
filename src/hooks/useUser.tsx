@@ -5,6 +5,10 @@ interface UpdateUserProfileData {
   firstName: string;
   lastName: string;
   phone: string;
+  direccion?: string;
+  cargo?: string;
+  fechaNacimiento?: string;
+  preferenciaContacto?: string;
 }
 
 export const useUser = () => {

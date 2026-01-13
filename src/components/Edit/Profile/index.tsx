@@ -7,6 +7,8 @@ import {
   handleNameInputChange,
   handlePhoneInputChange,
   handleRutInputChange,
+  handleTextInputChange,
+  PREFERENCIAS_CONTACTO,
 } from "../../../utils/validations/shared-fields";
 
 import {
@@ -19,6 +21,11 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  FormHelperText,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
@@ -29,7 +36,17 @@ interface ProfileFormData {
   lastName: string;
   phone: string;
   rut: string;
+  direccion: string;
+  cargo: string;
+  fechaNacimiento: Date | null;
+  preferenciaContacto: string;
 }
+
+const PREFERENCIA_LABELS: Record<string, string> = {
+  whatsapp: "WhatsApp",
+  telefono: "Teléfono",
+  email: "Email",
+};
 
 const Profile = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -58,6 +75,12 @@ const Profile = () => {
         firstName: values.firstName.trim(),
         lastName: values.lastName.trim(),
         phone: values.phone.trim(),
+        direccion: values.direccion?.trim() || undefined,
+        cargo: values.cargo?.trim() || undefined,
+        fechaNacimiento: values.fechaNacimiento
+          ? values.fechaNacimiento.toISOString().split("T")[0]
+          : undefined,
+        preferenciaContacto: values.preferenciaContacto || undefined,
       });
 
       // Update user in store
@@ -66,6 +89,11 @@ const Profile = () => {
         firstName: response.firstName || values.firstName.trim(),
         lastName: response.lastName || values.lastName.trim(),
         phone: response.phone || values.phone.trim(),
+        direccion: response.direccion || values.direccion?.trim(),
+        cargo: response.cargo || values.cargo?.trim(),
+        fechaNacimiento: response.fechaNacimiento || values.fechaNacimiento,
+        preferenciaContacto:
+          response.preferenciaContacto || values.preferenciaContacto,
       });
 
       setModalStatus("success");
@@ -83,12 +111,25 @@ const Profile = () => {
     }
   };
 
+  const parseInitialDate = (
+    date: string | Date | undefined
+  ): Date | null => {
+    if (!date) return null;
+    if (date instanceof Date) return date;
+    const parsed = new Date(date);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  };
+
   const formik = useFormik<ProfileFormData>({
     initialValues: {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       phone: user?.phone || "",
       rut: user?.rut || "",
+      direccion: user?.direccion || "",
+      cargo: user?.cargo || "",
+      fechaNacimiento: parseInitialDate(user?.fechaNacimiento),
+      preferenciaContacto: user?.preferenciaContacto || "",
     },
     validationSchema: profileFieldsSchema,
     onSubmit: (values) => {
@@ -108,6 +149,28 @@ const Profile = () => {
 
   const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleRutInputChange(e, formik.setFieldValue);
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleTextInputChange(e, formik.setFieldValue);
+  };
+
+  const formatDateForInput = (date: Date | null): string => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value) {
+      const date = new Date(value + "T00:00:00");
+      formik.setFieldValue("fechaNacimiento", date);
+    } else {
+      formik.setFieldValue("fechaNacimiento", null);
+    }
   };
 
   return (
@@ -145,71 +208,212 @@ const Profile = () => {
 
               {/* Form Fields */}
               <Box>
+                {/* Row 1: Nombre y Apellido */}
+                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
+                    <StyledTextField
+                      fullWidth
+                      variant="outlined"
+                      label="Nombre"
+                      placeholder="Nombre"
+                      id="firstName"
+                      name="firstName"
+                      disabled={loading}
+                      value={formik.values.firstName}
+                      error={
+                        formik.touched.firstName &&
+                        Boolean(formik.errors.firstName)
+                      }
+                      helperText={
+                        formik.touched.firstName && formik.errors.firstName
+                      }
+                      onChange={handleNameChange}
+                      onBlur={formik.handleBlur}
+                    />
+                  </Box>
+                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
+                    <StyledTextField
+                      fullWidth
+                      variant="outlined"
+                      label="Apellido"
+                      placeholder="Apellido"
+                      id="lastName"
+                      name="lastName"
+                      disabled={loading}
+                      value={formik.values.lastName}
+                      error={
+                        formik.touched.lastName &&
+                        Boolean(formik.errors.lastName)
+                      }
+                      helperText={
+                        formik.touched.lastName && formik.errors.lastName
+                      }
+                      onChange={handleNameChange}
+                      onBlur={formik.handleBlur}
+                    />
+                  </Box>
+                </Box>
+
+                {/* Row 2: RUT y Teléfono */}
+                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
+                    <StyledTextField
+                      fullWidth
+                      variant="outlined"
+                      label="RUT"
+                      placeholder="12.345.678-9"
+                      id="rut"
+                      name="rut"
+                      disabled={loading}
+                      value={formik.values.rut}
+                      error={formik.touched.rut && Boolean(formik.errors.rut)}
+                      helperText={formik.touched.rut && formik.errors.rut}
+                      onChange={handleRutChange}
+                      onBlur={formik.handleBlur}
+                    />
+                  </Box>
+                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
+                    <StyledTextField
+                      fullWidth
+                      variant="outlined"
+                      label="Teléfono móvil"
+                      placeholder="+56999650987"
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      disabled={loading}
+                      value={formik.values.phone}
+                      error={
+                        formik.touched.phone && Boolean(formik.errors.phone)
+                      }
+                      helperText={formik.touched.phone && formik.errors.phone}
+                      onChange={handlePhoneChange}
+                      onBlur={formik.handleBlur}
+                    />
+                  </Box>
+                </Box>
+
+                {/* Row 3: Dirección (full width) */}
                 <StyledTextField
                   fullWidth
                   variant="outlined"
-                  label="Nombre"
-                  placeholder="Nombre"
-                  id="firstName"
-                  name="firstName"
+                  label="Dirección"
+                  placeholder="Av. Providencia 1234, Santiago"
+                  id="direccion"
+                  name="direccion"
                   disabled={loading}
-                  value={formik.values.firstName}
+                  value={formik.values.direccion}
                   error={
-                    formik.touched.firstName && Boolean(formik.errors.firstName)
+                    formik.touched.direccion && Boolean(formik.errors.direccion)
                   }
                   helperText={
-                    formik.touched.firstName && formik.errors.firstName
+                    formik.touched.direccion && formik.errors.direccion
                   }
-                  onChange={handleNameChange}
+                  onChange={handleTextChange}
                   onBlur={formik.handleBlur}
                 />
-                <StyledTextField
+
+                {/* Row 4: Cargo y Fecha de Nacimiento */}
+                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
+                    <StyledTextField
+                      fullWidth
+                      variant="outlined"
+                      label="Cargo"
+                      placeholder="Gerente General"
+                      id="cargo"
+                      name="cargo"
+                      disabled={loading}
+                      value={formik.values.cargo}
+                      error={
+                        formik.touched.cargo && Boolean(formik.errors.cargo)
+                      }
+                      helperText={formik.touched.cargo && formik.errors.cargo}
+                      onChange={handleTextChange}
+                      onBlur={formik.handleBlur}
+                    />
+                  </Box>
+                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
+                    <StyledTextField
+                      fullWidth
+                      variant="outlined"
+                      label="Fecha de Nacimiento"
+                      type="date"
+                      id="fechaNacimiento"
+                      name="fechaNacimiento"
+                      disabled={loading}
+                      value={formatDateForInput(formik.values.fechaNacimiento)}
+                      error={
+                        formik.touched.fechaNacimiento &&
+                        Boolean(formik.errors.fechaNacimiento)
+                      }
+                      helperText={
+                        formik.touched.fechaNacimiento &&
+                        formik.errors.fechaNacimiento
+                      }
+                      onChange={handleDateChange}
+                      onBlur={formik.handleBlur}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      inputProps={{
+                        max: new Date().toISOString().split("T")[0],
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                {/* Row 5: Preferencia de Contacto */}
+                <FormControl
                   fullWidth
-                  variant="outlined"
-                  label="Apellido"
-                  placeholder="Apellido"
-                  id="lastName"
-                  name="lastName"
-                  disabled={loading}
-                  value={formik.values.lastName}
                   error={
-                    formik.touched.lastName && Boolean(formik.errors.lastName)
+                    formik.touched.preferenciaContacto &&
+                    Boolean(formik.errors.preferenciaContacto)
                   }
-                  helperText={formik.touched.lastName && formik.errors.lastName}
-                  onChange={handleNameChange}
-                  onBlur={formik.handleBlur}
-                />
-
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="RUT"
-                  placeholder="12.345.678-9"
-                  id="rut"
-                  name="rut"
+                  sx={{ mt: 2, mb: 2 }}
                   disabled={loading}
-                  value={formik.values.rut}
-                  error={formik.touched.rut && Boolean(formik.errors.rut)}
-                  helperText={formik.touched.rut && formik.errors.rut}
-                  onChange={handleRutChange}
-                  onBlur={formik.handleBlur}
-                />
-
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Teléfono móvil"
-                  placeholder="+56999650987"
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  disabled={loading}
-                  value={formik.values.phone}
-                  error={formik.touched.phone && Boolean(formik.errors.phone)}
-                  helperText={formik.touched.phone && formik.errors.phone}
-                  onChange={handlePhoneChange}
-                  onBlur={formik.handleBlur}
-                />
+                >
+                  <InputLabel id="preferenciaContacto-label">
+                    Preferencia de Contacto
+                  </InputLabel>
+                  <Select
+                    labelId="preferenciaContacto-label"
+                    id="preferenciaContacto"
+                    name="preferenciaContacto"
+                    value={formik.values.preferenciaContacto}
+                    label="Preferencia de Contacto"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    sx={{
+                      borderRadius: 2,
+                      backgroundColor: "background.default",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "divider",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "primary.main",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "primary.main",
+                      },
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>Seleccionar...</em>
+                    </MenuItem>
+                    {PREFERENCIAS_CONTACTO.map((pref) => (
+                      <MenuItem key={pref} value={pref}>
+                        {PREFERENCIA_LABELS[pref]}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {formik.touched.preferenciaContacto &&
+                    formik.errors.preferenciaContacto && (
+                      <FormHelperText>
+                        {formik.errors.preferenciaContacto}
+                      </FormHelperText>
+                    )}
+                </FormControl>
 
                 <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                   <Button

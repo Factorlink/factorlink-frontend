@@ -1,6 +1,5 @@
 import * as yup from "yup";
-import { rutValidation } from "./shared-fields";
-import { direccionValidation } from "./empresa-fields";
+import { rutValidation, direccionValidation } from "./shared-fields";
 
 export const rutFactoringValidation = rutValidation;
 
