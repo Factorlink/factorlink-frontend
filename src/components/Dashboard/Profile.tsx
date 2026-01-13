@@ -72,8 +72,6 @@ const Profile = () => {
 
   const menuItems = [
     { icon: <Edit fontSize="small" />, text: "Editar Información", action: handleEditProfile },
-    { icon: <Person fontSize="small" />, text: "Suite Factoring", action: handleClose },
-    { icon: <Business fontSize="small" />, text: "Suite Empresa", action: handleClose },
     { icon: <SwapHoriz fontSize="small" />, text: "Cambiar Empresa", action: handleClose },
     { icon: <Settings fontSize="small" />, text: "Configuración", action: handleClose },
     { icon: <Logout fontSize="small" />, text: "Cerrar sesión", action: handleLogoutClick },

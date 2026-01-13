@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
-import type { RegisterFormData } from "../../types/outgoing/register-form-data";
-import { validationSchema } from "./validation-schema";
-import { useAuth } from "../../hooks/useAuth";
-import useAuthStore from "../../store/authStore";
+import type { RegisterFormData } from "../../../types/outgoing/register-form-data";
+import { validationSchema } from "../validation-schema";
+import { useAuth } from "../../../hooks/useAuth";
+import useAuthStore from "../../../store/authStore";
 
 import {
   Box,
-  MenuItem,
   Button,
   Checkbox,
   FormControlLabel,
@@ -28,16 +27,17 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { StyledTextField } from "./styles";
-import logo from "../../assets/png/factorlink-logo.png";
+import { StyledTextField } from "../styles";
+import logo from "../../../assets/png/factorlink-logo.png";
 import {
   handlePhoneInputChange,
   handleNameInputChange,
   handleRutInputChange,
   handlePasswordInputChange,
-} from "../../utils/validations/shared-fields";
+} from "../../../utils/validations/shared-fields";
+import { ROLES } from '../../../utils/consts'
 
-const Register = () => {
+const EmpresasRegister = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
@@ -94,7 +94,7 @@ const Register = () => {
 
   const formik = useFormik<RegisterFormData>({
     initialValues: {
-      roleType: "",
+      roleType: ROLES.EMPRESA_ADMIN,
       firstName: "",
       lastName: "",
       rut: "",
@@ -161,7 +161,7 @@ const Register = () => {
               fontSize: "1rem",
             }}
           >
-            Registro
+            Empresa
           </Box>
 
           <Box
@@ -207,24 +207,6 @@ const Register = () => {
             <Box sx={{ paddingLeft: { md: 2 } }}>
               {/* Form Fields */}
               <Box>
-                <StyledTextField
-                  select
-                  fullWidth
-                  defaultValue=""
-                  label="Tipo de entidad"
-                  id="roleType"
-                  name="roleType"
-                  disabled={loading}
-                  error={
-                    formik.touched.roleType && Boolean(formik.errors.roleType)
-                  }
-                  helperText={formik.touched.roleType && formik.errors.roleType}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                >
-                  <MenuItem value="EMPRESA_ADMIN">Empresa</MenuItem>
-                  <MenuItem value="FACTORING_ADMIN">Factoring</MenuItem>
-                </StyledTextField>
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -309,53 +291,6 @@ const Register = () => {
                   onChange={handlePhoneChange}
                   onBlur={formik.handleBlur}
                 />
-
-                {/* Campos adicionales para Factoring */}
-                {formik.values.roleType === "FACTORING_ADMIN" && (
-                  <>
-                    <StyledTextField
-                      fullWidth
-                      variant="outlined"
-                      label="RUT de Factoring"
-                      placeholder="12.345.678-9"
-                      id="factoringRut"
-                      name="factoringRut"
-                      disabled={loading}
-                      value={formik.values.factoringRut || ""}
-                      error={
-                        formik.touched.factoringRut &&
-                        Boolean(formik.errors.factoringRut)
-                      }
-                      helperText={
-                        formik.touched.factoringRut &&
-                        formik.errors.factoringRut
-                      }
-                      onChange={handleRutChange}
-                      onBlur={formik.handleBlur}
-                    />
-                    <StyledTextField
-                      fullWidth
-                      variant="outlined"
-                      label="Razón Social"
-                      placeholder="Nombre de la empresa"
-                      id="factoringRazonSocial"
-                      name="factoringRazonSocial"
-                      disabled={loading}
-                      inputProps={{ maxLength: 100 }}
-                      value={formik.values.factoringRazonSocial || ""}
-                      error={
-                        formik.touched.factoringRazonSocial &&
-                        Boolean(formik.errors.factoringRazonSocial)
-                      }
-                      helperText={
-                        formik.touched.factoringRazonSocial &&
-                        formik.errors.factoringRazonSocial
-                      }
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                    />
-                  </>
-                )}
 
                 <StyledTextField
                   fullWidth
@@ -632,4 +567,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default EmpresasRegister;

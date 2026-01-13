@@ -6,5 +6,6 @@ export interface User {
   firstName: string;
   lastName: string;
   phone: string;
-  roles: Role[]
+  rut: string;
+  roles: Role[];
 }

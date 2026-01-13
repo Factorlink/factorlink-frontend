@@ -6,6 +6,7 @@ import {
   profileFieldsSchema,
   handleNameInputChange,
   handlePhoneInputChange,
+  handleRutInputChange,
 } from "../../../utils/validations/shared-fields";
 
 import {
@@ -27,6 +28,7 @@ interface ProfileFormData {
   firstName: string;
   lastName: string;
   phone: string;
+  rut: string;
 }
 
 const Profile = () => {
@@ -86,6 +88,7 @@ const Profile = () => {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       phone: user?.phone || "",
+      rut: user?.rut || "",
     },
     validationSchema: profileFieldsSchema,
     onSubmit: (values) => {
@@ -101,6 +104,10 @@ const Profile = () => {
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handlePhoneInputChange(e, formik.setFieldValue);
+  };
+
+  const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleRutInputChange(e, formik.setFieldValue);
   };
 
   return (
@@ -170,6 +177,21 @@ const Profile = () => {
                   }
                   helperText={formik.touched.lastName && formik.errors.lastName}
                   onChange={handleNameChange}
+                  onBlur={formik.handleBlur}
+                />
+
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="RUT"
+                  placeholder="12.345.678-9"
+                  id="rut"
+                  name="rut"
+                  disabled={loading}
+                  value={formik.values.rut}
+                  error={formik.touched.rut && Boolean(formik.errors.rut)}
+                  helperText={formik.touched.rut && formik.errors.rut}
+                  onChange={handleRutChange}
                   onBlur={formik.handleBlur}
                 />
 

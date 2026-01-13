@@ -3,7 +3,8 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { theme } from "./theme/theme";
 import Login from "./pages/login";
-import Register from "./pages/register";
+import EmpresasRegister from "./pages/register/empresa";
+import FactoringRegister from "./pages/register/factoring";
 import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
 import Dashboard from "./pages/dashboard";
@@ -19,9 +20,11 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<Register />} />
+          <Route path="/" element={<EmpresasRegister />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<EmpresasRegister />} />
+          <Route path="/empresas/register" element={<EmpresasRegister />} />
+          <Route path="/factoring/register" element={<FactoringRegister />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 

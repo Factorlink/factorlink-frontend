@@ -96,6 +96,7 @@ export const profileFieldsSchema = yup.object({
   firstName: firstNameValidation,
   lastName: lastNameValidation,
   phone: phoneValidation,
+  rut: rutValidation,
 });
 
 // Handler para filtrar números en campos de nombre
