@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Box, Tabs, Tab } from "@mui/material";
 import Layout from "../../components/Layout";
 import Profile from "../../components/Edit/Profile";
+import AccountLevels from "../../components/Edit/AccountLevels";
 import Empresa from "../../components/Edit/Empresa";
 import Factoring from "../../components/Edit/Factoring";
 import useAuthStore from "../../store/authStore";
@@ -49,7 +50,10 @@ const Edit = () => {
         </Box>
 
         <TabPanel value={tabValue} index={0}>
-          <Profile />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <AccountLevels currentLevel={currentRole?.nivel as 1 | 2 | 3 | undefined} />
+            <Profile />
+          </Box>
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
