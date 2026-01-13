@@ -208,92 +208,87 @@ const Profile = () => {
 
               {/* Form Fields */}
               <Box>
-                {/* Row 1: Nombre y Apellido */}
-                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
-                    <StyledTextField
-                      fullWidth
-                      variant="outlined"
-                      label="Nombre"
-                      placeholder="Nombre"
-                      id="firstName"
-                      name="firstName"
-                      disabled={loading}
-                      value={formik.values.firstName}
-                      error={
-                        formik.touched.firstName &&
-                        Boolean(formik.errors.firstName)
-                      }
-                      helperText={
-                        formik.touched.firstName && formik.errors.firstName
-                      }
-                      onChange={handleNameChange}
-                      onBlur={formik.handleBlur}
-                    />
-                  </Box>
-                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
-                    <StyledTextField
-                      fullWidth
-                      variant="outlined"
-                      label="Apellido"
-                      placeholder="Apellido"
-                      id="lastName"
-                      name="lastName"
-                      disabled={loading}
-                      value={formik.values.lastName}
-                      error={
-                        formik.touched.lastName &&
-                        Boolean(formik.errors.lastName)
-                      }
-                      helperText={
-                        formik.touched.lastName && formik.errors.lastName
-                      }
-                      onChange={handleNameChange}
-                      onBlur={formik.handleBlur}
-                    />
-                  </Box>
-                </Box>
+                {/* Nombre */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="Nombre"
+                  placeholder="Nombre"
+                  id="firstName"
+                  name="firstName"
+                  inputProps={{ maxLength: 50 }}
+                  disabled={loading}
+                  value={formik.values.firstName}
+                  error={
+                    formik.touched.firstName &&
+                    Boolean(formik.errors.firstName)
+                  }
+                  helperText={
+                    formik.touched.firstName && formik.errors.firstName
+                  }
+                  onChange={handleNameChange}
+                  onBlur={formik.handleBlur}
+                />
 
-                {/* Row 2: RUT y Teléfono */}
-                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
-                    <StyledTextField
-                      fullWidth
-                      variant="outlined"
-                      label="RUT"
-                      placeholder="12.345.678-9"
-                      id="rut"
-                      name="rut"
-                      disabled={loading}
-                      value={formik.values.rut}
-                      error={formik.touched.rut && Boolean(formik.errors.rut)}
-                      helperText={formik.touched.rut && formik.errors.rut}
-                      onChange={handleRutChange}
-                      onBlur={formik.handleBlur}
-                    />
-                  </Box>
-                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
-                    <StyledTextField
-                      fullWidth
-                      variant="outlined"
-                      label="Teléfono móvil"
-                      placeholder="+56999650987"
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      disabled={loading}
-                      value={formik.values.phone}
-                      error={
-                        formik.touched.phone && Boolean(formik.errors.phone)
-                      }
-                      helperText={formik.touched.phone && formik.errors.phone}
-                      onChange={handlePhoneChange}
-                      onBlur={formik.handleBlur}
-                    />
-                  </Box>
-                </Box>
+                {/* Apellido */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="Apellido"
+                  placeholder="Apellido"
+                  id="lastName"
+                  name="lastName"
+                  inputProps={{ maxLength: 50 }}
+                  disabled={loading}
+                  value={formik.values.lastName}
+                  error={
+                    formik.touched.lastName &&
+                    Boolean(formik.errors.lastName)
+                  }
+                  helperText={
+                    formik.touched.lastName && formik.errors.lastName
+                  }
+                  onChange={handleNameChange}
+                  onBlur={formik.handleBlur}
+                />
 
-                {/* Row 3: Dirección (full width) */}
+                {/* RUT */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="RUT"
+                  placeholder="12.345.678-9"
+                  id="rut"
+                  name="rut"
+                  inputProps={{ maxLength: 20 }}
+                  disabled={loading}
+                  value={formik.values.rut}
+                  error={formik.touched.rut && Boolean(formik.errors.rut)}
+                  helperText={formik.touched.rut && formik.errors.rut}
+                  onChange={handleRutChange}
+                  onBlur={formik.handleBlur}
+                />
+
+                {/* Teléfono */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="Teléfono móvil"
+                  placeholder="+56999650987"
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  disabled={loading}
+                  value={formik.values.phone}
+                  error={
+                    formik.touched.phone && Boolean(formik.errors.phone)
+                  }
+                  helperText={formik.touched.phone && formik.errors.phone}
+                  onChange={handlePhoneChange}
+                  onBlur={formik.handleBlur}
+                />
+
+                {/* Dirección */}
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -313,55 +308,51 @@ const Profile = () => {
                   onBlur={formik.handleBlur}
                 />
 
-                {/* Row 4: Cargo y Fecha de Nacimiento */}
-                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
-                    <StyledTextField
-                      fullWidth
-                      variant="outlined"
-                      label="Cargo"
-                      placeholder="Gerente General"
-                      id="cargo"
-                      name="cargo"
-                      disabled={loading}
-                      value={formik.values.cargo}
-                      error={
-                        formik.touched.cargo && Boolean(formik.errors.cargo)
-                      }
-                      helperText={formik.touched.cargo && formik.errors.cargo}
-                      onChange={handleTextChange}
-                      onBlur={formik.handleBlur}
-                    />
-                  </Box>
-                  <Box sx={{ flex: "1 1 45%", minWidth: 200 }}>
-                    <StyledTextField
-                      fullWidth
-                      variant="outlined"
-                      label="Fecha de Nacimiento"
-                      type="date"
-                      id="fechaNacimiento"
-                      name="fechaNacimiento"
-                      disabled={loading}
-                      value={formatDateForInput(formik.values.fechaNacimiento)}
-                      error={
-                        formik.touched.fechaNacimiento &&
-                        Boolean(formik.errors.fechaNacimiento)
-                      }
-                      helperText={
-                        formik.touched.fechaNacimiento &&
-                        formik.errors.fechaNacimiento
-                      }
-                      onChange={handleDateChange}
-                      onBlur={formik.handleBlur}
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                      inputProps={{
-                        max: new Date().toISOString().split("T")[0],
-                      }}
-                    />
-                  </Box>
-                </Box>
+                {/* Cargo */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="Cargo"
+                  placeholder="Gerente General"
+                  id="cargo"
+                  name="cargo"
+                  disabled={loading}
+                  value={formik.values.cargo}
+                  error={
+                    formik.touched.cargo && Boolean(formik.errors.cargo)
+                  }
+                  helperText={formik.touched.cargo && formik.errors.cargo}
+                  onChange={handleTextChange}
+                  onBlur={formik.handleBlur}
+                />
+
+                {/* Fecha de Nacimiento */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="Fecha de Nacimiento"
+                  type="date"
+                  id="fechaNacimiento"
+                  name="fechaNacimiento"
+                  disabled={loading}
+                  value={formatDateForInput(formik.values.fechaNacimiento)}
+                  error={
+                    formik.touched.fechaNacimiento &&
+                    Boolean(formik.errors.fechaNacimiento)
+                  }
+                  helperText={
+                    formik.touched.fechaNacimiento &&
+                    formik.errors.fechaNacimiento
+                  }
+                  onChange={handleDateChange}
+                  onBlur={formik.handleBlur}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  inputProps={{
+                    max: new Date().toISOString().split("T")[0],
+                  }}
+                />
 
                 {/* Row 5: Preferencia de Contacto */}
                 <FormControl
