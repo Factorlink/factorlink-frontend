@@ -66,10 +66,10 @@ const SiiSync = () => {
       formik.resetForm();
     } catch (error: unknown) {
       const axiosError = error as {
-        response?: { data?: { message?: string[] } };
+        response?: { data?: { message?: string } };
       };
       setErrorMessage(
-        axiosError?.response?.data?.message?.[0] ||
+        axiosError?.response?.data?.message ||
           "Ocurrió un error al sincronizar con el SII"
       );
       setModalStatus("error");
@@ -105,6 +105,7 @@ const SiiSync = () => {
   return (
     <>
       <Box
+        id="sii-sync-card"
         sx={{
           backgroundColor: "background.paper",
           borderRadius: 3,
