@@ -159,6 +159,7 @@ const SiiSync = () => {
               placeholder="Ingresa tu contraseña del SII"
               type={showPassword ? "text" : "password"}
               name="siiPassword"
+              inputProps={{ maxLength: 128, autoComplete: "current-password" }}
               value={formik.values.siiPassword}
               error={
                 formik.touched.siiPassword && Boolean(formik.errors.siiPassword)
