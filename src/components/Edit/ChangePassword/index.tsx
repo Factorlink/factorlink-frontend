@@ -144,6 +144,7 @@ const ChangePassword = () => {
                   type={showCurrentPassword ? "text" : "password"}
                   id="currentPassword"
                   name="currentPassword"
+                  inputProps={{ maxLength: 128, autoComplete: "current-password" }}
                   disabled={loading}
                   value={formik.values.currentPassword}
                   error={
@@ -179,6 +180,7 @@ const ChangePassword = () => {
                   type={showNewPassword ? "text" : "password"}
                   id="newPassword"
                   name="newPassword"
+                  inputProps={{ maxLength: 128, autoComplete: "new-password" }}
                   disabled={loading}
                   value={formik.values.newPassword}
                   error={
@@ -214,6 +216,7 @@ const ChangePassword = () => {
                   type={showConfirmPassword ? "text" : "password"}
                   id="confirmNewPassword"
                   name="confirmNewPassword"
+                  inputProps={{ maxLength: 128, autoComplete: "new-password" }}
                   disabled={loading}
                   value={formik.values.confirmNewPassword}
                   error={

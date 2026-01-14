@@ -254,6 +254,7 @@ const Login = () => {
                   label="Contraseña"
                   placeholder="Contraseña"
                   name="password"
+                  inputProps={{ maxLength: 128, autoComplete: "current-password" }}
                   value={formik.values.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}

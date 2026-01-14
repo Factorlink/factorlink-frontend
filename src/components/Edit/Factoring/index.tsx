@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Typography,
-  Container,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -130,7 +129,7 @@ const Factoring = () => {
   });
 
   return (
-    <Container maxWidth="md">
+    <>
       <Box
         sx={{
           backgroundColor: "background.paper",
@@ -355,7 +354,7 @@ const Factoring = () => {
           )}
         </DialogActions>
       </Dialog>
-    </Container>
+      </>
   );
 };
 

@@ -253,6 +253,7 @@ const ResetPassword = () => {
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
+                  inputProps={{ maxLength: 128, autoComplete: "new-password" }}
                   disabled={loading}
                   value={formik.values.password}
                   error={formik.touched.password && Boolean(formik.errors.password)}
@@ -282,6 +283,7 @@ const ResetPassword = () => {
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
+                  inputProps={{ maxLength: 128, autoComplete: "new-password" }}
                   disabled={loading}
                   value={formik.values.confirmPassword}
                   error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}

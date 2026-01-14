@@ -296,6 +296,7 @@ const Profile = () => {
                   name="direccion"
                   disabled={loading}
                   value={formik.values.direccion}
+                  inputProps={{ maxLength: 200 }}
                   error={
                     formik.touched.direccion && Boolean(formik.errors.direccion)
                   }
@@ -316,6 +317,7 @@ const Profile = () => {
                   name="cargo"
                   disabled={loading}
                   value={formik.values.cargo}
+                  inputProps={{ maxLength: 100 }}
                   error={
                     formik.touched.cargo && Boolean(formik.errors.cargo)
                   }
