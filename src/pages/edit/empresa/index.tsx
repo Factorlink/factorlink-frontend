@@ -10,8 +10,8 @@ const EmpresaTab = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <AccountLevels currentLevel={currentRole?.nivel as 1 | 2 | 3 | undefined} />
-      {currentRole?.nivel  === 1 && <SiiSync />}
-      <Empresa />
+      {currentRole?.nivel && currentRole?.nivel === 1 && <SiiSync />}
+      {currentRole?.nivel && currentRole?.nivel !== 1 && <Empresa readOnly={true} />}
     </Box>
   );
 };

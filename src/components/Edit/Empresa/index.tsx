@@ -26,7 +26,11 @@ interface EmpresaFormData {
   direccion: string;
 }
 
-const Empresa = () => {
+interface EmpresaProps {
+  readOnly?: boolean;
+}
+
+const Empresa = ({ readOnly = false }: EmpresaProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">(
     "success"
@@ -165,11 +169,21 @@ const Empresa = () => {
               placeholder="12.345.678-9"
               name="rut"
               value={formik.values.rut}
-              error={formik.touched.rut && Boolean(formik.errors.rut)}
-              helperText={formik.touched.rut && formik.errors.rut}
+              error={!readOnly && formik.touched.rut && Boolean(formik.errors.rut)}
+              helperText={!readOnly && formik.touched.rut && formik.errors.rut}
               onChange={handleRutChange}
               onBlur={formik.handleBlur}
               disabled={loading}
+              InputProps={{ readOnly }}
+              sx={readOnly ? { 
+                "& .MuiInputBase-input": { 
+                  color: "text.secondary",
+                  cursor: "default"
+                },
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "action.hover"
+                }
+              } : undefined}
             />
 
             <StyledTextField
@@ -178,15 +192,21 @@ const Empresa = () => {
               placeholder="Mi Empresa S.A."
               name="razonSocial"
               value={formik.values.razonSocial}
-              error={
-                formik.touched.razonSocial && Boolean(formik.errors.razonSocial)
-              }
-              helperText={
-                formik.touched.razonSocial && formik.errors.razonSocial
-              }
+              error={!readOnly && formik.touched.razonSocial && Boolean(formik.errors.razonSocial)}
+              helperText={!readOnly && formik.touched.razonSocial && formik.errors.razonSocial}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
+              InputProps={{ readOnly }}
+              sx={readOnly ? { 
+                "& .MuiInputBase-input": { 
+                  color: "text.secondary",
+                  cursor: "default"
+                },
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "action.hover"
+                }
+              } : undefined}
             />
 
             <StyledTextField
@@ -195,11 +215,21 @@ const Empresa = () => {
               placeholder="Servicios de consultoría"
               name="giro"
               value={formik.values.giro}
-              error={formik.touched.giro && Boolean(formik.errors.giro)}
-              helperText={formik.touched.giro && formik.errors.giro}
+              error={!readOnly && formik.touched.giro && Boolean(formik.errors.giro)}
+              helperText={!readOnly && formik.touched.giro && formik.errors.giro}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
+              InputProps={{ readOnly }}
+              sx={readOnly ? { 
+                "& .MuiInputBase-input": { 
+                  color: "text.secondary",
+                  cursor: "default"
+                },
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "action.hover"
+                }
+              } : undefined}
             />
 
             <StyledTextField
@@ -208,64 +238,74 @@ const Empresa = () => {
               placeholder="Av. Principal 123, Santiago"
               name="direccion"
               value={formik.values.direccion}
-              error={
-                formik.touched.direccion && Boolean(formik.errors.direccion)
-              }
-              helperText={formik.touched.direccion && formik.errors.direccion}
+              error={!readOnly && formik.touched.direccion && Boolean(formik.errors.direccion)}
+              helperText={!readOnly && formik.touched.direccion && formik.errors.direccion}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
+              InputProps={{ readOnly }}
+              sx={readOnly ? { 
+                "& .MuiInputBase-input": { 
+                  color: "text.secondary",
+                  cursor: "default"
+                },
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "action.hover"
+                }
+              } : undefined}
             />
 
-            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-              <Button
-                variant="contained"
-                onClick={() => formik.resetForm()}
-                disabled={loading || !formik.dirty}
-                sx={{
-                  backgroundColor: "secondary.main",
-                  color: "white",
-                  textTransform: "none",
-                  padding: "12px 24px",
-                  fontSize: "1rem",
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  boxShadow: "none",
-                  "&:hover": {
-                    backgroundColor: "secondary.dark",
+            {!readOnly && (
+              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                <Button
+                  variant="contained"
+                  onClick={() => formik.resetForm()}
+                  disabled={loading || !formik.dirty}
+                  sx={{
+                    backgroundColor: "secondary.main",
+                    color: "white",
+                    textTransform: "none",
+                    padding: "12px 24px",
+                    fontSize: "1rem",
+                    fontWeight: 500,
+                    borderRadius: 2,
                     boxShadow: "none",
-                  },
-                }}
-              >
-                Cancelar
-              </Button>
+                    "&:hover": {
+                      backgroundColor: "secondary.dark",
+                      boxShadow: "none",
+                    },
+                  }}
+                >
+                  Cancelar
+                </Button>
 
-              <Button
-                variant="contained"
-                onClick={() => formik.handleSubmit()}
-                disabled={loading || !formik.isValid || !formik.dirty}
-                sx={{
-                  backgroundColor: "success.main",
-                  color: "white",
-                  textTransform: "none",
-                  padding: "12px 24px",
-                  fontSize: "1rem",
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  boxShadow: "none",
-                  "&:hover": {
-                    backgroundColor: "success.dark",
+                <Button
+                  variant="contained"
+                  onClick={() => formik.handleSubmit()}
+                  disabled={loading || !formik.isValid || !formik.dirty}
+                  sx={{
+                    backgroundColor: "success.main",
+                    color: "white",
+                    textTransform: "none",
+                    padding: "12px 24px",
+                    fontSize: "1rem",
+                    fontWeight: 500,
+                    borderRadius: 2,
                     boxShadow: "none",
-                  },
-                }}
-              >
-                {loading ? (
-                  <CircularProgress size={24} sx={{ color: "white" }} />
-                ) : (
-                  "Guardar cambios"
-                )}
-              </Button>
-            </Box>
+                    "&:hover": {
+                      backgroundColor: "success.dark",
+                      boxShadow: "none",
+                    },
+                  }}
+                >
+                  {loading ? (
+                    <CircularProgress size={24} sx={{ color: "white" }} />
+                  ) : (
+                    "Guardar cambios"
+                  )}
+                </Button>
+              </Box>
+            )}
           </Box>
         </Box>
       </Box>

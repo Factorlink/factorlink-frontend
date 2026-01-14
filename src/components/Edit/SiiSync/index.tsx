@@ -58,6 +58,8 @@ const SiiSync = () => {
 
       useAuthStore.getState().setCurrentRole({
         ...currentRole,
+        empresaId: response.id,
+        nivel: 2,
         empresa: response,
       } as Role);
 
