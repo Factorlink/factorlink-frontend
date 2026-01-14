@@ -16,7 +16,6 @@ import {
   Description,
   SwapHoriz,
   Assessment,
-  Settings,
   Logout,
   Search,
   Menu,
@@ -32,7 +31,6 @@ const menuItems = [
 ];
 
 const bottomItems = [
-  { text: "Configuración", icon: Settings, path: "/configuracion" },
   { text: "Logout", icon: Logout, path: "/login" },
 ];
 

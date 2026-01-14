@@ -91,11 +91,56 @@ export const phoneValidation = yup
     "El teléfono debe tener un formato válido ejemplo: +56999650987"
   );
 
+// Validación de dirección (compartida con empresa)
+export const direccionValidation = yup
+  .string()
+  .trim()
+  .min(5, "La dirección debe tener al menos 5 caracteres")
+  .max(200, "La dirección no puede exceder 200 caracteres");
+
+// Validación de cargo
+export const cargoValidation = yup
+  .string()
+  .trim()
+  .min(2, "El cargo debe tener al menos 2 caracteres")
+  .max(100, "El cargo no puede exceder 100 caracteres");
+
+// Validación de fecha de nacimiento
+export const fechaNacimientoValidation = yup
+  .date()
+  .nullable()
+  .max(new Date(), "La fecha no puede ser futura")
+  .test("edad-minima", "Debes ser mayor de 18 años", (value) => {
+    if (!value) return true;
+    const hoy = new Date();
+    const fechaNac = new Date(value);
+    let edad = hoy.getFullYear() - fechaNac.getFullYear();
+    const mesActual = hoy.getMonth();
+    const mesNac = fechaNac.getMonth();
+    if (mesActual < mesNac || (mesActual === mesNac && hoy.getDate() < fechaNac.getDate())) {
+      edad--;
+    }
+    return edad >= 18;
+  });
+
+// Preferencias de contacto
+export const PREFERENCIAS_CONTACTO = ["whatsapp", "telefono", "email"] as const;
+export type PreferenciaContacto = (typeof PREFERENCIAS_CONTACTO)[number];
+
+export const preferenciaContactoValidation = yup
+  .string()
+  .oneOf([...PREFERENCIAS_CONTACTO], "Selecciona una preferencia válida");
+
 // Schema parcial para reutilizar en Profile
 export const profileFieldsSchema = yup.object({
   firstName: firstNameValidation,
   lastName: lastNameValidation,
   phone: phoneValidation,
+  rut: rutValidation,
+  direccion: direccionValidation,
+  cargo: cargoValidation,
+  fechaNacimiento: fechaNacimientoValidation,
+  preferenciaContacto: preferenciaContactoValidation,
 });
 
 // Handler para filtrar números en campos de nombre
@@ -157,5 +202,16 @@ export const handlePasswordInputChange = (
 ) => {
   const { name, value } = e.target;
   const filteredValue = value.replace(/\s+/g, "");
+  setFieldValue(name, filteredValue);
+};
+
+// Handler para campos de texto general (dirección, cargo)
+// Filtra caracteres potencialmente peligrosos
+export const handleTextInputChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  setFieldValue: (field: string, value: string) => void
+) => {
+  const { name, value } = e.target;
+  const filteredValue = value.replace(/[<>{}[\]\\]/g, "");
   setFieldValue(name, filteredValue);
 };

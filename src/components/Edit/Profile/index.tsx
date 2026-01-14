@@ -6,18 +6,25 @@ import {
   profileFieldsSchema,
   handleNameInputChange,
   handlePhoneInputChange,
+  handleRutInputChange,
+  handleTextInputChange,
+  PREFERENCIAS_CONTACTO,
 } from "../../../utils/validations/shared-fields";
 
 import {
   Box,
   Button,
   Typography,
-  Container,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   CircularProgress,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  FormHelperText,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
@@ -27,7 +34,18 @@ interface ProfileFormData {
   firstName: string;
   lastName: string;
   phone: string;
+  rut: string;
+  direccion: string;
+  cargo: string;
+  fechaNacimiento: Date | null;
+  preferenciaContacto: string;
 }
+
+const PREFERENCIA_LABELS: Record<string, string> = {
+  whatsapp: "WhatsApp",
+  telefono: "Teléfono",
+  email: "Email",
+};
 
 const Profile = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -56,6 +74,12 @@ const Profile = () => {
         firstName: values.firstName.trim(),
         lastName: values.lastName.trim(),
         phone: values.phone.trim(),
+        direccion: values.direccion?.trim() || undefined,
+        cargo: values.cargo?.trim() || undefined,
+        fechaNacimiento: values.fechaNacimiento
+          ? values.fechaNacimiento.toISOString().split("T")[0]
+          : undefined,
+        preferenciaContacto: values.preferenciaContacto || undefined,
       });
 
       // Update user in store
@@ -64,6 +88,11 @@ const Profile = () => {
         firstName: response.firstName || values.firstName.trim(),
         lastName: response.lastName || values.lastName.trim(),
         phone: response.phone || values.phone.trim(),
+        direccion: response.direccion || values.direccion?.trim(),
+        cargo: response.cargo || values.cargo?.trim(),
+        fechaNacimiento: response.fechaNacimiento || values.fechaNacimiento,
+        preferenciaContacto:
+          response.preferenciaContacto || values.preferenciaContacto,
       });
 
       setModalStatus("success");
@@ -81,11 +110,25 @@ const Profile = () => {
     }
   };
 
+  const parseInitialDate = (
+    date: string | Date | undefined
+  ): Date | null => {
+    if (!date) return null;
+    if (date instanceof Date) return date;
+    const parsed = new Date(date);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  };
+
   const formik = useFormik<ProfileFormData>({
     initialValues: {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       phone: user?.phone || "",
+      rut: user?.rut || "",
+      direccion: user?.direccion || "",
+      cargo: user?.cargo || "",
+      fechaNacimiento: parseInitialDate(user?.fechaNacimiento),
+      preferenciaContacto: user?.preferenciaContacto || "",
     },
     validationSchema: profileFieldsSchema,
     onSubmit: (values) => {
@@ -103,17 +146,42 @@ const Profile = () => {
     handlePhoneInputChange(e, formik.setFieldValue);
   };
 
+  const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleRutInputChange(e, formik.setFieldValue);
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleTextInputChange(e, formik.setFieldValue);
+  };
+
+  const formatDateForInput = (date: Date | null): string => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value) {
+      const date = new Date(value + "T00:00:00");
+      formik.setFieldValue("fechaNacimiento", date);
+    } else {
+      formik.setFieldValue("fechaNacimiento", null);
+    }
+  };
+
   return (
     <>
-      <Container maxWidth="md">
-        <Box
-          sx={{
-            backgroundColor: "background.paper",
-            borderRadius: 3,
-            overflow: "hidden",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          }}
-        >
+      <Box
+        sx={{
+          backgroundColor: "background.paper",
+          borderRadius: 3,
+          overflow: "hidden",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        }}
+      >
           <Box
             sx={{
               display: "grid",
@@ -138,6 +206,7 @@ const Profile = () => {
 
               {/* Form Fields */}
               <Box>
+                {/* Nombre */}
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -145,10 +214,12 @@ const Profile = () => {
                   placeholder="Nombre"
                   id="firstName"
                   name="firstName"
+                  inputProps={{ maxLength: 50 }}
                   disabled={loading}
                   value={formik.values.firstName}
                   error={
-                    formik.touched.firstName && Boolean(formik.errors.firstName)
+                    formik.touched.firstName &&
+                    Boolean(formik.errors.firstName)
                   }
                   helperText={
                     formik.touched.firstName && formik.errors.firstName
@@ -156,6 +227,8 @@ const Profile = () => {
                   onChange={handleNameChange}
                   onBlur={formik.handleBlur}
                 />
+
+                {/* Apellido */}
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -163,16 +236,38 @@ const Profile = () => {
                   placeholder="Apellido"
                   id="lastName"
                   name="lastName"
+                  inputProps={{ maxLength: 50 }}
                   disabled={loading}
                   value={formik.values.lastName}
                   error={
-                    formik.touched.lastName && Boolean(formik.errors.lastName)
+                    formik.touched.lastName &&
+                    Boolean(formik.errors.lastName)
                   }
-                  helperText={formik.touched.lastName && formik.errors.lastName}
+                  helperText={
+                    formik.touched.lastName && formik.errors.lastName
+                  }
                   onChange={handleNameChange}
                   onBlur={formik.handleBlur}
                 />
 
+                {/* RUT */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="RUT"
+                  placeholder="12.345.678-9"
+                  id="rut"
+                  name="rut"
+                  inputProps={{ maxLength: 20 }}
+                  disabled={loading}
+                  value={formik.values.rut}
+                  error={formik.touched.rut && Boolean(formik.errors.rut)}
+                  helperText={formik.touched.rut && formik.errors.rut}
+                  onChange={handleRutChange}
+                  onBlur={formik.handleBlur}
+                />
+
+                {/* Teléfono */}
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -183,11 +278,131 @@ const Profile = () => {
                   name="phone"
                   disabled={loading}
                   value={formik.values.phone}
-                  error={formik.touched.phone && Boolean(formik.errors.phone)}
+                  error={
+                    formik.touched.phone && Boolean(formik.errors.phone)
+                  }
                   helperText={formik.touched.phone && formik.errors.phone}
                   onChange={handlePhoneChange}
                   onBlur={formik.handleBlur}
                 />
+
+                {/* Dirección */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="Dirección"
+                  placeholder="Av. Providencia 1234, Santiago"
+                  id="direccion"
+                  name="direccion"
+                  disabled={loading}
+                  value={formik.values.direccion}
+                  error={
+                    formik.touched.direccion && Boolean(formik.errors.direccion)
+                  }
+                  helperText={
+                    formik.touched.direccion && formik.errors.direccion
+                  }
+                  onChange={handleTextChange}
+                  onBlur={formik.handleBlur}
+                />
+
+                {/* Cargo */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="Cargo"
+                  placeholder="Gerente General"
+                  id="cargo"
+                  name="cargo"
+                  disabled={loading}
+                  value={formik.values.cargo}
+                  error={
+                    formik.touched.cargo && Boolean(formik.errors.cargo)
+                  }
+                  helperText={formik.touched.cargo && formik.errors.cargo}
+                  onChange={handleTextChange}
+                  onBlur={formik.handleBlur}
+                />
+
+                {/* Fecha de Nacimiento */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="Fecha de Nacimiento"
+                  type="date"
+                  id="fechaNacimiento"
+                  name="fechaNacimiento"
+                  disabled={loading}
+                  value={formatDateForInput(formik.values.fechaNacimiento)}
+                  error={
+                    formik.touched.fechaNacimiento &&
+                    Boolean(formik.errors.fechaNacimiento)
+                  }
+                  helperText={
+                    formik.touched.fechaNacimiento &&
+                    formik.errors.fechaNacimiento
+                  }
+                  onChange={handleDateChange}
+                  onBlur={formik.handleBlur}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  inputProps={{
+                    max: new Date().toISOString().split("T")[0],
+                  }}
+                />
+
+                {/* Row 5: Preferencia de Contacto */}
+                <FormControl
+                  fullWidth
+                  error={
+                    formik.touched.preferenciaContacto &&
+                    Boolean(formik.errors.preferenciaContacto)
+                  }
+                  sx={{ mt: 2, mb: 2 }}
+                  disabled={loading}
+                >
+                  <InputLabel id="preferenciaContacto-label">
+                    Preferencia de Contacto
+                  </InputLabel>
+                  <Select
+                    labelId="preferenciaContacto-label"
+                    id="preferenciaContacto"
+                    name="preferenciaContacto"
+                    value={formik.values.preferenciaContacto}
+                    label="Preferencia de Contacto"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    sx={{
+                      borderRadius: 2,
+                      backgroundColor: "background.default",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "divider",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "primary.main",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "primary.main",
+                      },
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>Seleccionar...</em>
+                    </MenuItem>
+                    {PREFERENCIAS_CONTACTO.map((pref) => (
+                      <MenuItem key={pref} value={pref}>
+                        {PREFERENCIA_LABELS[pref]}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {formik.touched.preferenciaContacto &&
+                    formik.errors.preferenciaContacto && (
+                      <FormHelperText>
+                        {formik.errors.preferenciaContacto}
+                      </FormHelperText>
+                    )}
+                </FormControl>
 
                 <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                   <Button
@@ -241,9 +456,8 @@ const Profile = () => {
                 </Box>
               </Box>
             </Box>
-          </Box>
         </Box>
-      </Container>
+      </Box>
 
       <Dialog
         open={modalOpen}

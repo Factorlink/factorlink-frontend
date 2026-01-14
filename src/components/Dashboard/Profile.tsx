@@ -3,10 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   KeyboardArrowDown,
   Notifications,
-  Person,
-  Business,
-  SwapHoriz,
-  Settings,
   Logout,
   Warning,
   Edit,
@@ -31,7 +27,7 @@ import {
 } from "@mui/material";
 import useAuthStore from "../../store/authStore";
 import { useAuth } from "../../hooks/useAuth";
-import { getRoleNameByCode } from "../../utils/utils";
+import { capitalizeFirstLetter } from "../../utils/utils";
 
 const Profile = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -72,10 +68,6 @@ const Profile = () => {
 
   const menuItems = [
     { icon: <Edit fontSize="small" />, text: "Editar Información", action: handleEditProfile },
-    { icon: <Person fontSize="small" />, text: "Suite Factoring", action: handleClose },
-    { icon: <Business fontSize="small" />, text: "Suite Empresa", action: handleClose },
-    { icon: <SwapHoriz fontSize="small" />, text: "Cambiar Empresa", action: handleClose },
-    { icon: <Settings fontSize="small" />, text: "Configuración", action: handleClose },
     { icon: <Logout fontSize="small" />, text: "Cerrar sesión", action: handleLogoutClick },
   ];
 
@@ -164,7 +156,7 @@ const Profile = () => {
         >
           <Box sx={{ px: 2, py: 1.5, textAlign: "center" }}>
             <Chip
-              label={getRoleNameByCode(currentRole?.role || "")}
+              label={capitalizeFirstLetter(currentRole?.contexto || "")}
               size="small"
               sx={{
                 backgroundColor: "primary.main",

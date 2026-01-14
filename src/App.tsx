@@ -1,15 +1,19 @@
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { theme } from "./theme/theme";
 import Login from "./pages/login";
-import Register from "./pages/register";
+import EmpresasRegister from "./pages/register/empresa";
+import FactoringRegister from "./pages/register/factoring";
 import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
 import Dashboard from "./pages/dashboard";
 import Facturas from "./pages/facturas";
 import Operaciones from "./pages/operaciones";
 import Edit from "./pages/edit";
+import UsuarioTab from "./pages/edit/usuario";
+import EmpresaTab from "./pages/edit/empresa";
+import FactoringTab from "./pages/edit/factoring";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -19,9 +23,11 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<Register />} />
+          <Route path="/" element={<EmpresasRegister />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<EmpresasRegister />} />
+          <Route path="/empresas/register" element={<EmpresasRegister />} />
+          <Route path="/factoring/register" element={<FactoringRegister />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
@@ -57,7 +63,12 @@ function App() {
                 <Edit />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="/edit/usuario" replace />} />
+            <Route path="usuario" element={<UsuarioTab />} />
+            <Route path="empresa" element={<EmpresaTab />} />
+            <Route path="factoring" element={<FactoringTab />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

@@ -26,13 +26,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isLoginRequest = error.config?.url?.includes("auth/login");
+    const isLoginRequest = error.config?.url?.includes("auth/login") || error.config?.url?.includes("users/change-password");
     
     if (error.response?.status === 401 && !isLoginRequest) {
       // Limpiar estado de autenticación solo si NO es una petición de login
       useAuthStore.getState().setAccessToken("");
       useAuthStore.getState().setRefreshToken("");
       useAuthStore.getState().setUser(null);
+      useAuthStore.getState().setCurrentRole(null);
       
       // Redirigir a login
       window.location.href = "/login";

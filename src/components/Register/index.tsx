@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useFormik } from "formik";
+import type { FormikProps } from "formik";
 import { useNavigate } from "react-router-dom";
 import type { RegisterFormData } from "../../types/outgoing/register-form-data";
-import { validationSchema } from "./validation-schema";
+import { validationSchema } from "../../pages/register/validation-schema";
 import { useAuth } from "../../hooks/useAuth";
 import useAuthStore from "../../store/authStore";
 
 import {
   Box,
-  MenuItem,
   Button,
   Checkbox,
   FormControlLabel,
@@ -28,7 +28,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { StyledTextField } from "./styles";
+import { StyledTextField } from "../../pages/register/styles";
 import logo from "../../assets/png/factorlink-logo.png";
 import {
   handlePhoneInputChange,
@@ -37,13 +37,25 @@ import {
   handlePasswordInputChange,
 } from "../../utils/validations/shared-fields";
 
-const Register = () => {
+interface RegisterFormProps {
+  roleType: string;
+  tabLabel: string;
+  renderAdditionalFields?: (
+    formik: FormikProps<RegisterFormData>,
+    loading: boolean,
+    handleRutChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  ) => React.ReactNode;
+}
+
+const RegisterForm = ({
+  roleType,
+  tabLabel,
+  renderAdditionalFields,
+}: RegisterFormProps) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error">(
-    "success"
-  );
+  const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -71,8 +83,8 @@ const Register = () => {
       });
 
       if (response.user.roles.length === 1) {
-          useAuthStore.getState().setCurrentRole(response.user.roles[0]);
-        } 
+        useAuthStore.getState().setCurrentRole(response.user.roles[0]);
+      }
 
       setModalStatus("success");
       setModalOpen(true);
@@ -94,7 +106,7 @@ const Register = () => {
 
   const formik = useFormik<RegisterFormData>({
     initialValues: {
-      roleType: "",
+      roleType,
       firstName: "",
       lastName: "",
       rut: "",
@@ -112,7 +124,6 @@ const Register = () => {
     },
   });
 
-  // Función para filtrar números del input
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleNameInputChange(e, formik.setFieldValue);
   };
@@ -161,7 +172,7 @@ const Register = () => {
               fontSize: "1rem",
             }}
           >
-            Registro
+            {tabLabel}
           </Box>
 
           <Box
@@ -205,26 +216,7 @@ const Register = () => {
 
             {/* Right Side - Form */}
             <Box sx={{ paddingLeft: { md: 2 } }}>
-              {/* Form Fields */}
               <Box>
-                <StyledTextField
-                  select
-                  fullWidth
-                  defaultValue=""
-                  label="Tipo de entidad"
-                  id="roleType"
-                  name="roleType"
-                  disabled={loading}
-                  error={
-                    formik.touched.roleType && Boolean(formik.errors.roleType)
-                  }
-                  helperText={formik.touched.roleType && formik.errors.roleType}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                >
-                  <MenuItem value="EMPRESA_ADMIN">Empresa</MenuItem>
-                  <MenuItem value="FACTORING_ADMIN">Factoring</MenuItem>
-                </StyledTextField>
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -235,12 +227,8 @@ const Register = () => {
                   inputProps={{ maxLength: 50 }}
                   disabled={loading}
                   value={formik.values.firstName}
-                  error={
-                    formik.touched.firstName && Boolean(formik.errors.firstName)
-                  }
-                  helperText={
-                    formik.touched.firstName && formik.errors.firstName
-                  }
+                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                  helperText={formik.touched.firstName && formik.errors.firstName}
                   onChange={handleNameChange}
                   onBlur={formik.handleBlur}
                 />
@@ -254,9 +242,7 @@ const Register = () => {
                   inputProps={{ maxLength: 50 }}
                   disabled={loading}
                   value={formik.values.lastName}
-                  error={
-                    formik.touched.lastName && Boolean(formik.errors.lastName)
-                  }
+                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
                   helperText={formik.touched.lastName && formik.errors.lastName}
                   onChange={handleNameChange}
                   onBlur={formik.handleBlur}
@@ -276,7 +262,6 @@ const Register = () => {
                   onChange={handleRutChange}
                   onBlur={formik.handleBlur}
                 />
-
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -293,7 +278,6 @@ const Register = () => {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
-
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -310,52 +294,8 @@ const Register = () => {
                   onBlur={formik.handleBlur}
                 />
 
-                {/* Campos adicionales para Factoring */}
-                {formik.values.roleType === "FACTORING_ADMIN" && (
-                  <>
-                    <StyledTextField
-                      fullWidth
-                      variant="outlined"
-                      label="RUT de Factoring"
-                      placeholder="12.345.678-9"
-                      id="factoringRut"
-                      name="factoringRut"
-                      disabled={loading}
-                      value={formik.values.factoringRut || ""}
-                      error={
-                        formik.touched.factoringRut &&
-                        Boolean(formik.errors.factoringRut)
-                      }
-                      helperText={
-                        formik.touched.factoringRut &&
-                        formik.errors.factoringRut
-                      }
-                      onChange={handleRutChange}
-                      onBlur={formik.handleBlur}
-                    />
-                    <StyledTextField
-                      fullWidth
-                      variant="outlined"
-                      label="Razón Social"
-                      placeholder="Nombre de la empresa"
-                      id="factoringRazonSocial"
-                      name="factoringRazonSocial"
-                      disabled={loading}
-                      inputProps={{ maxLength: 100 }}
-                      value={formik.values.factoringRazonSocial || ""}
-                      error={
-                        formik.touched.factoringRazonSocial &&
-                        Boolean(formik.errors.factoringRazonSocial)
-                      }
-                      helperText={
-                        formik.touched.factoringRazonSocial &&
-                        formik.errors.factoringRazonSocial
-                      }
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                    />
-                  </>
-                )}
+                {/* Slot para campos adicionales */}
+                {renderAdditionalFields?.(formik, loading, handleRutChange)}
 
                 <StyledTextField
                   fullWidth
@@ -368,9 +308,7 @@ const Register = () => {
                   inputProps={{ maxLength: 100 }}
                   disabled={loading}
                   value={formik.values.password}
-                  error={
-                    formik.touched.password && Boolean(formik.errors.password)
-                  }
+                  error={formik.touched.password && Boolean(formik.errors.password)}
                   helperText={formik.touched.password && formik.errors.password}
                   onChange={handlePasswordChange}
                   onBlur={formik.handleBlur}
@@ -389,7 +327,6 @@ const Register = () => {
                     ),
                   }}
                 />
-
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -406,8 +343,7 @@ const Register = () => {
                     Boolean(formik.errors.confirmPassword)
                   }
                   helperText={
-                    formik.touched.confirmPassword &&
-                    formik.errors.confirmPassword
+                    formik.touched.confirmPassword && formik.errors.confirmPassword
                   }
                   onChange={handlePasswordChange}
                   onBlur={formik.handleBlur}
@@ -416,17 +352,11 @@ const Register = () => {
                       <InputAdornment position="end">
                         <IconButton
                           aria-label="toggle confirm password visibility"
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           edge="end"
                           disabled={loading}
                         >
-                          {showConfirmPassword ? (
-                            <VisibilityOff />
-                          ) : (
-                            <Visibility />
-                          )}
+                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -533,6 +463,7 @@ const Register = () => {
         </Box>
       </Container>
 
+      {/* Modal de feedback */}
       <Dialog
         open={modalOpen}
         onClose={handleCloseModal}
@@ -632,4 +563,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default RegisterForm;

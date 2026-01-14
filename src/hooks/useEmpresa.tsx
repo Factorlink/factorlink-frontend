@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../lib/axios";
 import type { Empresa } from "../types/empresa";
+import type { SiiEmpresa } from "../types/sii";
 
 export const useEmpresa = () => {
   const [loading, setLoading] = useState(false);
@@ -9,6 +10,18 @@ export const useEmpresa = () => {
     try {
       setLoading(true);
       const response = await api.post("empresas", data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createEmpresaBySii = async (data: SiiEmpresa) => {
+    try {
+      setLoading(true);
+      const response = await api.post("empresas/sync-sii", data);
       return response.data;
     } catch (error) {
       throw error;
@@ -65,5 +78,5 @@ export const useEmpresa = () => {
     }
   };
 
-  return { loading, createEmpresa, getAllEmpresas, getEmpresaById, updateEmpresa, deleteEmpresa };
+  return { loading, createEmpresa, getAllEmpresas, getEmpresaById, updateEmpresa, deleteEmpresa, createEmpresaBySii };
 };
