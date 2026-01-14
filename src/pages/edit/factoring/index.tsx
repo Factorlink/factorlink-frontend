@@ -8,7 +8,7 @@ const FactoringTab = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <FactoringState estadoEnrolamiento={currentRole?.factoring?.estadoEnrolamiento} />
-      <Factoring />;
+      <Factoring />
     </Box>
   );
 };
