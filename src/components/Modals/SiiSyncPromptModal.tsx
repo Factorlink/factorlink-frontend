@@ -22,8 +22,12 @@ const SiiSyncPromptModal = () => {
     // No mostrar si ya está en la página de empresa
     if (location.pathname === "/edit/empresa") return;
 
-    // Mostrar si empresaId es null
-    if (currentRole && !currentRole.empresaId) {
+    // Mostrar solo si el contexto es "empresa" y empresaId es null
+    if (
+      currentRole &&
+      currentRole.contexto === "empresa" &&
+      !currentRole.empresaId
+    ) {
       setOpen(true);
     }
   }, [currentRole, location.pathname]);
