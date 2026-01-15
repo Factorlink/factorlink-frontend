@@ -28,7 +28,10 @@ import {
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import { StyledTextField } from "../../../pages/register/styles";
+import { StyledTextField, StyledDatePicker } from "../../../pages/register/styles";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { es } from "date-fns/locale";
 
 interface ProfileFormData {
   firstName: string;
@@ -152,24 +155,6 @@ const Profile = () => {
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleTextInputChange(e, formik.setFieldValue);
-  };
-
-  const formatDateForInput = (date: Date | null): string => {
-    if (!date) return "";
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value) {
-      const date = new Date(value + "T00:00:00");
-      formik.setFieldValue("fechaNacimiento", date);
-    } else {
-      formik.setFieldValue("fechaNacimiento", null);
-    }
   };
 
   return (
@@ -327,32 +312,37 @@ const Profile = () => {
                 />
 
                 {/* Fecha de Nacimiento */}
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Fecha de Nacimiento"
-                  type="date"
-                  id="fechaNacimiento"
-                  name="fechaNacimiento"
-                  disabled={loading}
-                  value={formatDateForInput(formik.values.fechaNacimiento)}
-                  error={
-                    formik.touched.fechaNacimiento &&
-                    Boolean(formik.errors.fechaNacimiento)
-                  }
-                  helperText={
-                    formik.touched.fechaNacimiento &&
-                    formik.errors.fechaNacimiento
-                  }
-                  onChange={handleDateChange}
-                  onBlur={formik.handleBlur}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  inputProps={{
-                    max: new Date().toISOString().split("T")[0],
-                  }}
-                />
+                <LocalizationProvider
+                  dateAdapter={AdapterDateFns}
+                  adapterLocale={es}
+                >
+                  <StyledDatePicker
+                    label="Fecha de Nacimiento"
+                    
+                    value={formik.values.fechaNacimiento}
+                    onChange={(date) =>
+                      formik.setFieldValue("fechaNacimiento", date)
+                    }
+                    maxDate={new Date()}
+                    disabled={loading}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined",
+                        id: "fechaNacimiento",
+                        name: "fechaNacimiento",
+                        error:
+                          !!(
+                            formik.touched.fechaNacimiento &&
+                            formik.errors.fechaNacimiento
+                          ),
+                        helperText:
+                          formik.touched.fechaNacimiento &&
+                          formik.errors.fechaNacimiento,
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
 
                 {/* Row 5: Preferencia de Contacto */}
                 <FormControl

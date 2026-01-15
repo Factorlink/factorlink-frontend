@@ -1,13 +1,8 @@
 import * as yup from "yup";
+import { emailValidation } from "../../utils/validations/shared-fields";
 
 export const loginValidationSchema = yup.object().shape({
-  email: yup
-    .string()
-    .trim()
-    .lowercase()
-    .required("El correo electrónico es obligatorio")
-    .email("El formato del correo electrónico no es válido")
-    .max(255, "El correo electrónico no puede exceder 255 caracteres"),
+  email: emailValidation,
   password: yup
     .string()
     .required("La contraseña es obligatoria")

@@ -8,6 +8,7 @@ import {
   RUT_REGEX,
   passwordValidation,
   confirmPasswordValidation,
+  emailValidation
 } from "../../utils/validations/shared-fields";
 
 export const validationSchema = yup.object({
@@ -22,12 +23,7 @@ export const validationSchema = yup.object({
   firstName: firstNameValidation,
   lastName: lastNameValidation,
   rut: rutValidation,
-  email: yup
-    .string()
-    .trim()
-    .lowercase()
-    .email("Email inválido")
-    .required("El email es obligatorio"),
+  email: emailValidation,
   phone: phoneValidation,
   password: passwordValidation,
   confirmPassword: confirmPasswordValidation,

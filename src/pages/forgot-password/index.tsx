@@ -20,11 +20,11 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { StyledTextField } from "../register/styles";
 import logo from "../../assets/png/factorlink-logo.png";
 import { useAuth } from "../../hooks/useAuth";
+import { emailValidation } from "../../utils/validations/shared-fields";
+
 
 const validationSchema = Yup.object({
-  email: Yup.string()
-    .email("Correo electrónico inválido")
-    .required("El correo electrónico es requerido"),
+  email: emailValidation,
 });
 
 const ForgotPassword = () => {
