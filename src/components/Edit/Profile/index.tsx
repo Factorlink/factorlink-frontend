@@ -235,6 +235,18 @@ const Profile = () => {
                   onBlur={formik.handleBlur}
                 />
 
+                {/* Email (read-only) */}
+                <StyledTextField
+                  fullWidth
+                  variant="outlined"
+                  label="Email"
+                  placeholder="Email"
+                  id="email"
+                  name="email"
+                  disabled
+                  value={user?.email || ""}
+                />
+
                 {/* RUT */}
                 <StyledTextField
                   fullWidth
@@ -318,7 +330,6 @@ const Profile = () => {
                 >
                   <StyledDatePicker
                     label="Fecha de Nacimiento"
-                    
                     value={formik.values.fechaNacimiento}
                     onChange={(date) =>
                       formik.setFieldValue("fechaNacimiento", date)
@@ -379,9 +390,6 @@ const Profile = () => {
                       },
                     }}
                   >
-                    <MenuItem value="">
-                      <em>Seleccionar...</em>
-                    </MenuItem>
                     {PREFERENCIAS_CONTACTO.map((pref) => (
                       <MenuItem key={pref} value={pref}>
                         {PREFERENCIA_LABELS[pref]}

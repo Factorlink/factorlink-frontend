@@ -27,7 +27,9 @@ export const StyledTextField = styled(TextField)(({ theme }) => ({
 }));
 
 export const StyledDatePicker = styled(DatePicker)(({ theme }) => ({
-  // apply styles to the root element rendered by DatePicker
+  "& .MuiPickersOutlinedInput-root": {
+    backgroundColor: theme.palette.background.default,
+  },
   "& .MuiInputBase-root": {
     paddingBottom: 16,
     backgroundColor: theme.palette.background.default,

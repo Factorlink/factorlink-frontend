@@ -3,6 +3,7 @@ export interface Empresa {
   direccion?: string;
   estadoEnrolamiento?: string;
   giro: string;
+  email?: string;
   id?: string;
   isActive?: boolean;
   nivel?: string;
