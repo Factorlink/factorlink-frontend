@@ -3,6 +3,16 @@ import * as yup from "yup";
 // Regex para caracteres especiales permitidos en contraseñas
 export const SPECIAL_CHARS_REGEX = /[!@#$%^&*(),.?":{}|<>]/;
 
+// Regex para emails
+export const EMAIL_WITH_DOT_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const emailValidation = yup
+  .string()
+  .trim()
+  .lowercase()
+  .matches(EMAIL_WITH_DOT_REGEX, "Email inválido")
+  .required("El email es obligatorio");
+
 // Validación de contraseña robusta (para crear/cambiar contraseña)
 export const passwordValidation = yup
   .string()

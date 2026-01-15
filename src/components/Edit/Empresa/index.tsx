@@ -23,6 +23,7 @@ interface EmpresaFormData {
   rut: string;
   razonSocial: string;
   giro: string;
+  email: string;
   direccion: string;
 }
 
@@ -123,6 +124,7 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
       rut: currentRole?.empresa?.rut || "",
       razonSocial: currentRole?.empresa?.razonSocial || "",
       giro: currentRole?.empresa?.giro || "",
+      email: currentRole?.empresa?.email || "",
       direccion: currentRole?.empresa?.direccion || "",
     },
     validationSchema: empresaFieldsSchema,
@@ -217,6 +219,29 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
               value={formik.values.giro}
               error={!readOnly && formik.touched.giro && Boolean(formik.errors.giro)}
               helperText={!readOnly && formik.touched.giro && formik.errors.giro}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={loading}
+              InputProps={{ readOnly }}
+              sx={readOnly ? { 
+                "& .MuiInputBase-input": { 
+                  color: "text.secondary",
+                  cursor: "default"
+                },
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "action.hover"
+                }
+              } : undefined}
+            />
+
+            <StyledTextField
+              fullWidth
+              label="Email"
+              placeholder="contacto@empresa.cl"
+              name="email"
+              value={formik.values.email}
+              error={!readOnly && formik.touched.email && Boolean(formik.errors.email)}
+              helperText={!readOnly && formik.touched.email && formik.errors.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
