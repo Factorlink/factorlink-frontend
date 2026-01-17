@@ -15,6 +15,7 @@ import UsuarioTab from "./pages/edit/usuario";
 import EmpresaTab from "./pages/edit/empresa";
 import FactoringTab from "./pages/edit/factoring";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RoleSelection from "./pages/role/selection";
 
 function App() {
   return (
@@ -53,6 +54,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Operaciones />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/role-selection"
+            element={
+              <ProtectedRoute>
+                <RoleSelection />
               </ProtectedRoute>
             }
           />
