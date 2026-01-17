@@ -35,7 +35,9 @@ const mapLoginError = (error: unknown): string => {
 
     switch (status) {
       case 401:
-        return axiosError.response?.data?.message || "Email o contraseña incorrectos";
+        return (
+          axiosError.response?.data?.message || "Email o contraseña incorrectos"
+        );
       case 403:
         return "Tu cuenta se encuentra inactiva. Contacta al administrador";
       case 404:
@@ -69,7 +71,7 @@ const Login = () => {
   );
   const [errorMessage, setErrorMessage] = useState("");
   const { login, loading } = useAuth();
-  const { accessToken } = useAuthStore();
+  const { accessToken, user } = useAuthStore();
 
   // Redirigir si el usuario ya está autenticado
   useEffect(() => {
@@ -93,10 +95,10 @@ const Login = () => {
 
         if (response.user.roles.length === 1) {
           useAuthStore.getState().setCurrentRole(response.user.roles[0]);
-        } 
+        }
 
         setModalStatus("success");
-        setModalOpen(true);     
+        setModalOpen(true);
         useAuthStore.getState().setAccessToken(response.accessToken);
         useAuthStore.getState().setRefreshToken(response.refreshToken);
         useAuthStore.getState().setUser(response.user);
@@ -111,7 +113,11 @@ const Login = () => {
   const handleCloseModal = () => {
     setModalOpen(false);
     if (modalStatus === "success") {
-      navigate("/dashboard");
+      if (user?.roles.length === 1) {
+        navigate("/dashboard");
+      } else {
+        navigate("/role-selection");
+      }
     }
   };
 
@@ -201,8 +207,6 @@ const Login = () => {
                   mb: 3,
                 }}
               >
-                
-
                 <Typography
                   variant="body2"
                   sx={{
@@ -254,7 +258,10 @@ const Login = () => {
                   label="Contraseña"
                   placeholder="Contraseña"
                   name="password"
-                  inputProps={{ maxLength: 128, autoComplete: "current-password" }}
+                  inputProps={{
+                    maxLength: 128,
+                    autoComplete: "current-password",
+                  }}
                   value={formik.values.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
