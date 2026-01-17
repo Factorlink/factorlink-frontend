@@ -10,20 +10,31 @@ const Edit = () => {
   const { currentRole } = useAuthStore();
 
   const getTabValue = () => {
+    const hasEntityTab =
+      currentRole?.contexto === "empresa" || currentRole?.contexto === "factoring";
+
     if (location.pathname.includes("/edit/empresa")) return 1;
     if (location.pathname.includes("/edit/factoring")) return 1;
+    if (location.pathname.includes("/edit/usuarios")) {
+      return hasEntityTab ? 2 : 1;
+    }
     return 0;
   };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    const hasEntityTab =
+      currentRole?.contexto === "empresa" || currentRole?.contexto === "factoring";
+
     if (newValue === 0) {
       navigate("/edit/usuario");
-    } else if (newValue === 1) {
+    } else if (hasEntityTab && newValue === 1) {
       if (currentRole?.contexto === "empresa") {
         navigate("/edit/empresa");
       } else if (currentRole?.contexto === "factoring") {
         navigate("/edit/factoring");
       }
+    } else if ((hasEntityTab && newValue === 2) || (!hasEntityTab && newValue === 1)) {
+      navigate("/edit/usuarios");
     }
   };
 
@@ -45,6 +56,8 @@ const Edit = () => {
             {currentRole?.contexto === "factoring" && (
               <Tab label="Factoring" />
             )}
+
+            <Tab label="Usuarios" />
           </Tabs>
         </Box>
 
