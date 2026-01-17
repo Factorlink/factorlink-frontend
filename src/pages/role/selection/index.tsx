@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -11,18 +12,17 @@ import useAuthStore from "../../../store/authStore";
 import type { Role } from "../../../types/role";
 import Layout from "../../../components/Layout";
 import RoleCard from "./components/role-card";
-
-
+import SiiSyncModal from "../../../components/Modals/SiiSyncModal";
 
 const RoleSelection = () => {
   const navigate = useNavigate();
   const { user, currentRole, setCurrentRole } = useAuthStore();
+  const [siiModalOpen, setSiiModalOpen] = useState(false);
 
   const handleSelectRole = (role: Role) => {
     setCurrentRole(role);
     navigate("/dashboard");
   };
-
 
   const rolesList: Role[] = user?.roles || [];
 
@@ -107,7 +107,7 @@ const RoleSelection = () => {
               }}
             >
               <CardActionArea
-                onClick={() => navigate("/register/empresa")}
+                onClick={() => setSiiModalOpen(true)}
                 sx={{
                   p: 3,
                   height: "100%",
@@ -150,6 +150,11 @@ const RoleSelection = () => {
           </Box>
         </Box>
       </Box>
+
+      <SiiSyncModal
+        open={siiModalOpen}
+        onClose={() => setSiiModalOpen(false)}
+      />
     </Layout>
   );
 };
