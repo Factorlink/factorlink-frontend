@@ -102,10 +102,10 @@ const Profile = () => {
       setModalOpen(true);
     } catch (error: unknown) {
       const axiosError = error as {
-        response?: { data?: { message?: string[] } };
+        response?: { data?: { message?: string } };
       };
       setErrorMessage(
-        axiosError?.response?.data?.message?.[0] ||
+        axiosError?.response?.data?.message ||
           "Ocurrió un error, intenta nuevamente"
       );
       setModalStatus("error");
@@ -331,8 +331,15 @@ const Profile = () => {
                   <StyledDatePicker
                     label="Fecha de Nacimiento"
                     value={formik.values.fechaNacimiento}
-                    onChange={(date) =>
-                      formik.setFieldValue("fechaNacimiento", date)
+                    onChange={(date) => {
+                      formik.setFieldValue("fechaNacimiento", date);
+                      formik.setFieldTouched("fechaNacimiento", true);
+                    }}
+                    onClose={() =>
+                      formik.setFieldTouched("fechaNacimiento", true, true)
+                    }
+                    onAccept={() =>
+                      formik.setFieldTouched("fechaNacimiento", true, true)
                     }
                     maxDate={new Date()}
                     disabled={loading}
@@ -342,6 +349,7 @@ const Profile = () => {
                         variant: "outlined",
                         id: "fechaNacimiento",
                         name: "fechaNacimiento",
+                        onBlur: formik.handleBlur,
                         error:
                           !!(
                             formik.touched.fechaNacimiento &&

@@ -6,6 +6,7 @@ import {
   Logout,
   Warning,
   Edit,
+  SwitchAccount
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -66,8 +67,14 @@ const Profile = () => {
     navigate("/edit");
   };
 
+  const handleChangeRole = () => {
+    handleClose();
+    navigate("/role-selection");
+  };
+
   const menuItems = [
     { icon: <Edit fontSize="small" />, text: "Editar Información", action: handleEditProfile },
+    { icon: <SwitchAccount fontSize="small" />, text: "Cambiar de Rol", action: handleChangeRole },
     { icon: <Logout fontSize="small" />, text: "Cerrar sesión", action: handleLogoutClick },
   ];
 
@@ -118,7 +125,7 @@ const Profile = () => {
               variant="body2"
               sx={{ color: "text.secondary", fontSize: "0.85rem" }}
             >
-              Factorlink S.A
+              { currentRole?.contexto === 'empresa' ? currentRole?.empresa?.razonSocial || 'N/A' : currentRole?.factoring?.razonSocial || 'N/A' }
             </Typography>
           </Box>
           <KeyboardArrowDown
