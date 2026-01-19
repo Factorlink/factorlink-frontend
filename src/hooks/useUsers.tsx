@@ -29,10 +29,23 @@ export const useUsers = () => {
     }
   };
 
+  const getUsersByFactoringId = async (factoringId: string): Promise<User[]> => {
+    setLoading(true);
+    try {
+      const response = await api.get(`users/by-factoring/${factoringId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     getAllUsers,
     getUsersByEmpresaId,
+    getUsersByFactoringId,
   };
 };
 

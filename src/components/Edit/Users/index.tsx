@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -26,43 +26,9 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-
-// Mock data for layout purposes
-const mockUsers = [
-  {
-    id: "1",
-    firstName: "Admin",
-    lastName: "Empresa",
-    email: "admin@factorlink.cl",
-    role: "Admin Empresa",
-    status: "Activo",
-    fechaAsociacion: "31 dic 2023",
-    ultimoAcceso: "19 ene 2024, 20:00",
-    isCurrentUser: true,
-  },
-  {
-    id: "2",
-    firstName: "María",
-    lastName: "González",
-    email: "maria.gonzalez@factorlink.cl",
-    role: "Usuario Empresa",
-    status: "Activo",
-    fechaAsociacion: "09 ene 2024",
-    ultimoAcceso: "18 ene 2024, 20:00",
-    isCurrentUser: false,
-  },
-  {
-    id: "3",
-    firstName: "Carlos",
-    lastName: "Rodríguez",
-    email: "carlos.rodriguez@factorlink.cl",
-    role: "Usuario Empresa",
-    status: "Pendiente",
-    fechaAsociacion: "14 ene 2024",
-    ultimoAcceso: "-",
-    isCurrentUser: false,
-  },
-];
+import type { User } from "../../../types/user";
+import { useUsers } from "../../../hooks/useUsers";
+import useAuthStore from "../../../store/authStore";
 
 const getInitials = (firstName: string, lastName: string) => {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -73,8 +39,8 @@ const getRoleColor = (role: string) => {
   return "#6B7280";
 };
 
-const getStatusConfig = (status: string) => {
-  if (status === "Activo") {
+const getStatusConfig = (status: boolean) => {
+  if (status) {
     return {
       color: "#00A86B",
       bgColor: "rgba(0, 168, 107, 0.1)",
@@ -90,9 +56,16 @@ const getStatusConfig = (status: string) => {
 
 const Users = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [_selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [_selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, userId: string) => {
+  const { user: currentUser, currentRole } = useAuthStore();
+  const [users, setUsers] = useState<User[]>([]);
+  const { getUsersByEmpresaId, getUsersByFactoringId } = useUsers();
+
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    userId: number
+  ) => {
     setAnchorEl(event.currentTarget);
     setSelectedUserId(userId);
   };
@@ -102,9 +75,25 @@ const Users = () => {
     setSelectedUserId(null);
   };
 
-  const totalUsers = mockUsers.length;
-  const activeUsers = mockUsers.filter((u) => u.status === "Activo").length;
-  const pendingUsers = mockUsers.filter((u) => u.status === "Pendiente").length;
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const users =
+          currentRole?.contexto === "empresa"
+            ? await getUsersByEmpresaId(currentRole?.empresaId || "")
+            : await getUsersByFactoringId(currentRole?.factoringId || "");
+        setUsers(users);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, [currentRole?.empresaId, currentRole?.factoringId, currentRole?.contexto]);
+
+  const totalUsers = users.length;
+  const activeUsers = users.filter((u) => u.isActive).length;
+  const pendingUsers = users.filter((u) => !u.isActive).length;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -245,22 +234,32 @@ const Users = () => {
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Usuario</TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Email</TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Rol</TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Estado</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                Usuario
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                Email
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                Rol
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                Estado
+              </TableCell>
               <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
                 Fecha Asociación
               </TableCell>
               <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
                 Último Acceso
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Acciones</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                Acciones
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {mockUsers.map((user) => {
-              const statusConfig = getStatusConfig(user.status);
+            {users.map((user) => {
+              const statusConfig = getStatusConfig(!!user.isActive);
               return (
                 <TableRow
                   key={user.id}
@@ -270,7 +269,9 @@ const Users = () => {
                   }}
                 >
                   <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                    >
                       <Avatar
                         sx={{
                           bgcolor: "#E0E7EF",
@@ -289,7 +290,7 @@ const Users = () => {
                           sx={{ fontWeight: 600, color: "#1E293B" }}
                         >
                           {user.firstName} {user.lastName}
-                          {user.isCurrentUser && (
+                          {user.id === currentUser?.id && (
                             <Typography
                               component="span"
                               variant="caption"
@@ -310,17 +311,17 @@ const Users = () => {
                   <TableCell>
                     <Chip
                       icon={<VerifiedUserIcon sx={{ fontSize: 14 }} />}
-                      label={user.role}
+                      label={user.roles[0].role}
                       size="small"
                       sx={{
                         backgroundColor:
-                          user.role === "Admin Empresa"
+                          user.roles[0].role === "Admin Empresa"
                             ? "rgba(0, 168, 107, 0.1)"
                             : "#F1F5F9",
-                        color: getRoleColor(user.role),
+                        color: getRoleColor(user.roles[0].role),
                         fontWeight: 500,
                         "& .MuiChip-icon": {
-                          color: getRoleColor(user.role),
+                          color: getRoleColor(user.roles[0].role),
                         },
                       }}
                     />
@@ -328,7 +329,7 @@ const Users = () => {
                   <TableCell>
                     <Chip
                       icon={statusConfig.icon}
-                      label={user.status}
+                      label={user.isActive ? "Activo" : "Inactivo"}
                       size="small"
                       sx={{
                         backgroundColor: statusConfig.bgColor,
@@ -342,12 +343,12 @@ const Users = () => {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ color: "#64748B" }}>
-                      {user.fechaAsociacion}
+                      {"dd-mm-yyyy"}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ color: "#64748B" }}>
-                      {user.ultimoAcceso}
+                      {"dd-mm-yyyy"}
                     </Typography>
                   </TableCell>
                   <TableCell>

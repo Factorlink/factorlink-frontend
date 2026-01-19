@@ -56,7 +56,7 @@ const RoleSelection = () => {
               textAlign: "center",
             }}
           >
-            Selecciona un Rol
+            Selecciona una Entidad
           </Typography>
           <Typography
             sx={{
