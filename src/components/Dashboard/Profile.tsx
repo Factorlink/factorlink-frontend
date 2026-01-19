@@ -94,7 +94,13 @@ const Profile = () => {
     <>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Actualizado hace 2 minutos
+          Actualizado hace{" "}
+          {user?.updatedAt
+            ? Math.floor(
+                (Date.now() - new Date(user.updatedAt).getTime()) / 60000,
+              )
+            : 0}{" "}
+          minutos
         </Typography>
 
         <IconButton

@@ -30,8 +30,9 @@ import type { User } from "../../../types/user";
 import { useUsers } from "../../../hooks/useUsers";
 import useAuthStore from "../../../store/authStore";
 import InviteUserModal from "../../Modals/InviteUserModal";
+import DeleteUserModal from "../../Modals/DeleteUserModal";
 import type { Role } from "../../../types/role";
-import { ROLES } from "../../../utils/consts";
+import { ROLE_NAMES, ROLES } from "../../../utils/consts";
 
 const getInitials = (firstName: string, lastName: string) => {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -70,6 +71,7 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [editRoleModalOpen, setEditRoleModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const { currentRole } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
@@ -102,6 +104,11 @@ const Users = () => {
 
   const handleChangeRole = () => {
     setEditRoleModalOpen(true);
+    setAnchorEl(null);
+  };
+
+  const handleDeleteUser = () => {
+    setDeleteModalOpen(true);
     setAnchorEl(null);
   };
 
@@ -343,13 +350,13 @@ const Users = () => {
                     <Chip
                       icon={<VerifiedUserIcon sx={{ fontSize: 14 }} />}
                       label={
-                        getUserRole(
+                        ROLE_NAMES[getUserRole(
                           user.roles,
                           currentRole?.contexto,
                           currentRole?.contexto === "empresa"
                             ? currentRole?.empresaId
                             : currentRole?.factoringId,
-                        )?.role || "N/A"
+                        )?.role || ROLES.DEFAULT]
                       }
                       size="small"
                       sx={{
@@ -461,7 +468,7 @@ const Users = () => {
           </ListItemIcon>
           <ListItemText primary="Cambiar rol" />
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={handleDeleteUser}>
           <ListItemIcon>
             <DeleteIcon sx={{ color: "#EF4444" }} />
           </ListItemIcon>
@@ -493,6 +500,22 @@ const Users = () => {
         userData={{
           email: selectedUser?.email || "",
           currentRole: getSelectedUserRole(),
+        }}
+      />
+
+      {/* Delete User Modal */}
+      <DeleteUserModal
+        open={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedUser(null);
+        }}
+        onSuccess={() => {
+          fetchUsers();
+        }}
+        userData={{
+          email: selectedUser?.email || "",
+          fullName: selectedUser ? `${selectedUser.firstName} ${selectedUser.lastName}` : "",
         }}
       />
     </Box>
