@@ -67,8 +67,9 @@ const getStatusConfig = (status: boolean) => {
 
 const Users = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [_selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [editRoleModalOpen, setEditRoleModalOpen] = useState(false);
 
   const { currentRole } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
@@ -88,15 +89,32 @@ const Users = () => {
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
-    userId: number,
+    user: User,
   ) => {
     setAnchorEl(event.currentTarget);
-    setSelectedUserId(userId);
+    setSelectedUser(user);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedUserId(null);
+    setSelectedUser(null);
+  };
+
+  const handleChangeRole = () => {
+    setEditRoleModalOpen(true);
+    setAnchorEl(null);
+  };
+
+  const getSelectedUserRole = () => {
+    if (!selectedUser) return undefined;
+    const userRole = getUserRole(
+      selectedUser.roles,
+      currentRole?.contexto,
+      currentRole?.contexto === "empresa"
+        ? currentRole?.empresaId
+        : currentRole?.factoringId
+    );
+    return userRole?.role;
   };
 
   useEffect(() => {
@@ -409,7 +427,7 @@ const Users = () => {
                   <TableCell>
                     <IconButton
                       size="small"
-                      onClick={(e) => handleMenuOpen(e, user.id)}
+                      onClick={(e) => handleMenuOpen(e, user)}
                       sx={{ color: "#64748B" }}
                     >
                       <MoreVertIcon />
@@ -437,7 +455,7 @@ const Users = () => {
           },
         }}
       >
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={handleChangeRole}>
           <ListItemIcon>
             <SwapHorizIcon sx={{ color: "#64748B" }} />
           </ListItemIcon>
@@ -459,6 +477,23 @@ const Users = () => {
         open={inviteModalOpen}
         onClose={() => setInviteModalOpen(false)}
         onSuccess={fetchUsers}
+      />
+
+      {/* Edit Role Modal */}
+      <InviteUserModal
+        open={editRoleModalOpen}
+        onClose={() => {
+          setEditRoleModalOpen(false);
+          setSelectedUser(null);
+        }}
+        onSuccess={() => {
+          fetchUsers();
+        }}
+        mode="edit"
+        userData={{
+          email: selectedUser?.email || "",
+          currentRole: getSelectedUserRole(),
+        }}
       />
     </Box>
   );

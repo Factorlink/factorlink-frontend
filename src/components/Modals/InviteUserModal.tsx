@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -10,32 +10,49 @@ import {
   Button,
   Alert,
   CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import EditIcon from "@mui/icons-material/Edit";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { StyledTextField } from "../../pages/register/styles";
 import { useRole } from "../../hooks/useRole";
 import useAuthStore from "../../store/authStore";
 import { emailValidation } from "../../utils/validations/shared-fields";
-import { ROLES } from "../../utils/consts";
+import { ROLES, ROLE_NAMES } from "../../utils/consts";
 
 interface InviteUserModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  mode?: "invite" | "edit";
+  userData?: {
+    email: string;
+    currentRole?: string;
+  };
 }
 
 interface InviteFormData {
   email: string;
+  role: string;
 }
 
-const validationSchema = Yup.object({
-  email: emailValidation,
-});
+const EMPRESA_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.EMPRESA_USUARIO];
+const FACTORING_ROLES = [ROLES.FACTORING_ADMIN, ROLES.FACTORING_ANALISTA];
 
-const InviteUserModal = ({ open, onClose, onSuccess }: InviteUserModalProps) => {
+const InviteUserModal = ({ 
+  open, 
+  onClose, 
+  onSuccess, 
+  mode = "invite",
+  userData 
+}: InviteUserModalProps) => {
   const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -43,26 +60,36 @@ const InviteUserModal = ({ open, onClose, onSuccess }: InviteUserModalProps) => 
   const { assignToEmpresa, assignToFactoring, loading } = useRole();
 
   const isEmpresa = currentRole?.contexto === "empresa";
+  const availableRoles = isEmpresa ? EMPRESA_ROLES : FACTORING_ROLES;
+  const isEditMode = mode === "edit";
 
-  const handleInvite = async (values: InviteFormData) => {
+  const validationSchema = Yup.object({
+    email: emailValidation,
+    role: Yup.string().required("El rol es requerido"),
+  });
+
+  const handleSubmit = async (values: InviteFormData) => {
     try {
       if (isEmpresa) {
         await assignToEmpresa({
           email: values.email.trim(),
-          role: ROLES.EMPRESA_USUARIO as "EMPRESA_ADMIN" | "EMPRESA_USUARIO",
+          role: values.role as "EMPRESA_ADMIN" | "EMPRESA_USUARIO",
           empresaId: currentRole?.empresaId || "",
         });
       } else {
         await assignToFactoring({
           email: values.email.trim(),
-          role: ROLES.FACTORING_ANALISTA as "FACTORING_ADMIN" | "FACTORING_ANALISTA",
+          role: values.role as "FACTORING_ADMIN" | "FACTORING_ANALISTA",
           factoringId: currentRole?.factoringId || "",
         });
       }
 
       setAlertStatus("success");
-      setAlertMessage("Invitación enviada correctamente.");
-      formik.resetForm();
+      setAlertMessage(
+        isEditMode 
+          ? "Rol actualizado correctamente." 
+          : "Invitación enviada correctamente."
+      );
       onSuccess?.();
     } catch (error: unknown) {
       const axiosError = error as {
@@ -71,7 +98,9 @@ const InviteUserModal = ({ open, onClose, onSuccess }: InviteUserModalProps) => 
       setAlertStatus("error");
       setAlertMessage(
         axiosError?.response?.data?.message ||
-          "Ocurrió un error al enviar la invitación"
+          (isEditMode 
+            ? "Ocurrió un error al actualizar el rol" 
+            : "Ocurrió un error al enviar la invitación")
       );
     }
   };
@@ -85,11 +114,30 @@ const InviteUserModal = ({ open, onClose, onSuccess }: InviteUserModalProps) => 
 
   const formik = useFormik<InviteFormData>({
     initialValues: {
-      email: "",
+      email: userData?.email || "",
+      role: userData?.currentRole || "",
     },
     validationSchema,
-    onSubmit: handleInvite,
+    onSubmit: handleSubmit,
+    enableReinitialize: true,
   });
+
+  useEffect(() => {
+    if (open && userData) {
+      formik.setValues({
+        email: userData.email || "",
+        role: userData.currentRole || "",
+      });
+    }
+  }, [open, userData]);
+
+  const modalTitle = isEditMode ? "Cambiar Rol" : "Invitar Usuario";
+  const modalDescription = isEditMode
+    ? `Selecciona el nuevo rol para el usuario.`
+    : `Ingresa el correo electrónico del usuario que deseas invitar a ${
+        isEmpresa ? "la empresa" : "el factoring"
+      }.`;
+  const submitButtonText = isEditMode ? "Guardar Cambios" : "Enviar Invitación";
 
   return (
     <Dialog
@@ -120,16 +168,20 @@ const InviteUserModal = ({ open, onClose, onSuccess }: InviteUserModalProps) => 
               width: 48,
               height: 48,
               borderRadius: 2,
-              backgroundColor: "primary.main",
+              backgroundColor: isEditMode ? "#F59E0B" : "primary.main",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <PersonAddIcon sx={{ color: "white", fontSize: 24 }} />
+            {isEditMode ? (
+              <EditIcon sx={{ color: "white", fontSize: 24 }} />
+            ) : (
+              <PersonAddIcon sx={{ color: "white", fontSize: 24 }} />
+            )}
           </Box>
           <Typography variant="h6" fontWeight={600}>
-            Invitar Usuario
+            {modalTitle}
           </Typography>
         </Box>
         <IconButton onClick={handleClose} disabled={loading}>
@@ -152,9 +204,7 @@ const InviteUserModal = ({ open, onClose, onSuccess }: InviteUserModalProps) => 
         )}
 
         <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
-          Ingresa el correo electrónico del usuario que deseas invitar a{" "}
-          {isEmpresa ? "la empresa" : "el factoring"}. Se le asignará el rol de{" "}
-          <strong>{isEmpresa ? "Usuario Empresa" : "Analista Factoring"}</strong>.
+          {modalDescription}
         </Typography>
 
         <form onSubmit={formik.handleSubmit}>
@@ -169,12 +219,49 @@ const InviteUserModal = ({ open, onClose, onSuccess }: InviteUserModalProps) => 
             helperText={formik.touched.email && formik.errors.email}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            disabled={loading || alertStatus === "success"}
+            disabled={loading || alertStatus === "success" || isEditMode}
+            sx={{ mb: 3 }}
           />
+
+          <FormControl 
+            fullWidth 
+            error={formik.touched.role && Boolean(formik.errors.role)}
+            disabled={loading || alertStatus === "success"}
+          >
+            <InputLabel id="role-select-label">Rol</InputLabel>
+            <Select
+              labelId="role-select-label"
+              id="role"
+              name="role"
+              value={formik.values.role}
+              label="Rol"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              sx={{
+                borderRadius: 1,
+                backgroundColor: "background.default",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(0, 0, 0, 0.23)",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "primary.main",
+                },
+              }}
+            >
+              {availableRoles.map((role) => (
+                <MenuItem key={role} value={role}>
+                  {ROLE_NAMES[role]}
+                </MenuItem>
+              ))}
+            </Select>
+            {formik.touched.role && formik.errors.role && (
+              <FormHelperText>{formik.errors.role}</FormHelperText>
+            )}
+          </FormControl>
         </form>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 3, pt: 0, gap: 2 }}>
+      <DialogActions sx={{ px: 3, pb: 3, pt: 3, gap: 2 }}>
         <Button
           variant="outlined"
           onClick={handleClose}
@@ -192,7 +279,7 @@ const InviteUserModal = ({ open, onClose, onSuccess }: InviteUserModalProps) => 
         <Button
           variant="contained"
           onClick={() => formik.handleSubmit()}
-          disabled={loading || alertStatus === "success" || !formik.isValid || !formik.dirty}
+          disabled={loading || alertStatus === "success" || !formik.isValid || (!isEditMode && !formik.dirty)}
           sx={{
             flex: 1,
             py: 1.5,
@@ -200,12 +287,16 @@ const InviteUserModal = ({ open, onClose, onSuccess }: InviteUserModalProps) => 
             textTransform: "none",
             fontWeight: 600,
             color: "white",
+            backgroundColor: isEditMode ? "#F59E0B" : "primary.main",
+            "&:hover": {
+              backgroundColor: isEditMode ? "#D97706" : undefined,
+            },
           }}
         >
           {loading ? (
             <CircularProgress size={24} color="inherit" />
           ) : (
-            "Enviar Invitación"
+            submitButtonText
           )}
         </Button>
       </DialogActions>
