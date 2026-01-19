@@ -3,6 +3,7 @@ import { Box, Tabs, Tab } from "@mui/material";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Layout from "../../components/Layout";
 import useAuthStore from "../../store/authStore";
+import { ROLES } from "../../utils/consts";
 
 const Edit = () => {
   const navigate = useNavigate();
@@ -10,20 +11,36 @@ const Edit = () => {
   const { currentRole } = useAuthStore();
 
   const getTabValue = () => {
+    const hasEntityTab =
+      currentRole?.contexto === "empresa" ||
+      currentRole?.contexto === "factoring";
+
     if (location.pathname.includes("/edit/empresa")) return 1;
     if (location.pathname.includes("/edit/factoring")) return 1;
+    if (location.pathname.includes("/edit/usuarios")) {
+      return hasEntityTab ? 2 : 1;
+    }
     return 0;
   };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    const hasEntityTab =
+      currentRole?.contexto === "empresa" ||
+      currentRole?.contexto === "factoring";
+
     if (newValue === 0) {
       navigate("/edit/usuario");
-    } else if (newValue === 1) {
+    } else if (hasEntityTab && newValue === 1) {
       if (currentRole?.contexto === "empresa") {
         navigate("/edit/empresa");
       } else if (currentRole?.contexto === "factoring") {
         navigate("/edit/factoring");
       }
+    } else if (
+      (hasEntityTab && newValue === 2) ||
+      (!hasEntityTab && newValue === 1)
+    ) {
+      navigate("/edit/usuarios");
     }
   };
 
@@ -39,12 +56,12 @@ const Edit = () => {
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={getTabValue()} onChange={handleTabChange}>
             <Tab label="Usuario" />
-            {currentRole?.contexto === "empresa" && (
-              <Tab label="Empresa" />
-            )}
-            {currentRole?.contexto === "factoring" && (
-              <Tab label="Factoring" />
-            )}
+            {currentRole?.contexto === "empresa" && <Tab label="Empresa" />}
+            {currentRole?.contexto === "factoring" && <Tab label="Factoring" />}
+
+            {[ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN].includes(
+              currentRole?.role || ""
+            ) && <Tab label="Gestión Usuarios" />}
           </Tabs>
         </Box>
 

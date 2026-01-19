@@ -11,28 +11,13 @@ import {
   useTheme,
   IconButton,
 } from "@mui/material";
-import {
-  GridView,
-  Description,
-  SwapHoriz,
-  Assessment,
-  Logout,
-  Search,
-  Menu,
-} from "@mui/icons-material";
+import { Logout, Search, Menu } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/png/factorlink-logo.png";
+import { mainMenuItems } from "../../config/menuConfig";
+import useAuthStore from "../../store/authStore";
 
-const menuItems = [
-  { text: "Inicio / Dashboard", icon: GridView, path: "/dashboard" },
-  { text: "Control de Facturas", icon: Description, path: "/facturas" },
-  { text: "Operaciones", icon: SwapHoriz, path: "/operaciones" },
-  { text: "Riesgo / Scoring", icon: Assessment, path: "/#" },
-];
-
-const bottomItems = [
-  { text: "Logout", icon: Logout, path: "/login" },
-];
+const bottomItems = [{ text: "Logout", icon: Logout, path: "/login" }];
 
 const Sidebar = () => {
   const theme = useTheme();
@@ -41,6 +26,7 @@ const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
+  const { currentRole } = useAuthStore();
 
   const sidebarWidth = collapsed ? 72 : 260;
 
@@ -118,52 +104,57 @@ const Sidebar = () => {
       </Box>
 
       {/* Main Menu */}
-      <List sx={{ px: 1, flex: 1 }}>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              onClick={() => navigate(item.path)}
-              sx={{
-                borderRadius: 2,
-                backgroundColor: isActive(item.path)
-                  ? "rgba(0, 188, 212, 0.08)"
-                  : "transparent",
-                "&:hover": {
-                  backgroundColor: "rgba(0, 188, 212, 0.12)",
-                },
-                justifyContent: collapsed ? "center" : "flex-start",
-                px: collapsed ? 1 : 2,
-              }}
-            >
-              <ListItemIcon
-                sx={{ minWidth: collapsed ? 0 : 40, justifyContent: "center" }}
+      {currentRole?.contexto && (
+        <List sx={{ px: 1, flex: 1 }}>
+          {mainMenuItems.map((item) => (
+            <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                onClick={() => navigate(item.path)}
+                sx={{
+                  borderRadius: 2,
+                  backgroundColor: isActive(item.path)
+                    ? "rgba(0, 188, 212, 0.08)"
+                    : "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 188, 212, 0.12)",
+                  },
+                  justifyContent: collapsed ? "center" : "flex-start",
+                  px: collapsed ? 1 : 2,
+                }}
               >
-                <item.icon
+                <ListItemIcon
                   sx={{
-                    color: isActive(item.path)
-                      ? "primary.main"
-                      : "text.secondary",
+                    minWidth: collapsed ? 0 : 40,
+                    justifyContent: "center",
                   }}
-                />
-              </ListItemIcon>
-              {!collapsed && (
-                <ListItemText
-                  primary={item.text}
-                  sx={{
-                    "& .MuiTypography-root": {
-                      fontWeight: isActive(item.path) ? 600 : 400,
+                >
+                  <item.icon
+                    sx={{
                       color: isActive(item.path)
-                        ? "text.primary"
+                        ? "primary.main"
                         : "text.secondary",
-                      fontSize: "0.95rem",
-                    },
-                  }}
-                />
-              )}
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+                    }}
+                  />
+                </ListItemIcon>
+                {!collapsed && (
+                  <ListItemText
+                    primary={item.text}
+                    sx={{
+                      "& .MuiTypography-root": {
+                        fontWeight: isActive(item.path) ? 600 : 400,
+                        color: isActive(item.path)
+                          ? "text.primary"
+                          : "text.secondary",
+                        fontSize: "0.95rem",
+                      },
+                    }}
+                  />
+                )}
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      )}
 
       {/* Bottom Menu */}
       <List sx={{ px: 1, pb: 2 }}>

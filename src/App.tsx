@@ -14,6 +14,7 @@ import Edit from "./pages/edit";
 import UsuarioTab from "./pages/edit/usuario";
 import EmpresaTab from "./pages/edit/empresa";
 import FactoringTab from "./pages/edit/factoring";
+import UsuariosTab from "./pages/edit/usuarios";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleSelection from "./pages/role/selection";
 
@@ -77,6 +78,7 @@ function App() {
             <Route path="usuario" element={<UsuarioTab />} />
             <Route path="empresa" element={<EmpresaTab />} />
             <Route path="factoring" element={<FactoringTab />} />
+            <Route path="usuarios" element={<UsuariosTab />} />
           </Route>
         </Routes>
       </BrowserRouter>

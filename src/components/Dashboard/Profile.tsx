@@ -6,7 +6,7 @@ import {
   Logout,
   Warning,
   Edit,
-  SwitchAccount
+  SwitchAccount,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -73,9 +73,21 @@ const Profile = () => {
   };
 
   const menuItems = [
-    { icon: <Edit fontSize="small" />, text: "Editar Información", action: handleEditProfile },
-    { icon: <SwitchAccount fontSize="small" />, text: "Cambiar de Rol", action: handleChangeRole },
-    { icon: <Logout fontSize="small" />, text: "Cerrar sesión", action: handleLogoutClick },
+    {
+      icon: <Edit fontSize="small" />,
+      text: "Editar Información",
+      action: handleEditProfile,
+    },
+    {
+      icon: <SwitchAccount fontSize="small" />,
+      text: "Cambiar de Rol",
+      action: handleChangeRole,
+    },
+    {
+      icon: <Logout fontSize="small" />,
+      text: "Cerrar sesión",
+      action: handleLogoutClick,
+    },
   ];
 
   return (
@@ -113,19 +125,26 @@ const Profile = () => {
               backgroundColor: "primary.light",
             }}
           >
-            { user?.firstName?.charAt(0).toUpperCase() || "" }{user?.lastName?.charAt(0).toUpperCase() || ""}
+            {user?.firstName?.charAt(0).toUpperCase() || ""}
+            {user?.lastName?.charAt(0).toUpperCase() || ""}
           </Avatar>
           <Box>
             <Typography
-              sx={{ fontWeight: 600, fontSize: "0.95rem", color: "text.primary" }}
+              sx={{
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                color: "text.primary",
+              }}
             >
-              { user?.firstName } {user?.lastName }
+              {user?.firstName} {user?.lastName}
             </Typography>
             <Typography
               variant="body2"
               sx={{ color: "text.secondary", fontSize: "0.85rem" }}
             >
-              { currentRole?.contexto === 'empresa' ? currentRole?.empresa?.razonSocial || 'N/A' : currentRole?.factoring?.razonSocial || 'N/A' }
+              {currentRole?.contexto === "empresa"
+                ? currentRole?.empresa?.razonSocial || "N/A"
+                : currentRole?.factoring?.razonSocial || "N/A"}
             </Typography>
           </Box>
           <KeyboardArrowDown
@@ -162,15 +181,17 @@ const Profile = () => {
           }}
         >
           <Box sx={{ px: 2, py: 1.5, textAlign: "center" }}>
-            <Chip
-              label={capitalizeFirstLetter(currentRole?.contexto || "")}
-              size="small"
-              sx={{
-                backgroundColor: "primary.main",
-                color: "white",
-                fontWeight: 500,
-              }}
-            />
+            {currentRole?.contexto && (
+              <Chip
+                label={capitalizeFirstLetter(currentRole?.contexto || "")}
+                size="small"
+                sx={{
+                  backgroundColor: "primary.main",
+                  color: "white",
+                  fontWeight: 500,
+                }}
+              />
+            )}
           </Box>
           <Divider />
           {menuItems.map((item, index) => (
@@ -189,7 +210,11 @@ const Profile = () => {
                 {item.icon}
               </ListItemIcon>
               <ListItemText
-                primary={item.text === "Cerrar sesión" && loading ? "Cerrando sesión..." : item.text}
+                primary={
+                  item.text === "Cerrar sesión" && loading
+                    ? "Cerrando sesión..."
+                    : item.text
+                }
                 primaryTypographyProps={{
                   fontSize: "0.9rem",
                   color: "text.primary",
@@ -218,7 +243,8 @@ const Profile = () => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            ¿Estás seguro de que deseas cerrar tu sesión? Tendrás que volver a iniciar sesión para acceder al sistema.
+            ¿Estás seguro de que deseas cerrar tu sesión? Tendrás que volver a
+            iniciar sesión para acceder al sistema.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
