@@ -29,13 +29,24 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import type { User } from "../../../types/user";
 import { useUsers } from "../../../hooks/useUsers";
 import useAuthStore from "../../../store/authStore";
+import InviteUserModal from "../../Modals/InviteUserModal";
+import type { Role } from "../../../types/role";
+import { ROLES } from "../../../utils/consts";
 
 const getInitials = (firstName: string, lastName: string) => {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 };
 
+const getUserRole = (roles: Role[], contexto?: string, currentId?: string) => {
+  if (contexto === "empresa") {
+    return roles.find((role) => role.empresaId === currentId);
+  } else if (contexto === "factoring") {
+    return roles.find((role) => role.factoringId === currentId);
+  }
+};
+
 const getRoleColor = (role: string) => {
-  if (role === "Admin Empresa") return "#00A86B";
+  if (role === ROLES.EMPRESA_ADMIN || role === ROLES.FACTORING_ADMIN) return "#00A86B";
   return "#6B7280";
 };
 
@@ -57,14 +68,27 @@ const getStatusConfig = (status: boolean) => {
 const Users = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [_selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
-  const { user: currentUser, currentRole } = useAuthStore();
+  const { currentRole } = useAuthStore();
   const [users, setUsers] = useState<User[]>([]);
   const { getUsersByEmpresaId, getUsersByFactoringId } = useUsers();
 
+  const fetchUsers = async () => {
+    try {
+      const usersData =
+        currentRole?.contexto === "empresa"
+          ? await getUsersByEmpresaId(currentRole?.empresaId || "")
+          : await getUsersByFactoringId(currentRole?.factoringId || "");
+      setUsers(usersData);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
-    userId: number
+    userId: number,
   ) => {
     setAnchorEl(event.currentTarget);
     setSelectedUserId(userId);
@@ -76,18 +100,6 @@ const Users = () => {
   };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const users =
-          currentRole?.contexto === "empresa"
-            ? await getUsersByEmpresaId(currentRole?.empresaId || "")
-            : await getUsersByFactoringId(currentRole?.factoringId || "");
-        setUsers(users);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
     fetchUsers();
   }, [currentRole?.empresaId, currentRole?.factoringId, currentRole?.contexto]);
 
@@ -133,6 +145,7 @@ const Users = () => {
         <Button
           variant="contained"
           startIcon={<PersonAddIcon />}
+          onClick={() => setInviteModalOpen(true)}
           sx={{
             backgroundColor: "#00BCD4;",
             "&:hover": { backgroundColor: "#00BCD4;" },
@@ -290,7 +303,7 @@ const Users = () => {
                           sx={{ fontWeight: 600, color: "#1E293B" }}
                         >
                           {user.firstName} {user.lastName}
-                          {user.id === currentUser?.id && (
+                          {user.isCurrentUser && (
                             <Typography
                               component="span"
                               variant="caption"
@@ -311,17 +324,47 @@ const Users = () => {
                   <TableCell>
                     <Chip
                       icon={<VerifiedUserIcon sx={{ fontSize: 14 }} />}
-                      label={user.roles[0].role}
+                      label={
+                        getUserRole(
+                          user.roles,
+                          currentRole?.contexto,
+                          currentRole?.contexto === "empresa"
+                            ? currentRole?.empresaId
+                            : currentRole?.factoringId,
+                        )?.role || "N/A"
+                      }
                       size="small"
                       sx={{
                         backgroundColor:
-                          user.roles[0].role === "Admin Empresa"
+                          getUserRole(
+                            user.roles,
+                            currentRole?.contexto,
+                            currentRole?.contexto === "empresa"
+                              ? currentRole?.empresaId
+                              : currentRole?.factoringId,
+                          )?.role === ROLES.EMPRESA_ADMIN
                             ? "rgba(0, 168, 107, 0.1)"
                             : "#F1F5F9",
-                        color: getRoleColor(user.roles[0].role),
+                        color: getRoleColor(
+                          getUserRole(
+                            user.roles,
+                            currentRole?.contexto,
+                            currentRole?.contexto === "empresa" 
+                            ? currentRole?.empresaId 
+                            : currentRole?.factoringId
+                          )?.role || "N/A",
+                        ),
                         fontWeight: 500,
                         "& .MuiChip-icon": {
-                          color: getRoleColor(user.roles[0].role),
+                          color: getRoleColor(
+                          getUserRole(
+                            user.roles,
+                            currentRole?.contexto,
+                            currentRole?.contexto === "empresa" 
+                            ? currentRole?.empresaId 
+                            : currentRole?.factoringId
+                          )?.role || "N/A",
+                        ),
                         },
                       }}
                     />
@@ -343,12 +386,24 @@ const Users = () => {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ color: "#64748B" }}>
-                      {"dd-mm-yyyy"}
+                      {user?.createdAt
+                        ? new Date(user.createdAt).toLocaleDateString("es-ES", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })
+                        : "N/A"}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ color: "#64748B" }}>
-                      {"dd-mm-yyyy"}
+                      {user?.updatedAt
+                        ? new Date(user.updatedAt).toLocaleDateString("es-ES", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })
+                        : "N/A"}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -398,6 +453,13 @@ const Users = () => {
           />
         </MenuItem>
       </Menu>
+
+      {/* Invite User Modal */}
+      <InviteUserModal
+        open={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        onSuccess={fetchUsers}
+      />
     </Box>
   );
 };

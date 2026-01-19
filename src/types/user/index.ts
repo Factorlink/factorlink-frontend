@@ -14,4 +14,7 @@ export interface User {
   fechaNacimiento?: string | Date;
   preferenciaContacto?: PreferenciaContacto;
   isActive?: boolean;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  isCurrentUser?: boolean;
 }
