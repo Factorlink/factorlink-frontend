@@ -17,6 +17,7 @@ import FactoringTab from "./pages/edit/factoring";
 import UsuariosTab from "./pages/edit/usuarios";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleSelection from "./pages/role/selection";
+import Invitations from "./pages/invitations";
 
 function App() {
   return (
@@ -63,6 +64,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <RoleSelection />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invitations"
+            element={
+              <ProtectedRoute>
+                <Invitations />
               </ProtectedRoute>
             }
           />

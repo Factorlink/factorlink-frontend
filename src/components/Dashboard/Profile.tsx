@@ -7,6 +7,7 @@ import {
   Warning,
   Edit,
   SwitchAccount,
+  MailOutline,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -72,11 +73,21 @@ const Profile = () => {
     navigate("/role-selection");
   };
 
+  const handleInvitations = () => {
+    handleClose();
+    navigate("/invitations");
+  };
+
   const menuItems = [
     {
       icon: <Edit fontSize="small" />,
       text: "Editar Información",
       action: handleEditProfile,
+    },
+    {
+      icon: <MailOutline fontSize="small" />,
+      text: "Invitaciones",
+      action: handleInvitations,
     },
     {
       icon: <SwitchAccount fontSize="small" />,
@@ -94,7 +105,13 @@ const Profile = () => {
     <>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Actualizado hace 2 minutos
+          Actualizado hace{" "}
+          {user?.updatedAt
+            ? Math.floor(
+                (Date.now() - new Date(user.updatedAt).getTime()) / 60000,
+              )
+            : 0}{" "}
+          minutos
         </Typography>
 
         <IconButton
