@@ -263,7 +263,7 @@ const Invitations: FC = () => {
                 <TableBody>
                   {[...invitations.empresas, ...invitations.factorings].map(
                     (invitation) => {
-                      const typeConfig = getTypeConfig("empresa");
+                      const typeConfig = getTypeConfig(invitation.empresaId ? "empresa" : "factoring");
                       const isLoading = loading;
 
                       return (
