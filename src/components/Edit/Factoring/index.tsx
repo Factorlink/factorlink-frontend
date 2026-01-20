@@ -18,6 +18,7 @@ import { factoringFieldsSchema } from "../../../utils/validations/factoring-fiel
 import { handleRutInputChange } from "../../../utils/validations/shared-fields";
 import useAuthStore from "../../../store/authStore";
 import type { Role } from "../../../types/role";
+import { ROLES } from "../../../utils/consts";
 
 interface FactoringFormData {
   rut: string;
@@ -28,7 +29,7 @@ interface FactoringFormData {
 const Factoring = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">(
-    "success"
+    "success",
   );
   const [errorMessage, setErrorMessage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -36,6 +37,7 @@ const Factoring = () => {
   const { currentRole } = useAuthStore();
 
   const { createFactoring, updateFactoring, loading } = useFactoring();
+  const isReadOnly = currentRole?.role !== ROLES.FACTORING_ADMIN;
 
   const handleCreateFactoring = async (values: FactoringFormData) => {
     setIsEditing(false);
@@ -59,7 +61,7 @@ const Factoring = () => {
       };
       setErrorMessage(
         axiosError?.response?.data?.message?.[0] ||
-          "Ocurrió un error al crear el factoring"
+          "Ocurrió un error al crear el factoring",
       );
       setModalStatus("error");
       setModalOpen(true);
@@ -88,7 +90,7 @@ const Factoring = () => {
       };
       setErrorMessage(
         axiosError?.response?.data?.message ||
-          "Ocurrió un error al actualizar el factoring"
+          "Ocurrió un error al actualizar el factoring",
       );
       setModalStatus("error");
       setModalOpen(true);
@@ -97,7 +99,7 @@ const Factoring = () => {
 
   const handleCloseModal = (
     _event?: unknown,
-    reason?: "backdropClick" | "escapeKeyDown"
+    reason?: "backdropClick" | "escapeKeyDown",
   ) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
     setModalOpen(false);
@@ -166,6 +168,20 @@ const Factoring = () => {
               onChange={handleRutChange}
               onBlur={formik.handleBlur}
               disabled={loading}
+              InputProps={{ readOnly: isReadOnly }}
+              sx={
+                isReadOnly
+                  ? {
+                      "& .MuiInputBase-input": {
+                        color: "text.secondary",
+                        cursor: "default",
+                      },
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "action.hover",
+                      },
+                    }
+                  : undefined
+              }
             />
 
             <StyledTextField
@@ -184,6 +200,20 @@ const Factoring = () => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
+              InputProps={{ readOnly: isReadOnly }}
+              sx={
+                isReadOnly
+                  ? {
+                      "& .MuiInputBase-input": {
+                        color: "text.secondary",
+                        cursor: "default",
+                      },
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "action.hover",
+                      },
+                    }
+                  : undefined
+              }
             />
 
             <StyledTextField
@@ -193,62 +223,82 @@ const Factoring = () => {
               name="direccion"
               inputProps={{ maxLength: 200 }}
               value={formik.values.direccion}
-              error={formik.touched.direccion && Boolean(formik.errors.direccion)}
+              error={
+                formik.touched.direccion && Boolean(formik.errors.direccion)
+              }
               helperText={formik.touched.direccion && formik.errors.direccion}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
+              InputProps={{ readOnly: isReadOnly }}
+              sx={
+                isReadOnly
+                  ? {
+                      "& .MuiInputBase-input": {
+                        color: "text.secondary",
+                        cursor: "default",
+                      },
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "action.hover",
+                      },
+                    }
+                  : undefined
+              }
             />
 
-            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-              <Button
-                variant="contained"
-                onClick={() => formik.resetForm()}
-                disabled={loading || !formik.dirty}
-                sx={{
-                  backgroundColor: "secondary.main",
-                  color: "white",
-                  textTransform: "none",
-                  padding: "12px 24px",
-                  fontSize: "1rem",
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  boxShadow: "none",
-                  "&:hover": {
-                    backgroundColor: "secondary.dark",
+            {!isReadOnly && (
+              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                <Button
+                  variant="contained"
+                  onClick={() => formik.resetForm()}
+                  disabled={loading || !formik.dirty || isReadOnly}
+                  sx={{
+                    backgroundColor: "secondary.main",
+                    color: "white",
+                    textTransform: "none",
+                    padding: "12px 24px",
+                    fontSize: "1rem",
+                    fontWeight: 500,
+                    borderRadius: 2,
                     boxShadow: "none",
-                  },
-                }}
-              >
-                Cancelar
-              </Button>
+                    "&:hover": {
+                      backgroundColor: "secondary.dark",
+                      boxShadow: "none",
+                    },
+                  }}
+                >
+                  Cancelar
+                </Button>
 
-              <Button
-                variant="contained"
-                onClick={() => formik.handleSubmit()}
-                disabled={loading || !formik.isValid || !formik.dirty}
-                sx={{
-                  backgroundColor: "success.main",
-                  color: "white",
-                  textTransform: "none",
-                  padding: "12px 24px",
-                  fontSize: "1rem",
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  boxShadow: "none",
-                  "&:hover": {
-                    backgroundColor: "success.dark",
+                <Button
+                  variant="contained"
+                  onClick={() => formik.handleSubmit()}
+                  disabled={
+                    loading || !formik.isValid || !formik.dirty || isReadOnly
+                  }
+                  sx={{
+                    backgroundColor: "success.main",
+                    color: "white",
+                    textTransform: "none",
+                    padding: "12px 24px",
+                    fontSize: "1rem",
+                    fontWeight: 500,
+                    borderRadius: 2,
                     boxShadow: "none",
-                  },
-                }}
-              >
-                {loading ? (
-                  <CircularProgress size={24} sx={{ color: "white" }} />
-                ) : (
-                  "Guardar cambios"
-                )}
-              </Button>
-            </Box>
+                    "&:hover": {
+                      backgroundColor: "success.dark",
+                      boxShadow: "none",
+                    },
+                  }}
+                >
+                  {loading ? (
+                    <CircularProgress size={24} sx={{ color: "white" }} />
+                  ) : (
+                    "Guardar cambios"
+                  )}
+                </Button>
+              </Box>
+            )}
           </Box>
         </Box>
       </Box>
@@ -354,7 +404,7 @@ const Factoring = () => {
           )}
         </DialogActions>
       </Dialog>
-      </>
+    </>
   );
 };
 
