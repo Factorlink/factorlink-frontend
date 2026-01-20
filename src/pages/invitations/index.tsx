@@ -253,12 +253,6 @@ const Invitations: FC = () => {
                       Tipo
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Rol Asignado
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Invitado por
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
                       Fecha
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
@@ -302,22 +296,6 @@ const Invitations: FC = () => {
                                 },
                               }}
                             />
-                          </TableCell>
-                          <TableCell>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: "#64748B" }}
-                            >
-                              {"EMPRESA_USUARIO"}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: "#64748B" }}
-                            >
-                              {"PASCUAL"}
-                            </Typography>
                           </TableCell>
                           <TableCell>
                             <Typography
