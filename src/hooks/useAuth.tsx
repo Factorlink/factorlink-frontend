@@ -66,12 +66,34 @@ export const useAuth = () => {
     }
   };
 
+  const refreshToken = async (refreshToken: string) => {
+    try {
+      setLoading(true);
+      const response = await api.post("auth/refresh-token", { refreshToken });
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkStatus = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("auth/check-status");
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     register,
     login,
     logout,
     forgotPassword,
     resetPassword,
+    refreshToken,
+    checkStatus,
     loading,
   };
 };

@@ -8,10 +8,14 @@ interface AuthState {
   refreshToken: string;
   currentRole: Role | null;
   user: User | null;
+  tokenExpiresAt: number | null;
+  lastActivity: number;
   setAccessToken: (token: string) => void;
   setRefreshToken: (token: string) => void;
   setUser: (user: User | null) => void;
   setCurrentRole: (role: Role | null) => void;
+  setTokenExpiresAt: (timestamp: number | null) => void;
+  setLastActivity: (timestamp: number) => void;
   logout: () => void;
 }
 
@@ -22,11 +26,21 @@ const useAuthStore = create<AuthState>()(
       refreshToken: "",
       currentRole: null,
       user: null,
+      tokenExpiresAt: null,
+      lastActivity: Date.now(),
       setAccessToken: (token: string) => set({ accessToken: token }),
       setRefreshToken: (token: string) => set({ refreshToken: token }),
       setUser: (user: User | null) => set({ user: user }),
       setCurrentRole: (role: Role | null) => set({ currentRole: role }),
-      logout: () => set({ accessToken: "", refreshToken: "", user: null, currentRole: null }),
+      setTokenExpiresAt: (timestamp: number | null) => set({ tokenExpiresAt: timestamp }),
+      setLastActivity: (timestamp: number) => set({ lastActivity: timestamp }),
+      logout: () => set({ 
+        accessToken: "", 
+        refreshToken: "", 
+        user: null, 
+        currentRole: null,
+        tokenExpiresAt: null,
+      }),
     }),
     {
       name: "auth-storage",

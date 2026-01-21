@@ -18,12 +18,14 @@ import UsuariosTab from "./pages/edit/usuarios";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleSelection from "./pages/role/selection";
 import Invitations from "./pages/invitations";
+import { AuthProvider } from "./providers/AuthProvider";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<EmpresasRegister />} />
@@ -90,7 +92,8 @@ function App() {
             <Route path="usuarios" element={<UsuariosTab />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
