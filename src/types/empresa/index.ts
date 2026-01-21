@@ -12,4 +12,5 @@ export interface Empresa {
   siiPassword?: string;
   siiRut?: string;
   siiSyncEnabled?: boolean;
+  inviteAccepted?: string;
 }

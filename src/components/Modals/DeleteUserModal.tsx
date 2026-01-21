@@ -33,7 +33,9 @@ const DeleteUserModal = ({
   onSuccess,
   userData,
 }: DeleteUserModalProps) => {
-  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
+  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
+    null,
+  );
   const [alertMessage, setAlertMessage] = useState("");
 
   const { currentRole } = useAuthStore();
@@ -67,7 +69,7 @@ const DeleteUserModal = ({
       setAlertStatus("error");
       setAlertMessage(
         axiosError?.response?.data?.message ||
-          "Ocurrió un error al eliminar el usuario"
+          "Ocurrió un error al eliminar el usuario",
       );
     }
   };
@@ -145,21 +147,23 @@ const DeleteUserModal = ({
             mt: 2,
           }}
         >
-          <Typography
-            variant="body2"
-            sx={{ color: "#EF4444", lineHeight: 1.6 }}
-          >
-            Esta acción eliminará a{" "}
+          {alertStatus !== "success" && (
             <Typography
-              component="span"
               variant="body2"
-              sx={{ fontWeight: 600 }}
+              sx={{ color: "#EF4444", lineHeight: 1.6 }}
             >
-              {userData.fullName}
-            </Typography>{" "}
-            ({userData.email}) de la organización. Esta acción no se puede
-            deshacer.
-          </Typography>
+              Esta acción eliminará a{" "}
+              <Typography
+                component="span"
+                variant="body2"
+                sx={{ fontWeight: 600 }}
+              >
+                {userData.fullName}
+              </Typography>{" "}
+              ({userData.email}) de la organización. Esta acción no se puede
+              deshacer.
+            </Typography>
+          )}
         </Box>
       </DialogContent>
 
@@ -176,31 +180,33 @@ const DeleteUserModal = ({
             fontWeight: 600,
           }}
         >
-          Cancelar
+          {alertStatus === "success" ? "Cerrar" : "Cancelar"}
         </Button>
-        <Button
-          variant="contained"
-          onClick={handleDelete}
-          disabled={loading || alertStatus === "success"}
-          sx={{
-            flex: 1,
-            py: 1.5,
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 600,
-            color: "white",
-            backgroundColor: "#EF4444",
-            "&:hover": {
-              backgroundColor: "#DC2626",
-            },
-          }}
-        >
-          {loading ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            "Eliminar Usuario"
-          )}
-        </Button>
+        {alertStatus !== "success" && (
+          <Button
+            variant="contained"
+            onClick={handleDelete}
+            disabled={loading}
+            sx={{
+              flex: 1,
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              color: "white",
+              backgroundColor: "#EF4444",
+              "&:hover": {
+                backgroundColor: "#DC2626",
+              },
+            }}
+          >
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Eliminar Usuario"
+            )}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

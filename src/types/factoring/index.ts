@@ -7,4 +7,5 @@ export interface Factoring {
   isActive?: boolean;
   razonSocial: string;
   rut: string;
+  inviteAccepted?: string;
 }
