@@ -5,6 +5,18 @@ import type { User } from "../types/user";
 export const useUsers = () => {
   const [loading, setLoading] = useState(false);
 
+  const getMyInfo = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('users/me');
+      return response.data;
+    } catch (error) {
+      throw error
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const getAllUsers = async (): Promise<User[]> => {
     setLoading(true);
     try {
@@ -46,6 +58,7 @@ export const useUsers = () => {
     getAllUsers,
     getUsersByEmpresaId,
     getUsersByFactoringId,
+    getMyInfo,
   };
 };
 

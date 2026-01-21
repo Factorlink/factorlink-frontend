@@ -21,6 +21,10 @@ import BusinessIcon from "@mui/icons-material/Business";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import Layout from "../../components/Layout";
 import { useInvitation } from "../../hooks/useInvitation";
+import useAuthStore from "../../store/authStore";
+import { useUsers } from "../../hooks/useUsers";
+
+
 
 interface Invitation {
   empresaId?: string;
@@ -44,6 +48,9 @@ const Invitations: FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const { getMyInfo } = useUsers();
+  const { user, setUser } = useAuthStore();
+
   const {
     getPendingInvites,
     respondEmpresaInvite,
@@ -59,7 +66,6 @@ const Invitations: FC = () => {
       setInvitations(data || { empresas: [], factorings: [] });
     } catch (err) {
       setError("Error al cargar las invitaciones");
-      console.error("Error fetching invitations:", err);
     } finally {
       setLoadingData(false);
     }
@@ -80,6 +86,10 @@ const Invitations: FC = () => {
           accept: true,
         });
       }
+
+      const {user: updatedUser} = await getMyInfo();
+      
+      setUser({ ...user!, roles: updatedUser.roles });
 
       setSuccessMessage("Invitación aceptada correctamente");
       fetchInvitations();
