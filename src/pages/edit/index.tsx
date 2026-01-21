@@ -29,6 +29,7 @@ const Edit = () => {
 
     if (adminRoles.includes(currentRole?.role || "")) {
       tabs.push({ label: "Gestión Usuarios", path: "/edit/usuarios" });
+      tabs.push({ label: "Documentos Legales", path: "/edit/documentos-legales" });
     }
 
     return tabs;
@@ -59,17 +60,9 @@ const Edit = () => {
       <Box sx={{ p: 3, flex: 1 }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={getTabValue()} onChange={handleTabChange}>
-            <Tab label="Usuario" />
-            {[ROLES.EMPRESA_ADMIN, ROLES.EMPRESA_USUARIO].includes(
-              currentRole?.role || "",
-            ) && <Tab label="Empresa" />}
-            {[ROLES.FACTORING_ADMIN, ROLES.FACTORING_ANALISTA].includes(
-              currentRole?.role || "",
-            ) && <Tab label="Factoring" />}
-
-            {[ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN].includes(
-              currentRole?.role || "",
-            ) && <Tab label="Gestión Usuarios" />}
+            {buildTabs().map((t) => (
+              <Tab key={t.path} label={t.label} />
+            ))}
           </Tabs>
         </Box>
 
