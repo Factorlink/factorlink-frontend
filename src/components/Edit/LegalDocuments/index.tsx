@@ -1,7 +1,24 @@
-import { Typography } from "@mui/material";
+import { Box } from "@mui/material";
+import useAuthStore from "../../../store/authStore";
+import EmpresaDocumentStatus from "./EmpresaDocumentStatus";
+import FactoringDocumentStatus from "./FactoringDocumentStatus";
 
 const LegalDocuments = () => {
-  return <Typography variant="h5">Documentos Legales</Typography>;
+  const { currentRole } = useAuthStore();
+
+  const isEmpresa = currentRole?.contexto === "empresa";
+  const isFactoring = currentRole?.contexto === "factoring";
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      {isEmpresa && <EmpresaDocumentStatus currentLevel={currentRole.nivel} />}
+      {isFactoring && (
+        <FactoringDocumentStatus
+          estadoEnrolamiento={currentRole.factoring?.estadoEnrolamiento}
+        />
+      )}
+    </Box>
+  );
 };
 
 export default LegalDocuments;
