@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import useAuthStore from "../../../store/authStore";
 import EmpresaDocumentStatus from "./EmpresaDocumentStatus";
 import FactoringDocumentStatus from "./FactoringDocumentStatus";
+import ValidationProcessInfo from "./ValidationProcessInfo";
 
 const LegalDocuments = () => {
   const { currentRole } = useAuthStore();
@@ -17,6 +18,7 @@ const LegalDocuments = () => {
           estadoEnrolamiento={currentRole.factoring?.estadoEnrolamiento}
         />
       )}
+      <ValidationProcessInfo />
     </Box>
   );
 };

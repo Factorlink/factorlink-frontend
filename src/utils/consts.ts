@@ -25,3 +25,26 @@ export const ROLE_NAMES = {
   [ROLES.DEFAULT]: "Usuario por Defecto",
 }
 
+type DocumentItem = { id: string; label: string };
+
+export const EMPRESA_DOCUMENTOS: DocumentItem[] = [
+  { id: "escritura_constitucion", label: "Escritura de constitución" },
+  { id: "rut_empresa", label: "RUT empresa" },
+  { id: "representante_legal", label: "Representante legal" },
+  { id: "poderes", label: "Poderes" },
+  { id: "otros", label: "Otros documentos legales" },
+];
+
+export const FACTORING_DOCUMENTOS: DocumentItem[] = [
+  { id: "escritura_constitucion", label: "Escritura de constitución" },
+  { id: "rut_factoring", label: "RUT factoring" },
+  { id: "representante_legal", label: "Representante legal" },
+  { id: "poderes", label: "Poderes" },
+  { id: "documentacion_regulatoria", label: "Documentación regulatoria" },
+];
+
+export const DOCUMENT_STATES = {
+  PENDIENTE: "PENDIENTE",
+  RECHAZADO: "RECHAZADO",
+  VALIDADO: "VALIDADO",
+};
