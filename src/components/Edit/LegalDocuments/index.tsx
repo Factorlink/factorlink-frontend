@@ -3,6 +3,7 @@ import useAuthStore from "../../../store/authStore";
 import EmpresaDocumentStatus from "./EmpresaDocumentStatus";
 import FactoringDocumentStatus from "./FactoringDocumentStatus";
 import ValidationProcessInfo from "./ValidationProcessInfo";
+import DocumentsTable from "./DocumentsTable";
 
 const LegalDocuments = () => {
   const { currentRole } = useAuthStore();
@@ -19,6 +20,7 @@ const LegalDocuments = () => {
         />
       )}
       <ValidationProcessInfo />
+      <DocumentsTable />
     </Box>
   );
 };
