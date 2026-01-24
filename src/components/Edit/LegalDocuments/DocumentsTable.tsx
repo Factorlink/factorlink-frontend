@@ -23,6 +23,8 @@ import {
   Lock as LockIcon,
 } from "@mui/icons-material";
 import UploadDocumentModal from "../../Modals/UploadDocumentModal";
+import DeleteDocumentModal from "../../Modals/DeleteDocumentModal";
+import DownloadDocumentModal from "../../Modals/DownloadDocumentModal";
 import { useLegalDocuments } from "../../../hooks/useLegalDocuments";
 import useAuthStore from "../../../store/authStore";
 import { DOCUMENT_NAMES } from "../../../utils/consts";
@@ -71,9 +73,15 @@ const statusConfig: Record<
 
 const DocumentsTable = () => {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<{
+    id: string;
+    nombre: string;
+  } | null>(null);
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const { currentRole } = useAuthStore();
-  const { getLegalDocumentsByFactoringId, getLegalDocumentsByEmpresaId, getLegalDocumentById, deleteLegalDocument } =
+  const { getLegalDocumentsByFactoringId, getLegalDocumentsByEmpresaId } =
     useLegalDocuments();
 
   const renderStatusChip = (estado: DocumentStatus) => {
@@ -117,10 +125,40 @@ const DocumentsTable = () => {
     );
   };
 
+  const getDocumentDisplayName = (row: DocumentRow) => {
+    return `${DOCUMENT_NAMES[row.tipo as keyof typeof DOCUMENT_NAMES]} ${row.tipo === "rut" ? capitalizeFirstLetter(currentRole?.contexto || "") : ""}` || "-";
+  };
+
+  const handleDownloadClick = (row: DocumentRow) => {
+    setSelectedDocument({
+      id: row.id,
+      nombre: getDocumentDisplayName(row),
+    });
+    setDownloadModalOpen(true);
+  };
+
+  const handleDeleteClick = (row: DocumentRow) => {
+    setSelectedDocument({
+      id: row.id,
+      nombre: getDocumentDisplayName(row),
+    });
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteSuccess = () => {
+    fetchDocuments();
+    setDeleteModalOpen(false);
+    setSelectedDocument(null);
+  };
+
   const renderActions = (row: DocumentRow) => {
     if (row.estadoValidacion === "sin_subir") {
       return (
-        <IconButton size="small" sx={{ color: "primary.main" }}>
+        <IconButton
+          size="small"
+          sx={{ color: "primary.main" }}
+          onClick={() => setUploadModalOpen(true)}
+        >
           <UploadIcon />
         </IconButton>
       );
@@ -129,7 +167,11 @@ const DocumentsTable = () => {
     if (row.estadoValidacion === "validado") {
       return (
         <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton size="small" sx={{ color: "primary.main" }}>
+          <IconButton
+            size="small"
+            sx={{ color: "primary.main" }}
+            onClick={() => handleDownloadClick(row)}
+          >
             <DownloadIcon />
           </IconButton>
           <Box
@@ -149,10 +191,18 @@ const DocumentsTable = () => {
 
     return (
       <Box sx={{ display: "flex", gap: 1 }}>
-        <IconButton size="small" sx={{ color: "primary.main" }}>
+        <IconButton
+          size="small"
+          sx={{ color: "primary.main" }}
+          onClick={() => handleDownloadClick(row)}
+        >
           <DownloadIcon />
         </IconButton>
-        <IconButton size="small" sx={{ color: "error.main" }}>
+        <IconButton
+          size="small"
+          sx={{ color: "error.main" }}
+          onClick={() => handleDeleteClick(row)}
+        >
           <DeleteIcon />
         </IconButton>
       </Box>
@@ -167,7 +217,6 @@ const DocumentsTable = () => {
           : await getLegalDocumentsByFactoringId(
               currentRole?.factoringId || "",
             );
-      console.log(documents);
       setDocuments(documents);
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -300,8 +349,7 @@ const DocumentsTable = () => {
                       variant="body1"
                       sx={{ color: "text.primary", fontWeight: 500 }}
                     >
-                      {`${DOCUMENT_NAMES[row.tipo as keyof typeof DOCUMENT_NAMES]} ${row.tipo === "rut" ? capitalizeFirstLetter(currentRole?.contexto || "") : ""}` ||
-                        "-"}
+                      {getDocumentDisplayName(row)}
                     </Typography>
                   </Box>
                 </TableCell>
@@ -351,6 +399,29 @@ const DocumentsTable = () => {
         onClose={() => setUploadModalOpen(false)}
         onSuccess={handleUploadSuccess}
       />
+
+      {selectedDocument && (
+        <>
+          <DeleteDocumentModal
+            open={deleteModalOpen}
+            onClose={() => {
+              setDeleteModalOpen(false);
+              setSelectedDocument(null);
+            }}
+            onSuccess={handleDeleteSuccess}
+            documentData={selectedDocument}
+          />
+
+          <DownloadDocumentModal
+            open={downloadModalOpen}
+            onClose={() => {
+              setDownloadModalOpen(false);
+              setSelectedDocument(null);
+            }}
+            documentData={selectedDocument}
+          />
+        </>
+      )}
     </Box>
   );
 };
