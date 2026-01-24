@@ -140,6 +140,10 @@ const Users = () => {
       : userRole?.factoring?.inviteAccepted;
   };
 
+  const canInvite = () => {
+    return (Number(currentRole?.empresa?.nivel) || 0) >= 2 || currentRole?.factoring?.estadoEnrolamiento;
+  }
+
   const totalUsers = users.length;
   const activeUsers = users.filter(
     (u) => getUsersInvitationReesponse(u.roles) === "aceptada",
@@ -183,7 +187,7 @@ const Users = () => {
             </Typography>
           </Box>
         </Box>
-        <Button
+        {(canInvite()) && (<Button
           variant="contained"
           startIcon={<PersonAddIcon />}
           onClick={() => setInviteModalOpen(true)}
@@ -198,7 +202,7 @@ const Users = () => {
           }}
         >
           Invitar Usuario
-        </Button>
+        </Button>) }
       </Box>
 
       {/* Stats Cards */}

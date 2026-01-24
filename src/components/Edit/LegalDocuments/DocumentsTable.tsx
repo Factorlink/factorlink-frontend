@@ -228,6 +228,10 @@ const DocumentsTable = () => {
     setUploadModalOpen(false);
   };
 
+  const canOperate = () => {
+      return (Number(currentRole?.empresa?.nivel) || 0) >= 2 ||  currentRole?.factoring?.estadoEnrolamiento;
+    }
+
   useEffect(() => {
     fetchDocuments();
   }, []);
@@ -255,18 +259,20 @@ const DocumentsTable = () => {
         >
           Documentos Legales Requeridos
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<UploadIcon />}
-          onClick={() => setUploadModalOpen(true)}
-          sx={{
-            bgcolor: "primary.main",
-            "&:hover": { bgcolor: "primary.dark" },
-            color: "white",
-          }}
-        >
-          Subir Documento
-        </Button>
+        {canOperate() && (
+          <Button
+            variant="contained"
+            startIcon={<UploadIcon />}
+            onClick={() => setUploadModalOpen(true)}
+            sx={{
+              bgcolor: "primary.main",
+              "&:hover": { bgcolor: "primary.dark" },
+              color: "white",
+            }}
+          >
+            Subir Documento
+          </Button>
+        )}
       </Box>
 
       <TableContainer>
