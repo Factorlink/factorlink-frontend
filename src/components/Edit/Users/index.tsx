@@ -33,6 +33,7 @@ import InviteUserModal from "../../Modals/InviteUserModal";
 import DeleteUserModal from "../../Modals/DeleteUserModal";
 import type { Role } from "../../../types/role";
 import { ROLE_NAMES, ROLES } from "../../../utils/consts";
+import { capitalizeFirstLetter } from "../../../utils/utils";
 
 const getInitials = (firstName: string, lastName: string) => {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -47,12 +48,13 @@ const getUserRole = (roles: Role[], contexto?: string, currentId?: string) => {
 };
 
 const getRoleColor = (role: string) => {
-  if (role === ROLES.EMPRESA_ADMIN || role === ROLES.FACTORING_ADMIN) return "#00A86B";
+  if (role === ROLES.EMPRESA_ADMIN || role === ROLES.FACTORING_ADMIN)
+    return "#00A86B";
   return "#6B7280";
 };
 
-const getStatusConfig = (status: boolean) => {
-  if (status) {
+const getStatusConfig = (status: string | null) => {
+  if (status !== "pendiente") {
     return {
       color: "#00A86B",
       bgColor: "rgba(0, 168, 107, 0.1)",
@@ -89,10 +91,7 @@ const Users = () => {
     }
   };
 
-  const handleMenuOpen = (
-    event: React.MouseEvent<HTMLElement>,
-    user: User,
-  ) => {
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, user: User) => {
     setAnchorEl(event.currentTarget);
     setSelectedUser(user);
   };
@@ -119,7 +118,7 @@ const Users = () => {
       currentRole?.contexto,
       currentRole?.contexto === "empresa"
         ? currentRole?.empresaId
-        : currentRole?.factoringId
+        : currentRole?.factoringId,
     );
     return userRole?.role;
   };
@@ -128,9 +127,30 @@ const Users = () => {
     fetchUsers();
   }, [currentRole?.empresaId, currentRole?.factoringId, currentRole?.contexto]);
 
+  const getUsersInvitationReesponse = (roles: Role[]) => {
+    const userRole = getUserRole(
+      roles,
+      currentRole?.contexto,
+      currentRole?.contexto === "empresa"
+        ? currentRole?.empresaId
+        : currentRole?.factoringId,
+    );
+    return currentRole?.contexto === "empresa"
+      ? userRole?.empresa?.inviteAccepted
+      : userRole?.factoring?.inviteAccepted;
+  };
+
+  const canInvite = () => {
+    return (Number(currentRole?.empresa?.nivel) || 0) >= 2 || currentRole?.factoring?.estadoEnrolamiento;
+  }
+
   const totalUsers = users.length;
-  const activeUsers = users.filter((u) => u.isActive).length;
-  const pendingUsers = users.filter((u) => !u.isActive).length;
+  const activeUsers = users.filter(
+    (u) => getUsersInvitationReesponse(u.roles) === "aceptada",
+  ).length;
+  const pendingUsers = users.filter(
+    (u) => getUsersInvitationReesponse(u.roles) === "pendiente",
+  ).length;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -167,7 +187,7 @@ const Users = () => {
             </Typography>
           </Box>
         </Box>
-        <Button
+        {(canInvite()) && (<Button
           variant="contained"
           startIcon={<PersonAddIcon />}
           onClick={() => setInviteModalOpen(true)}
@@ -182,7 +202,7 @@ const Users = () => {
           }}
         >
           Invitar Usuario
-        </Button>
+        </Button>) }
       </Box>
 
       {/* Stats Cards */}
@@ -297,7 +317,23 @@ const Users = () => {
           </TableHead>
           <TableBody>
             {users.map((user) => {
-              const statusConfig = getStatusConfig(!!user.isActive);
+              const userRole = getUserRole(
+                user.roles,
+                currentRole?.contexto,
+                currentRole?.contexto === "empresa"
+                  ? currentRole?.empresaId
+                  : currentRole?.factoringId,
+              );
+              const inviteAccepted =
+                currentRole?.contexto === "empresa"
+                  ? userRole?.empresa?.inviteAccepted
+                  : userRole?.factoring?.inviteAccepted;
+              const statusConfig = getStatusConfig(inviteAccepted ?? null);
+
+              const inviteDate =
+                currentRole?.contexto === "empresa"
+                  ? userRole?.empresa?.inviteDate
+                  : userRole?.factoring?.inviteDate;
               return (
                 <TableRow
                   key={user.id}
@@ -350,13 +386,15 @@ const Users = () => {
                     <Chip
                       icon={<VerifiedUserIcon sx={{ fontSize: 14 }} />}
                       label={
-                        ROLE_NAMES[getUserRole(
-                          user.roles,
-                          currentRole?.contexto,
-                          currentRole?.contexto === "empresa"
-                            ? currentRole?.empresaId
-                            : currentRole?.factoringId,
-                        )?.role || ROLES.DEFAULT]
+                        ROLE_NAMES[
+                          getUserRole(
+                            user.roles,
+                            currentRole?.contexto,
+                            currentRole?.contexto === "empresa"
+                              ? currentRole?.empresaId
+                              : currentRole?.factoringId,
+                          )?.role || ROLES.DEFAULT
+                        ]
                       }
                       size="small"
                       sx={{
@@ -374,22 +412,22 @@ const Users = () => {
                           getUserRole(
                             user.roles,
                             currentRole?.contexto,
-                            currentRole?.contexto === "empresa" 
-                            ? currentRole?.empresaId 
-                            : currentRole?.factoringId
+                            currentRole?.contexto === "empresa"
+                              ? currentRole?.empresaId
+                              : currentRole?.factoringId,
                           )?.role || "N/A",
                         ),
                         fontWeight: 500,
                         "& .MuiChip-icon": {
                           color: getRoleColor(
-                          getUserRole(
-                            user.roles,
-                            currentRole?.contexto,
-                            currentRole?.contexto === "empresa" 
-                            ? currentRole?.empresaId 
-                            : currentRole?.factoringId
-                          )?.role || "N/A",
-                        ),
+                            getUserRole(
+                              user.roles,
+                              currentRole?.contexto,
+                              currentRole?.contexto === "empresa"
+                                ? currentRole?.empresaId
+                                : currentRole?.factoringId,
+                            )?.role || "N/A",
+                          ),
                         },
                       }}
                     />
@@ -397,7 +435,7 @@ const Users = () => {
                   <TableCell>
                     <Chip
                       icon={statusConfig.icon}
-                      label={user.isActive ? "Activo" : "Inactivo"}
+                      label={capitalizeFirstLetter(inviteAccepted ?? "")}
                       size="small"
                       sx={{
                         backgroundColor: statusConfig.bgColor,
@@ -411,8 +449,8 @@ const Users = () => {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ color: "#64748B" }}>
-                      {user?.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString("es-ES", {
+                      {inviteDate
+                        ? new Date(inviteDate).toLocaleDateString("es-ES", {
                             day: "2-digit",
                             month: "2-digit",
                             year: "numeric",
@@ -515,7 +553,9 @@ const Users = () => {
         }}
         userData={{
           email: selectedUser?.email || "",
-          fullName: selectedUser ? `${selectedUser.firstName} ${selectedUser.lastName}` : "",
+          fullName: selectedUser
+            ? `${selectedUser.firstName} ${selectedUser.lastName}`
+            : "",
         }}
       />
     </Box>

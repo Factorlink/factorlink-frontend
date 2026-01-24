@@ -15,6 +15,7 @@ import UsuarioTab from "./pages/edit/usuario";
 import EmpresaTab from "./pages/edit/empresa";
 import FactoringTab from "./pages/edit/factoring";
 import UsuariosTab from "./pages/edit/usuarios";
+import DocumentosLegalesTab from "./pages/edit/documentos-legales";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleSelection from "./pages/role/selection";
 import Invitations from "./pages/invitations";
@@ -88,6 +89,7 @@ function App() {
             <Route path="empresa" element={<EmpresaTab />} />
             <Route path="factoring" element={<FactoringTab />} />
             <Route path="usuarios" element={<UsuariosTab />} />
+            <Route path="documentos-legales" element={<DocumentosLegalesTab />} />
           </Route>
         </Routes>
       </BrowserRouter>

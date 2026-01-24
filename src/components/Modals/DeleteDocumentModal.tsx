@@ -13,54 +13,38 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useRole } from "../../hooks/useRole";
-import useAuthStore from "../../store/authStore";
-import { ROLES } from "../../utils/consts";
+import DescriptionIcon from "@mui/icons-material/Description";
+import { useLegalDocuments } from "../../hooks/useLegalDocuments";
 
-interface DeleteUserModalProps {
+interface DeleteDocumentModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  userData: {
-    email: string;
-    fullName: string;
+  documentData: {
+    id: string;
+    nombre: string;
   };
 }
 
-const DeleteUserModal = ({
+const DeleteDocumentModal = ({
   open,
   onClose,
   onSuccess,
-  userData,
-}: DeleteUserModalProps) => {
+  documentData,
+}: DeleteDocumentModalProps) => {
   const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
-    null,
+    null
   );
   const [alertMessage, setAlertMessage] = useState("");
 
-  const { currentRole } = useAuthStore();
-  const { unassignToEmpresa, unassignToFactoring, loading } = useRole();
-
-  const isEmpresa = currentRole?.contexto === "empresa";
+  const { deleteLegalDocument, loading } = useLegalDocuments();
 
   const handleDelete = async () => {
     try {
-      if (isEmpresa) {
-        await unassignToEmpresa({
-          email: userData.email,
-          role: ROLES.EMPRESA_USUARIO,
-          empresaId: currentRole?.empresaId || "",
-        });
-      } else {
-        await unassignToFactoring({
-          email: userData.email,
-          role: ROLES.FACTORING_ANALISTA,
-          factoringId: currentRole?.factoringId || "",
-        });
-      }
+      await deleteLegalDocument(documentData.id);
 
       setAlertStatus("success");
-      setAlertMessage("Usuario eliminado correctamente.");
+      setAlertMessage("Documento eliminado correctamente.");
       onSuccess?.();
     } catch (error: unknown) {
       const axiosError = error as {
@@ -69,7 +53,7 @@ const DeleteUserModal = ({
       setAlertStatus("error");
       setAlertMessage(
         axiosError?.response?.data?.message ||
-          "Ocurrió un error al eliminar el usuario",
+          "Ocurrió un error al eliminar el documento"
       );
     }
   };
@@ -118,7 +102,7 @@ const DeleteUserModal = ({
             <DeleteIcon sx={{ color: "white", fontSize: 24 }} />
           </Box>
           <Typography variant="h6" fontWeight={600}>
-            Eliminar Usuario
+            Eliminar Documento
           </Typography>
         </Box>
         <IconButton onClick={handleClose} disabled={loading}>
@@ -140,31 +124,56 @@ const DeleteUserModal = ({
           </Alert>
         )}
 
-        <Box
-          sx={{
-            borderRadius: 2,
-            p: 2,
-            mt: 2,
-          }}
-        >
-          {alertStatus !== "success" && (
+        {alertStatus !== "success" && (
+          <Box
+            sx={{
+              borderRadius: 2,
+              p: 2,
+              mt: 2,
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                mb: 2,
+                p: 2,
+                borderRadius: 2,
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              }}
+            >
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 2,
+                  bgcolor: "rgba(0, 188, 212, 0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <DescriptionIcon sx={{ color: "primary.main" }} />
+              </Box>
+              <Typography
+                variant="body1"
+                sx={{ color: "text.primary", fontWeight: 500 }}
+              >
+                {documentData.nombre}
+              </Typography>
+            </Box>
+
             <Typography
               variant="body2"
               sx={{ color: "#EF4444", lineHeight: 1.6 }}
             >
-              Esta acción eliminará a{" "}
-              <Typography
-                component="span"
-                variant="body2"
-                sx={{ fontWeight: 600 }}
-              >
-                {userData.fullName}
-              </Typography>{" "}
-              ({userData.email}) de la organización. Esta acción no se puede
-              deshacer.
+              ¿Estás seguro de que deseas eliminar este documento? Esta acción
+              no se puede deshacer y deberás volver a subir el archivo si lo
+              necesitas.
             </Typography>
-          )}
-        </Box>
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3, pt: 2, gap: 2 }}>
@@ -203,7 +212,7 @@ const DeleteUserModal = ({
             {loading ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
-              "Eliminar Usuario"
+              "Eliminar Documento"
             )}
           </Button>
         )}
@@ -212,4 +221,4 @@ const DeleteUserModal = ({
   );
 };
 
-export default DeleteUserModal;
+export default DeleteDocumentModal;

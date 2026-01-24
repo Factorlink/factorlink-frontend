@@ -213,7 +213,7 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
 
             <StyledTextField
               fullWidth
-              label="Giro"
+              label="Giro Principal"
               placeholder="Servicios de consultoría"
               name="giro"
               value={formik.values.giro}

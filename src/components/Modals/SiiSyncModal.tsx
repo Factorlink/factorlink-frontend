@@ -23,9 +23,8 @@ import {
   handleRutInputChange,
 } from "../../utils/validations/shared-fields";
 import useAuthStore from "../../store/authStore";
-import type { Role } from "../../types/role";
 import siiLogo from "../../assets/png/sii-logo.png";
-import { ROLES } from "../../utils/consts";
+import { useUsers } from "../../hooks/useUsers";
 
 interface SiiSyncFormData {
   siiRut: string;
@@ -47,45 +46,30 @@ const siiSyncSchema = yup.object({
 
 const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
   const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
-    null
+    null,
   );
   const [alertMessage, setAlertMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const { user, setUser } = useAuthStore();
   const { createEmpresaBySii, loading } = useEmpresa();
+  const { getMyInfo } = useUsers();
 
   const handleSyncSii = async (values: SiiSyncFormData) => {
     try {
-      const response = await createEmpresaBySii({
+      await createEmpresaBySii({
         siiRut: values.siiRut.trim(),
         siiPassword: values.siiPassword,
       });
 
-      const newRole = {
-        contexto: "empresa",
-        empresaId: response.id,
-        nivel: 2,
-        role: ROLES.EMPRESA_ADMIN,
-        empresa: response,
-      } as Role;
+      const { user: updatedUser } = await getMyInfo();
+      setUser({ ...user!, roles: updatedUser.roles });
 
-      if (user?.roles?.find((role) => role.empresaId === response.id)) {
-        setAlertStatus("error");
-        setAlertMessage("Ya tienes un rol de empresa asignado a esta empresa.");
-        return;
-      } else {
-        setUser({
-          ...(user as NonNullable<typeof user>),
-          roles: [newRole],
-        });
-
-        setAlertStatus("success");
-        setAlertMessage(
-          "Los datos de tu empresa han sido sincronizados correctamente con el SII."
-        );
-        formik.resetForm();
-      }
+      setAlertStatus("success");
+      setAlertMessage(
+        "Los datos de tu empresa han sido sincronizados correctamente con el SII.",
+      );
+      formik.resetForm();
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string } };
@@ -93,7 +77,7 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
       setAlertStatus("error");
       setAlertMessage(
         axiosError?.response?.data?.message ||
-          "Ocurrió un error al sincronizar con el SII"
+          "Ocurrió un error al sincronizar con el SII",
       );
     }
   };
