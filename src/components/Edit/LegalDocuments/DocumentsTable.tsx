@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -21,70 +22,47 @@ import {
   Delete as DeleteIcon,
   Lock as LockIcon,
 } from "@mui/icons-material";
+import UploadDocumentModal from "../../Modals/UploadDocumentModal";
+import { useLegalDocuments } from "../../../hooks/useLegalDocuments";
+import useAuthStore from "../../../store/authStore";
+import { DOCUMENT_NAMES } from "../../../utils/consts";
+import { capitalizeFirstLetter } from "../../../utils/utils";
 
-type DocumentStatus = "VALIDADO" | "PENDIENTE" | "RECHAZADO" | "SIN_SUBIR";
+type DocumentStatus = "validado" | "pendiente" | "rechazado" | "sin_subir";
 
 interface DocumentRow {
   id: string;
-  nombre: string;
-  estado: DocumentStatus;
-  fechaSubida?: string;
-  fechaValidacion?: string;
-  bloqueado?: boolean;
+  createdAt: string;
+  empresaId?: string;
+  estadoValidacion: DocumentStatus;
+  factoringId?: string;
+  tipo?: string;
 }
-
-const dummyData: DocumentRow[] = [
-  {
-    id: "1",
-    nombre: "Escritura de constitución",
-    estado: "VALIDADO",
-    fechaSubida: "14-01-2024",
-    fechaValidacion: "19-01-2024",
-    bloqueado: true,
-  },
-  {
-    id: "2",
-    nombre: "RUT empresa",
-    estado: "PENDIENTE",
-    fechaSubida: "17-01-2024",
-  },
-  {
-    id: "3",
-    nombre: "Representante legal",
-    estado: "SIN_SUBIR",
-  },
-  {
-    id: "4",
-    nombre: "Poderes",
-    estado: "SIN_SUBIR",
-  },
-  {
-    id: "5",
-    nombre: "Otros documentos legales",
-    estado: "SIN_SUBIR",
-  },
-];
 
 const statusConfig: Record<
   DocumentStatus,
-  { label: string; color: "success" | "warning" | "error" | "default"; icon: React.ReactNode }
+  {
+    label: string;
+    color: "success" | "warning" | "error" | "default";
+    icon: React.ReactNode;
+  }
 > = {
-  VALIDADO: {
-    label: "VALIDADO",
+  validado: {
+    label: "Validado",
     color: "success",
     icon: <CheckIcon fontSize="small" />,
   },
-  PENDIENTE: {
-    label: "PENDIENTE",
+  pendiente: {
+    label: "Pendiente",
     color: "warning",
     icon: <PendingIcon fontSize="small" />,
   },
-  RECHAZADO: {
-    label: "RECHAZADO",
+  rechazado: {
+    label: "Rechazado",
     color: "error",
     icon: <RejectedIcon fontSize="small" />,
   },
-  SIN_SUBIR: {
+  sin_subir: {
     label: "Sin subir",
     color: "default",
     icon: null,
@@ -92,10 +70,16 @@ const statusConfig: Record<
 };
 
 const DocumentsTable = () => {
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [documents, setDocuments] = useState<DocumentRow[]>([]);
+  const { currentRole } = useAuthStore();
+  const { getLegalDocumentsByFactoringId, getLegalDocumentsByEmpresaId, getLegalDocumentById, deleteLegalDocument } =
+    useLegalDocuments();
+
   const renderStatusChip = (estado: DocumentStatus) => {
     const config = statusConfig[estado];
 
-    if (estado === "SIN_SUBIR") {
+    if (estado === "sin_subir") {
       return (
         <Typography
           variant="body2"
@@ -114,17 +98,17 @@ const DocumentsTable = () => {
         variant="outlined"
         sx={{
           borderColor:
-            estado === "VALIDADO"
+            estado === "validado"
               ? "success.main"
-              : estado === "PENDIENTE"
-              ? "warning.main"
-              : "error.main",
+              : estado === "pendiente"
+                ? "warning.main"
+                : "error.main",
           color:
-            estado === "VALIDADO"
+            estado === "validado"
               ? "success.main"
-              : estado === "PENDIENTE"
-              ? "warning.main"
-              : "error.main",
+              : estado === "pendiente"
+                ? "warning.main"
+                : "error.main",
           "& .MuiChip-icon": {
             color: "inherit",
           },
@@ -134,7 +118,7 @@ const DocumentsTable = () => {
   };
 
   const renderActions = (row: DocumentRow) => {
-    if (row.estado === "SIN_SUBIR") {
+    if (row.estadoValidacion === "sin_subir") {
       return (
         <IconButton size="small" sx={{ color: "primary.main" }}>
           <UploadIcon />
@@ -142,13 +126,20 @@ const DocumentsTable = () => {
       );
     }
 
-    if (row.bloqueado) {
+    if (row.estadoValidacion === "validado") {
       return (
         <Box sx={{ display: "flex", gap: 1 }}>
           <IconButton size="small" sx={{ color: "primary.main" }}>
             <DownloadIcon />
           </IconButton>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              color: "text.secondary",
+            }}
+          >
             <LockIcon fontSize="small" />
             <Typography variant="body2">Bloqueado</Typography>
           </Box>
@@ -168,6 +159,30 @@ const DocumentsTable = () => {
     );
   };
 
+  const fetchDocuments = async () => {
+    try {
+      const documents =
+        currentRole?.contexto === "empresa"
+          ? await getLegalDocumentsByEmpresaId(currentRole?.empresaId || "")
+          : await getLegalDocumentsByFactoringId(
+              currentRole?.factoringId || "",
+            );
+      console.log(documents);
+      setDocuments(documents);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    }
+  };
+
+  const handleUploadSuccess = () => {
+    fetchDocuments();
+    setUploadModalOpen(false);
+  };
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
   return (
     <Box
       sx={{
@@ -185,12 +200,16 @@ const DocumentsTable = () => {
           mb: 3,
         }}
       >
-        <Typography variant="h6" sx={{ color: "text.primary", fontWeight: 600 }}>
+        <Typography
+          variant="h6"
+          sx={{ color: "text.primary", fontWeight: 600 }}
+        >
           Documentos Legales Requeridos
         </Typography>
         <Button
           variant="contained"
           startIcon={<UploadIcon />}
+          onClick={() => setUploadModalOpen(true)}
           sx={{
             bgcolor: "primary.main",
             "&:hover": { bgcolor: "primary.dark" },
@@ -257,8 +276,11 @@ const DocumentsTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {dummyData.map((row) => (
-              <TableRow key={row.id} sx={{ "&:last-child td": { borderBottom: 0 } }}>
+            {documents.map((row) => (
+              <TableRow
+                key={row.id}
+                sx={{ "&:last-child td": { borderBottom: 0 } }}
+              >
                 <TableCell>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <Box
@@ -274,20 +296,45 @@ const DocumentsTable = () => {
                     >
                       <DescriptionIcon sx={{ color: "primary.main" }} />
                     </Box>
-                    <Typography variant="body1" sx={{ color: "text.primary", fontWeight: 500 }}>
-                      {row.nombre}
+                    <Typography
+                      variant="body1"
+                      sx={{ color: "text.primary", fontWeight: 500 }}
+                    >
+                      {`${DOCUMENT_NAMES[row.tipo as keyof typeof DOCUMENT_NAMES]} ${row.tipo === "rut" ? capitalizeFirstLetter(currentRole?.contexto || "") : ""}` ||
+                        "-"}
                     </Typography>
                   </Box>
                 </TableCell>
-                <TableCell>{renderStatusChip(row.estado)}</TableCell>
+                <TableCell>
+                  {renderStatusChip(row.estadoValidacion || "sin_subir")}
+                </TableCell>
                 <TableCell>
                   <Box>
                     <Typography variant="body2" sx={{ color: "text.primary" }}>
-                      {row.fechaSubida || "-"}
+                      {row.createdAt
+                        ? new Date(row.createdAt).toLocaleDateString("es-ES", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })
+                        : "-"}
                     </Typography>
-                    {row.fechaValidacion && (
-                      <Typography variant="caption" sx={{ color: "success.main" }}>
-                        Validado: {row.fechaValidacion}
+                    {row.estadoValidacion === "validado" && (
+                      <Typography
+                        variant="caption"
+                        sx={{ color: "success.main" }}
+                      >
+                        Validado:{" "}
+                        {row?.createdAt
+                          ? new Date(row.createdAt).toLocaleDateString(
+                              "es-ES",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                              },
+                            )
+                          : "-"}
                       </Typography>
                     )}
                   </Box>
@@ -298,6 +345,12 @@ const DocumentsTable = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <UploadDocumentModal
+        open={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        onSuccess={handleUploadSuccess}
+      />
     </Box>
   );
 };

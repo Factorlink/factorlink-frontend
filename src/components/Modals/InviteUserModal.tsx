@@ -46,14 +46,16 @@ interface InviteFormData {
 const EMPRESA_ROLES = [ROLES.EMPRESA_USUARIO];
 const FACTORING_ROLES = [ROLES.FACTORING_ANALISTA];
 
-const InviteUserModal = ({ 
-  open, 
-  onClose, 
-  onSuccess, 
+const InviteUserModal = ({
+  open,
+  onClose,
+  onSuccess,
   mode = "invite",
-  userData 
+  userData,
 }: InviteUserModalProps) => {
-  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
+  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
+    null,
+  );
   const [alertMessage, setAlertMessage] = useState("");
 
   const { currentRole } = useAuthStore();
@@ -86,9 +88,9 @@ const InviteUserModal = ({
 
       setAlertStatus("success");
       setAlertMessage(
-        isEditMode 
-          ? "Rol actualizado correctamente." 
-          : "Invitación enviada correctamente."
+        isEditMode
+          ? "Rol actualizado correctamente."
+          : "Invitación enviada correctamente.",
       );
       onSuccess?.();
     } catch (error: unknown) {
@@ -98,9 +100,9 @@ const InviteUserModal = ({
       setAlertStatus("error");
       setAlertMessage(
         axiosError?.response?.data?.message ||
-          (isEditMode 
-            ? "Ocurrió un error al actualizar el rol" 
-            : "Ocurrió un error al enviar la invitación")
+          (isEditMode
+            ? "Ocurrió un error al actualizar el rol"
+            : "Ocurrió un error al enviar la invitación"),
       );
     }
   };
@@ -203,62 +205,66 @@ const InviteUserModal = ({
           </Alert>
         )}
 
-        <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
-          {modalDescription}
-        </Typography>
+        {alertStatus !== "success" && (
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
+            {modalDescription}
+          </Typography>
+        )}
 
-        <form onSubmit={formik.handleSubmit}>
-          <StyledTextField
-            fullWidth
-            label="Correo electrónico"
-            placeholder="ejemplo@correo.com"
-            name="email"
-            type="email"
-            value={formik.values.email}
-            error={formik.touched.email && Boolean(formik.errors.email)}
-            helperText={formik.touched.email && formik.errors.email}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            disabled={loading || alertStatus === "success" || isEditMode}
-            sx={{ mb: 3 }}
-          />
-
-          <FormControl 
-            fullWidth 
-            error={formik.touched.role && Boolean(formik.errors.role)}
-            disabled={loading || alertStatus === "success"}
-          >
-            <InputLabel id="role-select-label">Rol</InputLabel>
-            <Select
-              labelId="role-select-label"
-              id="role"
-              name="role"
-              value={formik.values.role}
-              label="Rol"
+        {alertStatus !== "success" && (
+          <form onSubmit={formik.handleSubmit}>
+            <StyledTextField
+              fullWidth
+              label="Correo electrónico"
+              placeholder="ejemplo@correo.com"
+              name="email"
+              type="email"
+              value={formik.values.email}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              sx={{
-                borderRadius: 1,
-                backgroundColor: "background.default",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "rgba(0, 0, 0, 0.23)",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "primary.main",
-                },
-              }}
+              disabled={loading || isEditMode}
+              sx={{ mb: 3 }}
+            />
+
+            <FormControl
+              fullWidth
+              error={formik.touched.role && Boolean(formik.errors.role)}
+              disabled={loading || isEditMode}
             >
-              {availableRoles.map((role) => (
-                <MenuItem key={role} value={role}>
-                  {ROLE_NAMES[role]}
-                </MenuItem>
-              ))}
-            </Select>
-            {formik.touched.role && formik.errors.role && (
-              <FormHelperText>{formik.errors.role}</FormHelperText>
-            )}
-          </FormControl>
-        </form>
+              <InputLabel id="role-select-label">Rol</InputLabel>
+              <Select
+                labelId="role-select-label"
+                id="role"
+                name="role"
+                value={formik.values.role}
+                label="Rol"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                sx={{
+                  borderRadius: 1,
+                  backgroundColor: "background.default",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "rgba(0, 0, 0, 0.23)",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "primary.main",
+                  },
+                }}
+              >
+                {availableRoles.map((role) => (
+                  <MenuItem key={role} value={role}>
+                    {ROLE_NAMES[role]}
+                  </MenuItem>
+                ))}
+              </Select>
+              {formik.touched.role && formik.errors.role && (
+                <FormHelperText>{formik.errors.role}</FormHelperText>
+              )}
+            </FormControl>
+          </form>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3, pt: 3, gap: 2 }}>
@@ -274,31 +280,35 @@ const InviteUserModal = ({
             fontWeight: 600,
           }}
         >
-          Cancelar
+          {alertStatus === "success" ? "Cerrar" : "Cancelar"}
         </Button>
-        <Button
-          variant="contained"
-          onClick={() => formik.handleSubmit()}
-          disabled={loading || alertStatus === "success" || !formik.isValid || (!isEditMode && !formik.dirty)}
-          sx={{
-            flex: 1,
-            py: 1.5,
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 600,
-            color: "white",
-            backgroundColor: isEditMode ? "#F59E0B" : "primary.main",
-            "&:hover": {
-              backgroundColor: isEditMode ? "#D97706" : undefined,
-            },
-          }}
-        >
-          {loading ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            submitButtonText
-          )}
-        </Button>
+        {alertStatus !== "success" && (
+          <Button
+            variant="contained"
+            onClick={() => formik.handleSubmit()}
+            disabled={
+              loading || !formik.isValid || (!isEditMode && !formik.dirty)
+            }
+            sx={{
+              flex: 1,
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              color: "white",
+              backgroundColor: isEditMode ? "#F59E0B" : "primary.main",
+              "&:hover": {
+                backgroundColor: isEditMode ? "#D97706" : undefined,
+              },
+            }}
+          >
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              submitButtonText
+            )}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

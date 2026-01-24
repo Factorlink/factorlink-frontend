@@ -325,6 +325,11 @@ const Users = () => {
                   ? userRole?.empresa?.inviteAccepted
                   : userRole?.factoring?.inviteAccepted;
               const statusConfig = getStatusConfig(inviteAccepted ?? null);
+
+              const inviteDate =
+                currentRole?.contexto === "empresa"
+                  ? userRole?.empresa?.inviteDate
+                  : userRole?.factoring?.inviteDate;
               return (
                 <TableRow
                   key={user.id}
@@ -440,8 +445,8 @@ const Users = () => {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ color: "#64748B" }}>
-                      {user?.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString("es-ES", {
+                      {inviteDate
+                        ? new Date(inviteDate).toLocaleDateString("es-ES", {
                             day: "2-digit",
                             month: "2-digit",
                             year: "numeric",

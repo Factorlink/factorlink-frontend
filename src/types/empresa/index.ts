@@ -13,4 +13,5 @@ export interface Empresa {
   siiRut?: string;
   siiSyncEnabled?: boolean;
   inviteAccepted?: string;
+  inviteDate?: string;
 }

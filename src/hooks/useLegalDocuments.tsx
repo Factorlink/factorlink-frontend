@@ -22,7 +22,7 @@ export const useLegalDocuments = () => {
   const createLegalDocument = async (data: LegalDocumentPayload) => {
     try {
       setLoading(true);
-      const response = await api.post("/api/v1/documentos-legales", data);
+      const response = await api.post("documentos-legales", data);
       return response.data;
     } catch (error) {
       throw error;
@@ -35,7 +35,7 @@ export const useLegalDocuments = () => {
     try {
       setLoading(true);
       const response = await api.get(
-        `/api/v1/documentos-legales?empresaId=${encodeURIComponent(empresaId)}`
+        `/documentos-legales?empresaId=${encodeURIComponent(empresaId)}`
       );
       return response.data;
     } catch (error) {
@@ -49,7 +49,7 @@ export const useLegalDocuments = () => {
     try {
       setLoading(true);
       const response = await api.get(
-        `/api/v1/documentos-legales?factoringId=${encodeURIComponent(factoringId)}`
+        `documentos-legales?factoringId=${encodeURIComponent(factoringId)}`
       );
       return response.data;
     } catch (error) {
@@ -62,7 +62,7 @@ export const useLegalDocuments = () => {
   const getLegalDocumentById = async (docId: string) => {
     try {
       setLoading(true);
-      const response = await api.get(`/api/v1/documentos-legales/${docId}`);
+      const response = await api.get(`documentos-legales/${docId}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -77,7 +77,7 @@ export const useLegalDocuments = () => {
   ) => {
     try {
       setLoading(true);
-      const response = await api.put(`/api/v1/documentos-legales/${docId}`, data);
+      const response = await api.put(`documentos-legales/${docId}`, data);
       return response.data;
     } catch (error) {
       throw error;
@@ -89,7 +89,7 @@ export const useLegalDocuments = () => {
   const deleteLegalDocument = async (docId: string) => {
     try {
       setLoading(true);
-      const response = await api.delete(`/api/v1/documentos-legales/${docId}`);
+      const response = await api.delete(`documentos-legales/${docId}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -108,4 +108,3 @@ export const useLegalDocuments = () => {
     deleteLegalDocument,
   };
 };
-

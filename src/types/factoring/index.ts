@@ -8,4 +8,5 @@ export interface Factoring {
   razonSocial: string;
   rut: string;
   inviteAccepted?: string;
+  inviteDate?: string;
 }
