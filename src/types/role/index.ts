@@ -9,4 +9,5 @@ export interface Role {
     role: string;
     empresa?: Empresa;
     factoring?: Factoring;
+    isMaster: boolean;
 }

@@ -229,7 +229,7 @@ const DocumentsTable = () => {
   };
 
   const canOperate = () => {
-      return (Number(currentRole?.empresa?.nivel) || 0) >= 2 ||  currentRole?.factoring?.estadoEnrolamiento;
+      return (Number(currentRole?.nivel) || 0) >= 2 ||  currentRole?.factoring?.estadoEnrolamiento;
     }
 
   useEffect(() => {
