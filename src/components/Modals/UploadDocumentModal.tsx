@@ -25,6 +25,7 @@ import * as Yup from "yup";
 import useAuthStore from "../../store/authStore";
 import { useLegalDocuments } from "../../hooks/useLegalDocuments";
 import { EMPRESA_DOCUMENTOS, FACTORING_DOCUMENTOS } from "../../utils/consts";
+import { validateFile, formatFileSize, MAX_FILE_SIZE } from "../../utils/validations/file-fields";
 
 interface UploadDocumentModalProps {
   open: boolean;
@@ -60,15 +61,33 @@ const UploadDocumentModal = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = reader.result as string;
-        formik.setFieldValue("archivoBase64", base64String, true);
-        formik.setFieldValue("nombreArchivo", file.name, true);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Ejecutar validaciones de seguridad
+    const validation = validateFile(file);
+    
+    if (!validation.valid) {
+      setAlertStatus("error");
+      setAlertMessage(validation.errors.join(". "));
+      // Limpiar el input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
     }
+
+    // Proceder con la conversión a Base64
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64String = reader.result as string;
+      formik.setFieldValue("archivoBase64", base64String, true);
+      formik.setFieldValue("nombreArchivo", file.name, true);
+    };
+    reader.onerror = () => {
+      setAlertStatus("error");
+      setAlertMessage("Error al leer el archivo");
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleRemoveFile = () => {
@@ -100,6 +119,7 @@ const UploadDocumentModal = ({
       setAlertStatus("success");
       setAlertMessage("Documento subido correctamente.");
       onSuccess?.();
+      handleClose();
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string } };
@@ -286,7 +306,7 @@ const UploadDocumentModal = ({
                     Haz clic para seleccionar un archivo
                   </Typography>
                   <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                    PDF, DOC, DOCX, JPG, PNG (máx. 10MB)
+                    PDF, DOC, DOCX, JPG, PNG (máx. {formatFileSize(MAX_FILE_SIZE)})
                   </Typography>
                 </Box>
               ) : (

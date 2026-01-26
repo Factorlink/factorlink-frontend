@@ -27,7 +27,7 @@ const Edit = () => {
       tabs.push({ label: "Factoring", path: "/edit/factoring" });
     }
 
-    if (adminRoles.includes(currentRole?.role || "")) {
+    if (adminRoles.includes(currentRole?.role || "") && currentRole?.isMaster) {
       tabs.push({ label: "Gestión Usuarios", path: "/edit/usuarios" });
       tabs.push({ label: "Documentos Legales", path: "/edit/documentos-legales" });
     }

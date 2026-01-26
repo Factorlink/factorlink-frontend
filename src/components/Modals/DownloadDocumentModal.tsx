@@ -41,17 +41,28 @@ const DownloadDocumentModal = ({
     try {
       const document = await getLegalDocumentById(documentData.id);
 
-      if (document?.archivoBase64) {
-        // Create a download link from base64
-        const link = window.document.createElement("a");
-        link.href = document.archivoBase64;
-        link.download = document.nombreArchivo || documentData.nombre || "documento";
+      if (document?.base64) {
+        // Convert base64 to Blob
+        const byteCharacters = atob(document.base64.split(',')[1] || document.base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+
+        // Create a download link from Blob
+        const url = window.URL.createObjectURL(blob);
+        const link = window.document.createElement('a');
+        link.href = url;
+        link.download = document.urlArchivo.split('/').pop() || 'documento';
         window.document.body.appendChild(link);
         link.click();
         window.document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
 
-        setAlertStatus("success");
-        setAlertMessage("Documento descargado correctamente.");
+        setAlertStatus('success');
+        setAlertMessage('Documento descargado correctamente.');
       } else {
         throw new Error("No se encontró el archivo");
       }
