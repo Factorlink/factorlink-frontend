@@ -2,9 +2,9 @@ import { Box, Typography } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 const validationItems = [
-  "Los documentos pueden estar en estado: PENDIENTE, VALIDADO o RECHAZADO",
+  "Los documentos pueden estar en estado: PENDIENTE, APROBADO o RECHAZADO",
   "Solo el Super Administrador puede validar o rechazar documentos",
-  "Los documentos VALIDADOS no pueden ser eliminados ni reemplazados",
+  "Los documentos APROBADOS no pueden ser eliminados ni reemplazados",
   "Los documentos RECHAZADOS pueden ser reemplazados con nuevas versiones",
   "La validación de todos los documentos es necesaria para habilitar operaciones",
 ];

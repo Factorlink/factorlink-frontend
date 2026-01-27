@@ -86,7 +86,7 @@ const RoleSelection = () => {
                 handleSelectRole={() => handleSelectRole(role)}
                 razonSocial={role.contexto === "empresa" ? role.empresa?.razonSocial : role.factoring?.razonSocial}
                 roleName={role.role}
-                email={role.contexto === "empresa" ? role.empresa?.email : "-"}
+                email={role.contexto === "empresa" ? role.empresa?.email : role.factoring?.email}
                 rut={role.contexto === "empresa" ? role.empresa?.rut : role.factoring?.rut}
               />
             ))}

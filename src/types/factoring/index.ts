@@ -9,4 +9,5 @@ export interface Factoring {
   rut: string;
   inviteAccepted?: string;
   inviteDate?: string;
+  email?: string;
 }
