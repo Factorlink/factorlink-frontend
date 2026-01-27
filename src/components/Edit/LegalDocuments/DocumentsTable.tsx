@@ -30,7 +30,7 @@ import useAuthStore from "../../../store/authStore";
 import { DOCUMENT_NAMES } from "../../../utils/consts";
 import { capitalizeFirstLetter } from "../../../utils/utils";
 
-type DocumentStatus = "validado" | "pendiente" | "rechazado" | "sin_subir";
+type DocumentStatus = "aprobado" | "pendiente" | "rechazado" | "sin_subir";
 
 interface DocumentRow {
   id: string;
@@ -49,8 +49,8 @@ const statusConfig: Record<
     icon: React.ReactNode;
   }
 > = {
-  validado: {
-    label: "Validado",
+  aprobado: {
+    label: "Aprobado",
     color: "success",
     icon: <CheckIcon fontSize="small" />,
   },
@@ -106,13 +106,13 @@ const DocumentsTable = () => {
         variant="outlined"
         sx={{
           borderColor:
-            estado === "validado"
+            estado === "aprobado"
               ? "success.main"
               : estado === "pendiente"
                 ? "warning.main"
                 : "error.main",
           color:
-            estado === "validado"
+            estado === "aprobado"
               ? "success.main"
               : estado === "pendiente"
                 ? "warning.main"
@@ -164,7 +164,7 @@ const DocumentsTable = () => {
       );
     }
 
-    if (row.estadoValidacion === "validado") {
+    if (row.estadoValidacion === "aprobado") {
       return (
         <Box sx={{ display: "flex", gap: 1 }}>
           <IconButton
@@ -373,12 +373,12 @@ const DocumentsTable = () => {
                           })
                         : "-"}
                     </Typography>
-                    {row.estadoValidacion === "validado" && (
+                    {row.estadoValidacion === "aprobado" && (
                       <Typography
                         variant="caption"
                         sx={{ color: "success.main" }}
                       >
-                        Validado:{" "}
+                        Aprobado:{" "}
                         {row?.createdAt
                           ? new Date(row.createdAt).toLocaleDateString(
                               "es-ES",
