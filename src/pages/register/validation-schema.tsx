@@ -31,6 +31,14 @@ export const validationSchema = yup.object({
     .boolean()
     .oneOf([true], "Debe aceptar los términos y condiciones")
     .required("Debe aceptar los términos y condiciones"),
+  privacyPolicy: yup
+    .boolean()
+    .oneOf([true], "Debe aceptar la política de privacidad")
+    .required("Debe aceptar la política de privacidad"),
+  emailConsent: yup
+    .boolean()
+    .oneOf([true], "Debe aceptar recibir comunicaciones por correo electrónico")
+    .required("Debe aceptar recibir comunicaciones por correo electrónico"),
   factoringRut: yup
     .string()
     .trim()
