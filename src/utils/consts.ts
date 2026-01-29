@@ -27,20 +27,21 @@ export const ROLE_NAMES = {
 
 type DocumentItem = { id: string; label: string };
 
-export const EMPRESA_DOCUMENTOS: DocumentItem[] = [
+const DOCUMENTOS: DocumentItem[] = [
   { id: "escritura_constitucion", label: "Escritura de constitución" },
-  { id: "rut", label: "RUT empresa" },
   { id: "representante_legal", label: "Representante legal" },
   { id: "poderes", label: "Poderes" },
   { id: "otros_documentos_legales", label: "Otros documentos legales" },
+]
+
+export const EMPRESA_DOCUMENTOS: DocumentItem[] = [
+  { id: "rut", label: "RUT empresa" },
+  ...DOCUMENTOS,
 ];
 
 export const FACTORING_DOCUMENTOS: DocumentItem[] = [
-  { id: "escritura_constitucion", label: "Escritura de constitución" },
   { id: "rut", label: "RUT factoring" },
-  { id: "representante_legal", label: "Representante legal" },
-  { id: "poderes", label: "Poderes" },
-  { id: "documentacion_regulatoria", label: "Documentación regulatoria" },
+  ...DOCUMENTOS,
 ];
 
 export const DOCUMENT_NAMES = {
@@ -49,7 +50,6 @@ export const DOCUMENT_NAMES = {
   representante_legal: "Representante legal",
   poderes: "Poderes",
   otros_documentos_legales: "Otros documentos legales",
-  documentacion_regulatoria: "Documentación regulatoria",
 };
 
 export const DOCUMENT_STATES = {

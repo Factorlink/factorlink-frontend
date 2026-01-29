@@ -115,6 +115,8 @@ const RegisterForm = ({
       password: "",
       confirmPassword: "",
       termsConditions: false,
+      privacyPolicy: false,
+      emailConsent: false,
       factoringRut: "",
       factoringRazonSocial: "",
     },
@@ -390,7 +392,8 @@ const RegisterForm = ({
                     >
                       He leído y acepto los{" "}
                       <Link
-                        href="#"
+                        href="/terminos-condiciones"
+                        target="_blank"
                         sx={{
                           color: "success.main",
                           textDecoration: "none",
@@ -400,6 +403,94 @@ const RegisterForm = ({
                         }}
                       >
                         términos y condiciones de uso
+                      </Link>
+                    </Typography>
+                  }
+                  sx={{ mb: 1 }}
+                />
+
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      id="acceptedPrivacy"
+                      name="privacyPolicy"
+                      checked={formik.values.privacyPolicy ?? false}
+                      onChange={formik.handleChange}
+                      disabled={loading}
+                      size="small"
+                      sx={{
+                        color: "text.disabled",
+                        "&.Mui-checked": {
+                          color: "success.main",
+                        },
+                      }}
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: "0.875rem",
+                        color: "text.secondary",
+                      }}
+                    >
+                      He leído y acepto la{" "}
+                      <Link
+                        href="/politica-privacidad"
+                        target="_blank"
+                        sx={{
+                          color: "success.main",
+                          textDecoration: "none",
+                          "&:hover": {
+                            textDecoration: "underline",
+                          },
+                        }}
+                      >
+                        Política de Privacidad
+                      </Link>
+                    </Typography>
+                  }
+                  sx={{ mb: 1 }}
+                />
+
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      id="acceptedEmailConsent"
+                      name="emailConsent"
+                      checked={formik.values.emailConsent ?? false}
+                      onChange={formik.handleChange}
+                      disabled={loading}
+                      size="small"
+                      sx={{
+                        color: "text.disabled",
+                        "&.Mui-checked": {
+                          color: "success.main",
+                        },
+                      }}
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: "0.875rem",
+                        color: "text.secondary",
+                      }}
+                    >
+                      He leído y acepto{" "}
+                      <Link
+                        href="/consentimiento-emails"
+                        target="_blank"
+                        sx={{
+                          color: "success.main",
+                          textDecoration: "none",
+                          "&:hover": {
+                            textDecoration: "underline",
+                          },
+                        }}
+                      >
+                        recibir comunicaciones por correo electrónico
                       </Link>
                     </Typography>
                   }
