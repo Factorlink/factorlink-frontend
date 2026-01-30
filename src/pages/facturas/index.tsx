@@ -16,6 +16,10 @@ import {
   Pagination,
   CircularProgress,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import {
   Description,
@@ -31,6 +35,7 @@ import { useFacturas } from "../../hooks/useFacturas";
 import useAuthStore from "../../store/authStore";
 import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
+import type { SelectChangeEvent } from "@mui/material/Select";
 
 const getStatusConfig = (estado: string) => {
   switch (estado) {
@@ -111,7 +116,7 @@ const Facturas = () => {
     };
 
     fetchFacturas();
-  }, [currentRole?.empresaId, meta.page]);
+  }, [currentRole?.empresaId, meta.page, meta.limit]);
 
   const filteredFacturas = useMemo(() => {
     if (!searchTerm) return facturas;
@@ -125,7 +130,7 @@ const Facturas = () => {
   }, [facturas, searchTerm]);
 
   const stats = useMemo(() => {
-    const total = facturas.length;
+    const total = meta.total || 0;
     const cargadas = facturas.filter(
       (f) => f.estado === "CARGADA"
     ).length;
@@ -143,6 +148,11 @@ const Facturas = () => {
     value: number
   ) => {
     setMeta((prev) => ({ ...prev, page: value }));
+  };
+  
+  const handleLimitChange = (event: SelectChangeEvent) => {
+    const value = Number(event.target.value);
+    setMeta((prev) => ({ ...prev, limit: value, page: 1 }));
   };
 
   return (
@@ -481,11 +491,27 @@ const Facturas = () => {
                 <Box
                   sx={{
                     display: "flex",
-                    justifyContent: "center",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                     py: 2,
                     borderTop: "1px solid #E2E8F0",
+                    px: 2,
+                    gap: 2,
                   }}
                 >
+                  <FormControl size="small" sx={{ minWidth: 160 }}>
+                    <InputLabel id="limit-label">Filas por página</InputLabel>
+                    <Select
+                      labelId="limit-label"
+                      value={String(meta.limit)}
+                      label="Filas por página"
+                      onChange={handleLimitChange}
+                    >
+                      <MenuItem value={10}>10</MenuItem>
+                      <MenuItem value={20}>20</MenuItem>
+                      <MenuItem value={50}>50</MenuItem>
+                    </Select>
+                  </FormControl>
                   <Pagination
                     count={meta.lastPage}
                     page={meta.page}
