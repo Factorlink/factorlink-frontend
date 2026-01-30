@@ -16,8 +16,9 @@ export interface MenuItem {
   roles: string[];
 }
 
-const ALL_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN, ROLES.DEFAULT];
+const ALL_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN, ROLES.DEFAULT, ROLES.EMPRESA_USUARIO, ROLES.FACTORING_ANALISTA];
 const ADMIN_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN];
+const EMPRESA_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.EMPRESA_USUARIO];
 
 export const mainMenuItems: MenuItem[] = [
   {
@@ -30,7 +31,7 @@ export const mainMenuItems: MenuItem[] = [
     text: "Control de Facturas",
     icon: Description,
     path: "/facturas",
-    roles: ALL_ROLES,
+    roles: EMPRESA_ROLES,
   },
   {
     text: "Operaciones",

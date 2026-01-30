@@ -12,7 +12,7 @@ import {
 import { Logout, Menu } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/png/factorlink-logo.png";
-import { mainMenuItems } from "../../config/menuConfig";
+import { getMenuItemsByRole, mainMenuItems } from "../../config/menuConfig";
 import useAuthStore from "../../store/authStore";
 
 const bottomItems = [{ text: "Logout", icon: Logout, path: "/login" }];
@@ -68,7 +68,7 @@ const Sidebar = () => {
       {
         <List sx={{ px: 1, flex: 1 }}>
           {currentRole?.contexto &&
-            mainMenuItems.map((item) => (
+            getMenuItemsByRole(mainMenuItems, currentRole.role).map((item) => (
               <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
                 <ListItemButton
                   onClick={() => navigate(item.path)}
