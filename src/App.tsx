@@ -19,6 +19,9 @@ import DocumentosLegalesTab from "./pages/edit/documentos-legales";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleSelection from "./pages/role/selection";
 import Invitations from "./pages/invitations";
+import TerminosCondiciones from "./pages/legal/terminos-condiciones";
+import PoliticaPrivacidad from "./pages/legal/politica-privacidad";
+import ConsentimientoEmails from "./pages/legal/consentimiento-emails";
 
 function App() {
   return (
@@ -34,6 +37,9 @@ function App() {
           <Route path="/factoring/register" element={<FactoringRegister />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/terminos-condiciones" element={<TerminosCondiciones />} />
+          <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+          <Route path="/consentimiento-emails" element={<ConsentimientoEmails />} />
 
           {/* Protected routes */}
           <Route
