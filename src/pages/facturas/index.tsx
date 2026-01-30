@@ -20,6 +20,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Menu,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import {
   Description,
@@ -29,6 +32,10 @@ import {
   Storefront,
   CheckCircle,
   MoreVert,
+  Visibility,
+  Edit,
+  Delete,
+  Send,
 } from "@mui/icons-material";
 import Layout from "../../components/Layout";
 import { useFacturas } from "../../hooks/useFacturas";
@@ -101,6 +108,44 @@ const Facturas = () => {
     page: 1,
     total: 0,
   });
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, factura: Factura) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedFactura(factura);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedFactura(null);
+  };
+
+  const handleVerDetalle = () => {
+    // TODO: Implementar ver detalle
+    handleMenuClose();
+  };
+
+  const handleEditar = () => {
+    // TODO: Implementar editar
+    handleMenuClose();
+  };
+
+  const handleEliminar = () => {
+    // TODO: Implementar eliminar
+    handleMenuClose();
+  };
+
+  const handleEnviarCotizar = () => {
+    // TODO: Implementar enviar a cotizar
+    handleMenuClose();
+  };
+
+  const canEnviarCotizar = (factura: Factura | null) => {
+    if (!factura) return false;
+    const estado = factura.estado?.toLowerCase();
+    return estado === "cargada";
+  };
 
   useEffect(() => {
     const fetchFacturas = async () => {
@@ -476,7 +521,11 @@ const Facturas = () => {
                           />
                         </TableCell>
                         <TableCell>
-                          <IconButton size="small" sx={{ color: "#64748B" }}>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => handleMenuOpen(e, factura)}
+                            sx={{ color: "#64748B" }}
+                          >
                             <MoreVert />
                           </IconButton>
                         </TableCell>
@@ -524,6 +573,55 @@ const Facturas = () => {
             </>
           )}
         </TableContainer>
+
+        {/* Actions Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
+          PaperProps={{
+            sx: {
+              borderRadius: 2,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              minWidth: 180,
+            },
+          }}
+        >
+          <MenuItem onClick={handleVerDetalle}>
+            <ListItemIcon>
+              <Visibility sx={{ color: "#64748B" }} />
+            </ListItemIcon>
+            <ListItemText primary="Ver detalle" />
+          </MenuItem>
+          <MenuItem onClick={handleEditar}>
+            <ListItemIcon>
+              <Edit sx={{ color: "#64748B" }} />
+            </ListItemIcon>
+            <ListItemText primary="Editar" />
+          </MenuItem>
+          <MenuItem onClick={handleEliminar}>
+            <ListItemIcon>
+              <Delete sx={{ color: "#EF4444" }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Eliminar"
+              sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
+            />
+          </MenuItem>
+          {canEnviarCotizar(selectedFactura) && (
+            <MenuItem onClick={handleEnviarCotizar}>
+              <ListItemIcon>
+                <Send sx={{ color: "#00BCD4" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Enviar a cotizar"
+                sx={{ "& .MuiTypography-root": { color: "#00BCD4" } }}
+              />
+            </MenuItem>
+          )}
+        </Menu>
       </Box>
     </Layout>
   );
