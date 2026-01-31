@@ -22,6 +22,7 @@ import Invitations from "./pages/invitations";
 import TerminosCondiciones from "./pages/legal/terminos-condiciones";
 import PoliticaPrivacidad from "./pages/legal/politica-privacidad";
 import ConsentimientoEmails from "./pages/legal/consentimiento-emails";
+import FacturaDetail from "./pages/facturas/detail";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Route path="/terminos-condiciones" element={<TerminosCondiciones />} />
           <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
           <Route path="/consentimiento-emails" element={<ConsentimientoEmails />} />
+          <Route path="/facturas/:id" element={<FacturaDetail />} />
 
           {/* Protected routes */}
           <Route

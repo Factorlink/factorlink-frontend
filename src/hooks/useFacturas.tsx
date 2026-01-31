@@ -40,8 +40,21 @@ export const useFacturas = () => {
     }
   };
 
+  const getFacturaById = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`facturas/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     getFacturas,
+    getFacturaById,
   };
 };

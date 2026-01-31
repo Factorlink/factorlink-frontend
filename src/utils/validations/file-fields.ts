@@ -1,5 +1,5 @@
-// Tamaño máximo permitido (10MB en bytes)
-export const MAX_FILE_SIZE = 10 * 1024 * 1024;
+// Tamaño máximo permitido (20MB en bytes)
+export const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 // Tipos MIME permitidos
 export const ALLOWED_MIME_TYPES = [

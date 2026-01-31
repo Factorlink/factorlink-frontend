@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -110,6 +111,7 @@ const Facturas = () => {
   });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
+  const navigate = useNavigate();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, factura: Factura) => {
     setAnchorEl(event.currentTarget);
@@ -123,6 +125,9 @@ const Facturas = () => {
 
   const handleVerDetalle = () => {
     // TODO: Implementar ver detalle
+    if (selectedFactura) {
+      navigate(`/facturas/${selectedFactura.id}`);
+    }
     handleMenuClose();
   };
 
