@@ -13,6 +13,14 @@ type GetFacturasParams = {
   order?: string;
 };
 
+type UpdateFacturaPayload = {
+  estado?: string;
+  facturaNameFile?: string;
+  base64Factura?: string;
+  plazo?: number;
+  montoFinanciar?: number;
+};
+
 export const useFacturas = () => {
   const [loading, setLoading] = useState(false);
 
@@ -52,9 +60,41 @@ export const useFacturas = () => {
     }
   };
 
+  const syncFacturasSii = async (periodoMes: string, periodoAnho: string, empresaId: string) => {
+    try {
+      setLoading(true);
+      const search = new URLSearchParams();
+      search.set("periodoMes", periodoMes);
+      search.set("periodoAnho", periodoAnho);
+      const response = await api.post(
+        `facturas/sync-sii?${search.toString()}`, 
+        { empresaId },
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateFactura = async (id: string, data: UpdateFacturaPayload) => {
+    try {
+      setLoading(true);
+      const response = await api.put(`/api/v1/facturas/${id}`, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     getFacturas,
     getFacturaById,
+    syncFacturasSii,
+    updateFactura,
   };
 };

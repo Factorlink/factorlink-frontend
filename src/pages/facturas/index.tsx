@@ -29,7 +29,6 @@ import {
   Description,
   Search,
   Sync,
-  Add,
   Storefront,
   CheckCircle,
   MoreVert,
@@ -38,6 +37,7 @@ import {
   Delete,
   Send,
 } from "@mui/icons-material";
+import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import Layout from "../../components/Layout";
 import { useFacturas } from "../../hooks/useFacturas";
 import useAuthStore from "../../store/authStore";
@@ -111,6 +111,7 @@ const Facturas = () => {
   });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
+  const [syncModalOpen, setSyncModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, factura: Factura) => {
@@ -246,8 +247,9 @@ const Facturas = () => {
             <Button
               variant="contained"
               startIcon={<Sync />}
+              onClick={() => setSyncModalOpen(true)}
               sx={{
-                backgroundColor: "#475569",
+                backgroundColor: "#00BCD4",
                 "&:hover": { backgroundColor: "#334155" },
                 textTransform: "none",
                 fontWeight: 600,
@@ -257,21 +259,6 @@ const Facturas = () => {
               }}
             >
               Sincronizar SII
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              sx={{
-                backgroundColor: "#00BCD4",
-                "&:hover": { backgroundColor: "#00ACC1" },
-                textTransform: "none",
-                fontWeight: 600,
-                borderRadius: 2,
-                px: 3,
-                color: "white",
-              }}
-            >
-              Agregar desde SII
             </Button>
           </Box>
         </Box>
@@ -627,6 +614,26 @@ const Facturas = () => {
             </MenuItem>
           )}
         </Menu>
+
+        {/* Sync Facturas SII Modal */}
+        <SyncFacturasSiiModal
+          open={syncModalOpen}
+          empresaId={currentRole?.empresaId || ""}
+          onClose={() => setSyncModalOpen(false)}
+          onSuccess={() => {
+            // Refresh facturas after sync
+            if (currentRole?.empresaId) {
+              getFacturas({
+                page: meta.page,
+                limit: meta.limit,
+                empresaId: currentRole.empresaId,
+              }).then(({ data, meta: metaResponse }) => {
+                setFacturas(data || []);
+                setMeta(metaResponse);
+              });
+            }
+          }}
+        />
       </Box>
     </Layout>
   );
