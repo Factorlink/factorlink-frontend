@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -12,8 +12,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  TextField,
-  InputAdornment,
   Pagination,
   CircularProgress,
   IconButton,
@@ -27,7 +25,6 @@ import {
 } from "@mui/material";
 import {
   Description,
-  Search,
   Sync,
   Storefront,
   CheckCircle,
@@ -38,6 +35,7 @@ import {
   Send,
 } from "@mui/icons-material";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
+import FacturasFilters, { type FacturasFiltersValues } from "../../components/Facturas/FacturasFilters";
 import Layout from "../../components/Layout";
 import { useFacturas } from "../../hooks/useFacturas";
 import useAuthStore from "../../store/authStore";
@@ -98,11 +96,28 @@ const formatDate = (dateString: string) => {
   });
 };
 
+const INITIAL_FILTERS: FacturasFiltersValues = {
+  rutEmisor: "",
+  rutReceptor: "",
+  razonSocialReceptor: "",
+  montoTotal: "",
+  minMontoTotal: "",
+  maxMontoTotal: "",
+  montoNeto: "",
+  minMontoNeto: "",
+  maxMontoNeto: "",
+  detalleIva: "",
+  minDetalleIva: "",
+  maxDetalleIva: "",
+  folio: "",
+  estado: "",
+};
+
 const Facturas = () => {
   const { currentRole } = useAuthStore();
   const { loading, getFacturas } = useFacturas();
   const [facturas, setFacturas] = useState<Factura[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState<FacturasFiltersValues>(INITIAL_FILTERS);
   const [meta, setMeta] = useState<Meta>({
     lastPage: 1,
     limit: 10,
@@ -153,32 +168,51 @@ const Facturas = () => {
     return estado === "cargada";
   };
 
-  useEffect(() => {
-    const fetchFacturas = async () => {
-      if (currentRole?.empresaId) {
-        const { data, meta: metaResponse } = await getFacturas({
-          page: meta.page,
-          limit: meta.limit,
-          empresaId: currentRole.empresaId,
-        });
-        setFacturas(data || []);
-        setMeta(metaResponse);
-      }
+  const fetchFacturas = useCallback(async (currentFilters: FacturasFiltersValues) => {
+    if (!currentRole?.empresaId) return;
+    
+    const params: Record<string, string | number> = {
+      page: meta.page,
+      limit: meta.limit,
+      empresaId: currentRole.empresaId,
     };
 
-    fetchFacturas();
+    // Add filter params if they have values
+    if (currentFilters.rutEmisor) params.rutEmisor = currentFilters.rutEmisor;
+    if (currentFilters.rutReceptor) params.rutReceptor = currentFilters.rutReceptor;
+    if (currentFilters.razonSocialReceptor) params.razonSocialReceptor = currentFilters.razonSocialReceptor;
+    if (currentFilters.folio) params.folio = currentFilters.folio;
+    if (currentFilters.estado) params.estado = currentFilters.estado;
+    if (currentFilters.montoTotal) params.montoTotal = Number(currentFilters.montoTotal);
+    if (currentFilters.minMontoTotal) params.minMontoTotal = Number(currentFilters.minMontoTotal);
+    if (currentFilters.maxMontoTotal) params.maxMontoTotal = Number(currentFilters.maxMontoTotal);
+    if (currentFilters.montoNeto) params.montoNeto = Number(currentFilters.montoNeto);
+    if (currentFilters.minMontoNeto) params.minMontoNeto = Number(currentFilters.minMontoNeto);
+    if (currentFilters.maxMontoNeto) params.maxMontoNeto = Number(currentFilters.maxMontoNeto);
+    if (currentFilters.detalleIva) params.detalleIva = Number(currentFilters.detalleIva);
+    if (currentFilters.minDetalleIva) params.minDetalleIva = Number(currentFilters.minDetalleIva);
+    if (currentFilters.maxDetalleIva) params.maxDetalleIva = Number(currentFilters.maxDetalleIva);
+
+    const { data, meta: metaResponse } = await getFacturas(params as any);
+    setFacturas(data || []);
+    setMeta(metaResponse);
+  }, [currentRole?.empresaId, meta.page, meta.limit, getFacturas]);
+
+  useEffect(() => {
+    fetchFacturas(filters);
   }, [currentRole?.empresaId, meta.page, meta.limit]);
 
-  const filteredFacturas = useMemo(() => {
-    if (!searchTerm) return facturas;
-    const term = searchTerm.toLowerCase();
-    return facturas.filter(
-      (f) =>
-        f.folio?.toLowerCase().includes(term) ||
-        f.razonSocialReceptor?.toLowerCase().includes(term) ||
-        f.rutReceptor?.toLowerCase().includes(term)
-    );
-  }, [facturas, searchTerm]);
+  const handleApplyFilters = (newFilters: FacturasFiltersValues) => {
+    setFilters(newFilters);
+    setMeta((prev) => ({ ...prev, page: 1 })); // Reset to page 1 when filtering
+    fetchFacturas(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters(INITIAL_FILTERS);
+    setMeta((prev) => ({ ...prev, page: 1 }));
+    fetchFacturas(INITIAL_FILTERS);
+  };
 
   const stats = useMemo(() => {
     const total = meta.total || 0;
@@ -331,30 +365,12 @@ const Facturas = () => {
           </Box>
         </Box>
 
-        {/* Search Input */}
-        <Box sx={{ mb: 3 }}>
-          <TextField
-            placeholder="Buscar por folio, receptor o RUT..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            size="small"
-            sx={{
-              width: { xs: "100%", md: 400 },
-              backgroundColor: "white",
-              borderRadius: 2,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-              },
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search sx={{ color: "#94A3B8" }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
+        {/* Filters Section */}
+        <FacturasFilters
+          onApplyFilters={handleApplyFilters}
+          onClearFilters={handleClearFilters}
+          loading={loading}
+        />
 
         {/* Table */}
         <TableContainer
@@ -376,7 +392,7 @@ const Facturas = () => {
             >
               <CircularProgress />
             </Box>
-          ) : filteredFacturas.length === 0 ? (
+          ) : facturas.length === 0 ? (
             <Box
               sx={{
                 display: "flex",
@@ -394,7 +410,7 @@ const Facturas = () => {
                 No hay facturas disponibles
               </Typography>
               <Typography variant="body2" sx={{ color: "#94A3B8", mt: 1 }}>
-                {searchTerm
+                {Object.values(filters).some((v) => v !== "")
                   ? "No se encontraron facturas con los criterios de búsqueda"
                   : "Sincroniza con el SII o agrega facturas manualmente para comenzar"}
               </Typography>
@@ -431,7 +447,7 @@ const Facturas = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredFacturas.map((factura) => {
+                  {facturas.map((factura) => {
                     const statusConfig = getStatusConfig(factura.estado);
                     return (
                       <TableRow

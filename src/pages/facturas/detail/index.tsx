@@ -43,9 +43,37 @@ const getStatusConfig = (estado: string) => {
         bgColor: "rgba(0, 188, 212, 0.1)",
         icon: <Business sx={{ fontSize: 14 }} />,
       };
-    case "COTIZADA":
+    case "CON_OFERTAS":
       return {
-        label: "COTIZADA",
+        label: "CON OFERTAS",
+        color: "#00A86B",
+        bgColor: "rgba(0, 168, 107, 0.1)",
+        icon: <Description sx={{ fontSize: 14 }} />,
+      };
+    case "CEDIDA":
+      return {
+        label: "CEDIDA",
+        color: "#00A86B",
+        bgColor: "rgba(0, 168, 107, 0.1)",
+        icon: <Description sx={{ fontSize: 14 }} />,
+      };
+    case "EN_COBRANZA":
+      return {
+        label: "EN COBRANZA",
+        color: "#00A86B",
+        bgColor: "rgba(0, 168, 107, 0.1)",
+        icon: <Description sx={{ fontSize: 14 }} />,
+      };
+    case "COBRADA":
+      return {
+        label: "COBRADA",
+        color: "#00A86B",
+        bgColor: "rgba(0, 168, 107, 0.1)",
+        icon: <Description sx={{ fontSize: 14 }} />,
+      };
+    case "NO_COBRADA":
+      return {
+        label: "NO COBRADA",
         color: "#00A86B",
         bgColor: "rgba(0, 168, 107, 0.1)",
         icon: <Description sx={{ fontSize: 14 }} />,
