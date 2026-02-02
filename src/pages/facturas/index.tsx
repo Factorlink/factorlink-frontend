@@ -188,10 +188,10 @@ const Facturas = () => {
     const enMarketplace = facturas.filter(
       (f) => f.estado === "EN_MARKETPLACE"
     ).length;
-    const cotizadas = facturas.filter(
+    const cedidas = facturas.filter(
       (f) => f.estado === "COTIZADA"
     ).length;
-    return { total, cargadas, enMarketplace, cotizadas };
+    return { total, cargadas, enMarketplace, cedidas };
   }, [facturas]);
 
   const handlePageChange = (
@@ -323,10 +323,10 @@ const Facturas = () => {
             }}
           >
             <Typography variant="body2" sx={{ color: "#64748B", mb: 0.5 }}>
-              Cotizadas
+              Cedidas
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#00A86B" }}>
-              {stats.cotizadas}
+              {stats.cedidas}
             </Typography>
           </Box>
         </Box>

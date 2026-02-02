@@ -25,6 +25,7 @@ import {
 import Layout from "../../../components/Layout";
 import type { Factura } from "../../../types/factura";
 import { useFacturas } from "../../../hooks/useFacturas";
+import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
 
 const getStatusConfig = (estado: string) => {
   switch (estado) {
@@ -85,18 +86,20 @@ const FacturaDetail = () => {
   const navigate = useNavigate();
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
+
+  const fetchFactura = async () => {
+    try {
+      setError(null);
+      const data = await getFacturaById(id!);
+      setFactura(data);
+    } catch (err) {
+      console.error("Error fetching factura:", err);
+      setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
+    }
+  };
 
   useEffect(() => {
-    const fetchFactura = async () => {
-      try {
-        setError(null);
-        const data = await getFacturaById(id!);
-        setFactura(data);
-      } catch (err) {
-        console.error("Error fetching factura:", err);
-        setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
-      }
-    };
     if (id) {
       fetchFactura();
     }
@@ -119,7 +122,11 @@ const FacturaDetail = () => {
   };
 
   const handleAdjuntarXML = () => {
-    // TODO: Implementar adjuntar XML
+    setUploadXmlModalOpen(true);
+  };
+
+  const handleUploadXmlSuccess = () => {
+    //fetchFactura();
   };
 
   // Loading state
@@ -270,7 +277,10 @@ const FacturaDetail = () => {
                 <Description sx={{ color: "#00BCD4", fontSize: 24 }} />
               </Box>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 600, color: "#1E293B" }}
+                >
                   Datos de la Factura
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#64748B" }}>
@@ -303,11 +313,20 @@ const FacturaDetail = () => {
             <Box>
               <Typography
                 variant="caption"
-                sx={{ color: "#64748B", display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}
+                sx={{
+                  color: "#64748B",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 0.5,
+                }}
               >
                 # Folio
               </Typography>
-              <Typography variant="h6" sx={{ color: "#00BCD4", fontWeight: 700 }}>
+              <Typography
+                variant="h6"
+                sx={{ color: "#00BCD4", fontWeight: 700 }}
+              >
                 #{factura.folio}
               </Typography>
               <Typography variant="caption" sx={{ color: "#94A3B8" }}>
@@ -319,11 +338,20 @@ const FacturaDetail = () => {
             <Box>
               <Typography
                 variant="caption"
-                sx={{ color: "#64748B", display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}
+                sx={{
+                  color: "#64748B",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 0.5,
+                }}
               >
                 <Business sx={{ fontSize: 14 }} /> Emisor
               </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: 600, color: "#1E293B" }}
+              >
                 {factura.razonSocialEmisor || "N/A"}
               </Typography>
               <Typography variant="caption" sx={{ color: "#94A3B8" }}>
@@ -335,11 +363,20 @@ const FacturaDetail = () => {
             <Box>
               <Typography
                 variant="caption"
-                sx={{ color: "#64748B", display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}
+                sx={{
+                  color: "#64748B",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 0.5,
+                }}
               >
                 <Business sx={{ fontSize: 14 }} /> Receptor
               </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: 600, color: "#1E293B" }}
+              >
                 {factura.razonSocialReceptor || "N/A"}
               </Typography>
               <Typography variant="caption" sx={{ color: "#94A3B8" }}>
@@ -351,11 +388,20 @@ const FacturaDetail = () => {
             <Box>
               <Typography
                 variant="caption"
-                sx={{ color: "#64748B", display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}
+                sx={{
+                  color: "#64748B",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 0.5,
+                }}
               >
                 <Person sx={{ fontSize: 14 }} /> RUT Firmante
               </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: 600, color: "#1E293B" }}
+              >
                 {factura.rutFirmante || "N/A"}
               </Typography>
             </Box>
@@ -364,11 +410,20 @@ const FacturaDetail = () => {
             <Box>
               <Typography
                 variant="caption"
-                sx={{ color: "#64748B", display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}
+                sx={{
+                  color: "#64748B",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 0.5,
+                }}
               >
                 <CalendarToday sx={{ fontSize: 14 }} /> Fecha de Emisión
               </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: 600, color: "#1E293B" }}
+              >
                 {formatDate(factura.fechaEmision)}
               </Typography>
             </Box>
@@ -377,11 +432,20 @@ const FacturaDetail = () => {
             <Box>
               <Typography
                 variant="caption"
-                sx={{ color: "#64748B", display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}
+                sx={{
+                  color: "#64748B",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 0.5,
+                }}
               >
                 <CalendarToday sx={{ fontSize: 14 }} /> Fecha de Recepción
               </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: 600, color: "#1E293B" }}
+              >
                 {formatDate(factura.fechaRecepcion)}
               </Typography>
             </Box>
@@ -389,7 +453,10 @@ const FacturaDetail = () => {
 
           {/* Plazo */}
           <Box>
-            <Typography variant="caption" sx={{ color: "#64748B", mb: 0.5, display: "block" }}>
+            <Typography
+              variant="caption"
+              sx={{ color: "#64748B", mb: 0.5, display: "block" }}
+            >
               Plazo
             </Typography>
             <Chip
@@ -414,7 +481,10 @@ const FacturaDetail = () => {
             boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           }}
         >
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#1E293B", mb: 2 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 600, color: "#1E293B", mb: 2 }}
+          >
             Detalle de Montos
           </Typography>
           <Box
@@ -429,13 +499,15 @@ const FacturaDetail = () => {
                 backgroundColor: "#F8FAFC",
                 borderRadius: 2,
                 p: 2,
-                
               }}
             >
               <Typography variant="caption" sx={{ color: "#64748B" }}>
                 Monto Neto
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: "#1E293B" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, color: "#1E293B" }}
+              >
                 {formatCurrency(factura.montoNeto)}
               </Typography>
             </Box>
@@ -449,7 +521,10 @@ const FacturaDetail = () => {
               <Typography variant="caption" sx={{ color: "#64748B" }}>
                 IVA (19%)
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: "#1E293B" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, color: "#1E293B" }}
+              >
                 {formatCurrency(factura.detalleIva)}
               </Typography>
             </Box>
@@ -463,7 +538,10 @@ const FacturaDetail = () => {
               <Typography variant="caption" sx={{ color: "#64748B" }}>
                 Descuento Global
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: "#1E293B" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, color: "#1E293B" }}
+              >
                 {formatCurrency(factura.descuentoGlobal)}
               </Typography>
             </Box>
@@ -477,7 +555,10 @@ const FacturaDetail = () => {
               <Typography variant="caption" sx={{ color: "#00A86B" }}>
                 Monto Total
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: "#00A86B" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, color: "#00A86B" }}
+              >
                 {formatCurrency(factura.montoTotal)}
               </Typography>
             </Box>
@@ -491,7 +572,10 @@ const FacturaDetail = () => {
               <Typography variant="caption" sx={{ color: "#00A86B" }}>
                 Monto a Financiar
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: "#00A86B" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, color: "#00A86B" }}
+              >
                 {formatCurrency(factura.montoFinanciar)}
               </Typography>
             </Box>
@@ -529,7 +613,10 @@ const FacturaDetail = () => {
                 <Description sx={{ color: "#00BCD4", fontSize: 24 }} />
               </Box>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 600, color: "#1E293B" }}
+                >
                   XML de la Factura
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#64748B" }}>
@@ -538,21 +625,24 @@ const FacturaDetail = () => {
               </Box>
             </Box>
 
-            {factura.urlFactura ? (
-              <Box
-                sx={{
-                  backgroundColor: "#F8FAFC",
-                  borderRadius: 2,
-                  p: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
+            <Box
+              sx={{
+                backgroundColor: "#F8FAFC",
+                borderRadius: 2,
+                p: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              {factura.urlFactura ? (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <Description sx={{ color: "#00A86B" }} />
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 600, color: "#1E293B" }}
+                    >
                       {factura.facturaNameFile || "Archivo XML"}
                     </Typography>
                     <Typography variant="caption" sx={{ color: "#64748B" }}>
@@ -560,34 +650,14 @@ const FacturaDetail = () => {
                     </Typography>
                   </Box>
                 </Box>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    borderColor: "#00BCD4",
-                    color: "#00BCD4",
-                    textTransform: "none",
-                    "&:hover": { borderColor: "#00ACC1", backgroundColor: "rgba(0,188,212,0.05)" },
-                  }}
-                >
-                  Ver XML
-                </Button>
-              </Box>
-            ) : (
-              <Box
-                sx={{
-                  backgroundColor: "#F8FAFC",
-                  borderRadius: 2,
-                  p: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
+              ) : (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <Cancel sx={{ color: "#EF4444" }} />
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 600, color: "#1E293B" }}
+                    >
                       XML No Cargado
                     </Typography>
                     <Typography variant="caption" sx={{ color: "#64748B" }}>
@@ -595,21 +665,22 @@ const FacturaDetail = () => {
                     </Typography>
                   </Box>
                 </Box>
-                <Button
-                  variant="contained"
-                  startIcon={<Upload />}
-                  onClick={handleAdjuntarXML}
-                  sx={{
-                    backgroundColor: "#00BCD4",
-                    "&:hover": { backgroundColor: "#00ACC1" },
-                    textTransform: "none",
-                    fontWeight: 600,
-                  }}
-                >
-                  Adjuntar XML
-                </Button>
-              </Box>
-            )}
+              )}
+              <Button
+                variant="contained"
+                startIcon={<Upload />}
+                onClick={handleAdjuntarXML}
+                sx={{
+                  backgroundColor: "#00BCD4",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#00ACC1" },
+                  textTransform: "none",
+                  fontWeight: 600,
+                }}
+              >
+                {factura.urlFactura ? "Reemplazar" : "Adjuntar"} XML
+              </Button>
+            </Box>
           </Box>
 
           {/* Card 4: Acciones */}
@@ -632,15 +703,13 @@ const FacturaDetail = () => {
                   justifyContent: "center",
                 }}
               >
-                <Settings sx={{color: "#00BCD4", fontSize: 24 }} />
+                <Settings sx={{ color: "#00BCD4", fontSize: 24 }} />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   Acciones
                 </Typography>
-                <Typography variant="body2">
-                  Gestiona esta factura
-                </Typography>
+                <Typography variant="body2">Gestiona esta factura</Typography>
               </Box>
             </Box>
 
@@ -654,7 +723,10 @@ const FacturaDetail = () => {
                 sx={{
                   backgroundColor: "#00BCD4",
                   "&:hover": { backgroundColor: "#00ACC1" },
-                  "&:disabled": { backgroundColor: "#475569", color: "#94A3B8" },
+                  "&:disabled": {
+                    backgroundColor: "#475569",
+                    color: "#94A3B8",
+                  },
                   textTransform: "none",
                   fontWeight: 600,
                   py: 1.5,
@@ -701,6 +773,14 @@ const FacturaDetail = () => {
             </Box>
           </Box>
         </Box>
+
+        {/* Upload XML Modal */}
+        <UploadXmlModal
+          open={uploadXmlModalOpen}
+          onClose={() => setUploadXmlModalOpen(false)}
+          onSuccess={handleUploadXmlSuccess}
+          facturaId={id || ""}
+        />
       </Box>
     </Layout>
   );

@@ -7,8 +7,8 @@ export interface RegisterFormData {
   password: string;
   confirmPassword: string;
   termsConditions: boolean;
-  privacyPolicy: boolean;
-  emailConsent: boolean;
+  privacyPolicy?: boolean;
+  emailConsent?: boolean;
   roleType: string;
   factoringRut?: string;
   factoringRazonSocial?: string;

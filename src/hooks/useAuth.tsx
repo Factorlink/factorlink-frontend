@@ -15,7 +15,8 @@ export const useAuth = () => {
   const register = async (formData: RegisterFormData) => {
     try {
       setLoading(true);
-      const response = await api.post("auth/register", formData);
+      const { privacyPolicy, emailConsent, ...rest } = formData;
+      const response = await api.post("auth/register", rest);
       return response.data;
     } catch (error) {
       throw error;
