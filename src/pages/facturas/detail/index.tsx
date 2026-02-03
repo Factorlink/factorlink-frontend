@@ -25,6 +25,7 @@ import Layout from "../../../components/Layout";
 import type { Factura } from "../../../types/factura";
 import { useFacturas } from "../../../hooks/useFacturas";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
+import DeleteFacturaModal from "../../../components/Modals/DeleteFacturaModal";
 
 const getStatusConfig = (estado: string) => {
   switch (estado) {
@@ -114,6 +115,7 @@ const FacturaDetail = () => {
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const fetchFactura = async () => {
     try {
@@ -142,7 +144,15 @@ const FacturaDetail = () => {
 
 
   const handleEliminar = () => {
-    // TODO: Implementar eliminar
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteSuccess = () => {
+    navigate("/facturas");
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
   };
 
   const handleAdjuntarXML = () => {
@@ -830,6 +840,21 @@ const FacturaDetail = () => {
           onSuccess={handleUploadXmlSuccess}
           facturaId={id || ""}
         />
+
+        {/* Delete Factura Modal */}
+        {factura && (
+          <DeleteFacturaModal
+            open={deleteModalOpen}
+            onClose={handleCloseDeleteModal}
+            onSuccess={handleDeleteSuccess}
+            facturaData={{
+              id: factura.id,
+              folio: factura.folio,
+              razonSocialReceptor: factura.razonSocialReceptor || "N/A",
+              montoTotal: factura.montoTotal,
+            }}
+          />
+        )}
       </Box>
     </Layout>
   );

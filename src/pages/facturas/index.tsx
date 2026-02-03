@@ -30,11 +30,11 @@ import {
   CheckCircle,
   MoreVert,
   Visibility,
-  Edit,
   Delete,
   Send,
 } from "@mui/icons-material";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
+import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
 import FacturasFilters, { type FacturasFiltersValues } from "../../components/Facturas/FacturasFilters";
 import SortableTableHeader from "../../components/Facturas/SortableTableHeader";
 import Layout from "../../components/Layout";
@@ -125,6 +125,7 @@ const Facturas = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, factura: Factura) => {
@@ -145,8 +146,17 @@ const Facturas = () => {
   };
 
   const handleEliminar = () => {
-    // TODO: Implementar eliminar
-    handleMenuClose();
+    setDeleteModalOpen(true);
+    setAnchorEl(null);
+  };
+
+  const handleDeleteSuccess = () => {
+    fetchFacturas(filters);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setSelectedFactura(null);
   };
 
   const handleEnviarCotizar = () => {
@@ -666,6 +676,21 @@ const Facturas = () => {
             }
           }}
         />
+
+        {/* Delete Factura Modal */}
+        {selectedFactura && (
+          <DeleteFacturaModal
+            open={deleteModalOpen}
+            onClose={handleCloseDeleteModal}
+            onSuccess={handleDeleteSuccess}
+            facturaData={{
+              id: selectedFactura.id,
+              folio: selectedFactura.folio,
+              razonSocialReceptor: selectedFactura.razonSocialReceptor || "N/A",
+              montoTotal: selectedFactura.montoTotal,
+            }}
+          />
+        )}
       </Box>
     </Layout>
   );
