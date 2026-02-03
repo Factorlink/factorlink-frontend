@@ -1,3 +1,5 @@
+import type { FacturasFiltersValues } from "../components/Facturas/FacturasFilters";
+
 export const ROLES = {
   EMPRESA_ADMIN: "EMPRESA_ADMIN",
   EMPRESA_USUARIO: "EMPRESA_USUARIO",
@@ -63,3 +65,42 @@ export const FACTORING_STATES = {
   VALIDACION: "VALIDACION",
   ACTIVO: "ACTIVO",
 }
+
+export const FACTURAS_STATES = [
+  { value: "CARGADA", label: "Cargada" },
+  { value: "EN_MARKETPLACE", label: "En Marketplace" },
+  { value: "CON_OFERTAS", label: "Con Ofertas" },
+  { value: "CEDIDA", label: "Cedida" },
+  { value: "EN_COBRANZA", label: "En Cobranza" },
+  { value: "COBRADA", label: "Cobrada" },
+  { value: "NO_COBRADA", label: "No Cobrada" },
+];
+
+export const INITIAL_FILTERS: FacturasFiltersValues = {
+  rutEmisor: "",
+  rutReceptor: "",
+  razonSocialReceptor: "",
+  montoTotal: "",
+  minMontoTotal: "",
+  maxMontoTotal: "",
+  montoNeto: "",
+  minMontoNeto: "",
+  maxMontoNeto: "",
+  detalleIva: "",
+  minDetalleIva: "",
+  maxDetalleIva: "",
+  folio: "",
+  estado: "",
+  sortBy: "",
+  order: "",
+}
+
+export const SORTABLE_COLUMNS = [
+  { field: "folio", label: "Folio" },
+  { field: "razonSocialReceptor", label: "Receptor" },
+  { field: "fechaEmision", label: "Fecha Emisión" },
+  { field: "montoTotal", label: "Monto Total" },
+  { field: "montoFinanciar", label: "Monto a Financiar" },
+  { field: "plazo", label: "Plazo" },
+  { field: "estado", label: "Estado" },
+];
