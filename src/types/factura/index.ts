@@ -25,4 +25,5 @@ export interface Factura {
     tipoDocumento: string;
     urlFactura: string;
     visibilidad: string;
+    xmlContentBase64: string;
 }

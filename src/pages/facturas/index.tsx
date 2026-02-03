@@ -138,15 +138,9 @@ const Facturas = () => {
   };
 
   const handleVerDetalle = () => {
-    // TODO: Implementar ver detalle
     if (selectedFactura) {
       navigate(`/facturas/${selectedFactura.id}`);
     }
-    handleMenuClose();
-  };
-
-  const handleEditar = () => {
-    // TODO: Implementar editar
     handleMenuClose();
   };
 
@@ -630,12 +624,6 @@ const Facturas = () => {
               <Visibility sx={{ color: "#64748B" }} />
             </ListItemIcon>
             <ListItemText primary="Ver detalle" />
-          </MenuItem>
-          <MenuItem onClick={handleEditar}>
-            <ListItemIcon>
-              <Edit sx={{ color: "#64748B" }} />
-            </ListItemIcon>
-            <ListItemText primary="Editar" />
           </MenuItem>
           <MenuItem onClick={handleEliminar}>
             <ListItemIcon>

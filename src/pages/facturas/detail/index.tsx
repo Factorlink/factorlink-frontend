@@ -14,7 +14,6 @@ import {
   Person,
   CalendarToday,
   Send,
-  Edit,
   Delete,
   Upload,
   Settings,
@@ -109,7 +108,7 @@ const formatDate = (dateString: string) => {
 };
 
 const FacturaDetail = () => {
-  const { getFacturaById, loading } = useFacturas();
+  const { getFacturaById, loading, refreshFactura } = useFacturas();
   const { id } = useParams();
   const navigate = useNavigate();
   const [factura, setFactura] = useState<Factura | null>(null);
@@ -134,16 +133,13 @@ const FacturaDetail = () => {
   }, [id]);
 
   const handleBack = () => {
-    navigate("/facturas");
+    navigate(-1);
   };
 
   const handleEnviarCotizar = () => {
     // TODO: Implementar enviar a cotizar
   };
 
-  const handleEditar = () => {
-    // TODO: Implementar editar
-  };
 
   const handleEliminar = () => {
     // TODO: Implementar eliminar
@@ -153,8 +149,38 @@ const FacturaDetail = () => {
     setUploadXmlModalOpen(true);
   };
 
-  const handleUploadXmlSuccess = () => {
-    //fetchFactura();
+  const handleCloseUploadXmlModal = () => {
+    setUploadXmlModalOpen(false);
+  };
+
+  const handleUploadXmlSuccess = async () => {
+    try {
+      const data = await refreshFactura(id!);
+      setFactura(data);
+    } catch (err) {
+      console.error("Error refreshing factura:", err);
+      setError(
+        "No se pudo actualizar la factura. Por favor, intente nuevamente.",
+      );
+    }
+  };
+
+  const handleDescargarXML = (base64: string, fileName: string) => {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: "application/xml" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   // Loading state
@@ -671,7 +697,18 @@ const FacturaDetail = () => {
                       variant="body2"
                       sx={{ fontWeight: 600, color: "#1E293B" }}
                     >
-                      {factura.facturaNameFile || "Archivo XML"}
+                      <Typography
+                        role="button"
+                        sx={{ color: "#00A86B", cursor: "pointer" }}
+                        onClick={() =>
+                          handleDescargarXML(
+                            factura.xmlContentBase64,
+                            factura.facturaNameFile || "factura.xml",
+                          )
+                        }
+                      >
+                        {factura.facturaNameFile || "Archivo XML"}
+                      </Typography>
                     </Typography>
                     <Typography variant="caption" sx={{ color: "#64748B" }}>
                       Documento cargado
@@ -764,22 +801,6 @@ const FacturaDetail = () => {
                 Enviar a cotizar
               </Button>
               <Button
-                variant="contained"
-                fullWidth
-                startIcon={<Edit />}
-                onClick={handleEditar}
-                sx={{
-                  backgroundColor: "#475569",
-                  "&:hover": { backgroundColor: "#334155" },
-                  textTransform: "none",
-                  fontWeight: 600,
-                  py: 1.5,
-                  color: "white",
-                }}
-              >
-                Editar factura
-              </Button>
-              <Button
                 variant="outlined"
                 fullWidth
                 startIcon={<Delete />}
@@ -805,7 +826,7 @@ const FacturaDetail = () => {
         {/* Upload XML Modal */}
         <UploadXmlModal
           open={uploadXmlModalOpen}
-          onClose={() => setUploadXmlModalOpen(false)}
+          onClose={handleCloseUploadXmlModal}
           onSuccess={handleUploadXmlSuccess}
           facturaId={id || ""}
         />

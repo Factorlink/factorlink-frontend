@@ -110,11 +110,34 @@ export const useFacturas = () => {
     }
   };
 
+  const refreshFactura = async (id: string) => {
+    try {
+      const response = await api.get(`/facturas/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const deleteFactura = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await api.delete(`/facturas/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     getFacturas,
     getFacturaById,
     syncFacturasSii,
     updateFactura,
+    refreshFactura,
+    deleteFactura,
   };
 };
