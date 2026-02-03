@@ -60,9 +60,9 @@ const getStatusConfig = (estado: string) => {
         bgColor: "rgba(0, 188, 212, 0.1)",
         icon: <Storefront sx={{ fontSize: 14 }} />,
       };
-    case "COTIZADA":
+    case "CEDIDA":
       return {
-        label: "COTIZADA",
+        label: "CEDIDA",
         color: "#00A86B",
         bgColor: "rgba(0, 168, 107, 0.1)",
         icon: <CheckCircle sx={{ fontSize: 14 }} />,
@@ -230,7 +230,7 @@ const Facturas = () => {
       (f) => f.estado === "EN_MARKETPLACE"
     ).length;
     const cedidas = facturas.filter(
-      (f) => f.estado === "COTIZADA"
+      (f) => f.estado === "CEDIDA"
     ).length;
     return { total, cargadas, enMarketplace, cedidas };
   }, [facturas]);
