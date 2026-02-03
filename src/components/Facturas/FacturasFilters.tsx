@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useFormik } from "formik";
 import {
   Box,
   Typography,
@@ -11,6 +13,7 @@ import {
   MenuItem,
   Grid,
   IconButton,
+  FormHelperText,
 } from "@mui/material";
 import {
   FilterList,
@@ -19,8 +22,9 @@ import {
   Clear,
   Search,
 } from "@mui/icons-material";
-import type { SelectChangeEvent } from "@mui/material/Select";
 import { FACTURAS_STATES, INITIAL_FILTERS } from "../../utils/consts";
+import { facturasFiltersSchema } from "./validation-schema";
+import { handleRutInputChange } from "../../utils/validations/shared-fields";
 
 export interface FacturasFiltersValues {
   rutEmisor: string;
@@ -45,48 +49,50 @@ interface FacturasFiltersProps {
   onApplyFilters: (filters: FacturasFiltersValues) => void;
   onClearFilters: () => void;
   loading?: boolean;
-  filters: FacturasFiltersValues;
-  setFilters: (filters: FacturasFiltersValues) => void;
 }
-
 
 const FacturasFilters = ({
   onApplyFilters,
   onClearFilters,
   loading = false,
-  filters,
-  setFilters
 }: FacturasFiltersProps) => {
   const [expanded, setExpanded] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const handleTextChange = (field: keyof FacturasFiltersValues) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFilters({ ...filters, [field]: e.target.value });
-  };
-
-  const handleSelectChange = (field: keyof FacturasFiltersValues) => (
-    e: SelectChangeEvent
-  ) => {
-    setFilters({ ...filters, [field]: e.target.value });
-  };
-
-  const handleApply = () => {
-    const newSearchParams = new URLSearchParams();
-    (Object.keys(filters) as Array<keyof FacturasFiltersValues>).forEach((key) => {
-      if (filters[key]) {
-        newSearchParams.set(key, filters[key]);
+  const getInitialValues = () => {
+    const newFilters = { ...INITIAL_FILTERS };
+    (Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+      const value = searchParams.get(key);
+      if (value !== null) {
+        newFilters[key] = value;
       }
     });
-    onApplyFilters(filters);
+    return newFilters;
   };
 
+  const formik = useFormik({
+    initialValues: getInitialValues(),
+    enableReinitialize: true,
+    validationSchema: facturasFiltersSchema,
+    onSubmit: (values) => {
+      const newSearchParams = new URLSearchParams();
+      (Object.keys(values) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+        if (values[key]) {
+          newSearchParams.set(key, values[key]);
+        }
+      });
+      setSearchParams(newSearchParams);
+      onApplyFilters(values);
+    },
+  });
+
   const handleClear = () => {
-    setFilters(INITIAL_FILTERS);
+    formik.resetForm({ values: INITIAL_FILTERS });
+    setSearchParams(new URLSearchParams());
     onClearFilters();
   };
 
-  const hasActiveFilters = Object.values(filters).some((val) => val !== "");
+  const hasActiveFilters = Object.values(formik.values).some((val) => val !== "" && val !== "ASC" && val !== "DESC");
 
   return (
     <Box
@@ -130,7 +136,7 @@ const FacturasFilters = ({
                 fontWeight: 600,
               }}
             >
-              {Object.values(filters).filter((val) => val !== "").length}
+              {Object.values(formik.values).filter((val) => val !== "" && val !== "ASC" && val !== "DESC").length}
             </Box>
           )}
         </Box>
@@ -141,17 +147,20 @@ const FacturasFilters = ({
 
       {/* Collapsible Content */}
       <Collapse in={expanded}>
-        <Box sx={{ p: 2, pt: 0, borderTop: "1px solid #E2E8F0" }}>
+        <Box sx={{ p: 2, pt: 0, borderTop: "1px solid #E2E8F0" }} component="form" onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {/* Folio */}
             <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
+                name="folio"
                 label="Folio"
                 placeholder="Número de folio"
-                value={filters.folio}
-                onChange={handleTextChange("folio")}
+                value={formik.values.folio}
+                onChange={formik.handleChange}
+                error={formik.touched.folio && Boolean(formik.errors.folio)}
+                helperText={formik.touched.folio && formik.errors.folio}
               />
             </Grid>
 
@@ -160,10 +169,13 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="rutEmisor"
                 label="RUT Emisor"
                 placeholder="Ej: 12.345.678-9"
-                value={filters.rutEmisor}
-                onChange={handleTextChange("rutEmisor")}
+                value={formik.values.rutEmisor}
+                onChange={(e) => handleRutInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                error={formik.touched.rutEmisor && Boolean(formik.errors.rutEmisor)}
+                helperText={formik.touched.rutEmisor && formik.errors.rutEmisor}
               />
             </Grid>
 
@@ -172,10 +184,13 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="rutReceptor"
                 label="RUT Receptor"
                 placeholder="Ej: 12.345.678-9"
-                value={filters.rutReceptor}
-                onChange={handleTextChange("rutReceptor")}
+                value={formik.values.rutReceptor}
+                onChange={(e) => handleRutInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                error={formik.touched.rutReceptor && Boolean(formik.errors.rutReceptor)}
+                helperText={formik.touched.rutReceptor && formik.errors.rutReceptor}
               />
             </Grid>
 
@@ -184,21 +199,25 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="razonSocialReceptor"
                 label="Razón Social Receptor"
                 placeholder="Nombre empresa"
-                value={filters.razonSocialReceptor}
-                onChange={handleTextChange("razonSocialReceptor")}
+                value={formik.values.razonSocialReceptor}
+                onChange={formik.handleChange}
+                error={formik.touched.razonSocialReceptor && Boolean(formik.errors.razonSocialReceptor)}
+                helperText={formik.touched.razonSocialReceptor && formik.errors.razonSocialReceptor}
               />
             </Grid>
 
             {/* Estado */}
             <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={formik.touched.estado && Boolean(formik.errors.estado)}>
                 <InputLabel>Estado</InputLabel>
                 <Select
-                  value={filters.estado}
+                  name="estado"
+                  value={formik.values.estado}
                   label="Estado"
-                  onChange={handleSelectChange("estado")}
+                  onChange={formik.handleChange}
                 >
                   {FACTURAS_STATES.map((estado) => (
                     <MenuItem key={estado.value} value={estado.value}>
@@ -206,6 +225,9 @@ const FacturasFilters = ({
                     </MenuItem>
                   ))}
                 </Select>
+                {formik.touched.estado && formik.errors.estado && (
+                  <FormHelperText>{formik.errors.estado}</FormHelperText>
+                )}
               </FormControl>
             </Grid>
 
@@ -214,11 +236,14 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="montoTotal"
                 label="Monto Total"
                 type="number"
                 placeholder="Monto exacto"
-                value={filters.montoTotal}
-                onChange={handleTextChange("montoTotal")}
+                value={formik.values.montoTotal}
+                onChange={formik.handleChange}
+                error={formik.touched.montoTotal && Boolean(formik.errors.montoTotal)}
+                helperText={formik.touched.montoTotal && formik.errors.montoTotal}
               />
             </Grid>
 
@@ -227,11 +252,14 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="minMontoTotal"
                 label="Monto Total Mínimo"
                 type="number"
                 placeholder="Desde"
-                value={filters.minMontoTotal}
-                onChange={handleTextChange("minMontoTotal")}
+                value={formik.values.minMontoTotal}
+                onChange={formik.handleChange}
+                error={formik.touched.minMontoTotal && Boolean(formik.errors.minMontoTotal)}
+                helperText={formik.touched.minMontoTotal && formik.errors.minMontoTotal}
               />
             </Grid>
 
@@ -240,11 +268,14 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="maxMontoTotal"
                 label="Monto Total Máximo"
                 type="number"
                 placeholder="Hasta"
-                value={filters.maxMontoTotal}
-                onChange={handleTextChange("maxMontoTotal")}
+                value={formik.values.maxMontoTotal}
+                onChange={formik.handleChange}
+                error={formik.touched.maxMontoTotal && Boolean(formik.errors.maxMontoTotal)}
+                helperText={formik.touched.maxMontoTotal && formik.errors.maxMontoTotal}
               />
             </Grid>
 
@@ -253,11 +284,14 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="montoNeto"
                 label="Monto Neto"
                 type="number"
                 placeholder="Monto exacto"
-                value={filters.montoNeto}
-                onChange={handleTextChange("montoNeto")}
+                value={formik.values.montoNeto}
+                onChange={formik.handleChange}
+                error={formik.touched.montoNeto && Boolean(formik.errors.montoNeto)}
+                helperText={formik.touched.montoNeto && formik.errors.montoNeto}
               />
             </Grid>
 
@@ -266,11 +300,14 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="minMontoNeto"
                 label="Monto Neto Mínimo"
                 type="number"
                 placeholder="Desde"
-                value={filters.minMontoNeto}
-                onChange={handleTextChange("minMontoNeto")}
+                value={formik.values.minMontoNeto}
+                onChange={formik.handleChange}
+                error={formik.touched.minMontoNeto && Boolean(formik.errors.minMontoNeto)}
+                helperText={formik.touched.minMontoNeto && formik.errors.minMontoNeto}
               />
             </Grid>
 
@@ -279,11 +316,14 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="maxMontoNeto"
                 label="Monto Neto Máximo"
                 type="number"
                 placeholder="Hasta"
-                value={filters.maxMontoNeto}
-                onChange={handleTextChange("maxMontoNeto")}
+                value={formik.values.maxMontoNeto}
+                onChange={formik.handleChange}
+                error={formik.touched.maxMontoNeto && Boolean(formik.errors.maxMontoNeto)}
+                helperText={formik.touched.maxMontoNeto && formik.errors.maxMontoNeto}
               />
             </Grid>
 
@@ -292,11 +332,14 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="detalleIva"
                 label="Detalle IVA"
                 type="number"
                 placeholder="Monto exacto"
-                value={filters.detalleIva}
-                onChange={handleTextChange("detalleIva")}
+                value={formik.values.detalleIva}
+                onChange={formik.handleChange}
+                error={formik.touched.detalleIva && Boolean(formik.errors.detalleIva)}
+                helperText={formik.touched.detalleIva && formik.errors.detalleIva}
               />
             </Grid>
 
@@ -305,11 +348,14 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="minDetalleIva"
                 label="IVA Mínimo"
                 type="number"
                 placeholder="Desde"
-                value={filters.minDetalleIva}
-                onChange={handleTextChange("minDetalleIva")}
+                value={formik.values.minDetalleIva}
+                onChange={formik.handleChange}
+                error={formik.touched.minDetalleIva && Boolean(formik.errors.minDetalleIva)}
+                helperText={formik.touched.minDetalleIva && formik.errors.minDetalleIva}
               />
             </Grid>
 
@@ -318,11 +364,14 @@ const FacturasFilters = ({
               <TextField
                 fullWidth
                 size="small"
+                name="maxDetalleIva"
                 label="IVA Máximo"
                 type="number"
                 placeholder="Hasta"
-                value={filters.maxDetalleIva}
-                onChange={handleTextChange("maxDetalleIva")}
+                value={formik.values.maxDetalleIva}
+                onChange={formik.handleChange}
+                error={formik.touched.maxDetalleIva && Boolean(formik.errors.maxDetalleIva)}
+                helperText={formik.touched.maxDetalleIva && formik.errors.maxDetalleIva}
               />
             </Grid>
           </Grid>
@@ -360,7 +409,7 @@ const FacturasFilters = ({
             <Button
               variant="contained"
               startIcon={<Search />}
-              onClick={handleApply}
+              onClick={() => formik.handleSubmit()}
               disabled={loading}
               sx={{
                 backgroundColor: "#00BCD4",

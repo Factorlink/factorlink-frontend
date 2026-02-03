@@ -410,8 +410,6 @@ const Facturas = () => {
           onApplyFilters={handleApplyFilters}
           onClearFilters={handleClearFilters}
           loading={loading}
-          filters={filters}
-          setFilters={setFilters}
         />
         {/* Table */}
         <TableContainer
