@@ -37,6 +37,8 @@ export interface FacturasFiltersValues {
   maxDetalleIva: string;
   folio: string;
   estado: string;
+  sortBy: string;
+  order: string;
 }
 
 interface FacturasFiltersProps {

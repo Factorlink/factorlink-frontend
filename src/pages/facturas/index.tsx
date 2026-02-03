@@ -36,13 +36,14 @@ import {
 } from "@mui/icons-material";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import FacturasFilters, { type FacturasFiltersValues } from "../../components/Facturas/FacturasFilters";
+import SortableTableHeader from "../../components/Facturas/SortableTableHeader";
 import Layout from "../../components/Layout";
 import { useFacturas } from "../../hooks/useFacturas";
 import useAuthStore from "../../store/authStore";
 import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
 import type { SelectChangeEvent } from "@mui/material/Select";
-import { INITIAL_FILTERS } from "../../utils/consts";
+import { INITIAL_FILTERS, SORTABLE_COLUMNS } from "../../utils/consts";
 
 const getStatusConfig = (estado: string) => {
   switch (estado) {
@@ -189,6 +190,8 @@ const Facturas = () => {
     if (currentFilters.detalleIva) params.detalleIva = Number(currentFilters.detalleIva);
     if (currentFilters.minDetalleIva) params.minDetalleIva = Number(currentFilters.minDetalleIva);
     if (currentFilters.maxDetalleIva) params.maxDetalleIva = Number(currentFilters.maxDetalleIva);
+    if (currentFilters.sortBy) params.sortBy = currentFilters.sortBy;
+    if (currentFilters.order) params.order = currentFilters.order;
 
     const { data, meta: metaResponse } = await getFacturas(params as any);
     setFacturas(data || []);
@@ -199,10 +202,7 @@ const Facturas = () => {
     fetchFacturas(filters);
   }, [currentRole?.empresaId, meta.page, meta.limit]);
 
-  const handleApplyFilters = (newFilters: FacturasFiltersValues) => {
-    setFilters(newFilters);
-    setMeta((prev) => ({ ...prev, page: 1 })); // Reset to page 1 when filtering
-    
+  const updateSearchParams = (newFilters: FacturasFiltersValues) => {
     const newSearchParams = new URLSearchParams();
     (Object.keys(newFilters) as Array<keyof FacturasFiltersValues>).forEach((key) => {
       if (newFilters[key]) {
@@ -210,7 +210,12 @@ const Facturas = () => {
       }
     });
     setSearchParams(newSearchParams);
+  };
 
+  const handleApplyFilters = (newFilters: FacturasFiltersValues) => {
+    setFilters(newFilters);
+    setMeta((prev) => ({ ...prev, page: 1 })); // Reset to page 1 when filtering
+    updateSearchParams(newFilters);
     fetchFacturas(newFilters);
   };
 
@@ -219,6 +224,34 @@ const Facturas = () => {
     setMeta((prev) => ({ ...prev, page: 1 }));
     setSearchParams(new URLSearchParams());
     fetchFacturas(INITIAL_FILTERS);
+  };
+
+  const handleSort = (field: string) => {
+    let newOrder: string;
+    let newSortBy: string;
+
+    if (filters.sortBy === field) {
+      // Toggle order or clear sorting
+      if (filters.order === "ASC") {
+        newOrder = "DESC";
+        newSortBy = field;
+      } else if (filters.order === "DESC") {
+        newOrder = "";
+        newSortBy = "";
+      } else {
+        newOrder = "ASC";
+        newSortBy = field;
+      }
+    } else {
+      // New field, start with ASC
+      newSortBy = field;
+      newOrder = "ASC";
+    }
+
+    const newFilters = { ...filters, sortBy: newSortBy, order: newOrder };
+    setFilters(newFilters);
+    updateSearchParams(newFilters);
+    fetchFacturas(newFilters);
   };
 
   const stats = useMemo(() => {
@@ -428,27 +461,16 @@ const Facturas = () => {
               <Table>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Folio
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Receptor
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Fecha Emisión
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Monto Total
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Monto a Financiar
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Plazo
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Estado
-                    </TableCell>
+                    {SORTABLE_COLUMNS.map((column) => (
+                      <SortableTableHeader
+                        key={column.field}
+                        field={column.field}
+                        label={column.label}
+                        currentSortBy={filters.sortBy}
+                        currentOrder={filters.order}
+                        onSort={handleSort}
+                      />
+                    ))}
                     <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
                       Acciones
                     </TableCell>

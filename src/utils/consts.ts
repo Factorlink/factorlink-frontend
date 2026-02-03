@@ -91,4 +91,16 @@ export const INITIAL_FILTERS: FacturasFiltersValues = {
   maxDetalleIva: "",
   folio: "",
   estado: "",
+  sortBy: "",
+  order: "",
 }
+
+export const SORTABLE_COLUMNS = [
+  { field: "folio", label: "Folio" },
+  { field: "razonSocialReceptor", label: "Receptor" },
+  { field: "fechaEmision", label: "Fecha Emisión" },
+  { field: "montoTotal", label: "Monto Total" },
+  { field: "montoFinanciar", label: "Monto a Financiar" },
+  { field: "plazo", label: "Plazo" },
+  { field: "estado", label: "Estado" },
+];
