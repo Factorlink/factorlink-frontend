@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -42,6 +42,7 @@ import useAuthStore from "../../store/authStore";
 import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
 import type { SelectChangeEvent } from "@mui/material/Select";
+import { INITIAL_FILTERS } from "../../utils/consts";
 
 const getStatusConfig = (estado: string) => {
   switch (estado) {
@@ -96,28 +97,24 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const INITIAL_FILTERS: FacturasFiltersValues = {
-  rutEmisor: "",
-  rutReceptor: "",
-  razonSocialReceptor: "",
-  montoTotal: "",
-  minMontoTotal: "",
-  maxMontoTotal: "",
-  montoNeto: "",
-  minMontoNeto: "",
-  maxMontoNeto: "",
-  detalleIva: "",
-  minDetalleIva: "",
-  maxDetalleIva: "",
-  folio: "",
-  estado: "",
-};
 
 const Facturas = () => {
   const { currentRole } = useAuthStore();
   const { loading, getFacturas } = useFacturas();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [facturas, setFacturas] = useState<Factura[]>([]);
-  const [filters, setFilters] = useState<FacturasFiltersValues>(INITIAL_FILTERS);
+  
+  const [filters, setFilters] = useState<FacturasFiltersValues>(() => {
+    const newFilters = { ...INITIAL_FILTERS };
+    (Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+      const value = searchParams.get(key);
+      if (value !== null) {
+        newFilters[key] = value;
+      }
+    });
+    return newFilters;
+  });
+
   const [meta, setMeta] = useState<Meta>({
     lastPage: 1,
     limit: 10,
@@ -205,12 +202,22 @@ const Facturas = () => {
   const handleApplyFilters = (newFilters: FacturasFiltersValues) => {
     setFilters(newFilters);
     setMeta((prev) => ({ ...prev, page: 1 })); // Reset to page 1 when filtering
+    
+    const newSearchParams = new URLSearchParams();
+    (Object.keys(newFilters) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+      if (newFilters[key]) {
+        newSearchParams.set(key, newFilters[key]);
+      }
+    });
+    setSearchParams(newSearchParams);
+
     fetchFacturas(newFilters);
   };
 
   const handleClearFilters = () => {
     setFilters(INITIAL_FILTERS);
     setMeta((prev) => ({ ...prev, page: 1 }));
+    setSearchParams(new URLSearchParams());
     fetchFacturas(INITIAL_FILTERS);
   };
 
@@ -370,8 +377,9 @@ const Facturas = () => {
           onApplyFilters={handleApplyFilters}
           onClearFilters={handleClearFilters}
           loading={loading}
+          filters={filters}
+          setFilters={setFilters}
         />
-
         {/* Table */}
         <TableContainer
           component={Paper}
@@ -656,3 +664,4 @@ const Facturas = () => {
 };
 
 export default Facturas;
+       

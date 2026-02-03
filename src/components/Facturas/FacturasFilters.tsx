@@ -20,7 +20,7 @@ import {
   Search,
 } from "@mui/icons-material";
 import type { SelectChangeEvent } from "@mui/material/Select";
-import { FACTURAS_STATES } from "../../utils/consts";
+import { FACTURAS_STATES, INITIAL_FILTERS } from "../../utils/consts";
 
 export interface FacturasFiltersValues {
   rutEmisor: string;
@@ -43,47 +43,39 @@ interface FacturasFiltersProps {
   onApplyFilters: (filters: FacturasFiltersValues) => void;
   onClearFilters: () => void;
   loading?: boolean;
+  filters: FacturasFiltersValues;
+  setFilters: (filters: FacturasFiltersValues) => void;
 }
-
-const INITIAL_FILTERS: FacturasFiltersValues = {
-  rutEmisor: "",
-  rutReceptor: "",
-  razonSocialReceptor: "",
-  montoTotal: "",
-  minMontoTotal: "",
-  maxMontoTotal: "",
-  montoNeto: "",
-  minMontoNeto: "",
-  maxMontoNeto: "",
-  detalleIva: "",
-  minDetalleIva: "",
-  maxDetalleIva: "",
-  folio: "",
-  estado: "",
-};
 
 
 const FacturasFilters = ({
   onApplyFilters,
   onClearFilters,
   loading = false,
+  filters,
+  setFilters
 }: FacturasFiltersProps) => {
   const [expanded, setExpanded] = useState(false);
-  const [filters, setFilters] = useState<FacturasFiltersValues>(INITIAL_FILTERS);
 
   const handleTextChange = (field: keyof FacturasFiltersValues) => (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setFilters((prev) => ({ ...prev, [field]: e.target.value }));
+    setFilters({ ...filters, [field]: e.target.value });
   };
 
   const handleSelectChange = (field: keyof FacturasFiltersValues) => (
     e: SelectChangeEvent
   ) => {
-    setFilters((prev) => ({ ...prev, [field]: e.target.value }));
+    setFilters({ ...filters, [field]: e.target.value });
   };
 
   const handleApply = () => {
+    const newSearchParams = new URLSearchParams();
+    (Object.keys(filters) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+      if (filters[key]) {
+        newSearchParams.set(key, filters[key]);
+      }
+    });
     onApplyFilters(filters);
   };
 

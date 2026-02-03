@@ -1,3 +1,5 @@
+import type { FacturasFiltersValues } from "../components/Facturas/FacturasFilters";
+
 export const ROLES = {
   EMPRESA_ADMIN: "EMPRESA_ADMIN",
   EMPRESA_USUARIO: "EMPRESA_USUARIO",
@@ -73,3 +75,20 @@ export const FACTURAS_STATES = [
   { value: "COBRADA", label: "Cobrada" },
   { value: "NO_COBRADA", label: "No Cobrada" },
 ];
+
+export const INITIAL_FILTERS: FacturasFiltersValues = {
+  rutEmisor: "",
+  rutReceptor: "",
+  razonSocialReceptor: "",
+  montoTotal: "",
+  minMontoTotal: "",
+  maxMontoTotal: "",
+  montoNeto: "",
+  minMontoNeto: "",
+  maxMontoNeto: "",
+  detalleIva: "",
+  minDetalleIva: "",
+  maxDetalleIva: "",
+  folio: "",
+  estado: "",
+}
