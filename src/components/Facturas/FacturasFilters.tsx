@@ -144,7 +144,7 @@ const FacturasFilters = ({
         <Box sx={{ p: 2, pt: 0, borderTop: "1px solid #E2E8F0" }}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {/* Folio */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -156,7 +156,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* RUT Emisor */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -168,7 +168,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* RUT Receptor */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -180,7 +180,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Razón Social Receptor */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -192,7 +192,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Estado */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>Estado</InputLabel>
                 <Select
@@ -210,7 +210,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Monto Total */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -223,7 +223,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Min Monto Total */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -236,7 +236,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Max Monto Total */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -249,7 +249,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Monto Neto */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -262,7 +262,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Min Monto Neto */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -275,7 +275,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Max Monto Neto */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -288,7 +288,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Detalle IVA */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -301,7 +301,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Min Detalle IVA */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -314,7 +314,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Max Detalle IVA */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
