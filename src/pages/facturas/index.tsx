@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Box,
@@ -35,7 +35,9 @@ import {
 } from "@mui/icons-material";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
-import FacturasFilters, { type FacturasFiltersValues } from "../../components/Facturas/FacturasFilters";
+import FacturasFilters, {
+  type FacturasFiltersValues,
+} from "../../components/Facturas/FacturasFilters";
 import SortableTableHeader from "../../components/Facturas/SortableTableHeader";
 import Layout from "../../components/Layout";
 import { useFacturas } from "../../hooks/useFacturas";
@@ -98,16 +100,17 @@ const formatDate = (dateString: string) => {
   });
 };
 
-
 const Facturas = () => {
   const { currentRole } = useAuthStore();
   const { loading, getFacturas } = useFacturas();
   const [searchParams, setSearchParams] = useSearchParams();
   const [facturas, setFacturas] = useState<Factura[]>([]);
-  
+
   const [filters, setFilters] = useState<FacturasFiltersValues>(() => {
     const newFilters = { ...INITIAL_FILTERS };
-    (Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+    (
+      Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>
+    ).forEach((key) => {
       const value = searchParams.get(key);
       if (value !== null) {
         newFilters[key] = value;
@@ -131,7 +134,10 @@ const Facturas = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, factura: Factura) => {
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    factura: Factura,
+  ) => {
     setAnchorEl(event.currentTarget);
     setSelectedFactura(factura);
   };
@@ -173,37 +179,51 @@ const Facturas = () => {
     return estado === "cargada";
   };
 
-  const fetchFacturas = useCallback(async (currentFilters: FacturasFiltersValues) => {
-    if (!currentRole?.empresaId) return;
-    
-    const params: Record<string, string | number> = {
-      page: meta.page,
-      limit: meta.limit,
-      empresaId: currentRole.empresaId,
-    };
+  const fetchFacturas = useCallback(
+    async (currentFilters: FacturasFiltersValues) => {
+      if (!currentRole?.empresaId) return;
 
-    // Add filter params if they have values
-    if (currentFilters.rutEmisor) params.rutEmisor = currentFilters.rutEmisor;
-    if (currentFilters.rutReceptor) params.rutReceptor = currentFilters.rutReceptor;
-    if (currentFilters.razonSocialReceptor) params.razonSocialReceptor = currentFilters.razonSocialReceptor;
-    if (currentFilters.folio) params.folio = currentFilters.folio;
-    if (currentFilters.estado) params.estado = currentFilters.estado;
-    if (currentFilters.montoTotal) params.montoTotal = Number(currentFilters.montoTotal);
-    if (currentFilters.minMontoTotal) params.minMontoTotal = Number(currentFilters.minMontoTotal);
-    if (currentFilters.maxMontoTotal) params.maxMontoTotal = Number(currentFilters.maxMontoTotal);
-    if (currentFilters.montoNeto) params.montoNeto = Number(currentFilters.montoNeto);
-    if (currentFilters.minMontoNeto) params.minMontoNeto = Number(currentFilters.minMontoNeto);
-    if (currentFilters.maxMontoNeto) params.maxMontoNeto = Number(currentFilters.maxMontoNeto);
-    if (currentFilters.detalleIva) params.detalleIva = Number(currentFilters.detalleIva);
-    if (currentFilters.minDetalleIva) params.minDetalleIva = Number(currentFilters.minDetalleIva);
-    if (currentFilters.maxDetalleIva) params.maxDetalleIva = Number(currentFilters.maxDetalleIva);
-    if (currentFilters.sortBy) params.sortBy = currentFilters.sortBy;
-    if (currentFilters.order) params.order = currentFilters.order;
+      const params: Record<string, string | number> = {
+        page: meta.page,
+        limit: meta.limit,
+        empresaId: currentRole.empresaId,
+      };
 
-    const { data, meta: metaResponse } = await getFacturas(params as any);
-    setFacturas(data || []);
-    setMeta(metaResponse);
-  }, [currentRole?.empresaId, meta.page, meta.limit, getFacturas]);
+      // Add filter params if they have values
+      if (currentFilters.rutEmisor) params.rutEmisor = currentFilters.rutEmisor;
+      if (currentFilters.rutReceptor)
+        params.rutReceptor = currentFilters.rutReceptor;
+      if (currentFilters.razonSocialReceptor)
+        params.razonSocialReceptor = currentFilters.razonSocialReceptor;
+      if (currentFilters.folio) params.folio = currentFilters.folio;
+      if (currentFilters.estado) params.estado = currentFilters.estado;
+      if (currentFilters.montoTotal)
+        params.montoTotal = Number(currentFilters.montoTotal);
+      if (currentFilters.minMontoTotal)
+        params.minMontoTotal = Number(currentFilters.minMontoTotal);
+      if (currentFilters.maxMontoTotal)
+        params.maxMontoTotal = Number(currentFilters.maxMontoTotal);
+      if (currentFilters.montoNeto)
+        params.montoNeto = Number(currentFilters.montoNeto);
+      if (currentFilters.minMontoNeto)
+        params.minMontoNeto = Number(currentFilters.minMontoNeto);
+      if (currentFilters.maxMontoNeto)
+        params.maxMontoNeto = Number(currentFilters.maxMontoNeto);
+      if (currentFilters.detalleIva)
+        params.detalleIva = Number(currentFilters.detalleIva);
+      if (currentFilters.minDetalleIva)
+        params.minDetalleIva = Number(currentFilters.minDetalleIva);
+      if (currentFilters.maxDetalleIva)
+        params.maxDetalleIva = Number(currentFilters.maxDetalleIva);
+      if (currentFilters.sortBy) params.sortBy = currentFilters.sortBy;
+      if (currentFilters.order) params.order = currentFilters.order;
+
+      const { data, meta: metaResponse } = await getFacturas(params as any);
+      setFacturas(data || []);
+      setMeta(metaResponse);
+    },
+    [currentRole?.empresaId, meta.page, meta.limit, getFacturas],
+  );
 
   useEffect(() => {
     fetchFacturas(filters);
@@ -211,11 +231,13 @@ const Facturas = () => {
 
   const updateSearchParams = (newFilters: FacturasFiltersValues) => {
     const newSearchParams = new URLSearchParams();
-    (Object.keys(newFilters) as Array<keyof FacturasFiltersValues>).forEach((key) => {
-      if (newFilters[key]) {
-        newSearchParams.set(key, newFilters[key]);
-      }
-    });
+    (Object.keys(newFilters) as Array<keyof FacturasFiltersValues>).forEach(
+      (key) => {
+        if (newFilters[key]) {
+          newSearchParams.set(key, newFilters[key]);
+        }
+      },
+    );
     setSearchParams(newSearchParams);
   };
 
@@ -261,14 +283,13 @@ const Facturas = () => {
     fetchFacturas(newFilters);
   };
 
-
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
-    value: number
+    value: number,
   ) => {
     setMeta((prev) => ({ ...prev, page: value }));
   };
-  
+
   const handleLimitChange = (event: SelectChangeEvent) => {
     const value = Number(event.target.value);
     setMeta((prev) => ({ ...prev, limit: value, page: 1 }));
@@ -303,7 +324,10 @@ const Facturas = () => {
               <Description sx={{ color: "#64748B", fontSize: 28 }} />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, color: "#1E293B" }}
+              >
                 Gestión de Facturas
               </Typography>
               <Typography variant="body2" sx={{ color: "#64748B" }}>
@@ -687,4 +711,3 @@ const Facturas = () => {
 };
 
 export default Facturas;
-       
