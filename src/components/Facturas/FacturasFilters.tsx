@@ -75,13 +75,6 @@ const FacturasFilters = ({
     enableReinitialize: true,
     validationSchema: facturasFiltersSchema,
     onSubmit: (values) => {
-      const newSearchParams = new URLSearchParams();
-      (Object.keys(values) as Array<keyof FacturasFiltersValues>).forEach((key) => {
-        if (values[key]) {
-          newSearchParams.set(key, values[key]);
-        }
-      });
-      setSearchParams(newSearchParams);
       onApplyFilters(values);
     },
   });

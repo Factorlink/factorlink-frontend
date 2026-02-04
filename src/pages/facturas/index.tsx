@@ -119,15 +119,15 @@ const Facturas = () => {
     return newFilters;
   });
 
-  const [meta, setMeta] = useState<Meta>({
+  const [meta, setMeta] = useState<Meta>(() => ({
     lastPage: 1,
-    limit: 10,
-    page: 1,
+    limit: Number(searchParams.get("limit")) || 10,
+    page: Number(searchParams.get("page")) || 1,
     total: 0,
     totalCargada: 0,
     totalCedida: 0,
     totalEnMarketplace: 0,
-  });
+  }));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
@@ -222,15 +222,31 @@ const Facturas = () => {
       setFacturas(data || []);
       setMeta(metaResponse);
     },
-    [currentRole?.empresaId, meta.page, meta.limit, getFacturas],
+    [currentRole?.empresaId, meta.page, meta.limit],
   );
 
   useEffect(() => {
     fetchFacturas(filters);
   }, [currentRole?.empresaId, meta.page, meta.limit]);
 
-  const updateSearchParams = (newFilters: FacturasFiltersValues) => {
+  const updateSearchParams = (
+    newFilters: FacturasFiltersValues,
+    page?: number,
+    limit?: number,
+  ) => {
     const newSearchParams = new URLSearchParams();
+    
+    // Add pagination params (only if not default values)
+    const currentPage = page ?? meta.page;
+    const currentLimit = limit ?? meta.limit;
+    if (currentPage !== 1) {
+      newSearchParams.set("page", String(currentPage));
+    }
+    if (currentLimit !== 10) {
+      newSearchParams.set("limit", String(currentLimit));
+    }
+    
+    // Add filter params
     (Object.keys(newFilters) as Array<keyof FacturasFiltersValues>).forEach(
       (key) => {
         if (newFilters[key]) {
@@ -243,15 +259,15 @@ const Facturas = () => {
 
   const handleApplyFilters = (newFilters: FacturasFiltersValues) => {
     setFilters(newFilters);
-    setMeta((prev) => ({ ...prev, page: 1 })); // Reset to page 1 when filtering
-    updateSearchParams(newFilters);
+    setMeta((prev) => ({ ...prev, page: 1 }));
+    updateSearchParams(newFilters, 1, meta.limit);
     fetchFacturas(newFilters);
   };
 
   const handleClearFilters = () => {
     setFilters(INITIAL_FILTERS);
     setMeta((prev) => ({ ...prev, page: 1 }));
-    setSearchParams(new URLSearchParams());
+    updateSearchParams(INITIAL_FILTERS, 1, meta.limit);
     fetchFacturas(INITIAL_FILTERS);
   };
 
@@ -279,7 +295,7 @@ const Facturas = () => {
 
     const newFilters = { ...filters, sortBy: newSortBy, order: newOrder };
     setFilters(newFilters);
-    updateSearchParams(newFilters);
+    updateSearchParams(newFilters, meta.page, meta.limit);
     fetchFacturas(newFilters);
   };
 
@@ -288,11 +304,13 @@ const Facturas = () => {
     value: number,
   ) => {
     setMeta((prev) => ({ ...prev, page: value }));
+    updateSearchParams(filters, value, meta.limit);
   };
 
   const handleLimitChange = (event: SelectChangeEvent) => {
     const value = Number(event.target.value);
     setMeta((prev) => ({ ...prev, limit: value, page: 1 }));
+    updateSearchParams(filters, 1, value);
   };
 
   return (
@@ -621,6 +639,11 @@ const Facturas = () => {
                     onChange={handlePageChange}
                     color="primary"
                     shape="rounded"
+                    sx={{
+                      "& .MuiPaginationItem-root.Mui-selected": {
+                        color: "white",
+                      },
+                    }}
                   />
                 </Box>
               )}
