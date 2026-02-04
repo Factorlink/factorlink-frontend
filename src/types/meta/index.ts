@@ -3,4 +3,7 @@ export interface Meta {
     limit: number;
     page: number;
     total: number;
+    totalCargada: number;
+    totalCedida: number;
+    totalEnMarketplace: number;
 }

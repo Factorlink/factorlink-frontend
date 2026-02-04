@@ -121,6 +121,9 @@ const Facturas = () => {
     limit: 10,
     page: 1,
     total: 0,
+    totalCargada: 0,
+    totalCedida: 0,
+    totalEnMarketplace: 0,
   });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
@@ -258,19 +261,6 @@ const Facturas = () => {
     fetchFacturas(newFilters);
   };
 
-  const stats = useMemo(() => {
-    const total = meta.total || 0;
-    const cargadas = facturas.filter(
-      (f) => f.estado === "CARGADA"
-    ).length;
-    const enMarketplace = facturas.filter(
-      (f) => f.estado === "EN_MARKETPLACE"
-    ).length;
-    const cedidas = facturas.filter(
-      (f) => f.estado === "CEDIDA"
-    ).length;
-    return { total, cargadas, enMarketplace, cedidas };
-  }, [facturas]);
 
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
@@ -356,7 +346,7 @@ const Facturas = () => {
               Total Facturas
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
-              {stats.total}
+              {meta.total}
             </Typography>
           </Box>
           <Box
@@ -372,7 +362,7 @@ const Facturas = () => {
               Cargadas
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
-              {stats.cargadas}
+              {meta.totalCargada}
             </Typography>
           </Box>
           <Box
@@ -388,7 +378,7 @@ const Facturas = () => {
               En Marketplace
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#00BCD4" }}>
-              {stats.enMarketplace}
+              {meta.totalEnMarketplace}
             </Typography>
           </Box>
           <Box
@@ -404,7 +394,7 @@ const Facturas = () => {
               Cedidas
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#00A86B" }}>
-              {stats.cedidas}
+              {meta.totalCedida}
             </Typography>
           </Box>
         </Box>

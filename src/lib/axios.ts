@@ -26,7 +26,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isLoginRequest = error.config?.url?.includes("auth/login") || error.config?.url?.includes("users/change-password");
+    const isLoginRequest = error.config?.url?.includes("auth/login") || error.config?.url?.includes("users/change-password") || error.config?.url?.includes("users/assign");
     
     if (error.response?.status === 401 && !isLoginRequest) {
       // Limpiar estado de autenticación solo si NO es una petición de login

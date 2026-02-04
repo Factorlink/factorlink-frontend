@@ -130,6 +130,7 @@ const DeleteFacturaModal = ({
             severity={alertStatus}
             sx={{ mb: 3 }}
             onClose={() => {
+              handleClose();
               setAlertStatus(null);
               setAlertMessage("");
             }}
