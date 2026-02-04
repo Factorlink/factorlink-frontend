@@ -327,13 +327,13 @@ const FacturasFilters = ({
               />
             </Grid>
 
-            {/* Detalle IVA */}
+            {/* Monto IVA */}
             <Grid size={{ xs: 12, sm: 8, md: 4 }}>
               <TextField
                 fullWidth
                 size="small"
                 name="detalleIva"
-                label="Detalle IVA"
+                label="Monto IVA"
                 type="number"
                 placeholder="Monto exacto"
                 value={formik.values.detalleIva}
