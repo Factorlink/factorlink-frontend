@@ -139,7 +139,7 @@ const FacturaDetail = () => {
   };
 
   const handleEnviarCotizar = () => {
-    // TODO: Implementar enviar a cotizar
+    navigate(`/facturas/${id}/cotizar`);
   };
 
 
@@ -799,8 +799,7 @@ const FacturaDetail = () => {
                   backgroundColor: "#00BCD4",
                   "&:hover": { backgroundColor: "#00ACC1" },
                   "&:disabled": {
-                    backgroundColor: "#475569",
-                    color: "#94A3B8",
+                    opacity: 0.7,
                   },
                   textTransform: "none",
                   fontWeight: 600,

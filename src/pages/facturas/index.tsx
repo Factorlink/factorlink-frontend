@@ -169,7 +169,9 @@ const Facturas = () => {
   };
 
   const handleEnviarCotizar = () => {
-    // TODO: Implementar enviar a cotizar
+    if (selectedFactura) {
+      navigate(`/facturas/${selectedFactura.id}/cotizar`);
+    }
     handleMenuClose();
   };
 
