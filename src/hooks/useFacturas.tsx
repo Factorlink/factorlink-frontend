@@ -31,6 +31,11 @@ type UpdateFacturaPayload = {
   montoFinanciar?: number;
 };
 
+type SendToMarketplacePayload = {
+  visibilidad: string;
+  factoringIds: string[];
+};
+
 export const useFacturas = () => {
   const [loading, setLoading] = useState(false);
 
@@ -131,6 +136,42 @@ export const useFacturas = () => {
     }
   };
 
+  const sendToMarketplace = async (id: string, payload: SendToMarketplacePayload) => {
+    try {
+      setLoading(true);
+      const response = await api.post(`/facturas/${id}/send-to-marketplace`, payload);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeFromMarketplace = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await api.post(`/facturas/${id}/remove-from-marketplace`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const listFromMarketplace = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/facturas/marketplace/list?empresaId=${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     getFacturas,
@@ -139,5 +180,8 @@ export const useFacturas = () => {
     updateFactura,
     refreshFactura,
     deleteFactura,
+    sendToMarketplace,
+    removeFromMarketplace,
+    listFromMarketplace,
   };
 };
