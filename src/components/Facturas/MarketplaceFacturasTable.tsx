@@ -21,6 +21,7 @@ import {
 } from "@mui/icons-material";
 import { useFacturas } from "../../hooks/useFacturas";
 import type { Factura } from "../../types/factura";
+import RemoveMarketplaceModal from "../Modals/RemoveMarketplaceModal";
 
 interface MarketplaceFacturasTableProps {
   empresaId: string;
@@ -51,9 +52,10 @@ const MarketplaceFacturasTable = ({
   empresaId,
   onRemoveSuccess,
 }: MarketplaceFacturasTableProps) => {
-  const { listFromMarketplace, removeFromMarketplace, loading } = useFacturas();
+  const { listFromMarketplace, loading } = useFacturas();
   const [facturas, setFacturas] = useState<Factura[]>([]);
-  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [removeModalOpen, setRemoveModalOpen] = useState(false);
+  const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
 
   const fetchMarketplace = useCallback(async () => {
     if (!empresaId) return;
@@ -69,17 +71,14 @@ const MarketplaceFacturasTable = ({
     fetchMarketplace();
   }, [fetchMarketplace]);
 
-  const handleRemove = async (facturaId: string) => {
-    try {
-      setRemovingId(facturaId);
-      await removeFromMarketplace(facturaId);
-      await fetchMarketplace();
-      onRemoveSuccess?.();
-    } catch {
-      // Error handling silently
-    } finally {
-      setRemovingId(null);
-    }
+  const handleOpenRemoveModal = (factura: Factura) => {
+    setSelectedFactura(factura);
+    setRemoveModalOpen(true);
+  };
+
+  const handleRemoveSuccess = () => {
+    fetchMarketplace();
+    onRemoveSuccess?.();
   };
 
   const getOfertasCount = (factura: Factura) => {
@@ -87,6 +86,7 @@ const MarketplaceFacturasTable = ({
   };
 
   return (
+    <>
     <TableContainer
       component={Paper}
       sx={{
@@ -95,7 +95,7 @@ const MarketplaceFacturasTable = ({
         overflow: "hidden",
       }}
     >
-      {loading && !removingId ? (
+      {loading ? (
         <Box
           sx={{
             display: "flex",
@@ -258,8 +258,7 @@ const MarketplaceFacturasTable = ({
                       size="small"
                       variant="outlined"
                       startIcon={<Cancel sx={{ fontSize: 16 }} />}
-                      onClick={() => handleRemove(factura.id)}
-                      disabled={removingId === factura.id}
+                      onClick={() => handleOpenRemoveModal(factura)}
                       sx={{
                         borderColor: "#E2E8F0",
                         color: "#EF4444",
@@ -275,11 +274,7 @@ const MarketplaceFacturasTable = ({
                         py: 0.5,
                       }}
                     >
-                      {removingId === factura.id ? (
-                        <CircularProgress size={16} color="inherit" />
-                      ) : (
-                        "Quitar"
-                      )}
+                      Quitar
                     </Button>
                   </Box>
                 </TableCell>
@@ -289,6 +284,23 @@ const MarketplaceFacturasTable = ({
         </Table>
       )}
     </TableContainer>
+
+    {selectedFactura && (
+      <RemoveMarketplaceModal
+        open={removeModalOpen}
+        onClose={() => {
+          setRemoveModalOpen(false);
+          setSelectedFactura(null);
+        }}
+        onSuccess={handleRemoveSuccess}
+        facturaData={{
+          id: selectedFactura.id,
+          folio: selectedFactura.folio,
+          razonSocialReceptor: selectedFactura.razonSocialReceptor || "N/A",
+        }}
+      />
+    )}
+    </>
   );
 };
 
