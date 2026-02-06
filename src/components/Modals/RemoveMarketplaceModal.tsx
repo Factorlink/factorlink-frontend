@@ -12,11 +12,11 @@ import {
   CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteIcon from "@mui/icons-material/Delete";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { useFacturas } from "../../hooks/useFacturas";
 
-interface DeleteFacturaModalProps {
+interface RemoveMarketplaceModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
@@ -24,39 +24,24 @@ interface DeleteFacturaModalProps {
     id: string;
     folio: string;
     razonSocialReceptor: string;
-    montoTotal: string;
   };
 }
 
-const formatCurrency = (value: string | number) => {
-  const numValue = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(numValue)) return "$0";
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    minimumFractionDigits: 0,
-  }).format(numValue);
-};
-
-const DeleteFacturaModal = ({
+const RemoveMarketplaceModal = ({
   open,
   onClose,
   onSuccess,
   facturaData,
-}: DeleteFacturaModalProps) => {
-  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
-    null
-  );
+}: RemoveMarketplaceModalProps) => {
+  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
   const [alertMessage, setAlertMessage] = useState("");
+  const { removeFromMarketplace, loading } = useFacturas();
 
-  const { deleteFactura, loading } = useFacturas();
-
-  const handleDelete = async () => {
+  const handleRemove = async () => {
     try {
-      await deleteFactura(facturaData.id);
-
+      await removeFromMarketplace(facturaData.id);
       setAlertStatus("success");
-      setAlertMessage("Factura eliminada correctamente.");
+      setAlertMessage("Factura retirada del marketplace correctamente.");
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string } };
@@ -64,7 +49,7 @@ const DeleteFacturaModal = ({
       setAlertStatus("error");
       setAlertMessage(
         axiosError?.response?.data?.message ||
-          "Ocurrió un error al eliminar la factura"
+          "Ocurrió un error al quitar la factura del marketplace"
       );
     }
   };
@@ -113,10 +98,10 @@ const DeleteFacturaModal = ({
               justifyContent: "center",
             }}
           >
-            <DeleteIcon sx={{ color: "white", fontSize: 24 }} />
+            <StorefrontIcon sx={{ color: "white", fontSize: 24 }} />
           </Box>
           <Typography variant="h6" fontWeight={600}>
-            Eliminar Factura
+            ¿Quitar del marketplace?
           </Typography>
         </Box>
         <IconButton onClick={handleClose} disabled={loading}>
@@ -176,10 +161,10 @@ const DeleteFacturaModal = ({
                   variant="body1"
                   sx={{ color: "text.primary", fontWeight: 600 }}
                 >
-                  Folio #{facturaData.folio}
+                  Folio #F-{facturaData.folio}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {facturaData.razonSocialReceptor} • {formatCurrency(facturaData.montoTotal)}
+                  {facturaData.razonSocialReceptor}
                 </Typography>
               </Box>
             </Box>
@@ -188,8 +173,9 @@ const DeleteFacturaModal = ({
               variant="body2"
               sx={{ color: "#EF4444", lineHeight: 1.6 }}
             >
-              ¿Estás seguro de que deseas eliminar esta factura? Esta acción
-              no se puede deshacer y se perderá toda la información asociada.
+              La factura será retirada del marketplace y dejará de estar
+              visible para los factoring. Esta acción se puede revertir
+              enviándola nuevamente a cotizar.
             </Typography>
           </Box>
         )}
@@ -213,7 +199,7 @@ const DeleteFacturaModal = ({
         {alertStatus !== "success" && (
           <Button
             variant="contained"
-            onClick={handleDelete}
+            onClick={handleRemove}
             disabled={loading}
             sx={{
               flex: 1,
@@ -231,7 +217,7 @@ const DeleteFacturaModal = ({
             {loading ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
-              "Eliminar Factura"
+              "Quitar del marketplace"
             )}
           </Button>
         )}
@@ -240,4 +226,4 @@ const DeleteFacturaModal = ({
   );
 };
 
-export default DeleteFacturaModal;
+export default RemoveMarketplaceModal;

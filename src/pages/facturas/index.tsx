@@ -1,9 +1,8 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Box,
   Typography,
-  Button,
   Chip,
   Table,
   TableBody,
@@ -22,6 +21,9 @@ import {
   Menu,
   ListItemIcon,
   ListItemText,
+  Tabs,
+  Tab,
+  Button,
 } from "@mui/material";
 import {
   Description,
@@ -33,9 +35,12 @@ import {
   Delete,
   Send,
 } from "@mui/icons-material";
+import MarketplaceFacturasTable from "../../components/Facturas/MarketplaceFacturasTable";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
-import FacturasFilters, { type FacturasFiltersValues } from "../../components/Facturas/FacturasFilters";
+import FacturasFilters, {
+  type FacturasFiltersValues,
+} from "../../components/Facturas/FacturasFilters";
 import SortableTableHeader from "../../components/Facturas/SortableTableHeader";
 import Layout from "../../components/Layout";
 import { useFacturas } from "../../hooks/useFacturas";
@@ -64,6 +69,13 @@ const getStatusConfig = (estado: string) => {
     case "CEDIDA":
       return {
         label: "CEDIDA",
+        color: "#00A86B",
+        bgColor: "rgba(0, 168, 107, 0.1)",
+        icon: <CheckCircle sx={{ fontSize: 14 }} />,
+      };
+    case "CON_OFERTAS":
+      return {
+        label: "CON OFERTAS",
         color: "#00A86B",
         bgColor: "rgba(0, 168, 107, 0.1)",
         icon: <CheckCircle sx={{ fontSize: 14 }} />,
@@ -98,16 +110,17 @@ const formatDate = (dateString: string) => {
   });
 };
 
-
 const Facturas = () => {
   const { currentRole } = useAuthStore();
   const { loading, getFacturas } = useFacturas();
   const [searchParams, setSearchParams] = useSearchParams();
   const [facturas, setFacturas] = useState<Factura[]>([]);
-  
+
   const [filters, setFilters] = useState<FacturasFiltersValues>(() => {
     const newFilters = { ...INITIAL_FILTERS };
-    (Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+    (
+      Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>
+    ).forEach((key) => {
       const value = searchParams.get(key);
       if (value !== null) {
         newFilters[key] = value;
@@ -116,19 +129,27 @@ const Facturas = () => {
     return newFilters;
   });
 
-  const [meta, setMeta] = useState<Meta>({
+  const [meta, setMeta] = useState<Meta>(() => ({
     lastPage: 1,
-    limit: 10,
-    page: 1,
+    limit: Number(searchParams.get("limit")) || 10,
+    page: Number(searchParams.get("page")) || 1,
     total: 0,
-  });
+    totalCargada: 0,
+    totalCedida: 0,
+    totalEnMarketplace: 0,
+  }));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  
   const navigate = useNavigate();
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, factura: Factura) => {
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    factura: Factura,
+  ) => {
     setAnchorEl(event.currentTarget);
     setSelectedFactura(factura);
   };
@@ -160,7 +181,9 @@ const Facturas = () => {
   };
 
   const handleEnviarCotizar = () => {
-    // TODO: Implementar enviar a cotizar
+    if (selectedFactura) {
+      navigate(`/facturas/${selectedFactura.id}/cotizar`);
+    }
     handleMenuClose();
   };
 
@@ -170,63 +193,95 @@ const Facturas = () => {
     return estado === "cargada";
   };
 
-  const fetchFacturas = useCallback(async (currentFilters: FacturasFiltersValues) => {
-    if (!currentRole?.empresaId) return;
-    
-    const params: Record<string, string | number> = {
-      page: meta.page,
-      limit: meta.limit,
-      empresaId: currentRole.empresaId,
-    };
+  const fetchFacturas = useCallback(
+    async (currentFilters: FacturasFiltersValues) => {
+      if (!currentRole?.empresaId) return;
 
-    // Add filter params if they have values
-    if (currentFilters.rutEmisor) params.rutEmisor = currentFilters.rutEmisor;
-    if (currentFilters.rutReceptor) params.rutReceptor = currentFilters.rutReceptor;
-    if (currentFilters.razonSocialReceptor) params.razonSocialReceptor = currentFilters.razonSocialReceptor;
-    if (currentFilters.folio) params.folio = currentFilters.folio;
-    if (currentFilters.estado) params.estado = currentFilters.estado;
-    if (currentFilters.montoTotal) params.montoTotal = Number(currentFilters.montoTotal);
-    if (currentFilters.minMontoTotal) params.minMontoTotal = Number(currentFilters.minMontoTotal);
-    if (currentFilters.maxMontoTotal) params.maxMontoTotal = Number(currentFilters.maxMontoTotal);
-    if (currentFilters.montoNeto) params.montoNeto = Number(currentFilters.montoNeto);
-    if (currentFilters.minMontoNeto) params.minMontoNeto = Number(currentFilters.minMontoNeto);
-    if (currentFilters.maxMontoNeto) params.maxMontoNeto = Number(currentFilters.maxMontoNeto);
-    if (currentFilters.detalleIva) params.detalleIva = Number(currentFilters.detalleIva);
-    if (currentFilters.minDetalleIva) params.minDetalleIva = Number(currentFilters.minDetalleIva);
-    if (currentFilters.maxDetalleIva) params.maxDetalleIva = Number(currentFilters.maxDetalleIva);
-    if (currentFilters.sortBy) params.sortBy = currentFilters.sortBy;
-    if (currentFilters.order) params.order = currentFilters.order;
+      const params: Record<string, string | number> = {
+        page: meta.page,
+        limit: meta.limit,
+        empresaId: currentRole.empresaId,
+      };
 
-    const { data, meta: metaResponse } = await getFacturas(params as any);
-    setFacturas(data || []);
-    setMeta(metaResponse);
-  }, [currentRole?.empresaId, meta.page, meta.limit, getFacturas]);
+      // Add filter params if they have values
+      if (currentFilters.rutEmisor) params.rutEmisor = currentFilters.rutEmisor;
+      if (currentFilters.rutReceptor)
+        params.rutReceptor = currentFilters.rutReceptor;
+      if (currentFilters.razonSocialReceptor)
+        params.razonSocialReceptor = currentFilters.razonSocialReceptor;
+      if (currentFilters.folio) params.folio = currentFilters.folio;
+      if (currentFilters.estado) params.estado = currentFilters.estado;
+      if (currentFilters.montoTotal)
+        params.montoTotal = Number(currentFilters.montoTotal);
+      if (currentFilters.minMontoTotal)
+        params.minMontoTotal = Number(currentFilters.minMontoTotal);
+      if (currentFilters.maxMontoTotal)
+        params.maxMontoTotal = Number(currentFilters.maxMontoTotal);
+      if (currentFilters.montoNeto)
+        params.montoNeto = Number(currentFilters.montoNeto);
+      if (currentFilters.minMontoNeto)
+        params.minMontoNeto = Number(currentFilters.minMontoNeto);
+      if (currentFilters.maxMontoNeto)
+        params.maxMontoNeto = Number(currentFilters.maxMontoNeto);
+      if (currentFilters.detalleIva)
+        params.detalleIva = Number(currentFilters.detalleIva);
+      if (currentFilters.minDetalleIva)
+        params.minDetalleIva = Number(currentFilters.minDetalleIva);
+      if (currentFilters.maxDetalleIva)
+        params.maxDetalleIva = Number(currentFilters.maxDetalleIva);
+      if (currentFilters.sortBy) params.sortBy = currentFilters.sortBy;
+      if (currentFilters.order) params.order = currentFilters.order;
+
+      const { data, meta: metaResponse } = await getFacturas(params as any);
+      setFacturas(data || []);
+      setMeta(metaResponse);
+    },
+    [currentRole?.empresaId, meta.page, meta.limit],
+  );
 
   useEffect(() => {
     fetchFacturas(filters);
   }, [currentRole?.empresaId, meta.page, meta.limit]);
 
-  const updateSearchParams = (newFilters: FacturasFiltersValues) => {
+  const updateSearchParams = (
+    newFilters: FacturasFiltersValues,
+    page?: number,
+    limit?: number,
+  ) => {
     const newSearchParams = new URLSearchParams();
-    (Object.keys(newFilters) as Array<keyof FacturasFiltersValues>).forEach((key) => {
-      if (newFilters[key]) {
-        newSearchParams.set(key, newFilters[key]);
-      }
-    });
+    
+    // Add pagination params (only if not default values)
+    const currentPage = page ?? meta.page;
+    const currentLimit = limit ?? meta.limit;
+    if (currentPage !== 1) {
+      newSearchParams.set("page", String(currentPage));
+    }
+    if (currentLimit !== 10) {
+      newSearchParams.set("limit", String(currentLimit));
+    }
+    
+    // Add filter params
+    (Object.keys(newFilters) as Array<keyof FacturasFiltersValues>).forEach(
+      (key) => {
+        if (newFilters[key]) {
+          newSearchParams.set(key, newFilters[key]);
+        }
+      },
+    );
     setSearchParams(newSearchParams);
   };
 
   const handleApplyFilters = (newFilters: FacturasFiltersValues) => {
     setFilters(newFilters);
-    setMeta((prev) => ({ ...prev, page: 1 })); // Reset to page 1 when filtering
-    updateSearchParams(newFilters);
+    setMeta((prev) => ({ ...prev, page: 1 }));
+    updateSearchParams(newFilters, 1, meta.limit);
     fetchFacturas(newFilters);
   };
 
   const handleClearFilters = () => {
     setFilters(INITIAL_FILTERS);
     setMeta((prev) => ({ ...prev, page: 1 }));
-    setSearchParams(new URLSearchParams());
+    updateSearchParams(INITIAL_FILTERS, 1, meta.limit);
     fetchFacturas(INITIAL_FILTERS);
   };
 
@@ -254,34 +309,22 @@ const Facturas = () => {
 
     const newFilters = { ...filters, sortBy: newSortBy, order: newOrder };
     setFilters(newFilters);
-    updateSearchParams(newFilters);
+    updateSearchParams(newFilters, meta.page, meta.limit);
     fetchFacturas(newFilters);
   };
 
-  const stats = useMemo(() => {
-    const total = meta.total || 0;
-    const cargadas = facturas.filter(
-      (f) => f.estado === "CARGADA"
-    ).length;
-    const enMarketplace = facturas.filter(
-      (f) => f.estado === "EN_MARKETPLACE"
-    ).length;
-    const cedidas = facturas.filter(
-      (f) => f.estado === "CEDIDA"
-    ).length;
-    return { total, cargadas, enMarketplace, cedidas };
-  }, [facturas]);
-
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
-    value: number
+    value: number,
   ) => {
     setMeta((prev) => ({ ...prev, page: value }));
+    updateSearchParams(filters, value, meta.limit);
   };
-  
+
   const handleLimitChange = (event: SelectChangeEvent) => {
     const value = Number(event.target.value);
     setMeta((prev) => ({ ...prev, limit: value, page: 1 }));
+    updateSearchParams(filters, 1, value);
   };
 
   return (
@@ -313,7 +356,10 @@ const Facturas = () => {
               <Description sx={{ color: "#64748B", fontSize: 28 }} />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, color: "#1E293B" }}
+              >
                 Gestión de Facturas
               </Typography>
               <Typography variant="body2" sx={{ color: "#64748B" }}>
@@ -356,7 +402,7 @@ const Facturas = () => {
               Total Facturas
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
-              {stats.total}
+              {meta.total}
             </Typography>
           </Box>
           <Box
@@ -372,7 +418,7 @@ const Facturas = () => {
               Cargadas
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
-              {stats.cargadas}
+              {meta.totalCargada}
             </Typography>
           </Box>
           <Box
@@ -388,7 +434,7 @@ const Facturas = () => {
               En Marketplace
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#00BCD4" }}>
-              {stats.enMarketplace}
+              {meta.totalEnMarketplace}
             </Typography>
           </Box>
           <Box
@@ -404,215 +450,267 @@ const Facturas = () => {
               Cedidas
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#00A86B" }}>
-              {stats.cedidas}
+              {meta.totalCedida}
             </Typography>
           </Box>
         </Box>
 
-        {/* Filters Section */}
-        <FacturasFilters
-          onApplyFilters={handleApplyFilters}
-          onClearFilters={handleClearFilters}
-          loading={loading}
-        />
-        {/* Table */}
-        <TableContainer
-          component={Paper}
-          sx={{
-            borderRadius: 3,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-            overflow: "hidden",
-          }}
-        >
-          {loading ? (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                py: 8,
-              }}
-            >
-              <CircularProgress />
-            </Box>
-          ) : facturas.length === 0 ? (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                py: 8,
-              }}
-            >
-              <Description sx={{ fontSize: 64, color: "#CBD5E1", mb: 2 }} />
-              <Typography
-                variant="h6"
-                sx={{ color: "#64748B", fontWeight: 500 }}
-              >
-                No hay facturas disponibles
-              </Typography>
-              <Typography variant="body2" sx={{ color: "#94A3B8", mt: 1 }}>
-                {Object.values(filters).some((v) => v !== "")
-                  ? "No se encontraron facturas con los criterios de búsqueda"
-                  : "Sincroniza con el SII o agrega facturas manualmente para comenzar"}
-              </Typography>
-            </Box>
-          ) : (
-            <>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
-                    {SORTABLE_COLUMNS.map((column) => (
-                      <SortableTableHeader
-                        key={column.field}
-                        field={column.field}
-                        label={column.label}
-                        currentSortBy={filters.sortBy}
-                        currentOrder={filters.order}
-                        onSort={handleSort}
-                      />
-                    ))}
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Acciones
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {facturas.map((factura) => {
-                    const statusConfig = getStatusConfig(factura.estado);
-                    return (
-                      <TableRow
-                        key={factura.id}
-                        sx={{
-                          "&:hover": { backgroundColor: "#F8FAFC" },
-                          "&:last-child td": { borderBottom: 0 },
-                        }}
-                      >
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "#00BCD4", fontWeight: 600 }}
-                          >
-                            #F-{factura.folio}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Box>
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: 600, color: "#1E293B" }}
-                            >
-                              {factura.razonSocialReceptor || "N/A"}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              sx={{ color: "#64748B" }}
-                            >
-                              {factura.rutReceptor || ""}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ color: "#64748B" }}>
-                            {formatDate(factura.fechaEmision)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "#1E293B", fontWeight: 500 }}
-                          >
-                            {formatCurrency(factura.montoTotal)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "#00A86B", fontWeight: 600 }}
-                          >
-                            {formatCurrency(factura.montoFinanciar)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={`${factura.plazo || 0} días`}
-                            size="small"
-                            sx={{
-                              backgroundColor: "#F1F5F9",
-                              color: "#475569",
-                              fontWeight: 500,
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            icon={statusConfig.icon}
-                            label={statusConfig.label}
-                            size="small"
-                            sx={{
-                              backgroundColor: statusConfig.bgColor,
-                              color: statusConfig.color,
-                              fontWeight: 500,
-                              "& .MuiChip-icon": {
-                                color: statusConfig.color,
-                              },
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleMenuOpen(e, factura)}
-                            sx={{ color: "#64748B" }}
-                          >
-                            <MoreVert />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+        {/* Tabs */}
+        <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+          <Tabs
+            value={activeTab}
+            onChange={(_e, newValue) => setActiveTab(newValue)}
+          >
+            <Tab
+              icon={<Description sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label="Todas las facturas"
+            />
+            <Tab
+              icon={<Storefront sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  En Marketplace
+                  {meta.totalEnMarketplace > 0 && (
+                    <Chip
+                      label={meta.totalEnMarketplace}
+                      size="small"
+                      sx={{
+                        height: 22,
+                        minWidth: 22,
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        backgroundColor: "#00BCD4",
+                        color: "white",
+                      }}
+                    />
+                  )}
+                </Box>
+              }
+            />
+          </Tabs>
+        </Box>
 
-              {/* Pagination */}
-              {meta.lastPage > 1 && (
+        {/* Tab Content */}
+        {activeTab === 0 ? (
+          <>
+            {/* Filters Section */}
+            <FacturasFilters
+              onApplyFilters={handleApplyFilters}
+              onClearFilters={handleClearFilters}
+              loading={loading}
+            />
+            {/* Table */}
+            <TableContainer
+              component={Paper}
+              sx={{
+                borderRadius: 3,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                overflow: "hidden",
+              }}
+            >
+              {loading ? (
                 <Box
                   sx={{
                     display: "flex",
-                    justifyContent: "space-between",
+                    justifyContent: "center",
                     alignItems: "center",
-                    py: 2,
-                    borderTop: "1px solid #E2E8F0",
-                    px: 2,
-                    gap: 2,
+                    py: 8,
                   }}
                 >
-                  <FormControl size="small" sx={{ minWidth: 160 }}>
-                    <InputLabel id="limit-label">Filas por página</InputLabel>
-                    <Select
-                      labelId="limit-label"
-                      value={String(meta.limit)}
-                      label="Filas por página"
-                      onChange={handleLimitChange}
-                    >
-                      <MenuItem value={10}>10</MenuItem>
-                      <MenuItem value={20}>20</MenuItem>
-                      <MenuItem value={50}>50</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <Pagination
-                    count={meta.lastPage}
-                    page={meta.page}
-                    onChange={handlePageChange}
-                    color="primary"
-                    shape="rounded"
-                  />
+                  <CircularProgress />
                 </Box>
+              ) : facturas.length === 0 ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    py: 8,
+                  }}
+                >
+                  <Description sx={{ fontSize: 64, color: "#CBD5E1", mb: 2 }} />
+                  <Typography
+                    variant="h6"
+                    sx={{ color: "#64748B", fontWeight: 500 }}
+                  >
+                    No hay facturas disponibles
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#94A3B8", mt: 1 }}>
+                    {Object.values(filters).some((v) => v !== "")
+                      ? "No se encontraron facturas con los criterios de búsqueda"
+                      : "Sincroniza con el SII o agrega facturas manualmente para comenzar"}
+                  </Typography>
+                </Box>
+              ) : (
+                <>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
+                        {SORTABLE_COLUMNS.map((column) => (
+                          <SortableTableHeader
+                            key={column.field}
+                            field={column.field}
+                            label={column.label}
+                            currentSortBy={filters.sortBy}
+                            currentOrder={filters.order}
+                            onSort={handleSort}
+                          />
+                        ))}
+                        <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                          Acciones
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {facturas.map((factura) => {
+                        const statusConfig = getStatusConfig(factura.estado);
+                        return (
+                          <TableRow
+                            key={factura.id}
+                            sx={{
+                              "&:hover": { backgroundColor: "#F8FAFC" },
+                              "&:last-child td": { borderBottom: 0 },
+                            }}
+                          >
+                            <TableCell>
+                              <Typography
+                                variant="body2"
+                                sx={{ color: "#00BCD4", fontWeight: 600 }}
+                              >
+                                #F-{factura.folio}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Box>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ fontWeight: 600, color: "#1E293B" }}
+                                >
+                                  {factura.razonSocialReceptor || "N/A"}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  sx={{ color: "#64748B" }}
+                                >
+                                  {factura.rutReceptor || ""}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2" sx={{ color: "#64748B" }}>
+                                {formatDate(factura.fechaEmision)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography
+                                variant="body2"
+                                sx={{ color: "#1E293B", fontWeight: 500 }}
+                              >
+                                {formatCurrency(factura.montoTotal)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography
+                                variant="body2"
+                                sx={{ color: "#00A86B", fontWeight: 600 }}
+                              >
+                                {formatCurrency(factura.montoFinanciar)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={`${factura.plazo || 0} días`}
+                                size="small"
+                                sx={{
+                                  backgroundColor: "#F1F5F9",
+                                  color: "#475569",
+                                  fontWeight: 500,
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                icon={statusConfig.icon}
+                                label={statusConfig.label}
+                                size="small"
+                                sx={{
+                                  backgroundColor: statusConfig.bgColor,
+                                  color: statusConfig.color,
+                                  fontWeight: 500,
+                                  "& .MuiChip-icon": {
+                                    color: statusConfig.color,
+                                  },
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => handleMenuOpen(e, factura)}
+                                sx={{ color: "#64748B" }}
+                              >
+                                <MoreVert />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+
+                  {/* Pagination */}
+                  {meta.lastPage > 1 && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        py: 2,
+                        borderTop: "1px solid #E2E8F0",
+                        px: 2,
+                        gap: 2,
+                      }}
+                    >
+                      <FormControl size="small" sx={{ minWidth: 160 }}>
+                        <InputLabel id="limit-label">Filas por página</InputLabel>
+                        <Select
+                          labelId="limit-label"
+                          value={String(meta.limit)}
+                          label="Filas por página"
+                          onChange={handleLimitChange}
+                        >
+                          <MenuItem value={10}>10</MenuItem>
+                          <MenuItem value={20}>20</MenuItem>
+                          <MenuItem value={50}>50</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <Pagination
+                        count={meta.lastPage}
+                        page={meta.page}
+                        onChange={handlePageChange}
+                        color="primary"
+                        shape="rounded"
+                        sx={{
+                          "& .MuiPaginationItem-root.Mui-selected": {
+                            color: "white",
+                          },
+                        }}
+                      />
+                    </Box>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </TableContainer>
+            </TableContainer>
+          </>
+        ) : (
+          <MarketplaceFacturasTable
+            empresaId={currentRole?.empresaId || ""}
+            onRemoveSuccess={() => fetchFacturas(filters)}
+          />
+        )}
 
         {/* Actions Menu */}
         <Menu
@@ -697,4 +795,3 @@ const Facturas = () => {
 };
 
 export default Facturas;
-       
