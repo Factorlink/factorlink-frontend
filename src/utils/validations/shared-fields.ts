@@ -225,3 +225,18 @@ export const handleTextInputChange = (
   const filteredValue = value.replace(/[<>{}[\]\\]/g, "");
   setFieldValue(name, filteredValue);
 };
+
+// Handler para solo permitir números positivos (incluyendo el 0)
+export const handlePositiveNumberInputChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  setFieldValue: (field: string, value: string) => void
+) => {
+  const { name, value } = e.target;
+  // Solo permitir dígitos (0-9)
+  const filteredValue = value.replace(/[^0-9]/g, "");
+
+  setFieldValue(name, filteredValue);
+};
+
+
+
