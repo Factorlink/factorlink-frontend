@@ -39,6 +39,7 @@ interface DocumentRow {
   estadoValidacion: DocumentStatus;
   factoringId?: string;
   tipo?: string;
+  nombreArchivo?: string;
 }
 
 const statusConfig: Record<
@@ -351,12 +352,22 @@ const DocumentsTable = () => {
                     >
                       <DescriptionIcon sx={{ color: "primary.main" }} />
                     </Box>
-                    <Typography
-                      variant="body1"
-                      sx={{ color: "text.primary", fontWeight: 500 }}
-                    >
-                      {getDocumentDisplayName(row)}
-                    </Typography>
+                    <Box>
+                      <Typography
+                        variant="body1"
+                        sx={{ color: "text.primary", fontWeight: 500 }}
+                      >
+                        {getDocumentDisplayName(row)}
+                      </Typography>
+                      {row.tipo === "otros_documentos_legales" && row.nombreArchivo && (
+                        <Typography
+                          variant="caption"
+                          sx={{ color: "text.secondary", fontStyle: "italic" }}
+                        >
+                          {row.nombreArchivo}
+                        </Typography>
+                      )}
+                    </Box>
                   </Box>
                 </TableCell>
                 <TableCell>

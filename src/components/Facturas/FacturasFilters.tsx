@@ -26,6 +26,15 @@ import { FACTURAS_STATES, INITIAL_FILTERS } from "../../utils/consts";
 import { facturasFiltersSchema } from "./validation-schema";
 import { handleRutInputChange, handlePositiveNumberInputChange } from "../../utils/validations/shared-fields";
 
+// Bloquea teclas no numéricas en campos numéricos (evita +, -, ., e, etc.)
+const blockNonNumericKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Home", "End"];
+  if (allowedKeys.includes(e.key)) return;
+  if (!/^[0-9]$/.test(e.key)) {
+    e.preventDefault();
+  }
+};
+
 export interface FacturasFiltersValues {
   rutEmisor: string;
   rutReceptor: string;
@@ -149,10 +158,12 @@ const FacturasFilters = ({
                 size="small"
                 name="folio"
                 label="Folio"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="Número de folio"
                 value={formik.values.folio}
                 onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                onKeyDown={blockNonNumericKeys}
                 error={formik.touched.folio && Boolean(formik.errors.folio)}
                 helperText={formik.touched.folio && formik.errors.folio}
                 onBlur={formik.handleBlur}
@@ -236,10 +247,12 @@ const FacturasFilters = ({
                 size="small"
                 name="montoTotal"
                 label="Monto Total"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="Monto exacto"
                 value={formik.values.montoTotal}
                 onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                onKeyDown={blockNonNumericKeys}
                 error={formik.touched.montoTotal && Boolean(formik.errors.montoTotal)}
                 helperText={formik.touched.montoTotal && formik.errors.montoTotal}
                 onBlur={formik.handleBlur}
@@ -253,10 +266,12 @@ const FacturasFilters = ({
                 size="small"
                 name="minMontoTotal"
                 label="Monto Total Mínimo"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="Desde"
                 value={formik.values.minMontoTotal}
                 onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                onKeyDown={blockNonNumericKeys}
                 error={formik.touched.minMontoTotal && Boolean(formik.errors.minMontoTotal)}
                 helperText={formik.touched.minMontoTotal && formik.errors.minMontoTotal}
                 onBlur={formik.handleBlur}
@@ -270,10 +285,12 @@ const FacturasFilters = ({
                 size="small"
                 name="maxMontoTotal"
                 label="Monto Total Máximo"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="Hasta"
                 value={formik.values.maxMontoTotal}
                 onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                onKeyDown={blockNonNumericKeys}
                 error={formik.touched.maxMontoTotal && Boolean(formik.errors.maxMontoTotal)}
                 helperText={formik.touched.maxMontoTotal && formik.errors.maxMontoTotal}
                 onBlur={formik.handleBlur}
@@ -287,10 +304,12 @@ const FacturasFilters = ({
                 size="small"
                 name="montoNeto"
                 label="Monto Neto"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="Monto exacto"
                 value={formik.values.montoNeto}
                 onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                onKeyDown={blockNonNumericKeys}
                 error={formik.touched.montoNeto && Boolean(formik.errors.montoNeto)}
                 helperText={formik.touched.montoNeto && formik.errors.montoNeto}
                 onBlur={formik.handleBlur}
@@ -304,10 +323,12 @@ const FacturasFilters = ({
                 size="small"
                 name="minMontoNeto"
                 label="Monto Neto Mínimo"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="Desde"
                 value={formik.values.minMontoNeto}
                 onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                onKeyDown={blockNonNumericKeys}
                 error={formik.touched.minMontoNeto && Boolean(formik.errors.minMontoNeto)}
                 helperText={formik.touched.minMontoNeto && formik.errors.minMontoNeto}
                 onBlur={formik.handleBlur}
@@ -321,10 +342,12 @@ const FacturasFilters = ({
                 size="small"
                 name="maxMontoNeto"
                 label="Monto Neto Máximo"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="Hasta"
                 value={formik.values.maxMontoNeto}
                 onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                onKeyDown={blockNonNumericKeys}
                 error={formik.touched.maxMontoNeto && Boolean(formik.errors.maxMontoNeto)}
                 helperText={formik.touched.maxMontoNeto && formik.errors.maxMontoNeto}
                 onBlur={formik.handleBlur}
@@ -338,10 +361,12 @@ const FacturasFilters = ({
                 size="small"
                 name="detalleIva"
                 label="Monto IVA"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="Monto exacto"
                 value={formik.values.detalleIva}
                 onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                onKeyDown={blockNonNumericKeys}
                 error={formik.touched.detalleIva && Boolean(formik.errors.detalleIva)}
                 helperText={formik.touched.detalleIva && formik.errors.detalleIva}
                 onBlur={formik.handleBlur}
@@ -355,10 +380,12 @@ const FacturasFilters = ({
                 size="small"
                 name="minDetalleIva"
                 label="IVA Mínimo"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="Desde"
                 value={formik.values.minDetalleIva}
                 onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                onKeyDown={blockNonNumericKeys}
                 error={formik.touched.minDetalleIva && Boolean(formik.errors.minDetalleIva)}
                 helperText={formik.touched.minDetalleIva && formik.errors.minDetalleIva}
                 onBlur={formik.handleBlur}
@@ -372,10 +399,12 @@ const FacturasFilters = ({
                 size="small"
                 name="maxDetalleIva"
                 label="IVA Máximo"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="Hasta"
                 value={formik.values.maxDetalleIva}
                 onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
+                onKeyDown={blockNonNumericKeys}
                 error={formik.touched.maxDetalleIva && Boolean(formik.errors.maxDetalleIva)}
                 helperText={formik.touched.maxDetalleIva && formik.errors.maxDetalleIva}
                 onBlur={formik.handleBlur}
