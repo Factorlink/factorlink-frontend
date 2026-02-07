@@ -20,6 +20,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DeleteIcon from "@mui/icons-material/Delete";
+import TextField from "@mui/material/TextField";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import useAuthStore from "../../store/authStore";
@@ -100,18 +101,23 @@ const UploadDocumentModal = ({
 
   const handleSubmit = async (values: UploadFormData) => {
     try {
+      const isOtrosDocumentos = values.tipo === "otros_documentos_legales";
       const payload = isEmpresa
         ? {
             empresaId: currentRole?.empresaId || null,
             tipo: values.tipo,
             archivoBase64: values.archivoBase64,
-            //nombreArchivo: values.nombreArchivo,
+            ...(isOtrosDocumentos && values.nombreArchivo
+              ? { nombreArchivo: values.nombreArchivo }
+              : {}),
           }
         : {
             factoringId: currentRole?.factoringId || null,
             tipo: values.tipo,
             archivoBase64: values.archivoBase64,
-            //nombreArchivo: values.nombreArchivo,
+            ...(isOtrosDocumentos && values.nombreArchivo
+              ? { nombreArchivo: values.nombreArchivo }
+              : {}),
           };
 
       await createLegalDocument(payload);
@@ -256,6 +262,33 @@ const UploadDocumentModal = ({
                 <FormHelperText>{formik.errors.tipo}</FormHelperText>
               )}
             </FormControl>
+
+            {formik.values.tipo === "otros_documentos_legales" && (
+              <TextField
+                fullWidth
+                id="nombreArchivo"
+                name="nombreArchivo"
+                label="Nombre del documento"
+                placeholder="Ej: Contrato de cesión, Poder notarial..."
+                value={formik.values.nombreArchivo}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                disabled={loading}
+                sx={{
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 1,
+                    backgroundColor: "background.default",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(0, 0, 0, 0.23)",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "primary.main",
+                    },
+                  },
+                }}
+              />
+            )}
 
             <Box>
               <Typography

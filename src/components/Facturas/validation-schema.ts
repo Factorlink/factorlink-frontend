@@ -14,17 +14,21 @@ const optionalRutValidation = yup
   });
 
 const optionalNumberValidation = yup
-  .number()
-  .transform((value, originalValue) => (String(originalValue).trim() === "" ? null : value))
+  .string()
+  .trim()
+  .test("is-number", "Debe ser un número válido", (value) => {
+    if (!value) return true;
+    return /^[0-9]+$/.test(value);
+  })
+  .transform((value) => (value ? Number(value) : null))
   .nullable()
-  .typeError("Debe ser un número válido")
   .min(0, "El monto no puede ser negativo");
 
 export const facturasFiltersSchema = yup.object({
   rutEmisor: optionalRutValidation,
   rutReceptor: optionalRutValidation,
   razonSocialReceptor: yup.string().trim(),
-  folio: yup.string().trim(),
+  folio: optionalNumberValidation,
   estado: yup.string(),
   
   montoTotal: optionalNumberValidation,
