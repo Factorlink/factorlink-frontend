@@ -39,6 +39,7 @@ import MarketplaceFacturasTable from "../../components/Facturas/MarketplaceFactu
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
 import RemoveMarketplaceModal from "../../components/Modals/RemoveMarketplaceModal";
+import DocumentsRequiredModal from "../../components/Modals/DocumentsRequiredModal";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import FacturasFilters, {
   type FacturasFiltersValues,
@@ -145,6 +146,7 @@ const Facturas = () => {
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
+  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   
   const navigate = useNavigate();
@@ -203,7 +205,11 @@ const Facturas = () => {
 
   const handleEnviarCotizar = () => {
     if (selectedFactura) {
-      navigate(`/facturas/${selectedFactura.id}/cotizar`);
+      if (currentRole && currentRole.nivel >= 3) {
+        navigate(`/facturas/${selectedFactura.id}/cotizar`);
+      } else {
+        setDocumentsRequiredModalOpen(true);
+      }
     }
     handleMenuClose();
   };
@@ -835,6 +841,11 @@ const Facturas = () => {
             }}
           />
         )}
+
+        <DocumentsRequiredModal
+          open={documentsRequiredModalOpen}
+          onClose={() => setDocumentsRequiredModalOpen(false)}
+        />
       </Box>
     </Layout>
   );

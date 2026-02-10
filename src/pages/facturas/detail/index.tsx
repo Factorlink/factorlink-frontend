@@ -27,7 +27,9 @@ import { useFacturas } from "../../../hooks/useFacturas";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
 import DeleteFacturaModal from "../../../components/Modals/DeleteFacturaModal";
 import RemoveMarketplaceModal from "../../../components/Modals/RemoveMarketplaceModal";
+import DocumentsRequiredModal from "../../../components/Modals/DocumentsRequiredModal";
 import StorefrontIcon from "@mui/icons-material/Storefront";
+import useAuthStore from "../../../store/authStore";
 
 const getStatusConfig = (estado: string) => {
   switch (estado) {
@@ -112,6 +114,7 @@ const formatDate = (dateString: string) => {
 
 const FacturaDetail = () => {
   const { getFacturaById, loading, refreshFactura } = useFacturas();
+  const { currentRole } = useAuthStore();
   const { id } = useParams();
   const navigate = useNavigate();
   const [factura, setFactura] = useState<Factura | null>(null);
@@ -119,6 +122,7 @@ const FacturaDetail = () => {
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
+  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
 
   const fetchFactura = async () => {
     try {
@@ -142,7 +146,11 @@ const FacturaDetail = () => {
   };
 
   const handleEnviarCotizar = () => {
-    navigate(`/facturas/${id}/cotizar`);
+    if (currentRole && currentRole.nivel >= 3) {
+      navigate(`/facturas/${id}/cotizar`);
+    } else {
+      setDocumentsRequiredModalOpen(true);
+    }
   };
 
 
@@ -894,6 +902,11 @@ const FacturaDetail = () => {
             }}
           />
         )}
+
+        <DocumentsRequiredModal
+          open={documentsRequiredModalOpen}
+          onClose={() => setDocumentsRequiredModalOpen(false)}
+        />
       </Box>
     </Layout>
   );
