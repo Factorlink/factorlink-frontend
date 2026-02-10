@@ -607,7 +607,7 @@ const Facturas = () => {
                                 variant="body2"
                                 sx={{ color: "#00BCD4", fontWeight: 600 }}
                               >
-                                #F-{factura.folio}
+                                {factura.folio}
                               </Typography>
                             </TableCell>
                             <TableCell>
