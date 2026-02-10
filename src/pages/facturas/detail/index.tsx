@@ -26,6 +26,8 @@ import type { Factura } from "../../../types/factura";
 import { useFacturas } from "../../../hooks/useFacturas";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
 import DeleteFacturaModal from "../../../components/Modals/DeleteFacturaModal";
+import RemoveMarketplaceModal from "../../../components/Modals/RemoveMarketplaceModal";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 
 const getStatusConfig = (estado: string) => {
   switch (estado) {
@@ -116,6 +118,7 @@ const FacturaDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
 
   const fetchFactura = async () => {
     try {
@@ -289,6 +292,7 @@ const FacturaDetail = () => {
 
   const statusConfig = getStatusConfig(factura.estado);
   const canEnviarCotizar = factura.estado?.toLowerCase() === "cargada";
+  const isInMarketplace = factura.estado === "EN_MARKETPLACE" || factura.estado === "CON_OFERTAS";
 
   return (
     <Layout>
@@ -809,25 +813,47 @@ const FacturaDetail = () => {
               >
                 Enviar a cotizar
               </Button>
-              <Button
-                variant="outlined"
-                fullWidth
-                startIcon={<Delete />}
-                onClick={handleEliminar}
-                sx={{
-                  borderColor: "#EF4444",
-                  color: "#EF4444",
-                  "&:hover": {
-                    borderColor: "#DC2626",
-                    backgroundColor: "rgba(239,68,68,0.1)",
-                  },
-                  textTransform: "none",
-                  fontWeight: 600,
-                  py: 1.5,
-                }}
-              >
-                Eliminar factura
-              </Button>
+              {isInMarketplace ? (
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<StorefrontIcon />}
+                  onClick={() => setRemoveMarketplaceModalOpen(true)}
+                  sx={{
+                    borderColor: "#EF4444",
+                    color: "#EF4444",
+                    "&:hover": {
+                      borderColor: "#DC2626",
+                      backgroundColor: "rgba(239,68,68,0.1)",
+                    },
+                    textTransform: "none",
+                    fontWeight: 600,
+                    py: 1.5,
+                  }}
+                >
+                  Quitar del marketplace
+                </Button>
+              ) : (
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<Delete />}
+                  onClick={handleEliminar}
+                  sx={{
+                    borderColor: "#EF4444",
+                    color: "#EF4444",
+                    "&:hover": {
+                      borderColor: "#DC2626",
+                      backgroundColor: "rgba(239,68,68,0.1)",
+                    },
+                    textTransform: "none",
+                    fontWeight: 600,
+                    py: 1.5,
+                  }}
+                >
+                  Eliminar factura
+                </Button>
+              )}
             </Box>
           </Box>
         </Box>
@@ -851,6 +877,20 @@ const FacturaDetail = () => {
               folio: factura.folio,
               razonSocialReceptor: factura.razonSocialReceptor || "N/A",
               montoTotal: factura.montoTotal,
+            }}
+          />
+        )}
+
+        {/* Remove from Marketplace Modal */}
+        {factura && (
+          <RemoveMarketplaceModal
+            open={removeMarketplaceModalOpen}
+            onClose={() => setRemoveMarketplaceModalOpen(false)}
+            onSuccess={() => fetchFactura()}
+            facturaData={{
+              id: factura.id,
+              folio: factura.folio,
+              razonSocialReceptor: factura.razonSocialReceptor || "N/A",
             }}
           />
         )}

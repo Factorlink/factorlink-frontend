@@ -38,6 +38,8 @@ import {
 import MarketplaceFacturasTable from "../../components/Facturas/MarketplaceFacturasTable";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
+import RemoveMarketplaceModal from "../../components/Modals/RemoveMarketplaceModal";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 import FacturasFilters, {
   type FacturasFiltersValues,
 } from "../../components/Facturas/FacturasFilters";
@@ -142,6 +144,7 @@ const Facturas = () => {
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   
   const navigate = useNavigate();
@@ -166,8 +169,17 @@ const Facturas = () => {
     handleMenuClose();
   };
 
+  const isInMarketplace = (factura: Factura | null) => {
+    if (!factura) return false;
+    return factura.estado === "EN_MARKETPLACE" || factura.estado === "CON_OFERTAS";
+  };
+
   const handleEliminar = () => {
-    setDeleteModalOpen(true);
+    if (isInMarketplace(selectedFactura)) {
+      setRemoveMarketplaceModalOpen(true);
+    } else {
+      setDeleteModalOpen(true);
+    }
     setAnchorEl(null);
   };
 
@@ -177,6 +189,15 @@ const Facturas = () => {
 
   const handleCloseDeleteModal = () => {
     setDeleteModalOpen(false);
+    setSelectedFactura(null);
+  };
+
+  const handleRemoveMarketplaceSuccess = () => {
+    fetchFacturas(filters);
+  };
+
+  const handleCloseRemoveMarketplaceModal = () => {
+    setRemoveMarketplaceModalOpen(false);
     setSelectedFactura(null);
   };
 
@@ -733,15 +754,27 @@ const Facturas = () => {
             </ListItemIcon>
             <ListItemText primary="Ver detalle" />
           </MenuItem>
-          <MenuItem onClick={handleEliminar}>
-            <ListItemIcon>
-              <Delete sx={{ color: "#EF4444" }} />
-            </ListItemIcon>
-            <ListItemText
-              primary="Eliminar"
-              sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
-            />
-          </MenuItem>
+          {isInMarketplace(selectedFactura) ? (
+            <MenuItem onClick={handleEliminar}>
+              <ListItemIcon>
+                <StorefrontIcon sx={{ color: "#EF4444" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Quitar del marketplace"
+                sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
+              />
+            </MenuItem>
+          ) : (
+            <MenuItem onClick={handleEliminar}>
+              <ListItemIcon>
+                <Delete sx={{ color: "#EF4444" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Eliminar"
+                sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
+              />
+            </MenuItem>
+          )}
           {canEnviarCotizar(selectedFactura) && (
             <MenuItem onClick={handleEnviarCotizar}>
               <ListItemIcon>
@@ -786,6 +819,19 @@ const Facturas = () => {
               folio: selectedFactura.folio,
               razonSocialReceptor: selectedFactura.razonSocialReceptor || "N/A",
               montoTotal: selectedFactura.montoTotal,
+            }}
+          />
+        )}
+
+        {selectedFactura && (
+          <RemoveMarketplaceModal
+            open={removeMarketplaceModalOpen}
+            onClose={handleCloseRemoveMarketplaceModal}
+            onSuccess={handleRemoveMarketplaceSuccess}
+            facturaData={{
+              id: selectedFactura.id,
+              folio: selectedFactura.folio,
+              razonSocialReceptor: selectedFactura.razonSocialReceptor || "N/A",
             }}
           />
         )}
