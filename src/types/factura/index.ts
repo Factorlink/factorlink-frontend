@@ -1,4 +1,9 @@
 import type { Empresa } from "../empresa";
+import type { Factoring } from "../factoring";
+
+interface VisibilidadDetalle {
+    factorings: Factoring[];
+}
 
 export interface Factura {
     createdAt: string;
@@ -26,4 +31,5 @@ export interface Factura {
     urlFactura: string;
     visibilidad: string;
     xmlContentBase64: string;
+    visibilidadDetalle: VisibilidadDetalle;
 }

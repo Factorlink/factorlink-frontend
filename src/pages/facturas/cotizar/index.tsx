@@ -29,6 +29,7 @@ import {
   CheckCircle,
   Warning,
   Send,
+  Check,
 } from "@mui/icons-material";
 import Layout from "../../../components/Layout";
 import type { Factura } from "../../../types/factura";
@@ -852,6 +853,11 @@ const CotizarFactura = () => {
                               key={value}
                               label={factoring?.razonSocial || value}
                               size="small"
+                              sx={{
+                                backgroundColor: "#E0F7FA",
+                                color: "#00838F",
+                                fontWeight: 500,
+                              }}
                             />
                           );
                         })}
@@ -859,11 +865,29 @@ const CotizarFactura = () => {
                     )}
                     disabled={loadingFactorings}
                   >
-                    {factorings.map((factoring) => (
-                      <MenuItem key={factoring.id} value={factoring.id}>
-                        {factoring.razonSocial} - {factoring.rut}
-                      </MenuItem>
-                    ))}
+                    {factorings.map((factoring) => {
+                      const isSelected = selectedFactorings.includes(factoring.id!);
+                      return (
+                        <MenuItem
+                          key={factoring.id}
+                          value={factoring.id}
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            backgroundColor: isSelected ? "#E0F7FA" : "transparent",
+                            "&:hover": {
+                              backgroundColor: isSelected ? "#B2EBF2" : undefined,
+                            },
+                          }}
+                        >
+                          <span>{factoring.razonSocial} - {factoring.rut}</span>
+                          {isSelected && (
+                            <Check sx={{ color: "#00BCD4", ml: 1, fontSize: 20 }} />
+                          )}
+                        </MenuItem>
+                      );
+                    })}
                   </Select>
                 </FormControl>
               )}
@@ -899,7 +923,7 @@ const CotizarFactura = () => {
                 variant="contained"
                 startIcon={<Send />}
                 onClick={handleSendToMarketplace}
-                disabled={sendingToMarketplace}
+                disabled={sendingToMarketplace || (visibilidad === "SELECCIONADOS" && selectedFactorings.length === 0)}
                 sx={{
                   backgroundColor: "#00BCD4",
                   "&:hover": { backgroundColor: "#00ACC1" },
