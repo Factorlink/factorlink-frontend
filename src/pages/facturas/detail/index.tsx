@@ -20,6 +20,9 @@ import {
   ErrorOutline,
   ArrowBack,
   Cancel,
+  Visibility,
+  ExpandMore,
+  ExpandLess,
 } from "@mui/icons-material";
 import Layout from "../../../components/Layout";
 import type { Factura } from "../../../types/factura";
@@ -123,6 +126,7 @@ const FacturaDetail = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
+  const [visibilidadExpanded, setVisibilidadExpanded] = useState(false);
 
   const fetchFactura = async () => {
     try {
@@ -657,6 +661,133 @@ const FacturaDetail = () => {
             </Box>
           </Box>
         </Box>
+
+        {/* Card: Visibilidad en Marketplace */}
+        {(factura.visibilidad === "TODOS" || factura.visibilidad === "SELECCIONADOS") && (
+          <Box
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 3,
+              p: 3,
+              mb: 3,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+              <Box
+                sx={{
+                  backgroundColor: "#F1F5F9",
+                  borderRadius: 2,
+                  p: 1.5,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Visibility sx={{ color: "#00BCD4", fontSize: 24 }} />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                  Visibilidad en Marketplace
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#64748B" }}>
+                  Factorings que pueden ver esta factura
+                </Typography>
+              </Box>
+            </Box>
+
+            {factura.visibilidad === "TODOS" ? (
+              <Box
+                sx={{
+                  backgroundColor: "#F0FDF4",
+                  borderRadius: 2,
+                  p: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                }}
+              >
+                <Visibility sx={{ color: "#00A86B", fontSize: 20 }} />
+                <Typography variant="body2" sx={{ color: "#15803D", fontWeight: 500 }}>
+                  Esta factura es visible para todos los factorings registrados en la plataforma.
+                </Typography>
+              </Box>
+            ) : (
+              <Box>
+                <Box
+                  onClick={() => setVisibilidadExpanded(!visibilidadExpanded)}
+                  sx={{
+                    backgroundColor: "#F8FAFC",
+                    borderRadius: 2,
+                    p: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    cursor: "pointer",
+                    "&:hover": { backgroundColor: "#F1F5F9" },
+                    transition: "background-color 0.2s",
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Visibility sx={{ color: "#00BCD4", fontSize: 20 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                      Factorings seleccionados
+                    </Typography>
+                    <Chip
+                      label={factura.visibilidadDetalle?.factorings?.length || 0}
+                      size="small"
+                      sx={{
+                        backgroundColor: "#E0F7FA",
+                        color: "#00838F",
+                        fontWeight: 700,
+                        minWidth: 28,
+                        height: 24,
+                      }}
+                    />
+                  </Box>
+                  {visibilidadExpanded ? (
+                    <ExpandLess sx={{ color: "#64748B" }} />
+                  ) : (
+                    <ExpandMore sx={{ color: "#64748B" }} />
+                  )}
+                </Box>
+
+                {visibilidadExpanded && (
+                  <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
+                    {factura.visibilidadDetalle?.factorings?.map((factoring, index) => (
+                      <Box
+                        key={factoring.id || index}
+                        sx={{
+                          backgroundColor: "#F8FAFC",
+                          borderRadius: 2,
+                          p: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1.5,
+                        }}
+                      >
+                        <Business sx={{ color: "#00BCD4", fontSize: 20 }} />
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                            {factoring.razonSocial}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: "#64748B" }}>
+                            {factoring.rut}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                    {(!factura.visibilidadDetalle?.factorings || factura.visibilidadDetalle.factorings.length === 0) && (
+                      <Typography variant="body2" sx={{ color: "#94A3B8", textAlign: "center", py: 2 }}>
+                        No hay factorings seleccionados
+                      </Typography>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            )}
+          </Box>
+        )}
 
         {/* Bottom Cards Grid */}
         <Box
