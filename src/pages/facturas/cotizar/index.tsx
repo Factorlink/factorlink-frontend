@@ -48,7 +48,7 @@ const truncateToTwo = (num: number): number => {
   return Math.trunc(num * 100) / 100;
 };
 
-const MIN_PLAZO = 30;
+const MIN_PLAZO = 1;
 const MAX_PLAZO = 180;
 
 const CotizarFactura = () => {
@@ -71,7 +71,7 @@ const CotizarFactura = () => {
 
   // Step 2 Form State
   const [montoFinanciar, setMontoFinanciar] = useState<number>(100);
-  const [plazo, setPlazo] = useState<number>(30);
+  const [plazo, setPlazo] = useState<number>(1);
   const [step2Error, setStep2Error] = useState<string | null>(null);
   const [step2Success, setStep2Success] = useState<string | null>(null);
   const [savingStep2, setSavingStep2] = useState(false);
@@ -609,10 +609,17 @@ const CotizarFactura = () => {
                   Plazo (días)
                 </Typography>
                 <TextField
-                  type="number"
-                  value={plazo}
-                  onChange={(e) => setPlazo(Number(e.target.value))}
-                  inputProps={{ min: MIN_PLAZO, max: MAX_PLAZO }}
+                  value={plazo === 0 ? "" : plazo}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Solo permitir dígitos
+                    const onlyNums = value.replace(/[^0-9]/g, "");
+                    // No permitir que empiece con 0 y limitar a 3 caracteres
+                    if (onlyNums.startsWith("0") || onlyNums.length > 3) {
+                      return;
+                    }
+                    setPlazo(onlyNums === "" ? 0 : Number(onlyNums));
+                  }}
                   fullWidth
                   size="small"
                   helperText={`Mínimo ${MIN_PLAZO} días, Máximo ${MAX_PLAZO} días`}

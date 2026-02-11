@@ -15,6 +15,7 @@ import {
   Select,
   MenuItem,
   FormHelperText,
+  InputAdornment,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -82,7 +83,9 @@ const UploadDocumentModal = ({
     reader.onload = () => {
       const base64String = reader.result as string;
       formik.setFieldValue("archivoBase64", base64String, true);
-      formik.setFieldValue("nombreArchivo", file.name, true);
+      // Quitar la extensión del nombre del archivo para que no se duplique con el adornment .pdf
+      const nameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
+      formik.setFieldValue("nombreArchivo", nameWithoutExtension, true);
     };
     reader.onerror = () => {
       setAlertStatus("error");
@@ -102,13 +105,20 @@ const UploadDocumentModal = ({
   const handleSubmit = async (values: UploadFormData) => {
     try {
       const isOtrosDocumentos = values.tipo === "otros_documentos_legales";
+      // Asegurar que el nombre del archivo siempre termine en .pdf
+      const finalNombreArchivo = isOtrosDocumentos && values.nombreArchivo
+        ? (values.nombreArchivo.toLowerCase().endsWith(".pdf") 
+            ? values.nombreArchivo 
+            : `${values.nombreArchivo}.pdf`)
+        : values.nombreArchivo;
+
       const payload = isEmpresa
         ? {
             empresaId: currentRole?.empresaId || null,
             tipo: values.tipo,
             archivoBase64: values.archivoBase64,
             ...(isOtrosDocumentos && values.nombreArchivo
-              ? { nombreArchivo: values.nombreArchivo }
+              ? { nombreArchivo: finalNombreArchivo }
               : {}),
           }
         : {
@@ -116,7 +126,7 @@ const UploadDocumentModal = ({
             tipo: values.tipo,
             archivoBase64: values.archivoBase64,
             ...(isOtrosDocumentos && values.nombreArchivo
-              ? { nombreArchivo: values.nombreArchivo }
+              ? { nombreArchivo: finalNombreArchivo }
               : {}),
           };
 
@@ -271,9 +281,22 @@ const UploadDocumentModal = ({
                 label="Nombre del documento"
                 placeholder="Ej: Contrato de cesión, Poder notarial..."
                 value={formik.values.nombreArchivo}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  // Si el usuario escribe .pdf, lo quitamos para no duplicar con el adornment
+                  if (val.toLowerCase().endsWith(".pdf")) {
+                    formik.setFieldValue("nombreArchivo", val.slice(0, -4));
+                  } else {
+                    formik.handleChange(e);
+                  }
+                }}
                 onBlur={formik.handleBlur}
                 disabled={loading}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">.pdf</InputAdornment>
+                  ),
+                }}
                 sx={{
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
