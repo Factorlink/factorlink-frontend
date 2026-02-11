@@ -161,7 +161,7 @@ const RemoveMarketplaceModal = ({
                   variant="body1"
                   sx={{ color: "text.primary", fontWeight: 600 }}
                 >
-                  Folio #F-{facturaData.folio}
+                  Folio {facturaData.folio}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   {facturaData.razonSocialReceptor}

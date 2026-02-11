@@ -19,10 +19,7 @@ const optionalNumberValidation = yup
   .test("is-number", "Debe ser un número válido", (value) => {
     if (!value) return true;
     return /^[0-9]+$/.test(value);
-  })
-  .transform((value) => (value ? Number(value) : null))
-  .nullable()
-  .min(0, "El monto no puede ser negativo");
+  });
 
 export const facturasFiltersSchema = yup.object({
   rutEmisor: optionalRutValidation,
@@ -36,8 +33,8 @@ export const facturasFiltersSchema = yup.object({
   maxMontoTotal: optionalNumberValidation
     .test("min-max-total", "El monto máximo debe ser mayor al mínimo", function (value) {
       const { minMontoTotal } = this.parent;
-      if (value != null && minMontoTotal != null) {
-        return value >= minMontoTotal;
+      if (value && minMontoTotal) {
+        return Number(value) >= Number(minMontoTotal);
       }
       return true;
     }),
@@ -47,8 +44,8 @@ export const facturasFiltersSchema = yup.object({
   maxMontoNeto: optionalNumberValidation
     .test("min-max-neto", "El monto máximo debe ser mayor al mínimo", function (value) {
       const { minMontoNeto } = this.parent;
-      if (value != null && minMontoNeto != null) {
-        return value >= minMontoNeto;
+      if (value && minMontoNeto) {
+        return Number(value) >= Number(minMontoNeto);
       }
       return true;
     }),
@@ -58,8 +55,8 @@ export const facturasFiltersSchema = yup.object({
   maxDetalleIva: optionalNumberValidation
     .test("min-max-iva", "El monto máximo debe ser mayor al mínimo", function (value) {
       const { minDetalleIva } = this.parent;
-      if (value != null && minDetalleIva != null) {
-        return value >= minDetalleIva;
+      if (value && minDetalleIva) {
+        return Number(value) >= Number(minDetalleIva);
       }
       return true;
     }),

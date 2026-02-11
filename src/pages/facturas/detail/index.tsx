@@ -20,12 +20,18 @@ import {
   ErrorOutline,
   ArrowBack,
   Cancel,
+  Visibility,
 } from "@mui/icons-material";
 import Layout from "../../../components/Layout";
 import type { Factura } from "../../../types/factura";
 import { useFacturas } from "../../../hooks/useFacturas";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
 import DeleteFacturaModal from "../../../components/Modals/DeleteFacturaModal";
+import RemoveMarketplaceModal from "../../../components/Modals/RemoveMarketplaceModal";
+import DocumentsRequiredModal from "../../../components/Modals/DocumentsRequiredModal";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import useAuthStore from "../../../store/authStore";
+import FactoringsList from "../../../components/Facturas/FactoringsList";
 
 const getStatusConfig = (estado: string) => {
   switch (estado) {
@@ -110,12 +116,15 @@ const formatDate = (dateString: string) => {
 
 const FacturaDetail = () => {
   const { getFacturaById, loading, refreshFactura } = useFacturas();
+  const { currentRole } = useAuthStore();
   const { id } = useParams();
   const navigate = useNavigate();
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
+  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
 
   const fetchFactura = async () => {
     try {
@@ -139,7 +148,11 @@ const FacturaDetail = () => {
   };
 
   const handleEnviarCotizar = () => {
-    navigate(`/facturas/${id}/cotizar`);
+    if (currentRole && currentRole.nivel >= 3) {
+      navigate(`/facturas/${id}/cotizar`);
+    } else {
+      setDocumentsRequiredModalOpen(true);
+    }
   };
 
 
@@ -289,6 +302,7 @@ const FacturaDetail = () => {
 
   const statusConfig = getStatusConfig(factura.estado);
   const canEnviarCotizar = factura.estado?.toLowerCase() === "cargada";
+  const isInMarketplace = factura.estado === "EN_MARKETPLACE" || factura.estado === "CON_OFERTAS";
 
   return (
     <Layout>
@@ -646,6 +660,64 @@ const FacturaDetail = () => {
           </Box>
         </Box>
 
+        {/* Card: Visibilidad en Marketplace */}
+        {(factura.visibilidad === "TODOS" || factura.visibilidad === "SELECCIONADOS") && (
+          <Box
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 3,
+              p: 3,
+              mb: 3,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+              <Box
+                sx={{
+                  backgroundColor: "#F1F5F9",
+                  borderRadius: 2,
+                  p: 1.5,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Visibility sx={{ color: "#00BCD4", fontSize: 24 }} />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                  Visibilidad en Marketplace
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#64748B" }}>
+                  Factorings que pueden ver esta factura
+                </Typography>
+              </Box>
+            </Box>
+
+            {factura.visibilidad === "TODOS" ? (
+              <Box
+                sx={{
+                  backgroundColor: "#F0FDF4",
+                  borderRadius: 2,
+                  p: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                }}
+              >
+                <Visibility sx={{ color: "#00A86B", fontSize: 20 }} />
+                <Typography variant="body2" sx={{ color: "#15803D", fontWeight: 500 }}>
+                  Esta factura es visible para todos los factorings registrados en la plataforma.
+                </Typography>
+              </Box>
+            ) : (
+              <FactoringsList
+                factorings={factura.visibilidadDetalle?.factorings || []}
+              />
+            )}
+          </Box>
+        )}
+
         {/* Bottom Cards Grid */}
         <Box
           sx={{
@@ -809,25 +881,47 @@ const FacturaDetail = () => {
               >
                 Enviar a cotizar
               </Button>
-              <Button
-                variant="outlined"
-                fullWidth
-                startIcon={<Delete />}
-                onClick={handleEliminar}
-                sx={{
-                  borderColor: "#EF4444",
-                  color: "#EF4444",
-                  "&:hover": {
-                    borderColor: "#DC2626",
-                    backgroundColor: "rgba(239,68,68,0.1)",
-                  },
-                  textTransform: "none",
-                  fontWeight: 600,
-                  py: 1.5,
-                }}
-              >
-                Eliminar factura
-              </Button>
+              {isInMarketplace ? (
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<StorefrontIcon />}
+                  onClick={() => setRemoveMarketplaceModalOpen(true)}
+                  sx={{
+                    borderColor: "#EF4444",
+                    color: "#EF4444",
+                    "&:hover": {
+                      borderColor: "#DC2626",
+                      backgroundColor: "rgba(239,68,68,0.1)",
+                    },
+                    textTransform: "none",
+                    fontWeight: 600,
+                    py: 1.5,
+                  }}
+                >
+                  Quitar del marketplace
+                </Button>
+              ) : (
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<Delete />}
+                  onClick={handleEliminar}
+                  sx={{
+                    borderColor: "#EF4444",
+                    color: "#EF4444",
+                    "&:hover": {
+                      borderColor: "#DC2626",
+                      backgroundColor: "rgba(239,68,68,0.1)",
+                    },
+                    textTransform: "none",
+                    fontWeight: 600,
+                    py: 1.5,
+                  }}
+                >
+                  Eliminar factura
+                </Button>
+              )}
             </Box>
           </Box>
         </Box>
@@ -854,6 +948,25 @@ const FacturaDetail = () => {
             }}
           />
         )}
+
+        {/* Remove from Marketplace Modal */}
+        {factura && (
+          <RemoveMarketplaceModal
+            open={removeMarketplaceModalOpen}
+            onClose={() => setRemoveMarketplaceModalOpen(false)}
+            onSuccess={() => fetchFactura()}
+            facturaData={{
+              id: factura.id,
+              folio: factura.folio,
+              razonSocialReceptor: factura.razonSocialReceptor || "N/A",
+            }}
+          />
+        )}
+
+        <DocumentsRequiredModal
+          open={documentsRequiredModalOpen}
+          onClose={() => setDocumentsRequiredModalOpen(false)}
+        />
       </Box>
     </Layout>
   );

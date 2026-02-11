@@ -38,6 +38,9 @@ import {
 import MarketplaceFacturasTable from "../../components/Facturas/MarketplaceFacturasTable";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
+import RemoveMarketplaceModal from "../../components/Modals/RemoveMarketplaceModal";
+import DocumentsRequiredModal from "../../components/Modals/DocumentsRequiredModal";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 import FacturasFilters, {
   type FacturasFiltersValues,
 } from "../../components/Facturas/FacturasFilters";
@@ -142,6 +145,8 @@ const Facturas = () => {
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
+  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   
   const navigate = useNavigate();
@@ -166,8 +171,17 @@ const Facturas = () => {
     handleMenuClose();
   };
 
+  const isInMarketplace = (factura: Factura | null) => {
+    if (!factura) return false;
+    return factura.estado === "EN_MARKETPLACE" || factura.estado === "CON_OFERTAS";
+  };
+
   const handleEliminar = () => {
-    setDeleteModalOpen(true);
+    if (isInMarketplace(selectedFactura)) {
+      setRemoveMarketplaceModalOpen(true);
+    } else {
+      setDeleteModalOpen(true);
+    }
     setAnchorEl(null);
   };
 
@@ -180,9 +194,22 @@ const Facturas = () => {
     setSelectedFactura(null);
   };
 
+  const handleRemoveMarketplaceSuccess = () => {
+    fetchFacturas(filters);
+  };
+
+  const handleCloseRemoveMarketplaceModal = () => {
+    setRemoveMarketplaceModalOpen(false);
+    setSelectedFactura(null);
+  };
+
   const handleEnviarCotizar = () => {
     if (selectedFactura) {
-      navigate(`/facturas/${selectedFactura.id}/cotizar`);
+      if (currentRole && currentRole.nivel >= 3) {
+        navigate(`/facturas/${selectedFactura.id}/cotizar`);
+      } else {
+        setDocumentsRequiredModalOpen(true);
+      }
     }
     handleMenuClose();
   };
@@ -580,7 +607,7 @@ const Facturas = () => {
                                 variant="body2"
                                 sx={{ color: "#00BCD4", fontWeight: 600 }}
                               >
-                                #F-{factura.folio}
+                                {factura.folio}
                               </Typography>
                             </TableCell>
                             <TableCell>
@@ -733,15 +760,27 @@ const Facturas = () => {
             </ListItemIcon>
             <ListItemText primary="Ver detalle" />
           </MenuItem>
-          <MenuItem onClick={handleEliminar}>
-            <ListItemIcon>
-              <Delete sx={{ color: "#EF4444" }} />
-            </ListItemIcon>
-            <ListItemText
-              primary="Eliminar"
-              sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
-            />
-          </MenuItem>
+          {isInMarketplace(selectedFactura) ? (
+            <MenuItem onClick={handleEliminar}>
+              <ListItemIcon>
+                <StorefrontIcon sx={{ color: "#EF4444" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Quitar del marketplace"
+                sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
+              />
+            </MenuItem>
+          ) : (
+            <MenuItem onClick={handleEliminar}>
+              <ListItemIcon>
+                <Delete sx={{ color: "#EF4444" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Eliminar"
+                sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
+              />
+            </MenuItem>
+          )}
           {canEnviarCotizar(selectedFactura) && (
             <MenuItem onClick={handleEnviarCotizar}>
               <ListItemIcon>
@@ -789,6 +828,24 @@ const Facturas = () => {
             }}
           />
         )}
+
+        {selectedFactura && (
+          <RemoveMarketplaceModal
+            open={removeMarketplaceModalOpen}
+            onClose={handleCloseRemoveMarketplaceModal}
+            onSuccess={handleRemoveMarketplaceSuccess}
+            facturaData={{
+              id: selectedFactura.id,
+              folio: selectedFactura.folio,
+              razonSocialReceptor: selectedFactura.razonSocialReceptor || "N/A",
+            }}
+          />
+        )}
+
+        <DocumentsRequiredModal
+          open={documentsRequiredModalOpen}
+          onClose={() => setDocumentsRequiredModalOpen(false)}
+        />
       </Box>
     </Layout>
   );

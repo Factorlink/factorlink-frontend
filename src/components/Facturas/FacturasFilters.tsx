@@ -28,7 +28,7 @@ import { handleRutInputChange, handlePositiveNumberInputChange } from "../../uti
 
 // Bloquea teclas no numéricas en campos numéricos (evita +, -, ., e, etc.)
 const blockNonNumericKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Home", "End"];
+  const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Home", "End", "Enter"];
   if (allowedKeys.includes(e.key)) return;
   if (!/^[0-9]$/.test(e.key)) {
     e.preventDefault();
@@ -152,13 +152,12 @@ const FacturasFilters = ({
         <Box sx={{ p: 2, pt: 0, borderTop: "1px solid #E2E8F0" }} component="form" onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {/* Folio */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 3 }}>
               <TextField
                 fullWidth
                 size="small"
                 name="folio"
                 label="Folio"
-                type="text"
                 inputMode="numeric"
                 placeholder="Número de folio"
                 value={formik.values.folio}
@@ -170,24 +169,8 @@ const FacturasFilters = ({
               />
             </Grid>
 
-            {/* RUT Emisor */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <TextField
-                fullWidth
-                size="small"
-                name="rutEmisor"
-                label="RUT Emisor"
-                placeholder="Ej: 12.345.678-9"
-                value={formik.values.rutEmisor}
-                onChange={(e) => handleRutInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
-                error={formik.touched.rutEmisor && Boolean(formik.errors.rutEmisor)}
-                helperText={formik.touched.rutEmisor && formik.errors.rutEmisor}
-                onBlur={formik.handleBlur}
-              />
-            </Grid>
-
             {/* RUT Receptor */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 3 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -203,7 +186,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Razón Social Receptor */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 3 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -219,7 +202,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Estado */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 3 }}>
               <FormControl fullWidth size="small" error={formik.touched.estado && Boolean(formik.errors.estado)}>
                 <InputLabel>Estado</InputLabel>
                 <Select
@@ -238,177 +221,6 @@ const FacturasFilters = ({
                   <FormHelperText>{formik.errors.estado}</FormHelperText>
                 )}
               </FormControl>
-            </Grid>
-
-            {/* Monto Total */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <TextField
-                fullWidth
-                size="small"
-                name="montoTotal"
-                label="Monto Total"
-                type="text"
-                inputMode="numeric"
-                placeholder="Monto exacto"
-                value={formik.values.montoTotal}
-                onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
-                onKeyDown={blockNonNumericKeys}
-                error={formik.touched.montoTotal && Boolean(formik.errors.montoTotal)}
-                helperText={formik.touched.montoTotal && formik.errors.montoTotal}
-                onBlur={formik.handleBlur}
-              />
-            </Grid>
-
-            {/* Min Monto Total */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <TextField
-                fullWidth
-                size="small"
-                name="minMontoTotal"
-                label="Monto Total Mínimo"
-                type="text"
-                inputMode="numeric"
-                placeholder="Desde"
-                value={formik.values.minMontoTotal}
-                onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
-                onKeyDown={blockNonNumericKeys}
-                error={formik.touched.minMontoTotal && Boolean(formik.errors.minMontoTotal)}
-                helperText={formik.touched.minMontoTotal && formik.errors.minMontoTotal}
-                onBlur={formik.handleBlur}
-              />
-            </Grid>
-
-            {/* Max Monto Total */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <TextField
-                fullWidth
-                size="small"
-                name="maxMontoTotal"
-                label="Monto Total Máximo"
-                type="text"
-                inputMode="numeric"
-                placeholder="Hasta"
-                value={formik.values.maxMontoTotal}
-                onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
-                onKeyDown={blockNonNumericKeys}
-                error={formik.touched.maxMontoTotal && Boolean(formik.errors.maxMontoTotal)}
-                helperText={formik.touched.maxMontoTotal && formik.errors.maxMontoTotal}
-                onBlur={formik.handleBlur}
-              />
-            </Grid>
-
-            {/* Monto Neto */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <TextField
-                fullWidth
-                size="small"
-                name="montoNeto"
-                label="Monto Neto"
-                type="text"
-                inputMode="numeric"
-                placeholder="Monto exacto"
-                value={formik.values.montoNeto}
-                onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
-                onKeyDown={blockNonNumericKeys}
-                error={formik.touched.montoNeto && Boolean(formik.errors.montoNeto)}
-                helperText={formik.touched.montoNeto && formik.errors.montoNeto}
-                onBlur={formik.handleBlur}
-              />
-            </Grid>
-
-            {/* Min Monto Neto */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <TextField
-                fullWidth
-                size="small"
-                name="minMontoNeto"
-                label="Monto Neto Mínimo"
-                type="text"
-                inputMode="numeric"
-                placeholder="Desde"
-                value={formik.values.minMontoNeto}
-                onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
-                onKeyDown={blockNonNumericKeys}
-                error={formik.touched.minMontoNeto && Boolean(formik.errors.minMontoNeto)}
-                helperText={formik.touched.minMontoNeto && formik.errors.minMontoNeto}
-                onBlur={formik.handleBlur}
-              />
-            </Grid>
-
-            {/* Max Monto Neto */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <TextField
-                fullWidth
-                size="small"
-                name="maxMontoNeto"
-                label="Monto Neto Máximo"
-                type="text"
-                inputMode="numeric"
-                placeholder="Hasta"
-                value={formik.values.maxMontoNeto}
-                onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
-                onKeyDown={blockNonNumericKeys}
-                error={formik.touched.maxMontoNeto && Boolean(formik.errors.maxMontoNeto)}
-                helperText={formik.touched.maxMontoNeto && formik.errors.maxMontoNeto}
-                onBlur={formik.handleBlur}
-              />
-            </Grid>
-
-            {/* Monto IVA */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <TextField
-                fullWidth
-                size="small"
-                name="detalleIva"
-                label="Monto IVA"
-                type="text"
-                inputMode="numeric"
-                placeholder="Monto exacto"
-                value={formik.values.detalleIva}
-                onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
-                onKeyDown={blockNonNumericKeys}
-                error={formik.touched.detalleIva && Boolean(formik.errors.detalleIva)}
-                helperText={formik.touched.detalleIva && formik.errors.detalleIva}
-                onBlur={formik.handleBlur}
-              />
-            </Grid>
-
-            {/* Min Detalle IVA */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <TextField
-                fullWidth
-                size="small"
-                name="minDetalleIva"
-                label="IVA Mínimo"
-                type="text"
-                inputMode="numeric"
-                placeholder="Desde"
-                value={formik.values.minDetalleIva}
-                onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
-                onKeyDown={blockNonNumericKeys}
-                error={formik.touched.minDetalleIva && Boolean(formik.errors.minDetalleIva)}
-                helperText={formik.touched.minDetalleIva && formik.errors.minDetalleIva}
-                onBlur={formik.handleBlur}
-              />
-            </Grid>
-
-            {/* Max Detalle IVA */}
-            <Grid size={{ xs: 12, sm: 8, md: 4 }}>
-              <TextField
-                fullWidth
-                size="small"
-                name="maxDetalleIva"
-                label="IVA Máximo"
-                type="text"
-                inputMode="numeric"
-                placeholder="Hasta"
-                value={formik.values.maxDetalleIva}
-                onChange={(e) => handlePositiveNumberInputChange(e as React.ChangeEvent<HTMLInputElement>, formik.setFieldValue)}
-                onKeyDown={blockNonNumericKeys}
-                error={formik.touched.maxDetalleIva && Boolean(formik.errors.maxDetalleIva)}
-                helperText={formik.touched.maxDetalleIva && formik.errors.maxDetalleIva}
-                onBlur={formik.handleBlur}
-              />
             </Grid>
           </Grid>
 

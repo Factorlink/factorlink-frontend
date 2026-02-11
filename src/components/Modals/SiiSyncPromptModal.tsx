@@ -107,6 +107,7 @@ const SiiSyncPromptModal = () => {
             textTransform: "none",
             px: 3,
             borderRadius: 2,
+            color: "white",
           }}
         >
           Sincronizar ahora
