@@ -44,6 +44,10 @@ import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
 
 const STEPS = ["Resumen Factura", "XML + Condiciones", "Resumen Final"];
 
+const truncateToTwo = (num: number): number => {
+  return Math.trunc(num * 100) / 100;
+};
+
 const MIN_PLAZO = 30;
 const MAX_PLAZO = 180;
 
@@ -90,7 +94,7 @@ const CotizarFactura = () => {
       if (data.montoFinanciar && data.montoTotal) {
         const percentage =
           (parseFloat(data.montoFinanciar) / parseFloat(data.montoTotal)) * 100;
-        setMontoFinanciar(Math.round(percentage));
+        setMontoFinanciar(truncateToTwo(percentage));
       }
       if (data.plazo) {
         setPlazo(data.plazo);
@@ -230,7 +234,7 @@ const CotizarFactura = () => {
 
     try {
       setSavingStep2(true);
-      const calculatedMontoFinanciar = Math.round(
+      const calculatedMontoFinanciar = Math.trunc(
         (parseFloat(factura.montoTotal) * montoFinanciar) / 100,
       );
 
@@ -282,7 +286,7 @@ const CotizarFactura = () => {
   };
 
   const calculatedMontoFinanciar = factura
-    ? Math.round((parseFloat(factura.montoTotal) * montoFinanciar) / 100)
+    ? Math.trunc((parseFloat(factura.montoTotal) * montoFinanciar) / 100)
     : 0;
 
   // Loading state
@@ -555,7 +559,7 @@ const CotizarFactura = () => {
                   variant="subtitle2"
                   sx={{ color: "#64748B", mb: 1 }}
                 >
-                  Monto a Financiar: {montoFinanciar}%
+                  Monto a Financiar: {truncateToTwo(montoFinanciar)}%
                 </Typography>
                 <Slider
                   value={montoFinanciar}
@@ -563,7 +567,7 @@ const CotizarFactura = () => {
                   min={1}
                   max={100}
                   valueLabelDisplay="auto"
-                  valueLabelFormat={(value) => `${value}%`}
+                  valueLabelFormat={(value) => `${truncateToTwo(value)}%`}
                   sx={{
                     color: "#00BCD4",
                     "& .MuiSlider-thumb": {
