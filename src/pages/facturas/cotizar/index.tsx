@@ -30,6 +30,7 @@ import {
   Warning,
   Send,
   Check,
+  Visibility,
 } from "@mui/icons-material";
 import Layout from "../../../components/Layout";
 import type { Factura } from "../../../types/factura";
@@ -41,6 +42,7 @@ import FacturaResumenCard, {
   formatCurrency,
 } from "../../../components/Facturas/FacturaResumenCard";
 import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
+import FactoringsList from "../../../components/Facturas/FactoringsList";
 
 const STEPS = ["Resumen Factura", "XML + Condiciones", "Resumen Final"];
 
@@ -129,6 +131,11 @@ const CotizarFactura = () => {
     if (activeStep === 0) {
       setActiveStep(1);
     } else if (activeStep === 1) {
+      // Validate visibility selection before saving
+      if (visibilidad === "SELECCIONADOS" && selectedFactorings.length === 0) {
+        setStep2Error("Debe seleccionar al menos un Factoring");
+        return;
+      }
       handleSaveStep2();
     }
   };
@@ -202,8 +209,9 @@ const CotizarFactura = () => {
     const xmlValidation = validateXmlMatch();
     const montoValidation = validateMontoFinanciar();
     const plazoValidation = validatePlazo();
+    const visibilidadValid = visibilidad === "TODOS" || selectedFactorings.length > 0;
     return (
-      xmlValidation.valid && montoValidation.valid && plazoValidation.valid
+      xmlValidation.valid && montoValidation.valid && plazoValidation.valid && visibilidadValid
     );
   };
 
@@ -631,7 +639,124 @@ const CotizarFactura = () => {
                     },
                   }}
                 />
-              </Box>
+            </Box>
+            </Box>
+
+            {/* Visibility Selection Card */}
+            <Box
+              sx={{
+                backgroundColor: "white",
+                borderRadius: 3,
+                p: 3,
+                mt: 3,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, color: "#1E293B", mb: 2 }}
+              >
+                Visibilidad en Marketplace
+              </Typography>
+
+              <FormControl component="fieldset">
+                <FormLabel component="legend" sx={{ color: "#64748B", mb: 1 }}>
+                  ¿Quién puede ver esta factura?
+                </FormLabel>
+                <RadioGroup
+                  value={visibilidad}
+                  onChange={(e) =>
+                    setVisibilidad(e.target.value as "TODOS" | "SELECCIONADOS")
+                  }
+                >
+                  <FormControlLabel
+                    value="TODOS"
+                    control={
+                      <Radio
+                        sx={{
+                          color: "#64748B",
+                          "&.Mui-checked": { color: "#00BCD4" },
+                        }}
+                      />
+                    }
+                    label="Todos los Factorings"
+                  />
+                  <FormControlLabel
+                    value="SELECCIONADOS"
+                    control={
+                      <Radio
+                        sx={{
+                          color: "#64748B",
+                          "&.Mui-checked": { color: "#00BCD4" },
+                        }}
+                      />
+                    }
+                    label="Solo Factorings seleccionados"
+                  />
+                </RadioGroup>
+              </FormControl>
+
+              {visibilidad === "SELECCIONADOS" && (
+                <Box sx={{ maxWidth: 500 }}>
+                  <FormControl fullWidth sx={{ mt: 2 }}>
+                    <InputLabel>Seleccionar Factorings</InputLabel>
+                    <Select
+                      multiple
+                      value={selectedFactorings}
+                      onChange={(e) =>
+                        setSelectedFactorings(e.target.value as string[])
+                      }
+                      label="Seleccionar Factorings"
+                      renderValue={(selected) => (
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                          {selected.map((value) => {
+                            const factoring = factorings.find(
+                              (f) => f.id === value,
+                            );
+                            return (
+                              <Chip
+                                key={value}
+                                label={factoring?.razonSocial || value}
+                                size="small"
+                                sx={{
+                                  backgroundColor: "#E0F7FA",
+                                  color: "#00838F",
+                                  fontWeight: 500,
+                                }}
+                              />
+                            );
+                          })}
+                        </Box>
+                      )}
+                      disabled={loadingFactorings}
+                    >
+                      {factorings.map((factoring) => {
+                        const isSelected = selectedFactorings.includes(factoring.id!);
+                        return (
+                          <MenuItem
+                            key={factoring.id}
+                            value={factoring.id}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              backgroundColor: isSelected ? "#E0F7FA" : "transparent",
+                              "&:hover": {
+                                backgroundColor: isSelected ? "#B2EBF2" : undefined,
+                              },
+                            }}
+                          >
+                            <span>{factoring.razonSocial} - {factoring.rut}</span>
+                            {isSelected && (
+                              <Check sx={{ color: "#00BCD4", ml: 1, fontSize: 20 }} />
+                            )}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
             </Box>
 
             {/* Navigation Buttons */}
@@ -779,7 +904,7 @@ const CotizarFactura = () => {
               </Box>
             </Box>
 
-            {/* Visibility Selection Card */}
+            {/* Visibility Summary Card */}
             <Box
               sx={{
                 backgroundColor: "white",
@@ -806,101 +931,26 @@ const CotizarFactura = () => {
                 </Alert>
               )}
 
-              <FormControl component="fieldset">
-                <FormLabel component="legend" sx={{ color: "#64748B", mb: 1 }}>
-                  ¿Quién puede ver esta factura?
-                </FormLabel>
-                <RadioGroup
-                  value={visibilidad}
-                  onChange={(e) =>
-                    setVisibilidad(e.target.value as "TODOS" | "SELECCIONADOS")
-                  }
+              {visibilidad === "TODOS" ? (
+                <Box
+                  sx={{
+                    backgroundColor: "#F0FDF4",
+                    borderRadius: 2,
+                    p: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                  }}
                 >
-                  <FormControlLabel
-                    value="TODOS"
-                    control={
-                      <Radio
-                        sx={{
-                          color: "#64748B",
-                          "&.Mui-checked": { color: "#00BCD4" },
-                        }}
-                      />
-                    }
-                    label="Todos los Factorings"
-                  />
-                  <FormControlLabel
-                    value="SELECCIONADOS"
-                    control={
-                      <Radio
-                        sx={{
-                          color: "#64748B",
-                          "&.Mui-checked": { color: "#00BCD4" },
-                        }}
-                      />
-                    }
-                    label="Solo Factorings seleccionados"
-                  />
-                </RadioGroup>
-              </FormControl>
-
-              {visibilidad === "SELECCIONADOS" && (
-                <FormControl fullWidth sx={{ mt: 2 }}>
-                  <InputLabel>Seleccionar Factorings</InputLabel>
-                  <Select
-                    multiple
-                    value={selectedFactorings}
-                    onChange={(e) =>
-                      setSelectedFactorings(e.target.value as string[])
-                    }
-                    label="Seleccionar Factorings"
-                    renderValue={(selected) => (
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                        {selected.map((value) => {
-                          const factoring = factorings.find(
-                            (f) => f.id === value,
-                          );
-                          return (
-                            <Chip
-                              key={value}
-                              label={factoring?.razonSocial || value}
-                              size="small"
-                              sx={{
-                                backgroundColor: "#E0F7FA",
-                                color: "#00838F",
-                                fontWeight: 500,
-                              }}
-                            />
-                          );
-                        })}
-                      </Box>
-                    )}
-                    disabled={loadingFactorings}
-                  >
-                    {factorings.map((factoring) => {
-                      const isSelected = selectedFactorings.includes(factoring.id!);
-                      return (
-                        <MenuItem
-                          key={factoring.id}
-                          value={factoring.id}
-                          sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            backgroundColor: isSelected ? "#E0F7FA" : "transparent",
-                            "&:hover": {
-                              backgroundColor: isSelected ? "#B2EBF2" : undefined,
-                            },
-                          }}
-                        >
-                          <span>{factoring.razonSocial} - {factoring.rut}</span>
-                          {isSelected && (
-                            <Check sx={{ color: "#00BCD4", ml: 1, fontSize: 20 }} />
-                          )}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                </FormControl>
+                  <Visibility sx={{ color: "#00A86B", fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ color: "#15803D", fontWeight: 500 }}>
+                    Esta factura será visible para todos los factorings registrados en la plataforma.
+                  </Typography>
+                </Box>
+              ) : (
+                <FactoringsList
+                  factorings={factorings.filter((f) => selectedFactorings.includes(f.id!))}
+                />
               )}
             </Box>
 
@@ -934,7 +984,7 @@ const CotizarFactura = () => {
                 variant="contained"
                 startIcon={<Send />}
                 onClick={handleSendToMarketplace}
-                disabled={sendingToMarketplace || (visibilidad === "SELECCIONADOS" && selectedFactorings.length === 0)}
+                disabled={sendingToMarketplace}
                 sx={{
                   backgroundColor: "#00BCD4",
                   "&:hover": { backgroundColor: "#00ACC1" },
