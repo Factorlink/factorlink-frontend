@@ -27,7 +27,6 @@ import {
   ArrowBack,
   ErrorOutline,
   CheckCircle,
-  Warning,
   Send,
   Check,
   Visibility,
@@ -47,7 +46,7 @@ import FactoringsList from "../../../components/Facturas/FactoringsList";
 const STEPS = ["Resumen Factura", "XML + Condiciones", "Resumen Final"];
 
 const truncateToTwo = (num: number): number => {
-  return Math.trunc(num * 100) / 100;
+  return Math.round(num * 100) / 100;
 };
 
 const MIN_PLAZO = 1;
@@ -294,7 +293,7 @@ const CotizarFactura = () => {
   };
 
   const calculatedMontoFinanciar = factura
-    ? Math.trunc((parseFloat(factura.montoTotal) * montoFinanciar) / 100)
+    ? Math.round((parseFloat(factura.montoTotal) * montoFinanciar) / 100)
     : 0;
 
   // Loading state
@@ -491,39 +490,6 @@ const CotizarFactura = () => {
               onDownloadClick={handleDownloadXml}
             />
 
-            {/* XML Validation Status */}
-            <Box
-              sx={{
-                backgroundColor: "white",
-                borderRadius: 3,
-                p: 3,
-                mt: 3,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 600, color: "#1E293B", mb: 2 }}
-              >
-                Validación XML vs Factura SII
-              </Typography>
-              {factura.urlFactura ? (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <CheckCircle sx={{ color: "#00A86B" }} />
-                  <Typography sx={{ color: "#00A86B", fontWeight: 500 }}>
-                    XML validado correctamente - Folio, RUT y monto coinciden
-                  </Typography>
-                </Box>
-              ) : (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Warning sx={{ color: "#F59E0B" }} />
-                  <Typography sx={{ color: "#F59E0B", fontWeight: 500 }}>
-                    Pendiente de subir XML para validación
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-
             {/* Conditions Card */}
             <Box
               sx={{
@@ -574,6 +540,7 @@ const CotizarFactura = () => {
                   onChange={(_, value) => setMontoFinanciar(value as number)}
                   min={1}
                   max={100}
+                  step={1}
                   valueLabelDisplay="auto"
                   valueLabelFormat={(value) => `${truncateToTwo(value)}%`}
                   sx={{
@@ -630,7 +597,7 @@ const CotizarFactura = () => {
                   }}
                   fullWidth
                   size="small"
-                  helperText={`Mínimo ${MIN_PLAZO} días, Máximo ${MAX_PLAZO} días`}
+                  helperText={`Mínimo ${MIN_PLAZO} día, Máximo ${MAX_PLAZO} días`}
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       "&.Mui-focused fieldset": {
@@ -881,7 +848,7 @@ const CotizarFactura = () => {
                     variant="h6"
                     sx={{ fontWeight: 700, color: "#00A86B" }}
                   >
-                    {formatCurrency(factura.montoFinanciar)} ({montoFinanciar}%)
+                    {formatCurrency(factura.montoFinanciar)} ({ truncateToTwo(montoFinanciar)}%)
                   </Typography>
                 </Box>
                 <Box

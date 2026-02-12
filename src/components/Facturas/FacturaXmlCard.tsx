@@ -17,7 +17,7 @@ const FacturaXmlCard = ({
     if (onDownloadClick && factura.xmlContentBase64) {
       onDownloadClick(
         factura.xmlContentBase64,
-        factura.facturaNameFile || "factura.xml"
+        factura.facturaNameFile || "factura.xml",
       );
     }
   };
@@ -115,6 +115,16 @@ const FacturaXmlCard = ({
         >
           {factura.urlFactura ? "Reemplazar" : "Adjuntar"} XML
         </Button>
+      </Box>
+      <Box sx={{ pt: 2, pl: 2 }}>
+        <Typography
+          variant="caption"
+          sx={{ color: factura.urlFactura ? "#00A86B" : "#F59E0B" }}
+        >
+          {factura.urlFactura
+            ? "XML validado correctamente - Folio, RUT y monto coinciden"
+            : "Pendiente de subir XML para validación"}
+        </Typography>
       </Box>
     </Box>
   );

@@ -15,11 +15,9 @@ import {
   CalendarToday,
   Send,
   Delete,
-  Upload,
   Settings,
   ErrorOutline,
   ArrowBack,
-  Cancel,
   Visibility,
 } from "@mui/icons-material";
 import Layout from "../../../components/Layout";
@@ -32,6 +30,7 @@ import DocumentsRequiredModal from "../../../components/Modals/DocumentsRequired
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import useAuthStore from "../../../store/authStore";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
+import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
 
 const getStatusConfig = (estado: string) => {
   switch (estado) {
@@ -727,108 +726,11 @@ const FacturaDetail = () => {
           }}
         >
           {/* Card 3: XML de la Factura */}
-          <Box
-            sx={{
-              backgroundColor: "white",
-              borderRadius: 3,
-              p: 3,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-              <Box
-                sx={{
-                  backgroundColor: "#F1F5F9",
-                  borderRadius: 2,
-                  p: 1.5,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Description sx={{ color: "#00BCD4", fontSize: 24 }} />
-              </Box>
-              <Box>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 600, color: "#1E293B" }}
-                >
-                  XML de la Factura
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#64748B" }}>
-                  Documento tributario electrónico
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box
-              sx={{
-                backgroundColor: "#F8FAFC",
-                borderRadius: 2,
-                p: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              {factura.urlFactura ? (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <Description sx={{ color: "#00A86B" }} />
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 600, color: "#1E293B" }}
-                    >
-                      <Typography
-                        role="button"
-                        sx={{ color: "#00A86B", cursor: "pointer" }}
-                        onClick={() =>
-                          handleDescargarXML(
-                            factura.xmlContentBase64,
-                            factura.facturaNameFile || "factura.xml",
-                          )
-                        }
-                      >
-                        {factura.facturaNameFile || "Archivo XML"}
-                      </Typography>
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: "#64748B" }}>
-                      Documento cargado
-                    </Typography>
-                  </Box>
-                </Box>
-              ) : (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <Cancel sx={{ color: "#EF4444" }} />
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 600, color: "#1E293B" }}
-                    >
-                      XML No Cargado
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: "#64748B" }}>
-                      Adjunta el archivo XML del SII
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
-              <Button
-                variant="contained"
-                startIcon={<Upload />}
-                onClick={handleAdjuntarXML}
-                sx={{
-                  backgroundColor: "#00BCD4",
-                  color: "white",
-                  "&:hover": { backgroundColor: "#00ACC1" },
-                  textTransform: "none",
-                  fontWeight: 600,
-                }}
-              >
-                {factura.urlFactura ? "Reemplazar" : "Adjuntar"} XML
-              </Button>
-            </Box>
-          </Box>
+          <FacturaXmlCard
+            factura={factura}
+            onUploadClick={() => setUploadXmlModalOpen(true)}
+            onDownloadClick={handleDescargarXML}
+          />
 
           {/* Card 4: Acciones */}
           <Box

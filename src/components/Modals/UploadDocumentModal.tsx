@@ -59,6 +59,11 @@ const UploadDocumentModal = ({
   const validationSchema = Yup.object({
     tipo: Yup.string().required("El tipo de documento es requerido"),
     archivoBase64: Yup.string().required("Debe seleccionar un archivo"),
+    nombreArchivo: Yup.string().when("tipo", {
+      is: "otros_documentos_legales",
+      then: (schema) => schema.required("El nombre del documento es requerido"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,7 +89,8 @@ const UploadDocumentModal = ({
       const base64String = reader.result as string;
       formik.setFieldValue("archivoBase64", base64String, true);
       // Quitar la extensión del nombre del archivo para que no se duplique con el adornment .pdf
-      const nameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
+      // Y limitar a 26 caracteres (30 - 4 de ".pdf")
+      const nameWithoutExtension = file.name.replace(/\.[^/.]+$/, "").slice(0, 26);
       formik.setFieldValue("nombreArchivo", nameWithoutExtension, true);
     };
     reader.onerror = () => {
@@ -255,10 +261,22 @@ const UploadDocumentModal = ({
                   borderRadius: 1,
                   backgroundColor: "background.default",
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "rgba(0, 0, 0, 0.23)",
+                    borderColor:
+                      formik.touched.tipo && formik.errors.tipo
+                        ? "error.main"
+                        : "rgba(0, 0, 0, 0.23)",
                   },
                   "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "primary.main",
+                    borderColor:
+                      formik.touched.tipo && formik.errors.tipo
+                        ? "error.main"
+                        : "primary.main",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor:
+                      formik.touched.tipo && formik.errors.tipo
+                        ? "error.main"
+                        : "primary.main",
                   },
                 }}
               >
@@ -280,9 +298,17 @@ const UploadDocumentModal = ({
                 name="nombreArchivo"
                 label="Nombre del documento"
                 placeholder="Ej: Contrato de cesión, Poder notarial..."
+                error={formik.touched.nombreArchivo && Boolean(formik.errors.nombreArchivo)}
+                helperText={
+                  (formik.touched.nombreArchivo && formik.errors.nombreArchivo) ||
+                  `${formik.values.nombreArchivo.length + 4}/30 caracteres`
+                }
                 value={formik.values.nombreArchivo}
                 onChange={(e) => {
                   const val = e.target.value;
+                  // Limitar a 26 caracteres (30 - 4 de ".pdf")
+                  if (val.length > 26) return;
+
                   // Si el usuario escribe .pdf, lo quitamos para no duplicar con el adornment
                   if (val.toLowerCase().endsWith(".pdf")) {
                     formik.setFieldValue("nombreArchivo", val.slice(0, -4));
@@ -303,10 +329,22 @@ const UploadDocumentModal = ({
                     borderRadius: 1,
                     backgroundColor: "background.default",
                     "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "rgba(0, 0, 0, 0.23)",
+                      borderColor:
+                        formik.touched.nombreArchivo && formik.errors.nombreArchivo
+                          ? "error.main"
+                          : "rgba(0, 0, 0, 0.23)",
                     },
                     "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "primary.main",
+                      borderColor:
+                        formik.touched.nombreArchivo && formik.errors.nombreArchivo
+                          ? "error.main"
+                          : "primary.main",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor:
+                        formik.touched.nombreArchivo && formik.errors.nombreArchivo
+                          ? "error.main"
+                          : "primary.main",
                     },
                   },
                 }}
@@ -445,7 +483,12 @@ const UploadDocumentModal = ({
           <Button
             variant="contained"
             onClick={() => formik.handleSubmit()}
-            disabled={loading || !formik.values.tipo || !formik.values.archivoBase64}
+            disabled={
+              loading || 
+              !formik.values.tipo || 
+              !formik.values.archivoBase64 || 
+              (formik.values.tipo === "otros_documentos_legales" && !formik.values.nombreArchivo)
+            }
             sx={{
               flex: 1,
               py: 1.5,
