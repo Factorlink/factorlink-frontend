@@ -94,7 +94,7 @@ const CotizarFactura = () => {
       // Initialize form values from factura
       if (data.montoFinanciar && data.montoTotal) {
         const percentage =
-          (parseFloat(data.montoFinanciar) / parseFloat(data.montoTotal)) * 100;
+          (parseFloat(data.urlFactura ? data.montoFinanciar : data.montoTotal) / parseFloat(data.montoTotal)) * 100;
         setMontoFinanciar(truncateToTwo(percentage));
       }
       if (data.plazo) {

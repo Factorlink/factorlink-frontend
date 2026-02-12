@@ -167,10 +167,6 @@ const FacturaDetail = () => {
     setDeleteModalOpen(false);
   };
 
-  const handleAdjuntarXML = () => {
-    setUploadXmlModalOpen(true);
-  };
-
   const handleCloseUploadXmlModal = () => {
     setUploadXmlModalOpen(false);
   };
