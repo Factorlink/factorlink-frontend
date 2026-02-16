@@ -24,6 +24,7 @@ import PoliticaPrivacidad from "./pages/legal/politica-privacidad";
 import ConsentimientoEmails from "./pages/legal/consentimiento-emails";
 import FacturaDetail from "./pages/facturas/detail";
 import CotizarFactura from "./pages/facturas/cotizar";
+import Marketplace from "./pages/marketplace";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
           <Route path="/consentimiento-emails" element={<ConsentimientoEmails />} />
           <Route path="/facturas/:id" element={<FacturaDetail />} />
           <Route path="/facturas/:id/cotizar" element={<CotizarFactura />} />
+          <Route path="/marketplace" element={<Marketplace />} />
 
           {/* Protected routes */}
           <Route
