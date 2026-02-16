@@ -209,6 +209,18 @@ export const useFacturas = () => {
     }
   };
 
+  const getFacturaByIdAndFactoringId = async (id: string, factoringId: string) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`facturas/${id}?factoringId=${factoringId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     getFacturas,
@@ -220,6 +232,7 @@ export const useFacturas = () => {
     sendToMarketplace,
     removeFromMarketplace,
     listFromMarketplace,
-    getFacturasByFactoringId
+    getFacturasByFactoringId,
+    getFacturaByIdAndFactoringId
   };
 };

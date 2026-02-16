@@ -25,6 +25,7 @@ import ConsentimientoEmails from "./pages/legal/consentimiento-emails";
 import FacturaDetail from "./pages/facturas/detail";
 import CotizarFactura from "./pages/facturas/cotizar";
 import Marketplace from "./pages/marketplace";
+import FacturaFactoringDetail from "./pages/facturas/detail/factoring";
 
 function App() {
   return (
@@ -40,12 +41,15 @@ function App() {
           <Route path="/factoring/register" element={<FactoringRegister />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/terminos-condiciones" element={<TerminosCondiciones />} />
+          <Route
+            path="/terminos-condiciones"
+            element={<TerminosCondiciones />}
+          />
           <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
-          <Route path="/consentimiento-emails" element={<ConsentimientoEmails />} />
-          <Route path="/facturas/:id" element={<FacturaDetail />} />
-          <Route path="/facturas/:id/cotizar" element={<CotizarFactura />} />
-          <Route path="/marketplace" element={<Marketplace />} />
+          <Route
+            path="/consentimiento-emails"
+            element={<ConsentimientoEmails />}
+          />
 
           {/* Protected routes */}
           <Route
@@ -89,6 +93,38 @@ function App() {
             }
           />
           <Route
+            path="/facturas/:id"
+            element={
+              <ProtectedRoute>
+                <FacturaDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/facturas/:id/cotizar"
+            element={
+              <ProtectedRoute>
+                <CotizarFactura />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/facturas/:id/factoring"
+            element={
+              <ProtectedRoute>
+                <FacturaFactoringDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace"
+            element={
+              <ProtectedRoute>
+                <Marketplace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/edit"
             element={
               <ProtectedRoute>
@@ -101,7 +137,10 @@ function App() {
             <Route path="empresa" element={<EmpresaTab />} />
             <Route path="factoring" element={<FactoringTab />} />
             <Route path="usuarios" element={<UsuariosTab />} />
-            <Route path="documentos-legales" element={<DocumentosLegalesTab />} />
+            <Route
+              path="documentos-legales"
+              element={<DocumentosLegalesTab />}
+            />
           </Route>
         </Routes>
       </BrowserRouter>

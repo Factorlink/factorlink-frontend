@@ -32,4 +32,6 @@ export interface Factura {
     visibilidad: string;
     xmlContentBase64: string;
     visibilidadDetalle: VisibilidadDetalle;
+    numeroOfertasRecibidas?: number;
+    historyOfertas?: any[];
 }
