@@ -26,8 +26,21 @@ export const useOfertas = () => {
     }
   };
 
+  const getOfertasByFacturaId = async (facturaId: string) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/ofertas/factura/${facturaId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     createOferta,
+    getOfertasByFacturaId,
   };
 };
