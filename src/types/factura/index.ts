@@ -34,4 +34,5 @@ export interface Factura {
     visibilidadDetalle: VisibilidadDetalle;
     numeroOfertasRecibidas?: number;
     historyOfertas?: any[];
+    factoringIsOfertme?: boolean;
 }

@@ -327,7 +327,7 @@ const Marketplace = () => {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          {miOferta ? (
+                          {factura.factoringIsOfertme ? (
                             <Chip
                               label="Enviada"
                               size="small"
