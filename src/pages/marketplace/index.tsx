@@ -161,9 +161,6 @@ const Marketplace = () => {
     updateSearchParams(sortBy, order, 1, value);
   };
 
-  const getMiOferta = (factura: Factura) => {
-    return (factura as any).miOferta ?? null;
-  };
 
   return (
     <Layout>
@@ -277,7 +274,6 @@ const Marketplace = () => {
                 </TableHead>
                 <TableBody>
                   {facturas.map((factura) => {
-                    const miOferta = getMiOferta(factura);
                     return (
                       <TableRow
                         key={factura.id}

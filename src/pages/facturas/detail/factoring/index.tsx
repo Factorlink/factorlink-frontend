@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { ArrowBack, Description, ErrorOutline } from "@mui/icons-material";
 import FacturaResumenCard from "../../../../components/Facturas/FacturaResumenCard";
+import EnviarOfertaCard from "../../../../components/Facturas/EnviarOfertaCard";
 
 const FacturaFactoringDetail = () => {
   const { getFacturaByIdAndFactoringId, loading } = useFacturas();
@@ -159,6 +160,13 @@ const FacturaFactoringDetail = () => {
         </Box>
 
         <FacturaResumenCard factura={factura} />
+
+        {/* Enviar Oferta */}
+        <EnviarOfertaCard
+          factura={factura}
+          factoringId={currentRole?.factoringId!}
+          onSuccess={fetchFactura}
+        />
       </Box>
     </Layout>
   );

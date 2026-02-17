@@ -1,5 +1,8 @@
 import type { Empresa } from "../empresa";
 import type { Factoring } from "../factoring";
+import type { Oferta } from "../oferta";
+
+
 
 interface VisibilidadDetalle {
     factorings: Factoring[];
@@ -33,6 +36,7 @@ export interface Factura {
     xmlContentBase64: string;
     visibilidadDetalle: VisibilidadDetalle;
     numeroOfertasRecibidas?: number;
-    historyOfertas?: any[];
+    historyOfertas?: Oferta[];
     factoringIsOfertme?: boolean;
+    ofertaFactoring?: Oferta
 }
