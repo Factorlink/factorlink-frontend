@@ -597,11 +597,12 @@ const CotizarFactura = () => {
                   }}
                   fullWidth
                   size="small"
-                  helperText={`Mínimo ${MIN_PLAZO} día, Máximo ${MAX_PLAZO} días`}
+                  error={plazo > 180}
+                  helperText={plazo > 180 ? "El plazo máximo es de 180 días" : `Mínimo ${MIN_PLAZO} día, Máximo ${MAX_PLAZO} días`}
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       "&.Mui-focused fieldset": {
-                        borderColor: "#00BCD4",
+                        borderColor:  plazo > 180 ? "#DC2626" : "#00BCD4",
                       },
                     },
                   }}

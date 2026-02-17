@@ -5,6 +5,7 @@ import {
   Assessment,
   Settings,
   Logout,
+  Storefront,
 } from "@mui/icons-material";
 import type { SvgIconComponent } from "@mui/icons-material";
 import { ROLES } from "../utils/consts";
@@ -19,6 +20,7 @@ export interface MenuItem {
 const ALL_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN, ROLES.DEFAULT, ROLES.EMPRESA_USUARIO, ROLES.FACTORING_ANALISTA];
 const ADMIN_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN];
 const EMPRESA_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.EMPRESA_USUARIO];
+const FACTORING_ROLES = [ROLES.FACTORING_ADMIN, ROLES.FACTORING_ANALISTA];
 
 export const mainMenuItems: MenuItem[] = [
   {
@@ -32,6 +34,12 @@ export const mainMenuItems: MenuItem[] = [
     icon: Description,
     path: "/facturas",
     roles: EMPRESA_ROLES,
+  },
+  {
+    text: "Marketplace",
+    icon: Storefront,
+    path: "/marketplace",
+    roles: FACTORING_ROLES,
   },
   {
     text: "Operaciones",
