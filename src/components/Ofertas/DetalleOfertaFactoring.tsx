@@ -50,8 +50,10 @@ const getEstadoConfig = (estado: string) => {
       return { label: "Rechazada", color: "#EF4444", bg: "#FEF2F2" };
     case "expirada":
       return { label: "Expirada", color: "#F59E0B", bg: "#FFFBEB" };
+    case "activa":
+      return { label: "Activa", color: "#00BCD4", bg: "#E0F7FA" };
     default:
-      return { label: "Pendiente de respuesta", color: "#00BCD4", bg: "#E0F7FA" };
+      return { label: estado, color: "#00BCD4", bg: "#E0F7FA" };
   }
 };
 
