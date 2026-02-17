@@ -24,7 +24,7 @@ import { useFacturas } from "../../hooks/useFacturas";
 import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
 import type { SelectChangeEvent } from "@mui/material/Select";
-import { useNavigate } from "react-router-dom";
+import OfertasDrawer from "./OfertasDrawer";
 
 interface OfertasFacturasTableProps {
   empresaId: string;
@@ -54,8 +54,9 @@ const formatDate = (dateString: string) => {
 
 const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
   const { getFacturasConOfertasByEmpresaId, loading } = useFacturas();
-  const navigate = useNavigate();
   const [facturas, setFacturas] = useState<Factura[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
 
 
   const [meta, setMeta] = useState<Meta>({
@@ -105,6 +106,7 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
   };
 
   return (
+    <>
     <TableContainer
       component={Paper}
       sx={{
@@ -237,7 +239,10 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
                       variant="outlined"
                       size="small"
                       startIcon={<Visibility sx={{ fontSize: 16 }} />}
-                      onClick={() => navigate(`/facturas/${factura.id}`)}
+                      onClick={() => {
+                        setSelectedFactura(factura);
+                        setDrawerOpen(true);
+                      }}
                       sx={{
                         borderColor: "#334155",
                         color: "#334155",
@@ -302,6 +307,12 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
         </>
       )}
     </TableContainer>
+      <OfertasDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        factura={selectedFactura}
+      />
+    </>
   );
 };
 
