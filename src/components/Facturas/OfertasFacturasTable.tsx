@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { Description, Groups, Visibility } from "@mui/icons-material";
 import { useFacturas } from "../../hooks/useFacturas";
-import SortableTableHeader from "./SortableTableHeader";
+
 import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
 import type { SelectChangeEvent } from "@mui/material/Select";
@@ -30,15 +30,7 @@ interface OfertasFacturasTableProps {
   empresaId: string;
 }
 
-const OFERTAS_SORTABLE_COLUMNS = [
-  { field: "folio", label: "Folio" },
-  { field: "razonSocialReceptor", label: "Receptor" },
-  { field: "fechaEmision", label: "Fecha Emisión" },
-  { field: "montoTotal", label: "Monto Total" },
-  { field: "montoFinanciar", label: "Monto a Financiar" },
-  { field: "plazo", label: "Plazo" },
-  { field: "numeroOfertasRecibidas", label: "Ofertas Recibidas" },
-];
+
 
 const formatCurrency = (value: string | number) => {
   const numValue = typeof value === "string" ? parseFloat(value) : value;
@@ -64,8 +56,8 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
   const { getFacturasConOfertasByEmpresaId, loading } = useFacturas();
   const navigate = useNavigate();
   const [facturas, setFacturas] = useState<Factura[]>([]);
-  const [sortBy, setSortBy] = useState("");
-  const [order, setOrder] = useState("");
+
+
   const [meta, setMeta] = useState<Meta>({
     lastPage: 1,
     limit: 10,
@@ -83,35 +75,19 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
         page: meta.page,
         limit: meta.limit,
         empresaId,
-        sortBy: sortBy || undefined,
-        order: order || undefined,
       });
       setFacturas(response?.data || []);
       if (response?.meta) setMeta(response.meta);
     } catch {
       setFacturas([]);
     }
-  }, [empresaId, meta.page, meta.limit, sortBy, order]);
+  }, [empresaId, meta.page, meta.limit]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const handleSort = (field: string) => {
-    if (sortBy === field) {
-      if (order === "ASC") {
-        setOrder("DESC");
-      } else if (order === "DESC") {
-        setSortBy("");
-        setOrder("");
-      } else {
-        setOrder("ASC");
-      }
-    } else {
-      setSortBy(field);
-      setOrder("ASC");
-    }
-  };
+
 
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
@@ -171,19 +147,14 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
-                {OFERTAS_SORTABLE_COLUMNS.map((column) => (
-                  <SortableTableHeader
-                    key={column.field}
-                    field={column.field}
-                    label={column.label}
-                    currentSortBy={sortBy}
-                    currentOrder={order}
-                    onSort={handleSort}
-                  />
-                ))}
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                  Acción
-                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Folio</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Receptor</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Fecha Emisión</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Monto Total</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Monto a Financiar</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Plazo</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Ofertas Recibidas</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Acción</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
