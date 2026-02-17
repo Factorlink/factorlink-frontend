@@ -36,6 +36,7 @@ import {
   Send,
 } from "@mui/icons-material";
 import MarketplaceFacturasTable from "../../components/Facturas/MarketplaceFacturasTable";
+import OfertasFacturasTable from "../../components/Facturas/OfertasFacturasTable";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
 import RemoveMarketplaceModal from "../../components/Modals/RemoveMarketplaceModal";
@@ -516,6 +517,11 @@ const Facturas = () => {
                 </Box>
               }
             />
+            <Tab
+              icon={<Visibility sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label="Ofertas"
+            />
           </Tabs>
         </Box>
 
@@ -732,10 +738,14 @@ const Facturas = () => {
               )}
             </TableContainer>
           </>
-        ) : (
+        ) : activeTab === 1 ? (
           <MarketplaceFacturasTable
             empresaId={currentRole?.empresaId || ""}
             onRemoveSuccess={() => fetchFacturas(filters)}
+          />
+        ) : (
+          <OfertasFacturasTable
+            empresaId={currentRole?.empresaId || ""}
           />
         )}
 
