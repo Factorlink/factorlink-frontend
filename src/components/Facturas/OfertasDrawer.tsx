@@ -114,7 +114,9 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
   }, [open, factura?.id]);
 
   const activas = ofertas.filter(
-    (o) => o.estado?.toLowerCase() !== "expirada" && o.estado?.toLowerCase() !== "rechazada"
+    (o) =>
+      o.estado?.toLowerCase() !== "expirada" &&
+      o.estado?.toLowerCase() !== "rechazada",
   ).length;
 
   return (
@@ -127,7 +129,14 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
       }}
     >
       {/* Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
         <Typography variant="h5" sx={{ fontWeight: 700, color: "#1E293B" }}>
           Ofertas Recibidas
         </Typography>
@@ -146,42 +155,78 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
             boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
           }}
         >
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#1E293B", mb: 1.5 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 700, color: "#1E293B", mb: 1.5 }}
+          >
             Referencia de Factura
           </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 3,
+              alignItems: "center",
+            }}
+          >
             <Box>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>Folio:</Typography>
-              <Typography variant="body2" sx={{ color: "#00BCD4", fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: "#64748B" }}>
+                Folio:
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: "#00BCD4", fontWeight: 600 }}
+              >
                 #{factura.folio}
               </Typography>
             </Box>
             <Box>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>Receptor:</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography variant="caption" sx={{ color: "#64748B" }}>
+                Receptor:
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, color: "#1E293B" }}
+              >
                 {factura.razonSocialReceptor || "N/A"}
               </Typography>
             </Box>
             <Box>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>Monto Total:</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 700, color: "#1E293B" }}>
+              <Typography variant="caption" sx={{ color: "#64748B" }}>
+                Monto Total:
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 700, color: "#1E293B" }}
+              >
                 {formatCurrency(factura.montoTotal)}
               </Typography>
             </Box>
             <Box>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>Monto a Financiar:</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 700, color: "#00A86B" }}>
+              <Typography variant="caption" sx={{ color: "#64748B" }}>
+                Monto a Financiar:
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 700, color: "#00A86B" }}
+              >
                 {formatCurrency(factura.montoFinanciar)}
               </Typography>
             </Box>
             <Box>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>Estado:</Typography>
+              <Typography variant="caption" sx={{ color: "#64748B" }}>
+                Estado:
+              </Typography>
               <Chip
                 icon={<Storefront sx={{ fontSize: 14 }} />}
                 label="EN MARKETPLACE"
                 size="small"
                 variant="outlined"
-                sx={{ fontWeight: 600, borderColor: "#334155", color: "#334155" }}
+                sx={{
+                  fontWeight: 600,
+                  borderColor: "#334155",
+                  color: "#334155",
+                }}
               />
             </Box>
           </Box>
@@ -190,10 +235,18 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
 
       {/* Ofertas disponibles */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#1E293B" }}>
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: 700, color: "#1E293B" }}
+        >
           Ofertas disponibles
         </Typography>
-        <Chip label={`${activas} activas`} size="small" variant="outlined" sx={{ fontWeight: 500 }} />
+        <Chip
+          label={`${activas} activas`}
+          size="small"
+          variant="outlined"
+          sx={{ fontWeight: 500 }}
+        />
       </Box>
 
       {loading ? (
@@ -207,18 +260,37 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
           </Typography>
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 3, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+        >
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Factoring</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>% Financiamiento</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Tasa</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Monto Adelanto</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Plazo</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Fecha Expiración</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Estado</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Acción</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                  Factoring
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                  % Financiamiento
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                  Tasa
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                  Monto Adelanto
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                  Plazo
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                  Fecha Expiración
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                  Estado
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                  Acción
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -234,22 +306,42 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                     }}
                   >
                     <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
-                        {oferta.factoringId}
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: 600, color: "#1E293B" }}
+                        >
+                          {oferta.factoring?.razonSocial || "N/A"}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: "#64748B" }}>
+                          {oferta.factoring?.rut || ""}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "#00A86B", fontWeight: 600 }}
+                      >
+                        {parseFloat(
+                          oferta.porcentajeFinanciamiento || "0",
+                        ).toFixed(2)}
+                        %
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#00A86B", fontWeight: 600 }}>
-                        {parseFloat(oferta.porcentajeFinanciamiento || "0").toFixed(2)}%
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" sx={{ color: "#1E293B", fontWeight: 500 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "#1E293B", fontWeight: 500 }}
+                      >
                         {parseFloat(oferta.tasa || "0").toFixed(2)}%
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ color: "#00A86B", fontWeight: 600 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "#00A86B", fontWeight: 600 }}
+                      >
                         {formatCurrency(oferta.montoAdelanto)}
                       </Typography>
                     </TableCell>
@@ -257,7 +349,11 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                       <Chip
                         label={`${factura?.plazo || 0} días`}
                         size="small"
-                        sx={{ backgroundColor: "#F1F5F9", color: "#475569", fontWeight: 500 }}
+                        sx={{
+                          backgroundColor: "#F1F5F9",
+                          color: "#475569",
+                          fontWeight: 500,
+                        }}
                       />
                     </TableCell>
                     <TableCell>
@@ -279,7 +375,9 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                           backgroundColor: isExpirada ? "#E2E8F0" : "#334155",
                           color: isExpirada ? "#94A3B8" : "white",
                           fontWeight: 500,
-                          "& .MuiChip-icon": { color: isExpirada ? "#94A3B8" : "white" },
+                          "& .MuiChip-icon": {
+                            color: isExpirada ? "#94A3B8" : "white",
+                          },
                         }}
                       />
                     </TableCell>
