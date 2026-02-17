@@ -38,9 +38,25 @@ export const useOfertas = () => {
     }
   };
 
+  const responderOferta = async (ofertaId: string, estado: "aceptada" | "rechazada", comentarioEmpresa: string) => {
+    try {
+      setLoading(true);
+      const response = await api.patch(`/ofertas/${ofertaId}/responder`, {
+        estado,
+        comentarioEmpresa,
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     createOferta,
     getOfertasByFacturaId,
+    responderOferta,
   };
 };
