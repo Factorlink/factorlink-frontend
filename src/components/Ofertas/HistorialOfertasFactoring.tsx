@@ -74,6 +74,7 @@ interface HistorialOfertasFactoringProps {
 
 const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoringProps) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const ofertasIncompletas = ofertas.filter((oferta) => oferta.estado?.toLowerCase() === "rechazada" || oferta.estado?.toLowerCase() === "expirada");
 
   const toggleExpand = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -106,7 +107,7 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
             Historial de ofertas anteriores
           </Typography>
           <Typography variant="body2" sx={{ color: "#64748B" }}>
-            {ofertas.length} oferta{ofertas.length !== 1 ? "s" : ""} rechazada{ofertas.length !== 1 ? "s" : ""} o expirada{ofertas.length !== 1 ? "s" : ""}
+            {ofertasIncompletas.length} oferta{ofertasIncompletas.length !== 1 ? "s" : ""} rechazada{ofertasIncompletas.length !== 1 ? "s" : ""} o expirada{ofertasIncompletas.length !== 1 ? "s" : ""}
           </Typography>
         </Box>
       </Box>

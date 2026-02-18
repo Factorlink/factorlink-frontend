@@ -14,6 +14,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DescriptionIcon from "@mui/icons-material/Description";
+import TextField from "@mui/material/TextField";
 import { useOfertas } from "../../hooks/useOfertas";
 
 interface AceptarOfertaModalProps {
@@ -47,11 +48,12 @@ const AceptarOfertaModal = ({
 }: AceptarOfertaModalProps) => {
   const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
   const [alertMessage, setAlertMessage] = useState("");
+  const [comentario, setComentario] = useState("");
   const { responderOferta, loading } = useOfertas();
 
   const handleAccept = async () => {
     try {
-      await responderOferta(ofertaData.id, "aceptada", "");
+      await responderOferta(ofertaData.id, "aceptada", comentario);
       setAlertStatus("success");
       setAlertMessage("Oferta aceptada correctamente.");
     } catch (error: unknown) {
@@ -72,6 +74,7 @@ const AceptarOfertaModal = ({
     }
     setAlertStatus(null);
     setAlertMessage("");
+    setComentario("");
     onClose();
   };
 
@@ -176,6 +179,20 @@ const AceptarOfertaModal = ({
               Al aceptar esta oferta, se notificará al factoring y se procederá
               con el financiamiento. Esta acción no se puede deshacer.
             </Typography>
+
+            <TextField
+              label="Comentario (opcional)"
+              multiline
+              minRows={3}
+              maxRows={5}
+              fullWidth
+              value={comentario}
+              onChange={(e) => setComentario(e.target.value)}
+              disabled={loading}
+              placeholder="Escribe un comentario para el factoring..."
+              sx={{ mt: 2 }}
+              inputProps={{ maxLength: 500 }}
+            />
           </Box>
         )}
       </DialogContent>

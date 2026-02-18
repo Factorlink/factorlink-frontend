@@ -17,9 +17,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Button,
+  IconButton,
+  Menu,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
-import { Storefront, Visibility } from "@mui/icons-material";
+import { Storefront, Visibility, MoreVert } from "@mui/icons-material";
 import SortableTableHeader from "../../components/Facturas/SortableTableHeader";
 import Layout from "../../components/Layout";
 import { useFacturas } from "../../hooks/useFacturas";
@@ -66,6 +69,8 @@ const Marketplace = () => {
 
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "");
   const [order, setOrder] = useState(searchParams.get("order") || "");
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuFactura, setMenuFactura] = useState<Factura | null>(null);
 
   const [meta, setMeta] = useState<Meta>(() => ({
     lastPage: 1,
@@ -400,24 +405,16 @@ const Marketplace = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          <Button
+                          <IconButton
                             size="small"
-                            startIcon={<Visibility sx={{ fontSize: 16 }} />}
-                            onClick={() =>
-                              navigate(`/facturas/${factura.id}/factoring`)
-                            }
-                            sx={{
-                              textTransform: "none",
-                              color: "#00BCD4",
-                              fontWeight: 500,
-                              fontSize: "0.8125rem",
-                              "&:hover": {
-                                backgroundColor: "rgba(0, 188, 212, 0.08)",
-                              },
+                            onClick={(e) => {
+                              setAnchorEl(e.currentTarget);
+                              setMenuFactura(factura);
                             }}
+                            sx={{ color: "#64748B" }}
                           >
-                            Ver factura
-                          </Button>
+                            <MoreVert />
+                          </IconButton>
                         </TableCell>
                       </TableRow>
                     );
@@ -470,6 +467,37 @@ const Marketplace = () => {
             </>
           )}
         </TableContainer>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => {
+            setAnchorEl(null);
+            setMenuFactura(null);
+          }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
+          PaperProps={{
+            sx: {
+              borderRadius: 2,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              minWidth: 180,
+            },
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              if (menuFactura) navigate(`/facturas/${menuFactura.id}/factoring`);
+              setAnchorEl(null);
+              setMenuFactura(null);
+            }}
+          >
+            <ListItemIcon>
+              <Visibility sx={{ color: "#64748B" }} />
+            </ListItemIcon>
+            <ListItemText primary="Ver factura" />
+          </MenuItem>
+        </Menu>
       </Box>
     </Layout>
   );

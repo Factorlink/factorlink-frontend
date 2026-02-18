@@ -14,6 +14,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DescriptionIcon from "@mui/icons-material/Description";
+import TextField from "@mui/material/TextField";
 import { useOfertas } from "../../hooks/useOfertas";
 
 interface RechazarOfertaModalProps {
@@ -47,11 +48,12 @@ const RechazarOfertaModal = ({
 }: RechazarOfertaModalProps) => {
   const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
   const [alertMessage, setAlertMessage] = useState("");
+  const [comentario, setComentario] = useState("");
   const { responderOferta, loading } = useOfertas();
 
   const handleReject = async () => {
     try {
-      await responderOferta(ofertaData.id, "rechazada", "");
+      await responderOferta(ofertaData.id, "rechazada", comentario);
       setAlertStatus("success");
       setAlertMessage("Oferta rechazada correctamente.");
     } catch (error: unknown) {
@@ -72,6 +74,7 @@ const RechazarOfertaModal = ({
     }
     setAlertStatus(null);
     setAlertMessage("");
+    setComentario("");
     onClose();
   };
 
@@ -176,6 +179,20 @@ const RechazarOfertaModal = ({
               ¿Estás seguro de que deseas rechazar esta oferta? Esta acción
               no se puede deshacer y el factoring será notificado.
             </Typography>
+
+            <TextField
+              label="Comentario (opcional)"
+              multiline
+              minRows={3}
+              maxRows={5}
+              fullWidth
+              value={comentario}
+              onChange={(e) => setComentario(e.target.value)}
+              disabled={loading}
+              placeholder="Escribe un comentario para el factoring..."
+              sx={{ mt: 2 }}
+              inputProps={{ maxLength: 500 }}
+            />
           </Box>
         )}
       </DialogContent>
