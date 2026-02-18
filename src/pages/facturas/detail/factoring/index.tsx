@@ -15,6 +15,7 @@ import { ArrowBack, Description, ErrorOutline } from "@mui/icons-material";
 import FacturaResumenCard from "../../../../components/Facturas/FacturaResumenCard";
 import EnviarOfertaCard from "../../../../components/Facturas/EnviarOfertaCard";
 import DetalleOfertaFactoring from "../../../../components/Ofertas/DetalleOfertaFactoring";
+import HistorialOfertasFactoring from "../../../../components/Ofertas/HistorialOfertasFactoring";
 
 const FacturaFactoringDetail = () => {
   const { getFacturaByIdAndFactoringId, loading } = useFacturas();
@@ -173,6 +174,14 @@ const FacturaFactoringDetail = () => {
             factura={factura}
             factoringId={currentRole?.factoringId!}
             onSuccess={fetchFactura}
+          />
+        )}
+
+        {/* Historial de ofertas anteriores */}
+        {factura.historyOfertas && factura.historyOfertas.length > 0 && (
+          <HistorialOfertasFactoring
+            ofertas={factura.historyOfertas}
+            plazo={factura.plazo || 0}
           />
         )}
       </Box>
