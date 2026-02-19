@@ -303,9 +303,6 @@ const Marketplace = () => {
                       />
                     ))}
                     <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Ofertas
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
                       Mi Oferta
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
@@ -375,14 +372,6 @@ const Marketplace = () => {
                             sx={{ color: "#1E293B", fontWeight: 500 }}
                           >
                             {formatCurrency(factura.montoTotal)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "#1E293B", fontWeight: 500 }}
-                          >
-                            {factura.numeroOfertasRecibidas || 0}
                           </Typography>
                         </TableCell>
                         <TableCell>
