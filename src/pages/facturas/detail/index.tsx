@@ -28,6 +28,7 @@ import useAuthStore from "../../../store/authStore";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
 import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
 import FacturaResumenCard from "../../../components/Facturas/FacturaResumenCard";
+import DetalleCotizacionCard from "../../../components/Facturas/DetalleCotizacionCard";
 
 
 const FacturaDetail = () => {
@@ -234,6 +235,14 @@ const FacturaDetail = () => {
         </Box>
 
         <FacturaResumenCard factura={factura} />
+
+        {factura.estado !== "CARGADA" && (
+          <DetalleCotizacionCard
+            plazo={factura.plazo}
+            porcentajeFinanciamiento={factura.porcentajeFinanciamiento || "0"}
+            montoFinanciar={factura.montoFinanciar}
+          />
+        )}
 
         {/* Card: Visibilidad en Marketplace */}
         {(factura.visibilidad === "TODOS" || factura.visibilidad === "SELECCIONADOS") && (
