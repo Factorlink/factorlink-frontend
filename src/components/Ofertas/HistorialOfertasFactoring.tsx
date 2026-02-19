@@ -21,6 +21,7 @@ import {
   CheckCircle,
 } from "@mui/icons-material";
 import type { Oferta } from "../../types/oferta";
+import CollapsibleSection from "../CollapsibleSection";
 
 const formatCurrency = (value: string | number) => {
   const num = typeof value === "string" ? parseFloat(value) : value;
@@ -99,6 +100,19 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
   };
 
   return (
+    <CollapsibleSection
+      title={
+        <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
+            Historial de ofertas anteriores
+          </Typography>
+      }
+      subtitle={
+        <Typography variant="body2" sx={{ color: "#64748B" }}>
+            {ofertas.length} oferta{ofertas.length !== 1 ? "s" : ""} en total
+          </Typography>
+      }
+      icon={<History sx={{ color: "primary.main", fontSize: 24 }} />}
+    >
     <Box
       sx={{
         backgroundColor: "white",
@@ -108,27 +122,6 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
         mt: 3,
       }}
     >
-      {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          p: 3,
-          borderBottom: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <History sx={{ color: "#00BCD4", fontSize: 24 }} />
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
-            Historial de ofertas anteriores
-          </Typography>
-          <Typography variant="body2" sx={{ color: "#64748B" }}>
-            {ofertas.length} oferta{ofertas.length !== 1 ? "s" : ""} en total
-          </Typography>
-        </Box>
-      </Box>
 
       {/* Resumen de estados */}
       <Box
@@ -359,6 +352,7 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
         })}
       </Box>
     </Box>
+    </CollapsibleSection>
   );
 };
 

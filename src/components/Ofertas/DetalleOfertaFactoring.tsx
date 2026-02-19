@@ -1,8 +1,4 @@
-import {
-  Box,
-  Typography,
-  Chip,
-} from "@mui/material";
+import { Box, Typography, Chip } from "@mui/material";
 import {
   Send,
   AccessTime,
@@ -11,6 +7,7 @@ import {
   CalendarToday,
 } from "@mui/icons-material";
 import type { Oferta } from "../../types/oferta";
+import CollapsibleSection from "../CollapsibleSection";
 
 const formatCurrency = (value: string | number) => {
   const num = typeof value === "string" ? parseFloat(value) : value;
@@ -62,185 +59,221 @@ interface DetalleOfertaFactoringProps {
   plazo: number;
 }
 
-const DetalleOfertaFactoring = ({ oferta, plazo }: DetalleOfertaFactoringProps) => {
+const DetalleOfertaFactoring = ({
+  oferta,
+  plazo,
+}: DetalleOfertaFactoringProps) => {
   const estadoConfig = getEstadoConfig(oferta.estado);
 
   return (
-    <Box
-      sx={{
-        backgroundColor: "white",
-        borderRadius: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-        overflow: "hidden",
-      }}
+    <CollapsibleSection
+      title={
+        <>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 600, color: "text.primary" }}
+          >
+            Estado de tu oferta
+          </Typography>
+        </>
+      }
+      subtitle=""
+      icon={<Send sx={{ color: "primary.main", fontSize: 24 }} />}
     >
-      {/* Header */}
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          p: 3,
-          borderBottom: "1px solid",
-          borderColor: "divider",
+          backgroundColor: "white",
+          borderRadius: 3,
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          overflow: "hidden",
         }}
       >
-        <Send sx={{ color: "primary.main", fontSize: 24 }} />
-        <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
-          Estado de tu oferta
-        </Typography>
-      </Box>
+        
 
-      <Box sx={{ p: 3 }}>
-        {/* Info banner */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            p: 2,
-            borderRadius: 2,
-            backgroundColor: "#E0F7FA",
-            mb: 3,
-          }}
-        >
-          <AccessTime sx={{ color: "#00BCD4", fontSize: 20 }} />
-          <Typography variant="body2" sx={{ color: "#00838F" }}>
-            Tu oferta está en revisión por la empresa emisora.
-          </Typography>
-        </Box>
-
-        {/* Card */}
-        <Box
-          sx={{
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 2,
-            p: 3,
-          }}
-        >
-          {/* Title + Badge */}
+        <Box sx={{ p: 3 }}>
+          {/* Info banner */}
           <Box
             sx={{
               display: "flex",
-              justifyContent: "space-between",
               alignItems: "center",
+              gap: 1.5,
+              p: 2,
+              borderRadius: 2,
+              backgroundColor: "#E0F7FA",
               mb: 3,
             }}
           >
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              Tu oferta
+            <AccessTime sx={{ color: "#00BCD4", fontSize: 20 }} />
+            <Typography variant="body2" sx={{ color: "#00838F" }}>
+              Tu oferta está en revisión por la empresa emisora.
             </Typography>
-            <Chip
-              icon={<AccessTime sx={{ fontSize: 16 }} />}
-              label={estadoConfig.label}
-              size="small"
-              sx={{
-                backgroundColor: estadoConfig.bg,
-                color: estadoConfig.color,
-                fontWeight: 600,
-                "& .MuiChip-icon": { color: estadoConfig.color },
-              }}
-            />
           </Box>
 
-          {/* Data grid */}
+          {/* Card */}
           <Box
             sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr 1fr", md: "1fr 1fr 1fr 1fr" },
-              gap: 3,
-              mb: 3,
-            }}
-          >
-            <Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
-                <Percent sx={{ fontSize: 16, color: "#64748B" }} />
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
-                  Financiamiento
-                </Typography>
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                {oferta.porcentajeFinanciamiento}%
-              </Typography>
-            </Box>
-
-            <Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
-                <Percent sx={{ fontSize: 16, color: "#64748B" }} />
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
-                  Tasa
-                </Typography>
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                {oferta.tasa}%
-              </Typography>
-            </Box>
-
-            <Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
-                <AccountBalance sx={{ fontSize: 16, color: "#64748B" }} />
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
-                  Monto adelanto
-                </Typography>
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: "primary.main" }}>
-                {formatCurrency(oferta.montoAdelanto)}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
-                <AccessTime sx={{ fontSize: 16, color: "#64748B" }} />
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
-                  Plazo
-                </Typography>
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                {plazo} días
-              </Typography>
-            </Box>
-          </Box>
-
-          {/* Dates */}
-          <Box
-            sx={{
-              display: "flex",
-              gap: 3,
-              mb: oferta.comentario ? 3 : 0,
-              pt: 2,
-              borderTop: "1px solid",
+              border: "1px solid",
               borderColor: "divider",
+              borderRadius: 2,
+              p: 3,
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <CalendarToday sx={{ fontSize: 16, color: "#94A3B8" }} />
-              <Typography variant="body2" sx={{ color: "#64748B" }}>
-                Enviada: {formatDate(oferta.createdAt)}
+            {/* Title + Badge */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                Tu oferta
               </Typography>
+              <Chip
+                icon={<AccessTime sx={{ fontSize: 16 }} />}
+                label={estadoConfig.label}
+                size="small"
+                sx={{
+                  backgroundColor: estadoConfig.bg,
+                  color: estadoConfig.color,
+                  fontWeight: 600,
+                  "& .MuiChip-icon": { color: estadoConfig.color },
+                }}
+              />
             </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <CalendarToday sx={{ fontSize: 16, color: "#94A3B8" }} />
-              <Typography variant="body2" sx={{ color: "#64748B" }}>
-                Expira: {formatDateShort(oferta.fechaExpiracion)}
-              </Typography>
-            </Box>
-          </Box>
 
-          {/* Comment */}
-          {oferta.comentario && (
-            <Box sx={{ pt: 2, borderTop: "1px solid", borderColor: "divider" }}>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>
-                Comentario:
-              </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5 }}>
-                {oferta.comentario}
-              </Typography>
+            {/* Data grid */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr 1fr", md: "1fr 1fr 1fr 1fr" },
+                gap: 3,
+                mb: 3,
+              }}
+            >
+              <Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    mb: 0.5,
+                  }}
+                >
+                  <Percent sx={{ fontSize: 16, color: "#64748B" }} />
+                  <Typography variant="caption" sx={{ color: "#64748B" }}>
+                    Financiamiento
+                  </Typography>
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  {oferta.porcentajeFinanciamiento}%
+                </Typography>
+              </Box>
+
+              <Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    mb: 0.5,
+                  }}
+                >
+                  <Percent sx={{ fontSize: 16, color: "#64748B" }} />
+                  <Typography variant="caption" sx={{ color: "#64748B" }}>
+                    Tasa
+                  </Typography>
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  {oferta.tasa}%
+                </Typography>
+              </Box>
+
+              <Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    mb: 0.5,
+                  }}
+                >
+                  <AccountBalance sx={{ fontSize: 16, color: "#64748B" }} />
+                  <Typography variant="caption" sx={{ color: "#64748B" }}>
+                    Monto adelanto
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 700, color: "primary.main" }}
+                >
+                  {formatCurrency(oferta.montoAdelanto)}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    mb: 0.5,
+                  }}
+                >
+                  <AccessTime sx={{ fontSize: 16, color: "#64748B" }} />
+                  <Typography variant="caption" sx={{ color: "#64748B" }}>
+                    Plazo
+                  </Typography>
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  {plazo} días
+                </Typography>
+              </Box>
             </Box>
-          )}
+
+            {/* Dates */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 3,
+                mb: oferta.comentario ? 3 : 0,
+                pt: 2,
+                borderTop: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <CalendarToday sx={{ fontSize: 16, color: "#94A3B8" }} />
+                <Typography variant="body2" sx={{ color: "#64748B" }}>
+                  Enviada: {formatDate(oferta.createdAt)}
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <CalendarToday sx={{ fontSize: 16, color: "#94A3B8" }} />
+                <Typography variant="body2" sx={{ color: "#64748B" }}>
+                  Expira: {formatDateShort(oferta.fechaExpiracion)}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Comment */}
+            {oferta.comentario && (
+              <Box
+                sx={{ pt: 2, borderTop: "1px solid", borderColor: "divider" }}
+              >
+                <Typography variant="caption" sx={{ color: "#64748B" }}>
+                  Comentario:
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5 }}>
+                  {oferta.comentario}
+                </Typography>
+              </Box>
+            )}
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </CollapsibleSection>
   );
 };
 
