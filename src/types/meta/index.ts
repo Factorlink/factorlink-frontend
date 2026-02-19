@@ -6,4 +6,5 @@ export interface Meta {
     totalCargada: number;
     totalCedida: number;
     totalEnMarketplace: number;
+    totalConOfertas: number;
 }

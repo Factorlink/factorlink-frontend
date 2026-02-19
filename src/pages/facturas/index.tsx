@@ -141,6 +141,7 @@ const Facturas = () => {
     totalCargada: 0,
     totalCedida: 0,
     totalEnMarketplace: 0,
+    totalConOfertas: 0,
   }));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
@@ -492,7 +493,25 @@ const Facturas = () => {
             <Tab
               icon={<Description sx={{ fontSize: 18 }} />}
               iconPosition="start"
-              label="Todas las facturas"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  Todas las facturas
+                  {meta.total > 0 && (
+                    <Chip
+                      label={meta.total}
+                      size="small"
+                      sx={{
+                        height: 22,
+                        minWidth: 22,
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        backgroundColor: activeTab === 0 ? "#00BCD4" : "#64748B",
+                        color: "white",
+                      }}
+                    />
+                  )}
+                </Box>
+              }
             />
             <Tab
               icon={<Storefront sx={{ fontSize: 18 }} />}
@@ -509,7 +528,7 @@ const Facturas = () => {
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: "#00BCD4",
+                        backgroundColor: activeTab === 1 ? "#00BCD4" : "#64748B",
                         color: "white",
                       }}
                     />
@@ -520,7 +539,25 @@ const Facturas = () => {
             <Tab
               icon={<Visibility sx={{ fontSize: 18 }} />}
               iconPosition="start"
-              label="Ofertas"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  Ofertas
+                  {meta.totalConOfertas > 0 && (
+                    <Chip
+                      label={meta.totalConOfertas}
+                      size="small"
+                      sx={{
+                        height: 22,
+                        minWidth: 22,
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        backgroundColor: activeTab === 2 ? "#00BCD4" : "#64748B",
+                        color: "white",
+                      }}
+                    />
+                  )}
+                </Box>
+              }
             />
           </Tabs>
         </Box>

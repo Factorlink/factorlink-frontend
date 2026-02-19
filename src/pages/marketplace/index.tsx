@@ -80,6 +80,7 @@ const Marketplace = () => {
     totalCargada: 0,
     totalCedida: 0,
     totalEnMarketplace: 0,
+    totalConOfertas: 0,
   }));
 
   const fetchFacturas = useCallback(
