@@ -26,6 +26,7 @@ import DocumentsRequiredModal from "../../../components/Modals/DocumentsRequired
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import useAuthStore from "../../../store/authStore";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
+import OfertasDrawer from "../../../components/Facturas/OfertasDrawer";
 import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
 import FacturaResumenCard from "../../../components/Facturas/FacturaResumenCard";
 import DetalleCotizacionCard from "../../../components/Facturas/DetalleCotizacionCard";
@@ -42,6 +43,7 @@ const FacturaDetail = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
+  const [ofertasDrawerOpen, setOfertasDrawerOpen] = useState(false);
 
   const fetchFactura = async () => {
     try {
@@ -348,6 +350,27 @@ const FacturaDetail = () => {
             </Box>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+              {factura.estado?.toLowerCase() !== "cargada" && (
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<Visibility />}
+                  onClick={() => setOfertasDrawerOpen(true)}
+                  sx={{
+                    borderColor: "#00BCD4",
+                    color: "#00BCD4",
+                    "&:hover": {
+                      borderColor: "#00ACC1",
+                      backgroundColor: "rgba(0,188,212,0.08)",
+                    },
+                    textTransform: "none",
+                    fontWeight: 600,
+                    py: 1.5,
+                  }}
+                >
+                  Ver ofertas
+                </Button>
+              )}
               <Button
                 variant="contained"
                 fullWidth
@@ -453,6 +476,12 @@ const FacturaDetail = () => {
         <DocumentsRequiredModal
           open={documentsRequiredModalOpen}
           onClose={() => setDocumentsRequiredModalOpen(false)}
+        />
+
+        <OfertasDrawer
+          open={ofertasDrawerOpen}
+          onClose={() => setOfertasDrawerOpen(false)}
+          factura={factura}
         />
       </Box>
     </Layout>

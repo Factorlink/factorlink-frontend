@@ -68,7 +68,11 @@ const MarketplaceFacturasTable = ({
   const fetchMarketplace = useCallback(async () => {
     if (!empresaId) return;
     try {
-      const response = await listFromMarketplace(empresaId);
+      const response = await listFromMarketplace({
+        page: 1,
+        limit: 10,
+        empresaId,
+      });
       setFacturas(response?.data || response || []);
     } catch {
       setFacturas([]);

@@ -161,10 +161,18 @@ export const useFacturas = () => {
     }
   };
 
-  const listFromMarketplace = async (id: string) => {
+  const listFromMarketplace = async (params: GetFacturasParams) => {
     try {
       setLoading(true);
-      const response = await api.get(`/facturas/marketplace/list?empresaId=${id}`);
+      const search = new URLSearchParams();
+      search.set("page", String(params.page));
+      search.set("limit", String(params.limit));
+      search.set("empresaId", params.empresaId || "");
+      if (params.estado) search.set("estado", params.estado);
+      if (params.sortBy) search.set("sortBy", params.sortBy);
+      if (params.order) search.set("order", params.order);
+      
+      const response = await api.get(`/facturas/marketplace/list?${search.toString()}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -241,6 +249,26 @@ export const useFacturas = () => {
     }
   };
 
+  const getFacturasCedidasByEmpresaId = async (params: GetFacturasParams) => {
+    try {
+      setLoading(true);
+      const search = new URLSearchParams();
+      search.set("page", String(params.page));
+      search.set("limit", String(params.limit));
+      search.set("empresaId", params.empresaId || "");
+      if (params.estado) search.set("estado", params.estado);
+      if (params.sortBy) search.set("sortBy", params.sortBy);
+      if (params.order) search.set("order", params.order);
+
+      const response = await api.get(`/facturas/cedidas?${search.toString()}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     getFacturas,
@@ -254,6 +282,7 @@ export const useFacturas = () => {
     listFromMarketplace,
     getFacturasByFactoringId,
     getFacturaByIdAndFactoringId,
-    getFacturasConOfertasByEmpresaId
+    getFacturasConOfertasByEmpresaId,
+    getFacturasCedidasByEmpresaId
   };
 };
