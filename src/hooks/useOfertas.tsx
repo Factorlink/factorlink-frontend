@@ -11,6 +11,11 @@ type CreateOfertaPayload = {
   comentario: string;
 };
 
+type GetOfertasParams = {
+  orderBy?: string;
+  order?: string;
+};
+
 export const useOfertas = () => {
   const [loading, setLoading] = useState(false);
 
@@ -26,10 +31,15 @@ export const useOfertas = () => {
     }
   };
 
-  const getOfertasByFacturaId = async (facturaId: string) => {
+  const getOfertasByFacturaId = async (facturaId: string, params?: GetOfertasParams) => {
     try {
       setLoading(true);
-      const response = await api.get(`/ofertas/factura/${facturaId}`);
+      const search = new URLSearchParams();
+
+      if (params?.orderBy) search.set("orderBy", params.orderBy);
+      if (params?.order) search.set("order", params.order);
+      
+      const response = await api.get(`/ofertas/factura/${facturaId}?${search.toString()}`);
       return response.data;
     } catch (error) {
       throw error;

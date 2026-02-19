@@ -134,8 +134,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
 
   const activas = ofertas.filter(
     (o) =>
-      o.estado?.toLowerCase() !== "expirada" &&
-      o.estado?.toLowerCase() !== "rechazada",
+      o.estado?.toLowerCase() === "activa"
   ).length;
 
   const handleToggleRow = (ofertaId: string) => {
