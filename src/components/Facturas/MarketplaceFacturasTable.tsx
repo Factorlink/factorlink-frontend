@@ -106,10 +106,6 @@ const MarketplaceFacturasTable = ({
     onRemoveSuccess?.();
   };
 
-  const getOfertasCount = (factura: Factura) => {
-    return (factura as any).ofertasCount ?? (factura as any).ofertas ?? 0;
-  };
-
   return (
     <>
       <TableContainer
@@ -239,7 +235,7 @@ const MarketplaceFacturasTable = ({
                         variant="body2"
                         sx={{ color: "#1E293B", fontWeight: 500 }}
                       >
-                        {getOfertasCount(factura)}
+                        {factura.numeroOfertasRecibidas || 0}
                       </Typography>
                     </Box>
                   </TableCell>
