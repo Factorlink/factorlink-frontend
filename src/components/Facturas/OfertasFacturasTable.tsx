@@ -16,9 +16,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Button,
+  IconButton,
+  Menu,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
-import { Description, Groups, Visibility } from "@mui/icons-material";
+import { Description, Groups, Visibility, MoreVert } from "@mui/icons-material";
 import { useFacturas } from "../../hooks/useFacturas";
 
 import type { Factura } from "../../types/factura";
@@ -57,6 +60,7 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
 
   const [meta, setMeta] = useState<Meta>({
@@ -104,6 +108,20 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
 
   const getOfertasCount = (factura: Factura) => {
     return factura.numeroOfertasRecibidas ?? (factura as any).ofertasCount ?? 0;
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, factura: Factura) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedFactura(factura);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleVerOfertas = () => {
+    setDrawerOpen(true);
+    setAnchorEl(null);
   };
 
   return (
@@ -157,7 +175,7 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
                 <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Monto a Financiar</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Plazo</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Ofertas Recibidas</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Acción</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -236,29 +254,13 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outlined"
+                    <IconButton
                       size="small"
-                      startIcon={<Visibility sx={{ fontSize: 16 }} />}
-                      onClick={() => {
-                        setSelectedFactura(factura);
-                        setDrawerOpen(true);
-                      }}
-                      sx={{
-                        borderColor: "#334155",
-                        color: "#334155",
-                        textTransform: "none",
-                        borderRadius: 5,
-                        fontSize: "0.8rem",
-                        fontWeight: 500,
-                        "&:hover": {
-                          borderColor: "#1E293B",
-                          backgroundColor: "rgba(30, 41, 59, 0.04)",
-                        },
-                      }}
+                      onClick={(e) => handleMenuOpen(e, factura)}
+                      sx={{ color: "#64748B" }}
                     >
-                      Ver ofertas
-                    </Button>
+                      <MoreVert />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))}
@@ -308,6 +310,29 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
         </>
       )}
     </TableContainer>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            minWidth: 180,
+          },
+        }}
+      >
+        <MenuItem onClick={handleVerOfertas}>
+          <ListItemIcon>
+            <Visibility sx={{ color: "#64748B" }} />
+          </ListItemIcon>
+          <ListItemText primary="Ver ofertas" />
+        </MenuItem>
+      </Menu>
+
       <OfertasDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
