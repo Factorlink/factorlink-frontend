@@ -28,6 +28,7 @@ import { useFacturas } from "../../hooks/useFacturas";
 import type { Factura } from "../../types/factura";
 import RemoveMarketplaceModal from "../Modals/RemoveMarketplaceModal";
 import OfertasDrawer from "./OfertasDrawer";
+import SortableTableHeader from "./SortableTableHeader";
 
 interface MarketplaceFacturasTableProps {
   empresaId: string;
@@ -64,6 +65,17 @@ const MarketplaceFacturasTable = ({
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("");
+  const [order, setOrder] = useState("DESC");
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
+    } else {
+      setSortBy(field);
+      setOrder("ASC");
+    }
+  };
 
   const fetchMarketplace = useCallback(async () => {
     if (!empresaId) return;
@@ -72,12 +84,14 @@ const MarketplaceFacturasTable = ({
         page: 1,
         limit: 10,
         empresaId,
+        sortBy: sortBy || undefined,
+        order: sortBy ? order : undefined,
       });
       setFacturas(response?.data || response || []);
     } catch {
       setFacturas([]);
     }
-  }, [empresaId]);
+  }, [empresaId, sortBy, order]);
 
   useEffect(() => {
     fetchMarketplace();
@@ -157,21 +171,11 @@ const MarketplaceFacturasTable = ({
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                  Folio
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                  Receptor
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                  Fecha Emisión
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                  Monto a Financiar
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                  Plazo
-                </TableCell>
+                <SortableTableHeader field="folio" label="Folio" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
+                <SortableTableHeader field="razonSocialReceptor" label="Receptor" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
+                <SortableTableHeader field="fechaEmision" label="Fecha Emisión" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
+                <SortableTableHeader field="montoFinanciar" label="Monto a Financiar" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
+                <SortableTableHeader field="plazo" label="Plazo" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
                 <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
                   Ofertas
                 </TableCell>

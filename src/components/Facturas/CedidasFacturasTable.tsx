@@ -22,6 +22,7 @@ import {
   ListItemText,
 } from "@mui/material";
 import { CheckCircle, Visibility, MoreVert } from "@mui/icons-material";
+import SortableTableHeader from "./SortableTableHeader";
 import { useFacturas } from "../../hooks/useFacturas";
 import { useNavigate } from "react-router-dom";
 
@@ -59,6 +60,17 @@ const CedidasFacturasTable = ({ empresaId }: CedidasFacturasTableProps) => {
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
+  const [sortBy, setSortBy] = useState("");
+  const [order, setOrder] = useState("DESC");
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
+    } else {
+      setSortBy(field);
+      setOrder("ASC");
+    }
+  };
 
   const [meta, setMeta] = useState<Meta>({
     lastPage: 1,
@@ -78,13 +90,15 @@ const CedidasFacturasTable = ({ empresaId }: CedidasFacturasTableProps) => {
         page: meta.page,
         limit: meta.limit,
         empresaId,
+        sortBy: sortBy || undefined,
+        order: sortBy ? order : undefined,
       });
       setFacturas(response?.data || []);
       if (response?.meta) setMeta(response.meta);
     } catch {
       setFacturas([]);
     }
-  }, [empresaId, meta.page, meta.limit]);
+  }, [empresaId, meta.page, meta.limit, sortBy, order]);
 
   useEffect(() => {
     fetchData();
@@ -161,16 +175,16 @@ const CedidasFacturasTable = ({ empresaId }: CedidasFacturasTableProps) => {
           <>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Folio</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Receptor</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Fecha Emisión</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Monto Total</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Monto a Financiar</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Plazo</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Estado</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Acciones</TableCell>
-                </TableRow>
+              <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
+                <SortableTableHeader field="folio" label="Folio" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
+                <SortableTableHeader field="razonSocialReceptor" label="Receptor" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
+                <SortableTableHeader field="fechaEmision" label="Fecha Emisión" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
+                <SortableTableHeader field="montoTotal" label="Monto Total" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
+                <SortableTableHeader field="montoFinanciar" label="Monto a Financiar" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
+                <SortableTableHeader field="plazo" label="Plazo" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Estado</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Acciones</TableCell>
+              </TableRow>
               </TableHead>
               <TableBody>
                 {facturas.map((factura) => (
