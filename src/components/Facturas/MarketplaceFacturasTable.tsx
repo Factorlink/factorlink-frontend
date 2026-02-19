@@ -27,6 +27,7 @@ import {
 import { useFacturas } from "../../hooks/useFacturas";
 import type { Factura } from "../../types/factura";
 import RemoveMarketplaceModal from "../Modals/RemoveMarketplaceModal";
+import OfertasDrawer from "./OfertasDrawer";
 
 interface MarketplaceFacturasTableProps {
   empresaId: string;
@@ -62,6 +63,7 @@ const MarketplaceFacturasTable = ({
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const fetchMarketplace = useCallback(async () => {
     if (!empresaId) return;
@@ -91,8 +93,10 @@ const MarketplaceFacturasTable = ({
   };
 
   const handleVerOfertas = () => {
-   
-    handleMenuClose();
+    if (selectedFactura && (selectedFactura.numeroOfertasRecibidas ?? 0) > 0) {
+      setDrawerOpen(true);
+    }
+    setAnchorEl(null);
   };
 
   const handleOpenRemoveModal = () => {
@@ -304,6 +308,11 @@ const MarketplaceFacturasTable = ({
           }}
       />
     )}
+      <OfertasDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        factura={selectedFactura}
+      />
     </>
   );
 };

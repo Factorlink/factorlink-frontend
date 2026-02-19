@@ -74,7 +74,25 @@ interface HistorialOfertasFactoringProps {
 
 const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoringProps) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const ofertasIncompletas = ofertas.filter((oferta) => oferta.estado?.toLowerCase() === "rechazada" || oferta.estado?.toLowerCase() === "expirada");
+
+  const conteo = ofertas.reduce(
+    (acc, o) => {
+      const estado = o.estado?.toLowerCase() || "";
+      if (estado === "activa") acc.activa++;
+      else if (estado === "aceptada") acc.aceptada++;
+      else if (estado === "rechazada") acc.rechazada++;
+      else if (estado === "expirada") acc.expirada++;
+      return acc;
+    },
+    { activa: 0, aceptada: 0, rechazada: 0, expirada: 0 }
+  );
+
+  const resumenItems = [
+    { label: "Activas", count: conteo.activa, color: "#00BCD4", bg: "#E0F7FA" },
+    { label: "Aceptadas", count: conteo.aceptada, color: "#10B981", bg: "#ECFDF5" },
+    { label: "Rechazadas", count: conteo.rechazada, color: "#EF4444", bg: "#FEF2F2" },
+    { label: "Expiradas", count: conteo.expirada, color: "#F59E0B", bg: "#FFFBEB" },
+  ];
 
   const toggleExpand = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -102,14 +120,41 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
         }}
       >
         <History sx={{ color: "#00BCD4", fontSize: 24 }} />
-        <Box>
+        <Box sx={{ flex: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
             Historial de ofertas anteriores
           </Typography>
           <Typography variant="body2" sx={{ color: "#64748B" }}>
-            {ofertasIncompletas.length} oferta{ofertasIncompletas.length !== 1 ? "s" : ""} rechazada{ofertasIncompletas.length !== 1 ? "s" : ""} o expirada{ofertasIncompletas.length !== 1 ? "s" : ""}
+            {ofertas.length} oferta{ofertas.length !== 1 ? "s" : ""} en total
           </Typography>
         </Box>
+      </Box>
+
+      {/* Resumen de estados */}
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1.5,
+          px: 3,
+          py: 2,
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          flexWrap: "wrap",
+        }}
+      >
+        {resumenItems.map((item) => (
+          <Chip
+            key={item.label}
+            label={`${item.label}: ${item.count}`}
+            size="small"
+            sx={{
+              backgroundColor: item.bg,
+              color: item.color,
+              fontWeight: 600,
+              fontSize: "0.8rem",
+            }}
+          />
+        ))}
       </Box>
 
       {/* Ofertas list */}
