@@ -30,6 +30,7 @@ import type { Factura } from "../../types/factura";
 import type { Oferta } from "../../types/oferta";
 import AceptarOfertaModal from "../Modals/AceptarOfertaModal";
 import RechazarOfertaModal from "../Modals/RechazarOfertaModal";
+import SortableTableHeader from "./SortableTableHeader";
 
 interface OfertasDrawerProps {
   open: boolean;
@@ -111,11 +112,27 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [aceptarModal, setAceptarModal] = useState<{ open: boolean; oferta: Oferta | null }>({ open: false, oferta: null });
   const [rechazarModal, setRechazarModal] = useState<{ open: boolean; oferta: Oferta | null }>({ open: false, oferta: null });
+  const [sortBy, setSortBy] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<string>("ASC");
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
+    } else {
+      setSortBy(field);
+      setSortOrder("ASC");
+    }
+  };
 
   const fetchOfertas = async () => {
     if (!factura?.id) return;
     try {
-      const data = await getOfertasByFacturaId(factura.id);
+      const params: { orderBy?: string; order?: string } = {};
+      if (sortBy) {
+        params.orderBy = sortBy;
+        params.order = sortOrder;
+      }
+      const data = await getOfertasByFacturaId(factura.id, params);
       setOfertas(Array.isArray(data) ? data : data?.data || []);
     } catch {
       setOfertas([]);
@@ -130,11 +147,16 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
       setOfertas([]);
       setExpandedRow(null);
     }
-  }, [open, factura?.id]);
+  }, [open, factura?.id, sortBy, sortOrder]);
 
   const activas = ofertas.filter(
     (o) =>
       o.estado?.toLowerCase() === "activa"
+  ).length;
+
+  const aceptadas = ofertas.filter(
+    (o) =>
+      o.estado?.toLowerCase() === "aceptada"
   ).length;
 
   const handleToggleRow = (ofertaId: string) => {
@@ -298,24 +320,14 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                   <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
                     Factoring
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                    % Financiamiento
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                    Tasa
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                    Monto Adelanto
-                  </TableCell>
+                  <SortableTableHeader field="porcentajeFinanciamiento" label="% Financiamiento" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
+                  <SortableTableHeader field="tasa" label="Tasa" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
+                  <SortableTableHeader field="montoAdelanto" label="Monto Adelanto" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
                   <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
                     Plazo
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                    Fecha Expiración
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                    Estado
-                  </TableCell>
+                  <SortableTableHeader field="fechaExpiracion" label="Fecha Expiración" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
+                  <SortableTableHeader field="estado" label="Estado" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -433,7 +445,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                               </Box>
 
                               {/* Action buttons */}
-                              {!isRespondida && !isExpirada && (
+                              {!isRespondida && !isExpirada && !aceptadas && (
                                 <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
                                   <Button
                                     variant="contained"
