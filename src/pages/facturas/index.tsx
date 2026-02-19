@@ -37,6 +37,7 @@ import {
 } from "@mui/icons-material";
 import MarketplaceFacturasTable from "../../components/Facturas/MarketplaceFacturasTable";
 import OfertasFacturasTable from "../../components/Facturas/OfertasFacturasTable";
+import CedidasFacturasTable from "../../components/Facturas/CedidasFacturasTable";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
 import RemoveMarketplaceModal from "../../components/Modals/RemoveMarketplaceModal";
@@ -559,6 +560,29 @@ const Facturas = () => {
                 </Box>
               }
             />
+            <Tab
+              icon={<CheckCircle sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  Cedidas
+                  {meta.totalCedida > 0 && (
+                    <Chip
+                      label={meta.totalCedida}
+                      size="small"
+                      sx={{
+                        height: 22,
+                        minWidth: 22,
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        backgroundColor: activeTab === 3 ? "#00BCD4" : "#64748B",
+                        color: "white",
+                      }}
+                    />
+                  )}
+                </Box>
+              }
+            />
           </Tabs>
         </Box>
 
@@ -780,8 +804,12 @@ const Facturas = () => {
             empresaId={currentRole?.empresaId || ""}
             onRemoveSuccess={() => fetchFacturas(filters)}
           />
-        ) : (
+        ) : activeTab === 2 ? (
           <OfertasFacturasTable
+            empresaId={currentRole?.empresaId || ""}
+          />
+        ) : (
+          <CedidasFacturasTable
             empresaId={currentRole?.empresaId || ""}
           />
         )}
