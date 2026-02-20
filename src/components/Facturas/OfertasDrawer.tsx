@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Drawer,
   Box,
@@ -108,6 +109,7 @@ const getEstadoChip = (estado: string) => {
 
 const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
   const { getOfertasByFacturaId, loading } = useOfertas();
+  const navigate = useNavigate();
   const [ofertas, setOfertas] = useState<Oferta[]>([]);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [aceptarModal, setAceptarModal] = useState<{ open: boolean; oferta: Oferta | null }>({ open: false, oferta: null });
@@ -150,21 +152,23 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
   }, [open, factura?.id, sortBy, sortOrder]);
 
   const activas = ofertas.filter(
-    (o) =>
-      o.estado?.toLowerCase() === "activa"
+    (o) => o.estado?.toLowerCase() === "activa"
   ).length;
 
   const aceptadas = ofertas.filter(
-    (o) =>
-      o.estado?.toLowerCase() === "aceptada"
+    (o) => o.estado?.toLowerCase() === "aceptada"
   ).length;
 
   const handleToggleRow = (ofertaId: string) => {
     setExpandedRow((prev) => (prev === ofertaId ? null : ofertaId));
   };
 
-  const handleModalSuccess = () => {
-    fetchOfertas();
+  const handleAceptarSuccess = () => {
+    navigate("/facturas/cedidas");
+  };
+
+  const handleRechazarSuccess = () => {
+    window.location.reload();
   };
 
   return (
@@ -510,7 +514,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
         <AceptarOfertaModal
           open={aceptarModal.open}
           onClose={() => setAceptarModal({ open: false, oferta: null })}
-          onSuccess={handleModalSuccess}
+          onSuccess={handleAceptarSuccess}
           ofertaData={{
             id: aceptarModal.oferta.id,
             factoringName: aceptarModal.oferta.factoring?.razonSocial || "N/A",
@@ -524,7 +528,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
         <RechazarOfertaModal
           open={rechazarModal.open}
           onClose={() => setRechazarModal({ open: false, oferta: null })}
-          onSuccess={handleModalSuccess}
+          onSuccess={handleRechazarSuccess}
           ofertaData={{
             id: rechazarModal.oferta.id,
             factoringName: rechazarModal.oferta.factoring?.razonSocial || "N/A",

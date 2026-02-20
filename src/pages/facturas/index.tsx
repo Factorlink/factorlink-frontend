@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import {
   Box,
@@ -131,6 +131,7 @@ const Facturas = () => {
   const [facturas, setFacturas] = useState<Factura[]>([]);
 
   const activeTab = getTabFromPath(location.pathname);
+  const prevTabRef = useRef(activeTab);
 
   const [filters, setFilters] = useState<FacturasFiltersValues>(() => {
     const newFilters = { ...INITIAL_FILTERS };
@@ -277,8 +278,27 @@ const Facturas = () => {
     [currentRole?.empresaId, meta.page, meta.limit],
   );
 
+  // Reset filters and URL params when switching tabs
   useEffect(() => {
-    fetchFacturas(filters);
+    const prevTab = prevTabRef.current;
+    if (prevTab !== activeTab) {
+      prevTabRef.current = activeTab;
+      // Clear search params when changing tabs (each tab has independent URL state)
+      setSearchParams(new URLSearchParams());
+      if (activeTab === 0) {
+        const resetFilters = { ...INITIAL_FILTERS };
+        setFilters(resetFilters);
+        setMeta((prev) => ({ ...prev, page: 1 }));
+        fetchFacturas(resetFilters);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 0) {
+      fetchFacturas(filters);
+    }
   }, [currentRole?.empresaId, meta.page, meta.limit]);
 
   const updateSearchParams = (
@@ -497,7 +517,9 @@ const Facturas = () => {
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
           <Tabs
             value={activeTab}
-            onChange={(_e, newValue) => navigate(TAB_ROUTES[newValue])}
+            onChange={(_e, newValue) => {
+              navigate(TAB_ROUTES[newValue]);
+            }}
           >
             <Tab
               icon={<Description sx={{ fontSize: 18 }} />}
