@@ -278,19 +278,20 @@ const Facturas = () => {
     [currentRole?.empresaId, meta.page, meta.limit],
   );
 
-  // Reset filters and URL params when switching tabs
+  // Reset filters, meta and URL params when switching tabs
   useEffect(() => {
     const prevTab = prevTabRef.current;
     if (prevTab !== activeTab) {
       prevTabRef.current = activeTab;
       // Clear search params when changing tabs (each tab has independent URL state)
       setSearchParams(new URLSearchParams());
-      if (activeTab === 0) {
-        const resetFilters = { ...INITIAL_FILTERS };
-        setFilters(resetFilters);
-        setMeta((prev) => ({ ...prev, page: 1 }));
-        fetchFacturas(resetFilters);
-      }
+      // Always reset filters and meta when switching tabs
+      const resetFilters = { ...INITIAL_FILTERS };
+      setFilters(resetFilters);
+      setMeta((prev) => ({ ...prev, page: 1 }));
+      
+      fetchFacturas(resetFilters);
+      
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
@@ -621,6 +622,7 @@ const Facturas = () => {
           <>
             {/* Filters Section */}
             <FacturasFilters
+              key={activeTab}
               onApplyFilters={handleApplyFilters}
               onClearFilters={handleClearFilters}
               loading={loading}
