@@ -57,10 +57,25 @@ const validationSchema = yup.object({
     .min(1, "Debe ser al menos 1%")
     .max(100, "No puede superar el 100%"),
   tasa: yup
-    .number()
+    .mixed()
     .required("La tasa es obligatoria")
-    .min(0, "La tasa debe ser mayor o igual a 0")
-    .max(100, "La tasa no puede superar el 100%"),
+    .test(
+      "no-trailing-dot",
+      "Ingresa un número decimal válido (ej: 0, 1.5, 10.25)",
+      (value) => {
+        if (value === undefined || value === null || value === "") return true;
+        return !String(value).endsWith(".");
+      }
+    )
+    .test(
+      "is-valid-range",
+      "La tasa debe estar entre 0 y 100",
+      (value) => {
+        if (value === undefined || value === null || value === "") return true;
+        const n = Number(value);
+        return !isNaN(n) && n >= 0 && n <= 100;
+      }
+    ),
   fechaExpiracion: yup
     .date()
     .required("La fecha de expiración es obligatoria")
@@ -196,6 +211,7 @@ const EnviarOfertaCard = ({
               onChange={(e) => {
                 const val = e.target.value;
                 if (val.length > 3) return;
+                if (/^0+$/.test(val)) return;
                 formik.handleChange(e);
               }}
               onBlur={formik.handleBlur}
@@ -226,8 +242,10 @@ const EnviarOfertaCard = ({
               value={formik.values.tasa}
               onChange={(e) => {
                 const val = e.target.value;
-                // Allow max 3 integer digits and 2 decimal places
-                if (/^\d{0,3}(\.\d{0,2})?$/.test(val) || val === "") {
+                // Allow empty or valid float: no leading zeros in integer part
+                // Valid: "", "0", "0.", "0.5", "0.05", "1", "10", "100", "10.50"
+                // Invalid: "00", "01", "001"
+                if (val === "" || /^(0|[1-9]\d{0,2})(\.\d{0,2})?$/.test(val)) {
                   formik.handleChange(e);
                 }
               }}
