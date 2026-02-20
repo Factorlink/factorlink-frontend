@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -115,11 +115,22 @@ const formatDate = (dateString: string) => {
   });
 };
 
+const TAB_ROUTES = ["/facturas", "/facturas/marketplace", "/facturas/ofertas", "/facturas/cedidas"];
+
+const getTabFromPath = (pathname: string) => {
+  const idx = TAB_ROUTES.indexOf(pathname);
+  return idx >= 0 ? idx : 0;
+};
+
 const Facturas = () => {
   const { currentRole } = useAuthStore();
   const { loading, getFacturas } = useFacturas();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [facturas, setFacturas] = useState<Factura[]>([]);
+
+  const activeTab = getTabFromPath(location.pathname);
 
   const [filters, setFilters] = useState<FacturasFiltersValues>(() => {
     const newFilters = { ...INITIAL_FILTERS };
@@ -150,9 +161,6 @@ const Facturas = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
-  
-  const navigate = useNavigate();
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -489,7 +497,7 @@ const Facturas = () => {
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
           <Tabs
             value={activeTab}
-            onChange={(_e, newValue) => setActiveTab(newValue)}
+            onChange={(_e, newValue) => navigate(TAB_ROUTES[newValue])}
           >
             <Tab
               icon={<Description sx={{ fontSize: 18 }} />}

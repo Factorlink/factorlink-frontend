@@ -138,6 +138,7 @@ const EnviarOfertaCard = ({
           borderRadius: 3,
           boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           overflow: "hidden",
+          mb: 3,
         }}
       >
         {/* Header */}
@@ -184,7 +185,7 @@ const EnviarOfertaCard = ({
               fullWidth
               name="porcentajeFinanciamiento"
               label="Porcentaje de financiamiento (%)"
-              type="number"
+              type="string"
               inputProps={{ min: 1, max: 100, step: 1 }}
               InputProps={{
                 endAdornment: (
@@ -215,7 +216,7 @@ const EnviarOfertaCard = ({
               fullWidth
               name="tasa"
               label="Tasa (%)"
-              type="number"
+              type="string"
               inputProps={{ min: 0, max: 100, step: 0.01 }}
               InputProps={{
                 endAdornment: (
@@ -285,6 +286,7 @@ const EnviarOfertaCard = ({
               value={formik.values.fechaExpiracion}
               onChange={(value) => {
                 formik.setFieldValue("fechaExpiracion", value, true);
+                formik.setFieldTouched("fechaExpiracion", true, true)
               }}
               onClose={() =>
                 formik.setFieldTouched("fechaExpiracion", true, true)

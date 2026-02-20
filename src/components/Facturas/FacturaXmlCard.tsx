@@ -22,6 +22,8 @@ const FacturaXmlCard = ({
     }
   };
 
+  const isCargada = factura.estado?.toLowerCase() === "cargada";
+
   return (
     <Box
       sx={{
@@ -101,7 +103,7 @@ const FacturaXmlCard = ({
             </Box>
           </Box>
         )}
-        <Button
+        { isCargada && (<Button
           variant="contained"
           startIcon={<Upload />}
           onClick={onUploadClick}
@@ -114,7 +116,7 @@ const FacturaXmlCard = ({
           }}
         >
           {factura.urlFactura ? "Reemplazar" : "Adjuntar"} XML
-        </Button>
+        </Button>)}
       </Box>
       <Box sx={{ pt: 2, pl: 2 }}>
         <Typography

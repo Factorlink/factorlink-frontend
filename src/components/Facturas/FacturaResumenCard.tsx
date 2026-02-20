@@ -307,25 +307,6 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             </Typography>
           </Box>
         </Box>
-
-        {/* Plazo */}
-        <Box>
-          <Typography
-            variant="caption"
-            sx={{ color: "#64748B", mb: 0.5, display: "block" }}
-          >
-            Plazo
-          </Typography>
-          <Chip
-            label={`${factura.plazo || 0} días`}
-            size="small"
-            sx={{
-              backgroundColor: "#F1F5F9",
-              color: "#475569",
-              fontWeight: 600,
-            }}
-          />
-        </Box>
       </Box>
 
       {/* Card 2: Detalle de Montos */}
@@ -347,7 +328,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(5, 1fr)" },
+            gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" },
             gap: 2,
           }}
         >
@@ -417,23 +398,6 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
               sx={{ fontWeight: 700, color: "#00A86B" }}
             >
               {formatCurrency(factura.montoTotal)}
-            </Typography>
-          </Box>
-          <Box
-            sx={{
-              backgroundColor: "rgba(0, 168, 107, 0.2)",
-              borderRadius: 2,
-              p: 2,
-            }}
-          >
-            <Typography variant="caption" sx={{ color: "#00A86B" }}>
-              Monto a Financiar
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 700, color: "#00A86B" }}
-            >
-              {formatCurrency(factura.montoFinanciar)}
             </Typography>
           </Box>
         </Box>
