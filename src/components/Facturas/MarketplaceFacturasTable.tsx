@@ -34,6 +34,7 @@ import SortableTableHeader from "./SortableTableHeader";
 interface MarketplaceFacturasTableProps {
   empresaId: string;
   onRemoveSuccess?: () => void;
+  onMetaChange?: (meta: any) => void;
 }
 
 const formatCurrency = (value: string | number) => {
@@ -59,6 +60,7 @@ const formatDate = (dateString: string) => {
 const MarketplaceFacturasTable = ({
   empresaId,
   onRemoveSuccess,
+  onMetaChange,
 }: MarketplaceFacturasTableProps) => {
   const { listFromMarketplace, loading } = useFacturas();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -104,6 +106,7 @@ const MarketplaceFacturasTable = ({
         order: sortBy ? order : undefined,
       });
       setFacturas(response?.data || response || []);
+      if (response?.meta) onMetaChange?.(response.meta);
     } catch {
       setFacturas([]);
     }

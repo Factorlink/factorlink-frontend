@@ -32,6 +32,7 @@ import type { SelectChangeEvent } from "@mui/material/Select";
 
 interface CedidasFacturasTableProps {
   empresaId: string;
+  onMetaChange?: (meta: any) => void;
 }
 
 const formatCurrency = (value: string | number) => {
@@ -54,7 +55,7 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const CedidasFacturasTable = ({ empresaId }: CedidasFacturasTableProps) => {
+const CedidasFacturasTable = ({ empresaId, onMetaChange }: CedidasFacturasTableProps) => {
   const { getFacturasCedidasByEmpresaId, loading } = useFacturas();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -113,7 +114,10 @@ const CedidasFacturasTable = ({ empresaId }: CedidasFacturasTableProps) => {
         order: sortBy ? order : undefined,
       });
       setFacturas(response?.data || []);
-      if (response?.meta) setMeta(response.meta);
+      if (response?.meta) {
+        setMeta(response.meta);
+        onMetaChange?.(response.meta);
+      }
     } catch {
       setFacturas([]);
     }

@@ -33,6 +33,7 @@ import OfertasDrawer from "./OfertasDrawer";
 
 interface OfertasFacturasTableProps {
   empresaId: string;
+  onMetaChange?: (meta: any) => void;
 }
 
 
@@ -57,7 +58,7 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
+const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableProps) => {
   const { getFacturasConOfertasByEmpresaId, loading } = useFacturas();
   const [searchParams, setSearchParams] = useSearchParams();
   const [facturas, setFacturas] = useState<Factura[]>([]);
@@ -116,7 +117,10 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
         order: sortBy ? order : undefined,
       });
       setFacturas(response?.data || []);
-      if (response?.meta) setMeta(response.meta);
+      if (response?.meta) {
+        setMeta(response.meta);
+        onMetaChange?.(response.meta);
+      }
     } catch {
       setFacturas([]);
     }

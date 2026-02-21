@@ -283,6 +283,10 @@ const Facturas = () => {
     [currentRole?.empresaId, meta.page, meta.limit],
   );
 
+  const handleChildMetaChange = useCallback((childMeta: Meta) => {
+    setMeta(childMeta);
+  }, []);
+
   // Reset filters, meta and URL params when switching tabs
   useEffect(() => {
     const prevTab = prevTabRef.current;
@@ -293,10 +297,22 @@ const Facturas = () => {
       // Always reset filters and meta when switching tabs
       const resetFilters = { ...INITIAL_FILTERS };
       setFilters(resetFilters);
-      setMeta((prev) => ({ ...prev, page: 1 }));
-      
-      fetchFacturas(resetFilters);
-      
+      // Reset meta to zeros - the active tab's component will update it via onMetaChange
+      setMeta({
+        lastPage: 1,
+        limit: 10,
+        page: 1,
+        total: 0,
+        totalCargada: 0,
+        totalCedida: 0,
+        totalEnMarketplace: 0,
+        totalConOfertas: 0,
+      });
+
+      // Only fetch from tab 0's endpoint when switching TO tab 0
+      if (activeTab === 0) {
+        fetchFacturas(resetFilters);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
@@ -840,14 +856,17 @@ const Facturas = () => {
           <MarketplaceFacturasTable
             empresaId={currentRole?.empresaId || ""}
             onRemoveSuccess={() => fetchFacturas(filters)}
+            onMetaChange={handleChildMetaChange}
           />
         ) : activeTab === 2 ? (
           <OfertasFacturasTable
             empresaId={currentRole?.empresaId || ""}
+            onMetaChange={handleChildMetaChange}
           />
         ) : (
           <CedidasFacturasTable
             empresaId={currentRole?.empresaId || ""}
+            onMetaChange={handleChildMetaChange}
           />
         )}
 
