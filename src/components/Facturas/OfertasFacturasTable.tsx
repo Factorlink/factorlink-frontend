@@ -24,6 +24,7 @@ import {
 import { Description, Groups, Visibility, MoreVert } from "@mui/icons-material";
 import SortableTableHeader from "./SortableTableHeader";
 import { useFacturas } from "../../hooks/useFacturas";
+import { useSearchParams } from "react-router-dom";
 
 import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
@@ -58,27 +59,45 @@ const formatDate = (dateString: string) => {
 
 const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
   const { getFacturasConOfertasByEmpresaId, loading } = useFacturas();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [sortBy, setSortBy] = useState("");
-  const [order, setOrder] = useState("DESC");
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "");
+  const [order, setOrder] = useState(searchParams.get("order") || "DESC");
 
-  const handleSort = (field: string) => {
-    if (sortBy === field) {
-      setOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
-    } else {
-      setSortBy(field);
-      setOrder("ASC");
-    }
+  const updateSearchParams = (newSortBy: string, newOrder: string, page?: number, limit?: number) => {
+    const params = new URLSearchParams();
+    const currentPage = page ?? meta.page;
+    const currentLimit = limit ?? meta.limit;
+    if (currentPage !== 1) params.set("page", String(currentPage));
+    if (currentLimit !== 10) params.set("limit", String(currentLimit));
+    if (newSortBy) params.set("sortBy", newSortBy);
+    if (newSortBy && newOrder) params.set("order", newOrder);
+    setSearchParams(params);
   };
 
+  const handleSort = (field: string) => {
+    let newSortBy: string;
+    let newOrder: string;
+    if (sortBy === field) {
+      if (order === "ASC") { newOrder = "DESC"; newSortBy = field; }
+      else if (order === "DESC") { newOrder = ""; newSortBy = ""; }
+      else { newOrder = "ASC"; newSortBy = field; }
+    } else {
+      newSortBy = field;
+      newOrder = "ASC";
+    }
+    setSortBy(newSortBy);
+    setOrder(newOrder);
+    updateSearchParams(newSortBy, newOrder);
+  };
 
   const [meta, setMeta] = useState<Meta>({
     lastPage: 1,
-    limit: 10,
-    page: 1,
+    limit: Number(searchParams.get("limit")) || 10,
+    page: Number(searchParams.get("page")) || 1,
     total: 0,
     totalCargada: 0,
     totalCedida: 0,
@@ -114,10 +133,13 @@ const OfertasFacturasTable = ({ empresaId }: OfertasFacturasTableProps) => {
     value: number
   ) => {
     setMeta((prev) => ({ ...prev, page: value }));
+    updateSearchParams(sortBy, order, value, meta.limit);
   };
 
   const handleLimitChange = (event: SelectChangeEvent) => {
-    setMeta((prev) => ({ ...prev, limit: Number(event.target.value), page: 1 }));
+    const value = Number(event.target.value);
+    setMeta((prev) => ({ ...prev, limit: value, page: 1 }));
+    updateSearchParams(sortBy, order, 1, value);
   };
 
   const getOfertasCount = (factura: Factura) => {

@@ -25,6 +25,7 @@ import {
   Delete,
 } from "@mui/icons-material";
 import { useFacturas } from "../../hooks/useFacturas";
+import { useSearchParams } from "react-router-dom";
 import type { Factura } from "../../types/factura";
 import RemoveMarketplaceModal from "../Modals/RemoveMarketplaceModal";
 import OfertasDrawer from "./OfertasDrawer";
@@ -60,21 +61,36 @@ const MarketplaceFacturasTable = ({
   onRemoveSuccess,
 }: MarketplaceFacturasTableProps) => {
   const { listFromMarketplace, loading } = useFacturas();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [sortBy, setSortBy] = useState("");
-  const [order, setOrder] = useState("DESC");
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "");
+  const [order, setOrder] = useState(searchParams.get("order") || "DESC");
+
+  const updateSearchParams = (newSortBy: string, newOrder: string) => {
+    const params = new URLSearchParams();
+    if (newSortBy) params.set("sortBy", newSortBy);
+    if (newSortBy && newOrder) params.set("order", newOrder);
+    setSearchParams(params);
+  };
 
   const handleSort = (field: string) => {
+    let newSortBy: string;
+    let newOrder: string;
     if (sortBy === field) {
-      setOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
+      if (order === "ASC") { newOrder = "DESC"; newSortBy = field; }
+      else if (order === "DESC") { newOrder = ""; newSortBy = ""; }
+      else { newOrder = "ASC"; newSortBy = field; }
     } else {
-      setSortBy(field);
-      setOrder("ASC");
+      newSortBy = field;
+      newOrder = "ASC";
     }
+    setSortBy(newSortBy);
+    setOrder(newOrder);
+    updateSearchParams(newSortBy, newOrder);
   };
 
   const fetchMarketplace = useCallback(async () => {
