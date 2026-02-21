@@ -84,7 +84,7 @@ const validationSchema = yup.object({
     .date()
     .typeError("Ingresa una fecha válida")
     .required("La fecha de expiración es obligatoria")
-    .min(tomorrow, "La fecha debe ser posterior a hoy")
+    .min(today, "La fecha debe ser posterior a hoy")
     .nullable(),
   comentario: yup
     .string()
