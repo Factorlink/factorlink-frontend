@@ -344,11 +344,13 @@ const Profile = () => {
                     maxDate={new Date()}
                     disabled={loading}
                     slotProps={{
+                      field: { readOnly: true },
                       textField: {
                         fullWidth: true,
                         variant: "outlined",
                         id: "fechaNacimiento",
                         name: "fechaNacimiento",
+                        onKeyDown: (e: React.KeyboardEvent) => e.preventDefault(),
                         onBlur: formik.handleBlur,
                         error:
                           !!(

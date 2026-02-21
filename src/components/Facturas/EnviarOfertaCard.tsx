@@ -320,8 +320,10 @@ const EnviarOfertaCard = ({
               minDate={tomorrow}
               format="dd/MM/yyyy"
               slotProps={{
+                field: { readOnly: true },
                 textField: {
                   fullWidth: true,
+                  onKeyDown: (e) => e.preventDefault(),
                   onBlur: () =>
                     formik.setFieldTouched("fechaExpiracion", true, true),
                   error:
