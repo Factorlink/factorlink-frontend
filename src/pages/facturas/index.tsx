@@ -232,6 +232,11 @@ const Facturas = () => {
     return estado === "cargada";
   };
 
+  const isCargada = (factura: Factura | null) => {
+    if (!factura) return false;
+    return factura.estado?.toLowerCase() === "cargada";
+  };
+
   const fetchFacturas = useCallback(
     async (currentFilters: FacturasFiltersValues) => {
       if (!currentRole?.empresaId) return;
@@ -867,18 +872,22 @@ const Facturas = () => {
             </ListItemIcon>
             <ListItemText primary="Ver detalle" />
           </MenuItem>
-          {isInMarketplace(selectedFactura) ? (
-            <MenuItem onClick={handleEliminar}>
-              <ListItemIcon>
-                <StorefrontIcon sx={{ color: "#EF4444" }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Quitar del marketplace"
-                sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
-              />
-            </MenuItem>
-          ) : (
-            <MenuItem onClick={handleEliminar}>
+          {
+            isInMarketplace(selectedFactura) && (
+              <MenuItem onClick={handleEliminar}>
+                <ListItemIcon>
+                  <StorefrontIcon sx={{ color: "#EF4444" }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Quitar del marketplace"
+                  sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
+                />
+              </MenuItem>
+            )
+          }
+          {
+            isCargada(selectedFactura) && (
+              <MenuItem onClick={handleEliminar}>
               <ListItemIcon>
                 <Delete sx={{ color: "#EF4444" }} />
               </ListItemIcon>
@@ -887,7 +896,8 @@ const Facturas = () => {
                 sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
               />
             </MenuItem>
-          )}
+            )
+          }
           {canEnviarCotizar(selectedFactura) && (
             <MenuItem onClick={handleEnviarCotizar}>
               <ListItemIcon>

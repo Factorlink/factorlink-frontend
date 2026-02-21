@@ -98,6 +98,15 @@ const getEstadoChip = (estado: string) => {
       />
     );
   }
+  if (normalized === "inactiva") {
+    return (
+      <Chip
+        label="Inactiva"
+        size="small"
+        sx={{ backgroundColor: "#E0F2FE", color: "#0369A1", fontWeight: 500 }}
+      />
+    );
+  }
   return (
     <Chip
       label="Recibida"
@@ -336,7 +345,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
               </TableHead>
               <TableBody>
                 {ofertas.map((oferta) => {
-                  const isExpirada = oferta.estado?.toLowerCase() === "expirada";
+                  const isNotAvailable = ["expirada", "inactiva"].includes(oferta.estado?.toLowerCase() || "");
                   const isExpanded = expandedRow === oferta.id;
                   const isRespondida =
                     oferta.estado?.toLowerCase() === "aceptada" ||
@@ -347,15 +356,15 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                       <TableRow
                         key={oferta.id}
                         sx={{
-                          opacity: isExpirada ? 0.5 : 1,
+                          opacity: isNotAvailable ? 0.5 : 1,
                           "&:hover": { backgroundColor: "#F8FAFC" },
-                          cursor: isExpirada ? "default" : "pointer",
+                          cursor: isNotAvailable ? "default" : "pointer",
                           "& > td": { borderBottom: isExpanded ? 0 : undefined },
                         }}
-                        onClick={() => !isExpirada && handleToggleRow(oferta.id)}
+                        onClick={() => !isNotAvailable && handleToggleRow(oferta.id)}
                       >
                         <TableCell sx={{ width: 48, px: 1 }}>
-                          {!isExpirada && (
+                          {!isNotAvailable && (
                             <IconButton size="small">
                               {isExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                             </IconButton>
@@ -415,7 +424,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                         <TableCell>
                           <Typography
                             variant="body2"
-                            sx={{ color: isExpirada ? "#EF4444" : "#64748B" }}
+                            sx={{ color: isNotAvailable ? "#EF4444" : "#64748B" }}
                           >
                             {formatDate(oferta.fechaExpiracion)}
                           </Typography>
@@ -449,7 +458,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                               </Box>
 
                               {/* Action buttons */}
-                              {!isRespondida && !isExpirada && !aceptadas && (
+                              {!isRespondida && !isNotAvailable && !aceptadas && (
                                 <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
                                   <Button
                                     variant="contained"

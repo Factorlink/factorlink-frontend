@@ -18,6 +18,10 @@ import { useOfertas } from "../../hooks/useOfertas";
 import type { Factura } from "../../types/factura";
 import ConfirmarOfertaModal from "../Modals/ConfirmarOfertaModal";
 
+const today = new Date();
+const tomorrow = new Date(today); // Create a new instance to avoid modifying 'today'
+tomorrow.setDate(today.getDate() + 1);
+
 const formatCurrency = (value: number) => {
   if (isNaN(value)) return "$0";
   return new Intl.NumberFormat("es-CL", {
@@ -80,7 +84,7 @@ const validationSchema = yup.object({
     .date()
     .typeError("Ingresa una fecha válida")
     .required("La fecha de expiración es obligatoria")
-    .min(new Date(), "La fecha debe ser posterior a hoy")
+    .min(tomorrow, "La fecha debe ser posterior a hoy")
     .nullable(),
   comentario: yup
     .string()
@@ -313,7 +317,7 @@ const EnviarOfertaCard = ({
               onAccept={() =>
                 formik.setFieldTouched("fechaExpiracion", true, true)
               }
-              minDate={new Date()}
+              minDate={tomorrow}
               format="dd/MM/yyyy"
               slotProps={{
                 textField: {

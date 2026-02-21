@@ -49,8 +49,10 @@ const getEstadoConfig = (estado: string) => {
       return { label: "Expirada", color: "#F59E0B", bg: "#FFFBEB" };
     case "activa":
       return { label: "Activa", color: "#00BCD4", bg: "#E0F7FA" };
+    case "inactiva":
+      return { label: "Inactiva", color: "#0369A1", bg: "#E0F7FA" };
     default:
-      return { label: estado, color: "#00BCD4", bg: "#E0F7FA" };
+      return { label: estado, color: "#0369A1", bg: "#E0F7FA" };
   }
 };
 

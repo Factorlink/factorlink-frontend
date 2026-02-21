@@ -216,6 +216,9 @@ const FacturaDetail = () => {
   }
 
   const isCargada = factura.estado?.toLowerCase() === "cargada";
+  const isInMarketplace = ["EN_MARKETPLACE", "CON_OFERTAS"].includes(
+    factura.estado,
+  );
 
   return (
     <Layout>
@@ -399,25 +402,27 @@ const FacturaDetail = () => {
                   Enviar a cotizar
                 </Button>
               )}
-              <Button
-                variant="outlined"
-                fullWidth
-                startIcon={<StorefrontIcon />}
-                onClick={() => setRemoveMarketplaceModalOpen(true)}
-                sx={{
-                  borderColor: "#EF4444",
-                  color: "#EF4444",
-                  "&:hover": {
-                    borderColor: "#DC2626",
-                    backgroundColor: "rgba(239,68,68,0.1)",
-                  },
-                  textTransform: "none",
-                  fontWeight: 600,
-                  py: 1.5,
-                }}
-              >
-                Quitar del marketplace
-              </Button>
+              {isInMarketplace && (
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<StorefrontIcon />}
+                  onClick={() => setRemoveMarketplaceModalOpen(true)}
+                  sx={{
+                    borderColor: "#EF4444",
+                    color: "#EF4444",
+                    "&:hover": {
+                      borderColor: "#DC2626",
+                      backgroundColor: "rgba(239,68,68,0.1)",
+                    },
+                    textTransform: "none",
+                    fontWeight: 600,
+                    py: 1.5,
+                  }}
+                >
+                  Quitar del marketplace
+                </Button>
+              )}
               {isCargada && (
                 <Button
                   variant="outlined"
