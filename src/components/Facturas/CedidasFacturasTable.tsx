@@ -101,6 +101,7 @@ const CedidasFacturasTable = ({ empresaId, onMetaChange }: CedidasFacturasTableP
     totalCedida: 0,
     totalEnMarketplace: 0,
     totalConOfertas: 0,
+    totalGeneral: 0,
   });
 
   const fetchData = useCallback(async () => {

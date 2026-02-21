@@ -155,6 +155,7 @@ const Facturas = () => {
     totalCedida: 0,
     totalEnMarketplace: 0,
     totalConOfertas: 0,
+    totalGeneral: 0,
   }));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
@@ -307,6 +308,7 @@ const Facturas = () => {
         totalCedida: 0,
         totalEnMarketplace: 0,
         totalConOfertas: 0,
+        totalGeneral: 0,
       });
 
       // Only fetch from tab 0's endpoint when switching TO tab 0
@@ -482,7 +484,7 @@ const Facturas = () => {
               Total Facturas
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
-              {meta.total}
+              {meta.totalGeneral}
             </Typography>
           </Box>
           <Box
@@ -549,9 +551,9 @@ const Facturas = () => {
               label={
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   Todas las facturas
-                  {meta.total > 0 && (
+                  {meta.totalGeneral > 0 && (
                     <Chip
-                      label={meta.total}
+                      label={meta.totalGeneral}
                       size="small"
                       sx={{
                         height: 22,
