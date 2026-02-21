@@ -52,6 +52,7 @@ const PREFERENCIA_LABELS: Record<string, string> = {
 
 const Profile = () => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">(
     "success"
   );
@@ -331,13 +332,16 @@ const Profile = () => {
                   <StyledDatePicker
                     label="Fecha de Nacimiento"
                     value={formik.values.fechaNacimiento}
+                    open={datePickerOpen}
+                    onOpen={() => setDatePickerOpen(true)}
+                    onClose={() => {
+                      setDatePickerOpen(false);
+                      formik.setFieldTouched("fechaNacimiento", true, true);
+                    }}
                     onChange={(date) => {
                       formik.setFieldValue("fechaNacimiento", date);
                       formik.setFieldTouched("fechaNacimiento", true);
                     }}
-                    onClose={() =>
-                      formik.setFieldTouched("fechaNacimiento", true, true)
-                    }
                     onAccept={() =>
                       formik.setFieldTouched("fechaNacimiento", true, true)
                     }
@@ -345,11 +349,13 @@ const Profile = () => {
                     disabled={loading}
                     slotProps={{
                       field: { readOnly: true },
+                      openPickerButton: { tabIndex: -1 },
                       textField: {
                         fullWidth: true,
                         variant: "outlined",
                         id: "fechaNacimiento",
                         name: "fechaNacimiento",
+                        onClick: () => !loading && setDatePickerOpen(true),
                         onKeyDown: (e: React.KeyboardEvent) => e.preventDefault(),
                         onBlur: formik.handleBlur,
                         error:
@@ -360,6 +366,13 @@ const Profile = () => {
                         helperText:
                           formik.touched.fechaNacimiento &&
                           formik.errors.fechaNacimiento,
+                        sx: {
+                          cursor: "pointer",
+                          "& .MuiOutlinedInput-root": {
+                            cursor: "pointer",
+                            "& input": { cursor: "pointer" },
+                          },
+                        },
                       },
                     }}
                   />

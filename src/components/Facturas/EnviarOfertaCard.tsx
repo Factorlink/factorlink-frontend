@@ -99,6 +99,7 @@ const EnviarOfertaCard = ({
 }: EnviarOfertaCardProps) => {
   const { createOferta, loading } = useOfertas();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -307,13 +308,16 @@ const EnviarOfertaCard = ({
             <StyledDatePicker
               label="Fecha de expiración"
               value={formik.values.fechaExpiracion}
+              open={datePickerOpen}
+              onOpen={() => setDatePickerOpen(true)}
+              onClose={() => {
+                setDatePickerOpen(false);
+                formik.setFieldTouched("fechaExpiracion", true, true);
+              }}
               onChange={(value) => {
                 formik.setFieldValue("fechaExpiracion", value, true);
                 formik.setFieldTouched("fechaExpiracion", true, true)
               }}
-              onClose={() =>
-                formik.setFieldTouched("fechaExpiracion", true, true)
-              }
               onAccept={() =>
                 formik.setFieldTouched("fechaExpiracion", true, true)
               }
@@ -321,8 +325,10 @@ const EnviarOfertaCard = ({
               format="dd/MM/yyyy"
               slotProps={{
                 field: { readOnly: true },
+                openPickerButton: { tabIndex: -1 },
                 textField: {
                   fullWidth: true,
+                  onClick: () => setDatePickerOpen(true),
                   onKeyDown: (e) => e.preventDefault(),
                   onBlur: () =>
                     formik.setFieldTouched("fechaExpiracion", true, true),
@@ -335,8 +341,11 @@ const EnviarOfertaCard = ({
                         "Fecha límite para que la empresa acepte"
                       : "Fecha límite para que la empresa acepte",
                   sx: {
+                    cursor: "pointer",
                     "& .MuiOutlinedInput-root": {
+                      cursor: "pointer",
                       backgroundColor: "background.default",
+                      "& input": { cursor: "pointer" },
                     },
                   },
                 },
