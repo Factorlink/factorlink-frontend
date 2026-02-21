@@ -83,9 +83,10 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
       else if (estado === "aceptada") acc.aceptada++;
       else if (estado === "rechazada") acc.rechazada++;
       else if (estado === "expirada") acc.expirada++;
+      else if (estado === "inactiva") acc.inactiva++;
       return acc;
     },
-    { activa: 0, aceptada: 0, rechazada: 0, expirada: 0 }
+    { activa: 0, aceptada: 0, rechazada: 0, expirada: 0, inactiva: 0 }
   );
 
   const resumenItems = [
@@ -93,6 +94,7 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
     { label: "Aceptadas", count: conteo.aceptada, color: "#10B981", bg: "#ECFDF5" },
     { label: "Rechazadas", count: conteo.rechazada, color: "#EF4444", bg: "#FEF2F2" },
     { label: "Expiradas", count: conteo.expirada, color: "#F59E0B", bg: "#FFFBEB" },
+    { label: "Inactivas", count: conteo.inactiva, color: "#64748B", bg: "#F9FAFB" },
   ];
 
   const toggleExpand = (id: string) => {
