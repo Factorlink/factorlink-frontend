@@ -105,7 +105,7 @@ export const useEmpresa = () => {
   const unsyncPersonalDataSii = async (empresaId: string) => {
     try {
       setLoading(true);
-      const response = await api.delete(
+      const response = await api.put(
         `empresas/${empresaId}/desvincular-sii-personal`,
       );
       return response.data;
