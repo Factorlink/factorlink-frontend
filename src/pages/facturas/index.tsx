@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -36,6 +36,8 @@ import {
   Send,
 } from "@mui/icons-material";
 import MarketplaceFacturasTable from "../../components/Facturas/MarketplaceFacturasTable";
+import OfertasFacturasTable from "../../components/Facturas/OfertasFacturasTable";
+import CedidasFacturasTable from "../../components/Facturas/CedidasFacturasTable";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
 import RemoveMarketplaceModal from "../../components/Modals/RemoveMarketplaceModal";
@@ -113,11 +115,23 @@ const formatDate = (dateString: string) => {
   });
 };
 
+const TAB_ROUTES = ["/facturas", "/facturas/marketplace", "/facturas/ofertas", "/facturas/cedidas"];
+
+const getTabFromPath = (pathname: string) => {
+  const idx = TAB_ROUTES.indexOf(pathname);
+  return idx >= 0 ? idx : 0;
+};
+
 const Facturas = () => {
   const { currentRole } = useAuthStore();
   const { loading, getFacturas } = useFacturas();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [facturas, setFacturas] = useState<Factura[]>([]);
+
+  const activeTab = getTabFromPath(location.pathname);
+  const prevTabRef = useRef(activeTab);
 
   const [filters, setFilters] = useState<FacturasFiltersValues>(() => {
     const newFilters = { ...INITIAL_FILTERS };
@@ -140,6 +154,8 @@ const Facturas = () => {
     totalCargada: 0,
     totalCedida: 0,
     totalEnMarketplace: 0,
+    totalConOfertas: 0,
+    totalGeneral: 0,
   }));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
@@ -147,9 +163,6 @@ const Facturas = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
-  
-  const navigate = useNavigate();
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -220,6 +233,11 @@ const Facturas = () => {
     return estado === "cargada";
   };
 
+  const isCargada = (factura: Factura | null) => {
+    if (!factura) return false;
+    return factura.estado?.toLowerCase() === "cargada";
+  };
+
   const fetchFacturas = useCallback(
     async (currentFilters: FacturasFiltersValues) => {
       if (!currentRole?.empresaId) return;
@@ -266,8 +284,45 @@ const Facturas = () => {
     [currentRole?.empresaId, meta.page, meta.limit],
   );
 
+  const handleChildMetaChange = useCallback((childMeta: Meta) => {
+    setMeta(childMeta);
+  }, []);
+
+  // Reset filters, meta and URL params when switching tabs
   useEffect(() => {
-    fetchFacturas(filters);
+    const prevTab = prevTabRef.current;
+    if (prevTab !== activeTab) {
+      prevTabRef.current = activeTab;
+      // Clear search params when changing tabs (each tab has independent URL state)
+      setSearchParams(new URLSearchParams());
+      // Always reset filters and meta when switching tabs
+      const resetFilters = { ...INITIAL_FILTERS };
+      setFilters(resetFilters);
+      // Reset meta to zeros - the active tab's component will update it via onMetaChange
+      setMeta({
+        lastPage: 1,
+        limit: 10,
+        page: 1,
+        total: 0,
+        totalCargada: 0,
+        totalCedida: 0,
+        totalEnMarketplace: 0,
+        totalConOfertas: 0,
+        totalGeneral: 0,
+      });
+
+      // Only fetch from tab 0's endpoint when switching TO tab 0
+      if (activeTab === 0) {
+        fetchFacturas(resetFilters);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 0) {
+      fetchFacturas(filters);
+    }
   }, [currentRole?.empresaId, meta.page, meta.limit]);
 
   const updateSearchParams = (
@@ -429,7 +484,7 @@ const Facturas = () => {
               Total Facturas
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
-              {meta.total}
+              {meta.totalGeneral}
             </Typography>
           </Box>
           <Box
@@ -486,12 +541,32 @@ const Facturas = () => {
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
           <Tabs
             value={activeTab}
-            onChange={(_e, newValue) => setActiveTab(newValue)}
+            onChange={(_e, newValue) => {
+              navigate(TAB_ROUTES[newValue]);
+            }}
           >
             <Tab
               icon={<Description sx={{ fontSize: 18 }} />}
               iconPosition="start"
-              label="Todas las facturas"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  Todas las facturas
+                  {meta.totalGeneral > 0 && (
+                    <Chip
+                      label={meta.totalGeneral}
+                      size="small"
+                      sx={{
+                        height: 22,
+                        minWidth: 22,
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        backgroundColor: activeTab === 0 ? "#00BCD4" : "#64748B",
+                        color: "white",
+                      }}
+                    />
+                  )}
+                </Box>
+              }
             />
             <Tab
               icon={<Storefront sx={{ fontSize: 18 }} />}
@@ -508,7 +583,53 @@ const Facturas = () => {
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: "#00BCD4",
+                        backgroundColor: activeTab === 1 ? "#00BCD4" : "#64748B",
+                        color: "white",
+                      }}
+                    />
+                  )}
+                </Box>
+              }
+            />
+            <Tab
+              icon={<Visibility sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  Ofertas
+                  {meta.totalConOfertas > 0 && (
+                    <Chip
+                      label={meta.totalConOfertas}
+                      size="small"
+                      sx={{
+                        height: 22,
+                        minWidth: 22,
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        backgroundColor: activeTab === 2 ? "#00BCD4" : "#64748B",
+                        color: "white",
+                      }}
+                    />
+                  )}
+                </Box>
+              }
+            />
+            <Tab
+              icon={<CheckCircle sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  Cedidas
+                  {meta.totalCedida > 0 && (
+                    <Chip
+                      label={meta.totalCedida}
+                      size="small"
+                      sx={{
+                        height: 22,
+                        minWidth: 22,
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        backgroundColor: activeTab === 3 ? "#00BCD4" : "#64748B",
                         color: "white",
                       }}
                     />
@@ -524,6 +645,7 @@ const Facturas = () => {
           <>
             {/* Filters Section */}
             <FacturasFilters
+              key={activeTab}
               onApplyFilters={handleApplyFilters}
               onClearFilters={handleClearFilters}
               loading={loading}
@@ -732,10 +854,21 @@ const Facturas = () => {
               )}
             </TableContainer>
           </>
-        ) : (
+        ) : activeTab === 1 ? (
           <MarketplaceFacturasTable
             empresaId={currentRole?.empresaId || ""}
             onRemoveSuccess={() => fetchFacturas(filters)}
+            onMetaChange={handleChildMetaChange}
+          />
+        ) : activeTab === 2 ? (
+          <OfertasFacturasTable
+            empresaId={currentRole?.empresaId || ""}
+            onMetaChange={handleChildMetaChange}
+          />
+        ) : (
+          <CedidasFacturasTable
+            empresaId={currentRole?.empresaId || ""}
+            onMetaChange={handleChildMetaChange}
           />
         )}
 
@@ -760,18 +893,22 @@ const Facturas = () => {
             </ListItemIcon>
             <ListItemText primary="Ver detalle" />
           </MenuItem>
-          {isInMarketplace(selectedFactura) ? (
-            <MenuItem onClick={handleEliminar}>
-              <ListItemIcon>
-                <StorefrontIcon sx={{ color: "#EF4444" }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Quitar del marketplace"
-                sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
-              />
-            </MenuItem>
-          ) : (
-            <MenuItem onClick={handleEliminar}>
+          {
+            isInMarketplace(selectedFactura) && (
+              <MenuItem onClick={handleEliminar}>
+                <ListItemIcon>
+                  <StorefrontIcon sx={{ color: "#EF4444" }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Quitar del marketplace"
+                  sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
+                />
+              </MenuItem>
+            )
+          }
+          {
+            isCargada(selectedFactura) && (
+              <MenuItem onClick={handleEliminar}>
               <ListItemIcon>
                 <Delete sx={{ color: "#EF4444" }} />
               </ListItemIcon>
@@ -780,7 +917,8 @@ const Facturas = () => {
                 sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
               />
             </MenuItem>
-          )}
+            )
+          }
           {canEnviarCotizar(selectedFactura) && (
             <MenuItem onClick={handleEnviarCotizar}>
               <ListItemIcon>

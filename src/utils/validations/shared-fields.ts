@@ -119,6 +119,7 @@ export const cargoValidation = yup
 export const fechaNacimientoValidation = yup
   .date()
   .nullable()
+  .typeError("Ingresa una fecha válida")
   .max(new Date(), "La fecha no puede ser futura")
   .test("edad-minima", "Debes ser mayor de 18 años", (value) => {
     if (!value) return true;

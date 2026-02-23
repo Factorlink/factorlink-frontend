@@ -17,9 +17,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Button,
+  IconButton,
+  Menu,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
-import { Storefront, Visibility } from "@mui/icons-material";
+import { Storefront, Visibility, MoreVert } from "@mui/icons-material";
 import SortableTableHeader from "../../components/Facturas/SortableTableHeader";
 import Layout from "../../components/Layout";
 import { useFacturas } from "../../hooks/useFacturas";
@@ -66,6 +69,8 @@ const Marketplace = () => {
 
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "");
   const [order, setOrder] = useState(searchParams.get("order") || "");
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuFactura, setMenuFactura] = useState<Factura | null>(null);
 
   const [meta, setMeta] = useState<Meta>(() => ({
     lastPage: 1,
@@ -75,6 +80,8 @@ const Marketplace = () => {
     totalCargada: 0,
     totalCedida: 0,
     totalEnMarketplace: 0,
+    totalConOfertas: 0,
+    totalGeneral: 0,
   }));
 
   const fetchFacturas = useCallback(
@@ -92,7 +99,9 @@ const Marketplace = () => {
 
       try {
         setError(null);
-        const { data, meta: metaResponse } = await getFacturasByFactoringId(params as any);
+        const { data, meta: metaResponse } = await getFacturasByFactoringId(
+          params as any,
+        );
         setFacturas(data || []);
         setMeta(metaResponse);
       } catch (err: any) {
@@ -150,7 +159,10 @@ const Marketplace = () => {
     fetchFacturas(newSortBy, newOrder);
   };
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
     setMeta((prev) => ({ ...prev, page: value }));
     updateSearchParams(sortBy, order, value, meta.limit);
   };
@@ -161,6 +173,22 @@ const Marketplace = () => {
     updateSearchParams(sortBy, order, 1, value);
   };
 
+  const getOfertaStatus = (factura: Factura) => {
+    const estado = factura.factoringIsOfertme?.toLowerCase() || "";
+
+    switch (estado) {
+      case "aceptada":
+        return { label: "Aceptada", color: "#10B981", bg: "#ECFDF5" };
+      case "rechazada":
+        return { label: "Rechazada", color: "#EF4444", bg: "#FEF2F2" };
+      case "expirada":
+        return { label: "Expirada", color: "#F59E0B", bg: "#FFFBEB" };
+      case "activa":
+        return { label: "Activa", color: "#00BCD4", bg: "#E0F7FA" };
+      default:
+        return { label: estado, color: "#00BCD4", bg: "#E0F7FA" };
+    }
+  };
 
   return (
     <Layout>
@@ -191,18 +219,29 @@ const Marketplace = () => {
               <Storefront sx={{ color: "#64748B", fontSize: 28 }} />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, color: "#1E293B" }}
+              >
                 Marketplace
               </Typography>
               <Typography variant="body2" sx={{ color: "#64748B" }}>
-                Explora las facturas disponibles para financiamiento y envía tus ofertas.
+                Explora las facturas disponibles para financiamiento y envía tus
+                ofertas.
               </Typography>
             </Box>
           </Box>
         </Box>
 
         {/* Facturas count */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
           <Typography variant="body2" sx={{ color: "#64748B" }}>
             {meta.total} facturas disponibles
           </Typography>
@@ -239,7 +278,10 @@ const Marketplace = () => {
               }}
             >
               <Storefront sx={{ fontSize: 64, color: "#CBD5E1", mb: 2 }} />
-              <Typography variant="h6" sx={{ color: "#64748B", fontWeight: 500 }}>
+              <Typography
+                variant="h6"
+                sx={{ color: "#64748B", fontWeight: 500 }}
+              >
                 {error || "No hay facturas disponibles en el marketplace"}
               </Typography>
               <Typography variant="body2" sx={{ color: "#94A3B8", mt: 1 }}>
@@ -262,9 +304,6 @@ const Marketplace = () => {
                       />
                     ))}
                     <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Ofertas
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
                       Mi Oferta
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
@@ -274,6 +313,7 @@ const Marketplace = () => {
                 </TableHead>
                 <TableBody>
                   {facturas.map((factura) => {
+                    const status = getOfertaStatus(factura);
                     return (
                       <TableRow
                         key={factura.id}
@@ -284,27 +324,42 @@ const Marketplace = () => {
                       >
                         <TableCell>
                           <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 600, color: "#1E293B" }}
+                            >
                               {factura.razonSocialEmisor || "N/A"}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: "#64748B" }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#64748B" }}
+                            >
                               {factura.rutEmisor || ""}
                             </Typography>
                           </Box>
                         </TableCell>
                         <TableCell>
                           <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 600, color: "#1E293B" }}
+                            >
                               {factura.razonSocialReceptor || "N/A"}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: "#64748B" }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#64748B" }}
+                            >
                               {factura.rutReceptor || ""}
                             </Typography>
                           </Box>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ color: "#00BCD4", fontWeight: 600 }}>
-                            #{factura.folio}
+                          <Typography
+                            variant="body2"
+                            sx={{ color: "#00BCD4", fontWeight: 600 }}
+                          >
+                            {factura.folio}
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -313,47 +368,44 @@ const Marketplace = () => {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ color: "#1E293B", fontWeight: 500 }}>
+                          <Typography
+                            variant="body2"
+                            sx={{ color: "#1E293B", fontWeight: 500 }}
+                          >
                             {formatCurrency(factura.montoTotal)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ color: "#1E293B", fontWeight: 500 }}>
-                            {factura.numeroOfertasRecibidas || 0}
                           </Typography>
                         </TableCell>
                         <TableCell>
                           {factura.factoringIsOfertme ? (
                             <Chip
-                              label="Enviada"
+                              label={status?.label || "N/A"}
                               size="small"
                               sx={{
-                                backgroundColor: "rgba(0, 188, 212, 0.1)",
-                                color: "#00BCD4",
+                                backgroundColor: status?.bg || "#00BCD4",
+                                color: status?.color || "#00BCD4",
                                 fontWeight: 500,
                               }}
                             />
                           ) : (
-                            <Typography variant="body2" sx={{ color: "#94A3B8" }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "#94A3B8" }}
+                            >
                               —
                             </Typography>
                           )}
                         </TableCell>
                         <TableCell>
-                          <Button
+                          <IconButton
                             size="small"
-                            startIcon={<Visibility sx={{ fontSize: 16 }} />}
-                            onClick={() => navigate(`/facturas/${factura.id}/factoring`)}
-                            sx={{
-                              textTransform: "none",
-                              color: "#00BCD4",
-                              fontWeight: 500,
-                              fontSize: "0.8125rem",
-                              "&:hover": { backgroundColor: "rgba(0, 188, 212, 0.08)" },
+                            onClick={(e) => {
+                              setAnchorEl(e.currentTarget);
+                              setMenuFactura(factura);
                             }}
+                            sx={{ color: "#64748B" }}
                           >
-                            Ver factura
-                          </Button>
+                            <MoreVert />
+                          </IconButton>
                         </TableCell>
                       </TableRow>
                     );
@@ -375,7 +427,9 @@ const Marketplace = () => {
                   }}
                 >
                   <FormControl size="small" sx={{ minWidth: 160 }}>
-                    <InputLabel id="marketplace-limit-label">Filas por página</InputLabel>
+                    <InputLabel id="marketplace-limit-label">
+                      Filas por página
+                    </InputLabel>
                     <Select
                       labelId="marketplace-limit-label"
                       value={String(meta.limit)}
@@ -404,6 +458,37 @@ const Marketplace = () => {
             </>
           )}
         </TableContainer>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => {
+            setAnchorEl(null);
+            setMenuFactura(null);
+          }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
+          PaperProps={{
+            sx: {
+              borderRadius: 2,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              minWidth: 180,
+            },
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              if (menuFactura) navigate(`/facturas/${menuFactura.id}/factoring`);
+              setAnchorEl(null);
+              setMenuFactura(null);
+            }}
+          >
+            <ListItemIcon>
+              <Visibility sx={{ color: "#64748B" }} />
+            </ListItemIcon>
+            <ListItemText primary="Ver factura" />
+          </MenuItem>
+        </Menu>
       </Box>
     </Layout>
   );

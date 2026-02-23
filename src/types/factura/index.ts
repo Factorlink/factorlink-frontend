@@ -24,6 +24,7 @@ export interface Factura {
     montoNeto: string;
     montoTotal: string;
     plazo: number;
+    porcentajeFinanciamiento?: string;
     razonSocialEmisor: string;
     razonSocialReceptor: string;
     rutEmisor: string;
@@ -37,6 +38,6 @@ export interface Factura {
     visibilidadDetalle: VisibilidadDetalle;
     numeroOfertasRecibidas?: number;
     historyOfertas?: Oferta[];
-    factoringIsOfertme?: boolean;
+    factoringIsOfertme?: string;
     ofertaFactoring?: Oferta
 }

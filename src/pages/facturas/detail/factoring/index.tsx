@@ -15,6 +15,8 @@ import { ArrowBack, Description, ErrorOutline } from "@mui/icons-material";
 import FacturaResumenCard from "../../../../components/Facturas/FacturaResumenCard";
 import EnviarOfertaCard from "../../../../components/Facturas/EnviarOfertaCard";
 import DetalleOfertaFactoring from "../../../../components/Ofertas/DetalleOfertaFactoring";
+import HistorialOfertasFactoring from "../../../../components/Ofertas/HistorialOfertasFactoring";
+import DetalleCotizacionCard from "../../../../components/Facturas/DetalleCotizacionCard";
 
 const FacturaFactoringDetail = () => {
   const { getFacturaByIdAndFactoringId, loading } = useFacturas();
@@ -162,6 +164,14 @@ const FacturaFactoringDetail = () => {
 
         <FacturaResumenCard factura={factura} />
 
+        {factura.estado !== "CARGADA" && (
+          <DetalleCotizacionCard
+            plazo={factura.plazo}
+            porcentajeFinanciamiento={factura.porcentajeFinanciamiento || "0"}
+            montoFinanciar={factura.montoFinanciar}
+          />
+        )}
+
         {/* Oferta: detalle si ya existe, formulario si no */}
         {factura.ofertaFactoring ? (
           <DetalleOfertaFactoring
@@ -173,6 +183,14 @@ const FacturaFactoringDetail = () => {
             factura={factura}
             factoringId={currentRole?.factoringId!}
             onSuccess={fetchFactura}
+          />
+        )}
+
+        {/* Historial de ofertas anteriores */}
+        {factura.historyOfertas && factura.historyOfertas.length > 0 && (
+          <HistorialOfertasFactoring
+            ofertas={factura.historyOfertas}
+            plazo={factura.plazo || 0}
           />
         )}
       </Box>

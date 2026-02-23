@@ -3,21 +3,24 @@ import {
   Box,
   Typography,
   Button,
-  
   Alert,
   InputAdornment,
+  Tooltip,
 } from "@mui/material";
 import { Send, AccountBalance } from "@mui/icons-material";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
-import { StyledTextField } from "../../pages/register/styles";
+import { StyledTextField, StyledDatePicker } from "../../pages/register/styles";
 import { useOfertas } from "../../hooks/useOfertas";
 import type { Factura } from "../../types/factura";
 import ConfirmarOfertaModal from "../Modals/ConfirmarOfertaModal";
+
+const today = new Date();
+const tomorrow = new Date(today); // Create a new instance to avoid modifying 'today'
+tomorrow.setDate(today.getDate() + 1);
 
 const formatCurrency = (value: number) => {
   if (isNaN(value)) return "$0";
@@ -28,7 +31,7 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-const blockNonNumericKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
+const blockNonNumericKeys = (e: React.KeyboardEvent<HTMLInputElement>, allowDecimal = false) => {
   const allowedKeys = [
     "Backspace",
     "Delete",
@@ -39,7 +42,8 @@ const blockNonNumericKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
     "End",
   ];
   if (allowedKeys.includes(e.key)) return;
-  if (!/^[0-9.]$/.test(e.key)) {
+  const pattern = allowDecimal ? /^[0-9.]$/ : /^[0-9]$/;
+  if (!pattern.test(e.key)) {
     e.preventDefault();
   }
 };
@@ -57,13 +61,30 @@ const validationSchema = yup.object({
     .min(1, "Debe ser al menos 1%")
     .max(100, "No puede superar el 100%"),
   tasa: yup
-    .number()
+    .mixed()
     .required("La tasa es obligatoria")
-    .min(0, "La tasa debe ser mayor o igual a 0"),
+    .test(
+      "no-trailing-dot",
+      "Ingresa un número decimal válido (ej: 0, 1.5, 10.25)",
+      (value) => {
+        if (value === undefined || value === null || value === "") return true;
+        return !String(value).endsWith(".");
+      }
+    )
+    .test(
+      "is-valid-range",
+      "La tasa debe estar entre 0 y 100",
+      (value) => {
+        if (value === undefined || value === null || value === "") return true;
+        const n = Number(value);
+        return !isNaN(n) && n >= 0 && n <= 100;
+      }
+    ),
   fechaExpiracion: yup
     .date()
+    .typeError("Ingresa una fecha válida")
     .required("La fecha de expiración es obligatoria")
-    .min(new Date(), "La fecha debe ser posterior a hoy")
+    .min(today, "La fecha debe ser posterior a hoy")
     .nullable(),
   comentario: yup
     .string()
@@ -78,6 +99,7 @@ const EnviarOfertaCard = ({
 }: EnviarOfertaCardProps) => {
   const { createOferta, loading } = useOfertas();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -137,6 +159,7 @@ const EnviarOfertaCard = ({
           borderRadius: 3,
           boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           overflow: "hidden",
+          mb: 3,
         }}
       >
         {/* Header */}
@@ -183,7 +206,7 @@ const EnviarOfertaCard = ({
               fullWidth
               name="porcentajeFinanciamiento"
               label="Porcentaje de financiamiento (%)"
-              type="number"
+              type="string"
               inputProps={{ min: 1, max: 100, step: 1 }}
               InputProps={{
                 endAdornment: (
@@ -191,9 +214,14 @@ const EnviarOfertaCard = ({
                 ),
               }}
               value={formik.values.porcentajeFinanciamiento}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val.length > 3) return;
+                if (/^0+$/.test(val)) return;
+                formik.handleChange(e);
+              }}
               onBlur={formik.handleBlur}
-              onKeyDown={blockNonNumericKeys}
+              onKeyDown={(e) => blockNonNumericKeys(e as React.KeyboardEvent<HTMLInputElement>, false)}
               error={
                 formik.touched.porcentajeFinanciamiento &&
                 Boolean(formik.errors.porcentajeFinanciamiento)
@@ -210,17 +238,25 @@ const EnviarOfertaCard = ({
               fullWidth
               name="tasa"
               label="Tasa (%)"
-              type="number"
-              inputProps={{ min: 0, step: 0.01 }}
+              type="string"
+              inputProps={{ min: 0, max: 100, step: 0.01 }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">%</InputAdornment>
                 ),
               }}
               value={formik.values.tasa}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                const val = e.target.value;
+                // Allow empty or valid float: no leading zeros in integer part
+                // Valid: "", "0", "0.", "0.5", "0.05", "1", "10", "100", "10.50"
+                // Invalid: "00", "01", "001"
+                if (val === "" || /^(0|[1-9]\d{0,2})(\.\d{0,2})?$/.test(val)) {
+                  formik.handleChange(e);
+                }
+              }}
               onBlur={formik.handleBlur}
-              onKeyDown={blockNonNumericKeys}
+              onKeyDown={(e) => blockNonNumericKeys(e as React.KeyboardEvent<HTMLInputElement>, true)}
               error={formik.touched.tasa && Boolean(formik.errors.tasa)}
               helperText={
                 formik.touched.tasa
@@ -252,32 +288,48 @@ const EnviarOfertaCard = ({
             />
 
             {/* Plazo (informativo) */}
-            <StyledTextField
-              fullWidth
-              label="Plazo (días)"
-              value={factura.plazo || 0}
-              InputProps={{ readOnly: true }}
-              helperText={`Plazo solicitado: ${factura.plazo || 0} días`}
-            />
+            <Tooltip title="Este campo no puede ser editado. El plazo es definido por la empresa emisora." arrow>
+              <StyledTextField
+                fullWidth
+                label="Plazo (días)"
+                value={factura.plazo || 0}
+                InputProps={{ readOnly: true }}
+                helperText={`Plazo solicitado: ${factura.plazo || 0} días`}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    cursor: "not-allowed",
+                    "& input": { cursor: "not-allowed" },
+                  },
+                }}
+              />
+            </Tooltip>
 
             {/* Fecha expiración */}
-            <DatePicker
+            <StyledDatePicker
               label="Fecha de expiración"
               value={formik.values.fechaExpiracion}
+              open={datePickerOpen}
+              onOpen={() => setDatePickerOpen(true)}
+              onClose={() => {
+                setDatePickerOpen(false);
+                formik.setFieldTouched("fechaExpiracion", true, true);
+              }}
               onChange={(value) => {
                 formik.setFieldValue("fechaExpiracion", value, true);
-              }}
-              onClose={() =>
                 formik.setFieldTouched("fechaExpiracion", true, true)
-              }
+              }}
               onAccept={() =>
                 formik.setFieldTouched("fechaExpiracion", true, true)
               }
-              minDate={new Date()}
+              minDate={tomorrow}
               format="dd/MM/yyyy"
               slotProps={{
+                field: { readOnly: true },
+                openPickerButton: { tabIndex: -1 },
                 textField: {
                   fullWidth: true,
+                  onClick: () => setDatePickerOpen(true),
+                  onKeyDown: (e) => e.preventDefault(),
                   onBlur: () =>
                     formik.setFieldTouched("fechaExpiracion", true, true),
                   error:
@@ -289,9 +341,11 @@ const EnviarOfertaCard = ({
                         "Fecha límite para que la empresa acepte"
                       : "Fecha límite para que la empresa acepte",
                   sx: {
-                    pb: 2,
+                    cursor: "pointer",
                     "& .MuiOutlinedInput-root": {
+                      cursor: "pointer",
                       backgroundColor: "background.default",
+                      "& input": { cursor: "pointer" },
                     },
                   },
                 },

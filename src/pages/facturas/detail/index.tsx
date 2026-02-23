@@ -26,9 +26,10 @@ import DocumentsRequiredModal from "../../../components/Modals/DocumentsRequired
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import useAuthStore from "../../../store/authStore";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
+import OfertasDrawer from "../../../components/Facturas/OfertasDrawer";
 import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
 import FacturaResumenCard from "../../../components/Facturas/FacturaResumenCard";
-
+import DetalleCotizacionCard from "../../../components/Facturas/DetalleCotizacionCard";
 
 const FacturaDetail = () => {
   const { getFacturaById, loading, refreshFactura } = useFacturas();
@@ -39,8 +40,11 @@ const FacturaDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
-  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
+  const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] =
+    useState(false);
+  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
+    useState(false);
+  const [ofertasDrawerOpen, setOfertasDrawerOpen] = useState(false);
 
   const fetchFactura = async () => {
     try {
@@ -70,7 +74,6 @@ const FacturaDetail = () => {
       setDocumentsRequiredModalOpen(true);
     }
   };
-
 
   const handleEliminar = () => {
     setDeleteModalOpen(true);
@@ -212,8 +215,10 @@ const FacturaDetail = () => {
     );
   }
 
-  const canEnviarCotizar = factura.estado?.toLowerCase() === "cargada";
-  const isInMarketplace = factura.estado === "EN_MARKETPLACE" || factura.estado === "CON_OFERTAS";
+  const isCargada = factura.estado?.toLowerCase() === "cargada";
+  const isInMarketplace = ["EN_MARKETPLACE", "CON_OFERTAS"].includes(
+    factura.estado,
+  );
 
   return (
     <Layout>
@@ -235,8 +240,17 @@ const FacturaDetail = () => {
 
         <FacturaResumenCard factura={factura} />
 
+        {factura.estado !== "CARGADA" && (
+          <DetalleCotizacionCard
+            plazo={factura.plazo}
+            porcentajeFinanciamiento={factura.porcentajeFinanciamiento || "0"}
+            montoFinanciar={factura.montoFinanciar}
+          />
+        )}
+
         {/* Card: Visibilidad en Marketplace */}
-        {(factura.visibilidad === "TODOS" || factura.visibilidad === "SELECCIONADOS") && (
+        {(factura.visibilidad === "TODOS" ||
+          factura.visibilidad === "SELECCIONADOS") && (
           <Box
             sx={{
               backgroundColor: "white",
@@ -260,7 +274,10 @@ const FacturaDetail = () => {
                 <Visibility sx={{ color: "#00BCD4", fontSize: 24 }} />
               </Box>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 600, color: "#1E293B" }}
+                >
                   Visibilidad en Marketplace
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#64748B" }}>
@@ -281,8 +298,12 @@ const FacturaDetail = () => {
                 }}
               >
                 <Visibility sx={{ color: "#00A86B", fontSize: 20 }} />
-                <Typography variant="body2" sx={{ color: "#15803D", fontWeight: 500 }}>
-                  Esta factura es visible para todos los factorings registrados en la plataforma.
+                <Typography
+                  variant="body2"
+                  sx={{ color: "#15803D", fontWeight: 500 }}
+                >
+                  Esta factura es visible para todos los factorings registrados
+                  en la plataforma.
                 </Typography>
               </Box>
             ) : (
@@ -339,27 +360,49 @@ const FacturaDetail = () => {
             </Box>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Button
-                variant="contained"
-                fullWidth
-                startIcon={<Send />}
-                onClick={handleEnviarCotizar}
-                disabled={!canEnviarCotizar}
-                sx={{
-                  backgroundColor: "#00BCD4",
-                  "&:hover": { backgroundColor: "#00ACC1" },
-                  "&:disabled": {
-                    opacity: 0.7,
-                  },
-                  textTransform: "none",
-                  fontWeight: 600,
-                  py: 1.5,
-                  color: "white",
-                }}
-              >
-                Enviar a cotizar
-              </Button>
-              {isInMarketplace ? (
+              {factura.estado?.toLowerCase() !== "cargada" && (
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<Visibility />}
+                  onClick={() => setOfertasDrawerOpen(true)}
+                  sx={{
+                    borderColor: "#00BCD4",
+                    color: "#00BCD4",
+                    "&:hover": {
+                      borderColor: "#00ACC1",
+                      backgroundColor: "rgba(0,188,212,0.08)",
+                    },
+                    textTransform: "none",
+                    fontWeight: 600,
+                    py: 1.5,
+                  }}
+                >
+                  Ver ofertas
+                </Button>
+              )}
+              {isCargada && (
+                <Button
+                  variant="contained"
+                  fullWidth
+                  startIcon={<Send />}
+                  onClick={handleEnviarCotizar}
+                  sx={{
+                    backgroundColor: "#00BCD4",
+                    "&:hover": { backgroundColor: "#00ACC1" },
+                    "&:disabled": {
+                      opacity: 0.7,
+                    },
+                    textTransform: "none",
+                    fontWeight: 600,
+                    py: 1.5,
+                    color: "white",
+                  }}
+                >
+                  Enviar a cotizar
+                </Button>
+              )}
+              {isInMarketplace && (
                 <Button
                   variant="outlined"
                   fullWidth
@@ -379,7 +422,8 @@ const FacturaDetail = () => {
                 >
                   Quitar del marketplace
                 </Button>
-              ) : (
+              )}
+              {isCargada && (
                 <Button
                   variant="outlined"
                   fullWidth
@@ -444,6 +488,12 @@ const FacturaDetail = () => {
         <DocumentsRequiredModal
           open={documentsRequiredModalOpen}
           onClose={() => setDocumentsRequiredModalOpen(false)}
+        />
+
+        <OfertasDrawer
+          open={ofertasDrawerOpen}
+          onClose={() => setOfertasDrawerOpen(false)}
+          factura={factura}
         />
       </Box>
     </Layout>

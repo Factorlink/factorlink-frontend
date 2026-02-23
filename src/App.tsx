@@ -69,6 +69,30 @@ function App() {
             }
           />
           <Route
+            path="/facturas/marketplace"
+            element={
+              <ProtectedRoute>
+                <Facturas />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/facturas/ofertas"
+            element={
+              <ProtectedRoute>
+                <Facturas />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/facturas/cedidas"
+            element={
+              <ProtectedRoute>
+                <Facturas />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/operaciones"
             element={
               <ProtectedRoute>

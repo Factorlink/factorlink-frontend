@@ -1,3 +1,5 @@
+import type { Factoring } from "../factoring";
+
 export interface Oferta {
     id: string;
     comentario: string;
@@ -10,4 +12,5 @@ export interface Oferta {
     montoAdelanto: string;
     porcentajeFinanciamiento: string;
     tasa: string;
+    factoring?: Factoring;
 }
