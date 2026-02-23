@@ -3,6 +3,12 @@ import api from "../lib/axios";
 import type { Empresa } from "../types/empresa";
 import type { SiiEmpresa } from "../types/sii";
 
+interface RequestSyncSii {
+  siiRutPersonal: string;
+  siiPasswordPersonal: string;
+  siiPasswordCertificadoPersonal: string;
+}
+
 export const useEmpresa = () => {
   const [loading, setLoading] = useState(false);
 
@@ -78,5 +84,47 @@ export const useEmpresa = () => {
     }
   };
 
-  return { loading, createEmpresa, getAllEmpresas, getEmpresaById, updateEmpresa, deleteEmpresa, createEmpresaBySii };
+  const syncPersonalDataSii = async (
+    empresaId: string,
+    payload: RequestSyncSii,
+  ) => {
+    try {
+      setLoading(true);
+      const response = await api.put(
+        `empresas/${empresaId}/vincular-sii-personal`,
+        payload,
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const unsyncPersonalDataSii = async (empresaId: string) => {
+    try {
+      setLoading(true);
+      const response = await api.delete(
+        `empresas/${empresaId}/desvincular-sii-personal`,
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    createEmpresa,
+    getAllEmpresas,
+    getEmpresaById,
+    updateEmpresa,
+    deleteEmpresa,
+    createEmpresaBySii,
+    syncPersonalDataSii,
+    unsyncPersonalDataSii,
+  };
 };
