@@ -3,6 +3,7 @@ import { Box } from "@mui/material";
 import AccountLevels from "../../../components/Edit/AccountLevels";
 import SiiSync from "../../../components/Edit/SiiSync";
 import SiiPersonalSync from "../../../components/Edit/SiiPersonalSync";
+import SiiPersonalInfo from "../../../components/Edit/SiiPersonalInfo";
 import Empresa from "../../../components/Edit/Empresa";
 import SiiPersonalSyncModal from "../../../components/Modals/SiiPersonalSyncModal";
 import UnlinkSiiPersonalModal from "../../../components/Modals/UnlinkSiiPersonalModal";
@@ -40,6 +41,7 @@ const EmpresaTab = () => {
           onUnlink={() => setUnlinkModalOpen(true)}
         />
       )}
+      {isPersonalLinked && <SiiPersonalInfo />}
 
       <SiiPersonalSyncModal
         open={syncModalOpen}
