@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Box } from "@mui/material";
 import AccountLevels from "../../../components/Edit/AccountLevels";
+import EmpresaInfoBannerSii from "../../../components/Edit/EmpresaInfoBannerSii";
 import SiiSync from "../../../components/Edit/SiiSync";
 import SiiPersonalSync from "../../../components/Edit/SiiPersonalSync";
 import SiiPersonalInfo from "../../../components/Edit/SiiPersonalInfo";
@@ -31,6 +32,7 @@ const EmpresaTab = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <AccountLevels currentLevel={currentRole?.nivel as 1 | 2 | 3 | undefined} />
+      {currentRole?.nivel && currentRole?.nivel !== 1 && <EmpresaInfoBannerSii />}
       {currentRole?.nivel && currentRole?.nivel === 1 && <SiiSync />}
       {currentRole?.nivel && currentRole?.nivel !== 1 && <Empresa readOnly={true} />}
       {currentRole?.nivel && currentRole?.nivel !== 1 && (
