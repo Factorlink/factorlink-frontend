@@ -6,6 +6,7 @@ import SiiSync from "../../../components/Edit/SiiSync";
 import SiiPersonalSync from "../../../components/Edit/SiiPersonalSync";
 import SiiPersonalInfo from "../../../components/Edit/SiiPersonalInfo";
 import Empresa from "../../../components/Edit/Empresa";
+import SiiSyncModal from "../../../components/Modals/SiiSyncModal";
 import SiiPersonalSyncModal from "../../../components/Modals/SiiPersonalSyncModal";
 import UnlinkSiiPersonalModal from "../../../components/Modals/UnlinkSiiPersonalModal";
 import useAuthStore from "../../../store/authStore";
@@ -15,6 +16,7 @@ const EmpresaTab = () => {
   const empresa = currentRole?.empresa;
   const isPersonalLinked = empresa?.siiRutPersonal != null;
 
+  const [siiSyncModalOpen, setSiiSyncModalOpen] = useState(false);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [syncModalIsUpdate, setSyncModalIsUpdate] = useState(false);
   const [unlinkModalOpen, setUnlinkModalOpen] = useState(false);
@@ -32,7 +34,9 @@ const EmpresaTab = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <AccountLevels currentLevel={currentRole?.nivel as 1 | 2 | 3 | undefined} />
-      {currentRole?.nivel && currentRole?.nivel !== 1 && <EmpresaInfoBannerSii />}
+      {currentRole?.nivel && currentRole?.nivel !== 1 && (
+        <EmpresaInfoBannerSii onUpdateCredentials={() => setSiiSyncModalOpen(true)} />
+      )}
       {currentRole?.nivel && currentRole?.nivel === 1 && <SiiSync />}
       {currentRole?.nivel && currentRole?.nivel !== 1 && <Empresa readOnly={true} />}
       {currentRole?.nivel && currentRole?.nivel !== 1 && (
@@ -45,6 +49,10 @@ const EmpresaTab = () => {
       )}
       {isPersonalLinked && <SiiPersonalInfo />}
 
+      <SiiSyncModal
+        open={siiSyncModalOpen}
+        onClose={() => setSiiSyncModalOpen(false)}
+      />
       <SiiPersonalSyncModal
         open={syncModalOpen}
         onClose={() => setSyncModalOpen(false)}
