@@ -55,7 +55,9 @@ const SiiPersonalSyncModal = ({
   onClose,
   isUpdate = false,
 }: SiiPersonalSyncModalProps) => {
-  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
+  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
+    null,
+  );
   const [alertMessage, setAlertMessage] = useState("");
   const [showPasswordSii, setShowPasswordSii] = useState(false);
   const [showPasswordCert, setShowPasswordCert] = useState(false);
@@ -81,7 +83,7 @@ const SiiPersonalSyncModal = ({
       setAlertMessage(
         isUpdate
           ? "Las credenciales personales del SII han sido actualizadas correctamente."
-          : "Tu cuenta personal del SII ha sido vinculada correctamente."
+          : "Tu cuenta personal del SII ha sido vinculada correctamente.",
       );
       formik.resetForm();
     } catch (error: unknown) {
@@ -91,7 +93,7 @@ const SiiPersonalSyncModal = ({
       setAlertStatus("error");
       setAlertMessage(
         axiosError?.response?.data?.message ||
-          "Ocurrió un error al vincular la cuenta personal del SII"
+          "Ocurrió un error al vincular la cuenta personal del SII",
       );
     }
   };
@@ -157,7 +159,9 @@ const SiiPersonalSyncModal = ({
             <SyncIcon sx={{ color: "common.white", fontSize: 24 }} />
           </Box>
           <Typography variant="h6" fontWeight={600}>
-            {isUpdate ? "Actualizar cuenta personal SII" : "Vincular cuenta personal SII"}
+            {isUpdate
+              ? "Actualizar cuenta personal SII"
+              : "Vincular cuenta personal SII"}
           </Typography>
         </Box>
         <IconButton onClick={handleClose} disabled={loading}>
@@ -185,82 +189,99 @@ const SiiPersonalSyncModal = ({
             : "Ingresa las credenciales de tu cuenta personal del SII para habilitar las funcionalidades avanzadas."}
         </Typography>
 
-        <StyledTextField
-          fullWidth
-          label="RUT Personal"
-          placeholder="12.345.678-9"
-          name="siiRutPersonal"
-          value={formik.values.siiRutPersonal}
-          error={formik.touched.siiRutPersonal && Boolean(formik.errors.siiRutPersonal)}
-          helperText={formik.touched.siiRutPersonal && formik.errors.siiRutPersonal}
-          onChange={handleRutChange}
-          onBlur={formik.handleBlur}
-          disabled={loading || alertStatus === "success"}
-        />
+        {alertStatus !== "success" && (
+          <>
+            <StyledTextField
+              fullWidth
+              label="RUT Personal"
+              placeholder="12.345.678-9"
+              name="siiRutPersonal"
+              value={formik.values.siiRutPersonal}
+              error={
+                formik.touched.siiRutPersonal &&
+                Boolean(formik.errors.siiRutPersonal)
+              }
+              helperText={
+                formik.touched.siiRutPersonal && formik.errors.siiRutPersonal
+              }
+              onChange={handleRutChange}
+              onBlur={formik.handleBlur}
+              disabled={loading}
+            />
 
-        <StyledTextField
-          fullWidth
-          label="Contraseña SII"
-          placeholder="Ingresa tu contraseña del SII"
-          type={showPasswordSii ? "text" : "password"}
-          name="siiPasswordPersonal"
-          inputProps={{ maxLength: 128, autoComplete: "current-password" }}
-          value={formik.values.siiPasswordPersonal}
-          error={formik.touched.siiPasswordPersonal && Boolean(formik.errors.siiPasswordPersonal)}
-          helperText={formik.touched.siiPasswordPersonal && formik.errors.siiPasswordPersonal}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          disabled={loading || alertStatus === "success"}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={() => setShowPasswordSii(!showPasswordSii)}
-                  edge="end"
-                  disabled={loading}
-                >
-                  {showPasswordSii ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+            <StyledTextField
+              fullWidth
+              label="Contraseña SII"
+              placeholder="Ingresa tu contraseña del SII"
+              type={showPasswordSii ? "text" : "password"}
+              name="siiPasswordPersonal"
+              inputProps={{ maxLength: 128, autoComplete: "current-password" }}
+              value={formik.values.siiPasswordPersonal}
+              error={
+                formik.touched.siiPasswordPersonal &&
+                Boolean(formik.errors.siiPasswordPersonal)
+              }
+              helperText={
+                formik.touched.siiPasswordPersonal &&
+                formik.errors.siiPasswordPersonal
+              }
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={loading}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPasswordSii(!showPasswordSii)}
+                      edge="end"
+                      disabled={loading}
+                    >
+                      {showPasswordSii ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
 
-        <StyledTextField
-          fullWidth
-          label="Contraseña del Certificado Digital"
-          placeholder="Ingresa la contraseña de tu certificado"
-          type={showPasswordCert ? "text" : "password"}
-          name="siiPasswordCertificadoPersonal"
-          inputProps={{ maxLength: 128, autoComplete: "current-password" }}
-          value={formik.values.siiPasswordCertificadoPersonal}
-          error={
-            formik.touched.siiPasswordCertificadoPersonal &&
-            Boolean(formik.errors.siiPasswordCertificadoPersonal)
-          }
-          helperText={
-            formik.touched.siiPasswordCertificadoPersonal &&
-            formik.errors.siiPasswordCertificadoPersonal
-          }
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          disabled={loading || alertStatus === "success"}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={() => setShowPasswordCert(!showPasswordCert)}
-                  edge="end"
-                  disabled={loading}
-                >
-                  {showPasswordCert ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+            <StyledTextField
+              fullWidth
+              label="Contraseña del Certificado Digital"
+              placeholder="Ingresa la contraseña de tu certificado"
+              type={showPasswordCert ? "text" : "password"}
+              name="siiPasswordCertificadoPersonal"
+              inputProps={{ maxLength: 128, autoComplete: "current-password" }}
+              value={formik.values.siiPasswordCertificadoPersonal}
+              error={
+                formik.touched.siiPasswordCertificadoPersonal &&
+                Boolean(formik.errors.siiPasswordCertificadoPersonal)
+              }
+              helperText={
+                formik.touched.siiPasswordCertificadoPersonal &&
+                formik.errors.siiPasswordCertificadoPersonal
+              }
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={loading}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPasswordCert(!showPasswordCert)}
+                      edge="end"
+                      disabled={loading}
+                    >
+                      {showPasswordCert ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </>
+        )}
 
-        <Box sx={{ display: "flex", gap: 2, mt: 3, justifyContent: "flex-end" }}>
+        <Box
+          sx={{ display: "flex", gap: 2, mt: 3, justifyContent: "flex-end" }}
+        >
           <Button
             variant="contained"
             onClick={handleClose}
