@@ -28,6 +28,7 @@ import useAuthStore from "../../../store/authStore";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
 import OfertasDrawer from "../../../components/Facturas/OfertasDrawer";
 import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
+import FacturaPdfCard from "../../../components/Facturas/FacturaPdfCard";
 import FacturaResumenCard from "../../../components/Facturas/FacturaResumenCard";
 import DetalleCotizacionCard from "../../../components/Facturas/DetalleCotizacionCard";
 
@@ -323,11 +324,20 @@ const FacturaDetail = () => {
           }}
         >
           {/* Card 3: XML de la Factura */}
-          <FacturaXmlCard
-            factura={factura}
-            onUploadClick={() => setUploadXmlModalOpen(true)}
-            onDownloadClick={handleDescargarXML}
-          />
+          <Box>
+            <FacturaXmlCard
+              factura={factura}
+              onUploadClick={() => setUploadXmlModalOpen(true)}
+              onDownloadClick={handleDescargarXML}
+            />
+
+            {/* Card: PDF de la Factura */}
+            <FacturaPdfCard
+              factura={factura}
+              onUploadClick={() => console.log("Upload PDF")}
+              onDownloadClick={handleDescargarXML}
+            />
+          </Box>
 
           {/* Card 4: Acciones */}
           <Box
