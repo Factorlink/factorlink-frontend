@@ -30,6 +30,9 @@ type UpdateFacturaPayload = {
   base64Factura?: string;
   plazo?: number;
   montoFinanciar?: number;
+  facturaNameFilePDF?: string;
+  base64FacturaPDF?: string;
+
 };
 
 type SendToMarketplacePayload = {
