@@ -5,6 +5,8 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { StyledTextField } from "../../../pages/register/styles";
+import useAuthStore from "../../../store/authStore";
 
 interface SiiPersonalSyncProps {
   isLinked: boolean;
@@ -26,6 +28,9 @@ const SiiPersonalSync = ({
   onUpdate,
   onUnlink,
 }: SiiPersonalSyncProps) => {
+  const { currentRole } = useAuthStore();
+  const empresa = currentRole?.empresa;
+
   return (
     <Box
       sx={{
@@ -102,9 +107,7 @@ const SiiPersonalSync = ({
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-            <HelpOutlineIcon
-              sx={{ fontSize: 20, color: "primary.main" }}
-            />
+            <HelpOutlineIcon sx={{ fontSize: 20, color: "primary.main" }} />
             <Typography
               variant="subtitle2"
               sx={{ color: "text.primary", fontWeight: 600 }}
@@ -112,13 +115,10 @@ const SiiPersonalSync = ({
               ¿Para qué sirve vincular tu cuenta personal del SII?
             </Typography>
           </Box>
-          <Typography
-            variant="body2"
-            sx={{ color: "text.secondary", mb: 2 }}
-          >
-            Al vincular tu cuenta personal del SII a tu empresa, podrás
-            realizar acciones adicionales de forma automática directamente
-            desde la plataforma.
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
+            Al vincular tu cuenta personal del SII a tu empresa, podrás realizar
+            acciones adicionales de forma automática directamente desde la
+            plataforma.
           </Typography>
           <Box
             sx={{
@@ -144,6 +144,51 @@ const SiiPersonalSync = ({
         </Box>
       </Box>
 
+      {isLinked && (
+        <Box sx={{ mx: 3, mb: 2 }}>
+          <Box
+            sx={{
+              display: "grid",
+              padding: { xs: 3, md: 5 },
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <Box>
+              {[
+                { label: "RUT Personal", value: empresa?.siiRutPersonal || "" },
+                {
+                  label: "Razón Social",
+                  value: empresa?.siiRazonSocialPersonal || "",
+                },
+                { label: "Email", value: empresa?.siiEmailPersonal || "" },
+                {
+                  label: "Dirección",
+                  value: empresa?.siiDireccionPersonal || "",
+                },
+              ].map((field) => (
+                <StyledTextField
+                  key={field.label}
+                  fullWidth
+                  label={field.label}
+                  value={field.value}
+                  InputProps={{ readOnly: true }}
+                  sx={{
+                    "& .MuiInputBase-input": {
+                      color: "text.secondary",
+                      cursor: "default",
+                    },
+                    "& .MuiOutlinedInput-root": {
+                      backgroundColor: "action.hover",
+                    },
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      )}
+
       {/* Footer */}
       <Box sx={{ px: 3, pb: 3 }}>
         {isLinked ? (
@@ -157,9 +202,7 @@ const SiiPersonalSync = ({
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <InfoOutlinedIcon
-                sx={{ fontSize: 20, color: "success.main" }}
-              />
+              <InfoOutlinedIcon sx={{ fontSize: 20, color: "success.main" }} />
               <Box>
                 <Typography variant="caption" sx={{ color: "success.main" }}>
                   Todas las funcionalidades avanzadas están habilitadas

@@ -18,6 +18,8 @@ import { empresaFieldsSchema } from "../../../utils/validations/empresa-fields";
 import { handleRutInputChange } from "../../../utils/validations/shared-fields";
 import useAuthStore from "../../../store/authStore";
 import type { Role } from "../../../types/role";
+import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
+import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 
 interface EmpresaFormData {
   rut: string;
@@ -25,16 +27,18 @@ interface EmpresaFormData {
   giro: string;
   email: string;
   direccion: string;
+  
 }
 
 interface EmpresaProps {
   readOnly?: boolean;
+  onUpdateCredentials: () => void;
 }
 
-const Empresa = ({ readOnly = false }: EmpresaProps) => {
+const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">(
-    "success"
+    "success",
   );
   const [errorMessage, setErrorMessage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -66,7 +70,7 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
       };
       setErrorMessage(
         axiosError?.response?.data?.message?.[0] ||
-          "Ocurrió un error al crear la empresa"
+          "Ocurrió un error al crear la empresa",
       );
       setModalStatus("error");
       setModalOpen(true);
@@ -82,7 +86,7 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
         giro: values.giro.trim(),
         direccion: values.direccion.trim(),
       });
-      
+
       useAuthStore.getState().setCurrentRole({
         ...currentRole,
         empresa: response,
@@ -96,7 +100,7 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
       };
       setErrorMessage(
         axiosError?.response?.data?.message?.[0] ||
-          "Ocurrió un error al actualizar la empresa"
+          "Ocurrió un error al actualizar la empresa",
       );
       setModalStatus("error");
       setModalOpen(true);
@@ -105,7 +109,7 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
 
   const handleCloseModal = (
     _event?: unknown,
-    reason?: "backdropClick" | "escapeKeyDown"
+    reason?: "backdropClick" | "escapeKeyDown",
   ) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
     setModalOpen(false);
@@ -158,12 +162,65 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
           }}
         >
           <Box sx={{ paddingLeft: { md: 2 } }}>
-            <Typography
-              variant="h6"
-              sx={{ color: "text.primary", fontWeight: 600, mb: 3 }}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingBottom: 3
+              }}
             >
-              Información de la Empresa
-            </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                  sx={{
+                    backgroundColor: "#00BCD4",
+                    borderRadius: 2,
+                    p: 1.5,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <ApartmentOutlinedIcon
+                    sx={{ color: "white", fontSize: 28 }}
+                  />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="h6"
+                    sx={{ color: "text.primary", fontWeight: 600 }}
+                  >
+                    Información de la Empresa
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    Datos tributarios sincronizados desde el SII
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Button
+                variant="contained"
+                startIcon={<VpnKeyOutlinedIcon />}
+                onClick={onUpdateCredentials}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: 2,
+                  fontWeight: 500,
+                  backgroundColor: "#00BCD4",
+                  color: "common.white",
+                  px: 3,
+                  py: 1.2,
+                  boxShadow: "none",
+                  whiteSpace: "nowrap",
+                  "&:hover": {
+                    backgroundColor: "#0097A7",
+                    boxShadow: "none",
+                  },
+                }}
+              >
+                Actualizar credenciales
+              </Button>
+            </Box>
 
             <StyledTextField
               fullWidth
@@ -171,21 +228,27 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
               placeholder="12.345.678-9"
               name="rut"
               value={formik.values.rut}
-              error={!readOnly && formik.touched.rut && Boolean(formik.errors.rut)}
+              error={
+                !readOnly && formik.touched.rut && Boolean(formik.errors.rut)
+              }
               helperText={!readOnly && formik.touched.rut && formik.errors.rut}
               onChange={handleRutChange}
               onBlur={formik.handleBlur}
               disabled={loading}
               InputProps={{ readOnly }}
-              sx={readOnly ? { 
-                "& .MuiInputBase-input": { 
-                  color: "text.secondary",
-                  cursor: "default"
-                },
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "action.hover"
-                }
-              } : undefined}
+              sx={
+                readOnly
+                  ? {
+                      "& .MuiInputBase-input": {
+                        color: "text.secondary",
+                        cursor: "default",
+                      },
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "action.hover",
+                      },
+                    }
+                  : undefined
+              }
             />
 
             <StyledTextField
@@ -194,21 +257,33 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
               placeholder="Mi Empresa S.A."
               name="razonSocial"
               value={formik.values.razonSocial}
-              error={!readOnly && formik.touched.razonSocial && Boolean(formik.errors.razonSocial)}
-              helperText={!readOnly && formik.touched.razonSocial && formik.errors.razonSocial}
+              error={
+                !readOnly &&
+                formik.touched.razonSocial &&
+                Boolean(formik.errors.razonSocial)
+              }
+              helperText={
+                !readOnly &&
+                formik.touched.razonSocial &&
+                formik.errors.razonSocial
+              }
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
               InputProps={{ readOnly }}
-              sx={readOnly ? { 
-                "& .MuiInputBase-input": { 
-                  color: "text.secondary",
-                  cursor: "default"
-                },
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "action.hover"
-                }
-              } : undefined}
+              sx={
+                readOnly
+                  ? {
+                      "& .MuiInputBase-input": {
+                        color: "text.secondary",
+                        cursor: "default",
+                      },
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "action.hover",
+                      },
+                    }
+                  : undefined
+              }
             />
 
             <StyledTextField
@@ -217,21 +292,29 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
               placeholder="Servicios de consultoría"
               name="giro"
               value={formik.values.giro}
-              error={!readOnly && formik.touched.giro && Boolean(formik.errors.giro)}
-              helperText={!readOnly && formik.touched.giro && formik.errors.giro}
+              error={
+                !readOnly && formik.touched.giro && Boolean(formik.errors.giro)
+              }
+              helperText={
+                !readOnly && formik.touched.giro && formik.errors.giro
+              }
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
               InputProps={{ readOnly }}
-              sx={readOnly ? { 
-                "& .MuiInputBase-input": { 
-                  color: "text.secondary",
-                  cursor: "default"
-                },
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "action.hover"
-                }
-              } : undefined}
+              sx={
+                readOnly
+                  ? {
+                      "& .MuiInputBase-input": {
+                        color: "text.secondary",
+                        cursor: "default",
+                      },
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "action.hover",
+                      },
+                    }
+                  : undefined
+              }
             />
 
             <StyledTextField
@@ -240,21 +323,31 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
               placeholder="contacto@empresa.cl"
               name="email"
               value={formik.values.email}
-              error={!readOnly && formik.touched.email && Boolean(formik.errors.email)}
-              helperText={!readOnly && formik.touched.email && formik.errors.email}
+              error={
+                !readOnly &&
+                formik.touched.email &&
+                Boolean(formik.errors.email)
+              }
+              helperText={
+                !readOnly && formik.touched.email && formik.errors.email
+              }
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
               InputProps={{ readOnly }}
-              sx={readOnly ? { 
-                "& .MuiInputBase-input": { 
-                  color: "text.secondary",
-                  cursor: "default"
-                },
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "action.hover"
-                }
-              } : undefined}
+              sx={
+                readOnly
+                  ? {
+                      "& .MuiInputBase-input": {
+                        color: "text.secondary",
+                        cursor: "default",
+                      },
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "action.hover",
+                      },
+                    }
+                  : undefined
+              }
             />
 
             <StyledTextField
@@ -263,21 +356,31 @@ const Empresa = ({ readOnly = false }: EmpresaProps) => {
               placeholder="Av. Principal 123, Santiago"
               name="direccion"
               value={formik.values.direccion}
-              error={!readOnly && formik.touched.direccion && Boolean(formik.errors.direccion)}
-              helperText={!readOnly && formik.touched.direccion && formik.errors.direccion}
+              error={
+                !readOnly &&
+                formik.touched.direccion &&
+                Boolean(formik.errors.direccion)
+              }
+              helperText={
+                !readOnly && formik.touched.direccion && formik.errors.direccion
+              }
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={loading}
               InputProps={{ readOnly }}
-              sx={readOnly ? { 
-                "& .MuiInputBase-input": { 
-                  color: "text.secondary",
-                  cursor: "default"
-                },
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "action.hover"
-                }
-              } : undefined}
+              sx={
+                readOnly
+                  ? {
+                      "& .MuiInputBase-input": {
+                        color: "text.secondary",
+                        cursor: "default",
+                      },
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "action.hover",
+                      },
+                    }
+                  : undefined
+              }
             />
 
             {!readOnly && (
