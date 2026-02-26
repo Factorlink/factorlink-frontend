@@ -20,6 +20,7 @@ import Layout from "../../../components/Layout";
 import type { Factura } from "../../../types/factura";
 import { useFacturas } from "../../../hooks/useFacturas";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
+import UploadPdfModal from "../../../components/Modals/UploadPdfModal";
 import DeleteFacturaModal from "../../../components/Modals/DeleteFacturaModal";
 import RemoveMarketplaceModal from "../../../components/Modals/RemoveMarketplaceModal";
 import DocumentsRequiredModal from "../../../components/Modals/DocumentsRequiredModal";
@@ -40,6 +41,7 @@ const FacturaDetail = () => {
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
+  const [uploadPdfModalOpen, setUploadPdfModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] =
     useState(false);
@@ -90,6 +92,22 @@ const FacturaDetail = () => {
 
   const handleCloseUploadXmlModal = () => {
     setUploadXmlModalOpen(false);
+  };
+
+  const handleCloseUploadPdfModal = () => {
+    setUploadPdfModalOpen(false);
+  };
+
+  const handleUploadPdfSuccess = async () => {
+    try {
+      const data = await refreshFactura(id!);
+      setFactura(data);
+    } catch (err) {
+      console.error("Error refreshing factura:", err);
+      setError(
+        "No se pudo actualizar la factura. Por favor, intente nuevamente.",
+      );
+    }
   };
 
   const handleUploadXmlSuccess = async () => {
@@ -319,33 +337,48 @@ const FacturaDetail = () => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+            gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
             gap: 3,
           }}
         >
-          {/* Card 3: XML de la Factura */}
-          <Box>
-            <FacturaXmlCard
-              factura={factura}
-              onUploadClick={() => setUploadXmlModalOpen(true)}
-              onDownloadClick={handleDescargarXML}
-            />
+          {/* Card: XML de la Factura */}
+          <FacturaXmlCard
+            factura={factura}
+            onUploadClick={() => setUploadXmlModalOpen(true)}
+            onDownloadClick={handleDescargarXML}
+          />
 
-            {/* Card: PDF de la Factura */}
-            <FacturaPdfCard
-              factura={factura}
-              onUploadClick={() => console.log("Upload PDF")}
-              onDownloadClick={handleDescargarXML}
-            />
-          </Box>
+          {/* Card: PDF de la Factura */}
+          <FacturaPdfCard
+            factura={factura}
+            onUploadClick={() => setUploadPdfModalOpen(true)}
+            onDownloadClick={(base64, fileName) => {
+              const byteCharacters = atob(base64);
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              const blob = new Blob([byteArray], { type: "application/pdf" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = fileName;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }}
+          />
 
-          {/* Card 4: Acciones */}
+          {/* Card: Acciones */}
           <Box
             sx={{
               backgroundColor: "white",
               borderRadius: 3,
               p: 3,
               boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              gridColumn: { lg: "1 / -1" },
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
@@ -463,6 +496,14 @@ const FacturaDetail = () => {
           open={uploadXmlModalOpen}
           onClose={handleCloseUploadXmlModal}
           onSuccess={handleUploadXmlSuccess}
+          facturaId={id || ""}
+        />
+
+        {/* Upload PDF Modal */}
+        <UploadPdfModal
+          open={uploadPdfModalOpen}
+          onClose={handleCloseUploadPdfModal}
+          onSuccess={handleUploadPdfSuccess}
           facturaId={id || ""}
         />
 
