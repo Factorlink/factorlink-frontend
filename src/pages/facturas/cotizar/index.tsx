@@ -848,6 +848,33 @@ const CotizarFactura = () => {
               </Box>
             </Box>
 
+            {/* PDF Validated Card */}
+            <Box
+              sx={{
+                backgroundColor: "white",
+                borderRadius: 3,
+                p: 3,
+                mb: 3,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <CheckCircle sx={{ color: "#00A86B", fontSize: 32 }} />
+                <Box>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 600, color: "#1E293B" }}
+                  >
+                    PDF Validado
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#64748B" }}>
+                    {factura.facturaNameFilePDF || "factura.pdf"} - Documento
+                    subido correctamente
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
             {/* Financial Conditions Card */}
             <Box
               sx={{
