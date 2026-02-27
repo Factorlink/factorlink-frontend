@@ -334,22 +334,52 @@ const FacturaDetail = () => {
           </Box>
         )}
 
-        {/* Documents Row: Col 1 = SII fetch, Col 2 = XML + PDF stacked */}
+        {/* Grid 2x2: Fila 1 = SII + XML, Fila 2 = PDF + Acciones */}
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 2fr" },
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
             gap: 3,
           }}
         >
-          {/* Column 1: Fetch SII Documents */}
-          
-          <Box>
-            <FetchSiiDocumentsCard
-              facturaId={factura.id}
-              onSuccess={(data) => setFactura(data)}
-            />
-            <Box
+          {/* Fila 1, Col 1: SII */}
+          <FetchSiiDocumentsCard
+            facturaId={factura.id}
+            onSuccess={(data) => setFactura(data)}
+          />
+
+          {/* Fila 1, Col 2: XML */}
+          <FacturaXmlCard
+            factura={factura}
+            onUploadClick={() => setUploadXmlModalOpen(true)}
+            onDownloadClick={handleDescargarXML}
+          />
+
+          {/* Fila 2, Col 1: PDF */}
+          <FacturaPdfCard
+            factura={factura}
+            onUploadClick={() => setUploadPdfModalOpen(true)}
+            onDownloadClick={(base64, fileName) => {
+              const byteCharacters = atob(base64);
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              const blob = new Blob([byteArray], { type: "application/pdf" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = fileName;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }}
+          />
+
+          {/* Fila 2, Col 2: Acciones */}
+          <Box
             sx={{
               backgroundColor: "white",
               borderRadius: 3,
@@ -462,38 +492,6 @@ const FacturaDetail = () => {
                 </Button>
               )}
             </Box>
-          </Box>
-
-          </Box>
-
-          {/* Column 2: XML + PDF stacked */}
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <FacturaXmlCard
-              factura={factura}
-              onUploadClick={() => setUploadXmlModalOpen(true)}
-              onDownloadClick={handleDescargarXML}
-            />
-            <FacturaPdfCard
-              factura={factura}
-              onUploadClick={() => setUploadPdfModalOpen(true)}
-              onDownloadClick={(base64, fileName) => {
-                const byteCharacters = atob(base64);
-                const byteNumbers = new Array(byteCharacters.length);
-                for (let i = 0; i < byteCharacters.length; i++) {
-                  byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-                const byteArray = new Uint8Array(byteNumbers);
-                const blob = new Blob([byteArray], { type: "application/pdf" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              }}
-            />
           </Box>
         </Box>
 
