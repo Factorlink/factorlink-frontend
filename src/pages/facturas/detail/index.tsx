@@ -334,30 +334,30 @@ const FacturaDetail = () => {
           </Box>
         )}
 
-        {/* Fetch SII Documents - only when CARGADA */}
-        {isCargada && (
-          <FetchSiiDocumentsCard
-            facturaId={factura.id}
-            onSuccess={(data) => setFactura(data)}
-          />
-        )}
-
-        {/* Bottom Cards Grid */}
+        {/* Documents & Actions Grid */}
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr", lg: "3fr 3fr 3fr" },
             gap: 3,
           }}
         >
-          {/* Card: XML de la Factura */}
+          {/* 1. Fetch SII Documents */}
+          {isCargada && (
+            <FetchSiiDocumentsCard
+              facturaId={factura.id}
+              onSuccess={(data) => setFactura(data)}
+            />
+          )}
+
+          {/* 2. XML de la Factura */}
           <FacturaXmlCard
             factura={factura}
             onUploadClick={() => setUploadXmlModalOpen(true)}
             onDownloadClick={handleDescargarXML}
           />
 
-          {/* Card: PDF de la Factura */}
+          {/* 3. PDF de la Factura */}
           <FacturaPdfCard
             factura={factura}
             onUploadClick={() => setUploadPdfModalOpen(true)}
@@ -379,15 +379,16 @@ const FacturaDetail = () => {
               URL.revokeObjectURL(url);
             }}
           />
+        </Box>
 
-          {/* Card: Acciones */}
+        {/* 4. Acciones */}
           <Box
             sx={{
+              mt: 3,
               backgroundColor: "white",
               borderRadius: 3,
               p: 3,
               boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-              gridColumn: { lg: "1 / -1" },
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
@@ -442,9 +443,7 @@ const FacturaDetail = () => {
                   sx={{
                     backgroundColor: "#00BCD4",
                     "&:hover": { backgroundColor: "#00ACC1" },
-                    "&:disabled": {
-                      opacity: 0.7,
-                    },
+                    "&:disabled": { opacity: 0.7 },
                     textTransform: "none",
                     fontWeight: 600,
                     py: 1.5,
@@ -498,7 +497,6 @@ const FacturaDetail = () => {
               )}
             </Box>
           </Box>
-        </Box>
 
         {/* Upload XML Modal */}
         <UploadXmlModal
