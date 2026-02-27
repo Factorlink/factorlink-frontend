@@ -32,6 +32,7 @@ import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
 import FacturaPdfCard from "../../../components/Facturas/FacturaPdfCard";
 import FacturaResumenCard from "../../../components/Facturas/FacturaResumenCard";
 import DetalleCotizacionCard from "../../../components/Facturas/DetalleCotizacionCard";
+import FetchSiiDocumentsCard from "../../../components/Facturas/FetchSiiDocumentsCard";
 
 const FacturaDetail = () => {
   const { getFacturaById, loading, refreshFactura } = useFacturas();
@@ -331,6 +332,14 @@ const FacturaDetail = () => {
               />
             )}
           </Box>
+        )}
+
+        {/* Fetch SII Documents - only when CARGADA */}
+        {isCargada && (
+          <FetchSiiDocumentsCard
+            facturaId={factura.id}
+            onSuccess={(data) => setFactura(data)}
+          />
         )}
 
         {/* Bottom Cards Grid */}

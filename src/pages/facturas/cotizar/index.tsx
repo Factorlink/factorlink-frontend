@@ -44,6 +44,7 @@ import FacturaPdfCard from "../../../components/Facturas/FacturaPdfCard";
 import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
 import UploadPdfModal from "../../../components/Modals/UploadPdfModal";
+import FetchSiiDocumentsCard from "../../../components/Facturas/FetchSiiDocumentsCard";
 
 const STEPS = ["Resumen Factura", "XML + Condiciones", "Resumen Final"];
 
@@ -494,6 +495,12 @@ const CotizarFactura = () => {
 
         {activeStep === 1 && (
           <>
+            {/* Fetch SII Documents */}
+            <FetchSiiDocumentsCard
+              facturaId={factura.id}
+              onSuccess={(data) => setFactura(data)}
+            />
+
             {/* XML Card */}
             <FacturaXmlCard
               factura={factura}
@@ -818,59 +825,69 @@ const CotizarFactura = () => {
 
         {activeStep === 2 && (
           <>
-            {/* Summary Cards */}
-            <FacturaResumenCard factura={factura} />
-
-            {/* XML Validated Card */}
             <Box
               sx={{
-                backgroundColor: "white",
-                borderRadius: 3,
-                p: 3,
-                mb: 3,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                gap: 3,
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <CheckCircle sx={{ color: "#00A86B", fontSize: 32 }} />
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 600, color: "#1E293B" }}
-                  >
-                    XML Validado
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "#64748B" }}>
-                    {factura.facturaNameFile || "factura.xml"} - Documento
-                    verificado
-                  </Typography>
+              {/* Summary Cards */}
+              <FacturaResumenCard factura={factura} />
+
+              <Box>
+                {/* XML Validated Card */}
+                <Box
+                  sx={{
+                    backgroundColor: "white",
+                    borderRadius: 3,
+                    p: 3,
+                    mb: 3,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <CheckCircle sx={{ color: "#00A86B", fontSize: 32 }} />
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 600, color: "#1E293B" }}
+                      >
+                        XML Validado
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "#64748B" }}>
+                        {factura.facturaNameFile || "factura.xml"} - Documento
+                        verificado
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-              </Box>
-            </Box>
 
-            {/* PDF Validated Card */}
-            <Box
-              sx={{
-                backgroundColor: "white",
-                borderRadius: 3,
-                p: 3,
-                mb: 3,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <CheckCircle sx={{ color: "#00A86B", fontSize: 32 }} />
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 600, color: "#1E293B" }}
-                  >
-                    PDF Validado
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "#64748B" }}>
-                    {factura.facturaNameFilePDF || "factura.pdf"} - Documento
-                    subido correctamente
-                  </Typography>
+                {/* PDF Validated Card */}
+                <Box
+                  sx={{
+                    backgroundColor: "white",
+                    borderRadius: 3,
+                    p: 3,
+                    mb: 3,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <CheckCircle sx={{ color: "#00A86B", fontSize: 32 }} />
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 600, color: "#1E293B" }}
+                      >
+                        PDF Validado
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "#64748B" }}>
+                        {factura.facturaNameFilePDF || "factura.pdf"} -
+                        Documento subido correctamente
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
               </Box>
             </Box>
@@ -1050,7 +1067,7 @@ const CotizarFactura = () => {
           onSuccess={handleUploadXmlSuccess}
           facturaId={id || ""}
         />
-        
+
         {/* Upload PDF Modal */}
         <UploadPdfModal
           open={uploadPdfModalOpen}
