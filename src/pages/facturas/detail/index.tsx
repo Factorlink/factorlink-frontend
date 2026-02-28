@@ -28,11 +28,9 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import useAuthStore from "../../../store/authStore";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
 import OfertasDrawer from "../../../components/Facturas/OfertasDrawer";
-import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
-import FacturaPdfCard from "../../../components/Facturas/FacturaPdfCard";
 import FacturaResumenCard from "../../../components/Facturas/FacturaResumenCard";
 import DetalleCotizacionCard from "../../../components/Facturas/DetalleCotizacionCard";
-import FetchSiiDocumentsCard from "../../../components/Facturas/FetchSiiDocumentsCard";
+import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
 
 const FacturaDetail = () => {
   const { getFacturaById, loading, refreshFactura } = useFacturas();
@@ -334,32 +332,21 @@ const FacturaDetail = () => {
           </Box>
         )}
 
-        {/* Grid 2x2: Fila 1 = SII + XML, Fila 2 = PDF + Acciones */}
+        {/* Documentos + Acciones */}
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
             gap: 3,
           }}
         >
-          {/* Fila 1, Col 1: SII */}
-          <FetchSiiDocumentsCard
-            facturaId={factura.id}
-            onSuccess={(data) => setFactura(data)}
-          />
-
-          {/* Fila 1, Col 2: XML */}
-          <FacturaXmlCard
+          {/* Documentos Asociados */}
+          <DocumentosAsociadosCard
             factura={factura}
-            onUploadClick={() => setUploadXmlModalOpen(true)}
-            onDownloadClick={handleDescargarXML}
-          />
-
-          {/* Fila 2, Col 1: PDF */}
-          <FacturaPdfCard
-            factura={factura}
-            onUploadClick={() => setUploadPdfModalOpen(true)}
-            onDownloadClick={(base64, fileName) => {
+            onUploadXmlClick={() => setUploadXmlModalOpen(true)}
+            onUploadPdfClick={() => setUploadPdfModalOpen(true)}
+            onDownloadXml={handleDescargarXML}
+            onDownloadPdf={(base64, fileName) => {
               const byteCharacters = atob(base64);
               const byteNumbers = new Array(byteCharacters.length);
               for (let i = 0; i < byteCharacters.length; i++) {
@@ -376,9 +363,10 @@ const FacturaDetail = () => {
               document.body.removeChild(a);
               URL.revokeObjectURL(url);
             }}
+            onFetchSiiSuccess={(data) => setFactura(data)}
           />
 
-          {/* Fila 2, Col 2: Acciones */}
+          {/* Acciones */}
           <Box
             sx={{
               backgroundColor: "white",

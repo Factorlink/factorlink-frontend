@@ -40,11 +40,9 @@ import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
 import FacturaResumenCard, {
   formatCurrency,
 } from "../../../components/Facturas/FacturaResumenCard";
-import FacturaPdfCard from "../../../components/Facturas/FacturaPdfCard";
-import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
 import UploadPdfModal from "../../../components/Modals/UploadPdfModal";
-import FetchSiiDocumentsCard from "../../../components/Facturas/FetchSiiDocumentsCard";
+import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
 
 const STEPS = ["Resumen Factura", "XML + Condiciones", "Resumen Final"];
 
@@ -495,27 +493,15 @@ const CotizarFactura = () => {
 
         {activeStep === 1 && (
           <>
-            {/* Fetch SII Documents */}
-            <FetchSiiDocumentsCard
-              facturaId={factura.id}
-              onSuccess={(data) => setFactura(data)}
-            />
-
-            {/* XML Card */}
-            <FacturaXmlCard
+            {/* Documentos Asociados */}
+            <DocumentosAsociadosCard
               factura={factura}
-              onUploadClick={() => setUploadXmlModalOpen(true)}
-              onDownloadClick={handleDownloadXml}
+              onUploadXmlClick={() => setUploadXmlModalOpen(true)}
+              onUploadPdfClick={() => setUploadPdfModalOpen(true)}
+              onDownloadXml={handleDownloadXml}
+              onDownloadPdf={handleDownloadXml}
+              onFetchSiiSuccess={(data) => setFactura(data)}
             />
-
-            {/* PDF Card */}
-            <Box sx={{ mt: 3 }}>
-              <FacturaPdfCard
-                factura={factura}
-                onUploadClick={() => setUploadPdfModalOpen(true)}
-                onDownloadClick={handleDownloadXml}
-              />
-            </Box>
 
             {/* Conditions Card */}
             <Box
@@ -835,7 +821,15 @@ const CotizarFactura = () => {
               {/* Summary Cards */}
               <FacturaResumenCard factura={factura} />
 
-              <Box>
+            </Box>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 3,
+              }}
+              >
                 {/* XML Validated Card */}
                 <Box
                   sx={{
@@ -890,7 +884,6 @@ const CotizarFactura = () => {
                   </Box>
                 </Box>
               </Box>
-            </Box>
 
             {/* Financial Conditions Card */}
             <Box

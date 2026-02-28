@@ -60,7 +60,7 @@ const FetchSiiDocumentsCard = ({ facturaId, onSuccess, disabled }: FetchSiiDocum
             Obtener Documentos del SII
           </Typography>
           <Typography variant="body2" sx={{ color: "#64748B" }}>
-            Descarga automáticamente el XML y PDF asociados a esta factura desde el SII
+            Obten automáticamente el XML y PDF asociados a esta factura desde el SII
           </Typography>
         </Box>
       </Box>
