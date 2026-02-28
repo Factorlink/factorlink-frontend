@@ -30,6 +30,9 @@ type UpdateFacturaPayload = {
   base64Factura?: string;
   plazo?: number;
   montoFinanciar?: number;
+  facturaNameFilePDF?: string;
+  base64FacturaPDF?: string;
+
 };
 
 type SendToMarketplacePayload = {
@@ -269,6 +272,18 @@ export const useFacturas = () => {
     }
   };
 
+  const fetchXMLContent = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await api.post(`/facturas/${id}/fetch-xml`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     getFacturas,
@@ -283,6 +298,7 @@ export const useFacturas = () => {
     getFacturasByFactoringId,
     getFacturaByIdAndFactoringId,
     getFacturasConOfertasByEmpresaId,
-    getFacturasCedidasByEmpresaId
+    getFacturasCedidasByEmpresaId,
+    fetchXMLContent
   };
 };

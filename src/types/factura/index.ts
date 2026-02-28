@@ -16,6 +16,7 @@ export interface Factura {
     empresaId: string;
     estado: string;
     facturaNameFile: string;
+    facturaNameFilePDF: string;
     fechaEmision: string;
     fechaRecepcion: string;
     folio: string;
@@ -40,4 +41,5 @@ export interface Factura {
     historyOfertas?: Oferta[];
     factoringIsOfertme?: string;
     ofertaFactoring?: Oferta
+    pdfContentBase64?: string;
 }

@@ -20,6 +20,7 @@ import Layout from "../../../components/Layout";
 import type { Factura } from "../../../types/factura";
 import { useFacturas } from "../../../hooks/useFacturas";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
+import UploadPdfModal from "../../../components/Modals/UploadPdfModal";
 import DeleteFacturaModal from "../../../components/Modals/DeleteFacturaModal";
 import RemoveMarketplaceModal from "../../../components/Modals/RemoveMarketplaceModal";
 import DocumentsRequiredModal from "../../../components/Modals/DocumentsRequiredModal";
@@ -27,9 +28,9 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import useAuthStore from "../../../store/authStore";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
 import OfertasDrawer from "../../../components/Facturas/OfertasDrawer";
-import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
 import FacturaResumenCard from "../../../components/Facturas/FacturaResumenCard";
 import DetalleCotizacionCard from "../../../components/Facturas/DetalleCotizacionCard";
+import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
 
 const FacturaDetail = () => {
   const { getFacturaById, loading, refreshFactura } = useFacturas();
@@ -39,6 +40,7 @@ const FacturaDetail = () => {
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
+  const [uploadPdfModalOpen, setUploadPdfModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] =
     useState(false);
@@ -89,6 +91,22 @@ const FacturaDetail = () => {
 
   const handleCloseUploadXmlModal = () => {
     setUploadXmlModalOpen(false);
+  };
+
+  const handleCloseUploadPdfModal = () => {
+    setUploadPdfModalOpen(false);
+  };
+
+  const handleUploadPdfSuccess = async () => {
+    try {
+      const data = await refreshFactura(id!);
+      setFactura(data);
+    } catch (err) {
+      console.error("Error refreshing factura:", err);
+      setError(
+        "No se pudo actualizar la factura. Por favor, intente nuevamente.",
+      );
+    }
   };
 
   const handleUploadXmlSuccess = async () => {
@@ -314,22 +332,41 @@ const FacturaDetail = () => {
           </Box>
         )}
 
-        {/* Bottom Cards Grid */}
+        {/* Documentos + Acciones */}
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+            gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
             gap: 3,
           }}
         >
-          {/* Card 3: XML de la Factura */}
-          <FacturaXmlCard
+          {/* Documentos Asociados */}
+          <DocumentosAsociadosCard
             factura={factura}
-            onUploadClick={() => setUploadXmlModalOpen(true)}
-            onDownloadClick={handleDescargarXML}
+            onUploadXmlClick={() => setUploadXmlModalOpen(true)}
+            onUploadPdfClick={() => setUploadPdfModalOpen(true)}
+            onDownloadXml={handleDescargarXML}
+            onDownloadPdf={(base64, fileName) => {
+              const byteCharacters = atob(base64);
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              const blob = new Blob([byteArray], { type: "application/pdf" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = fileName;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }}
+            onFetchSiiSuccess={(data) => setFactura(data)}
           />
 
-          {/* Card 4: Acciones */}
+          {/* Acciones */}
           <Box
             sx={{
               backgroundColor: "white",
@@ -390,9 +427,7 @@ const FacturaDetail = () => {
                   sx={{
                     backgroundColor: "#00BCD4",
                     "&:hover": { backgroundColor: "#00ACC1" },
-                    "&:disabled": {
-                      opacity: 0.7,
-                    },
+                    "&:disabled": { opacity: 0.7 },
                     textTransform: "none",
                     fontWeight: 600,
                     py: 1.5,
@@ -453,6 +488,14 @@ const FacturaDetail = () => {
           open={uploadXmlModalOpen}
           onClose={handleCloseUploadXmlModal}
           onSuccess={handleUploadXmlSuccess}
+          facturaId={id || ""}
+        />
+
+        {/* Upload PDF Modal */}
+        <UploadPdfModal
+          open={uploadPdfModalOpen}
+          onClose={handleCloseUploadPdfModal}
+          onSuccess={handleUploadPdfSuccess}
           facturaId={id || ""}
         />
 

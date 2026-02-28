@@ -14,4 +14,10 @@ export interface Empresa {
   siiSyncEnabled?: boolean;
   inviteAccepted?: string;
   inviteDate?: string;
+  siiDireccionPersonal?: string;
+  siiEmailPersonal?: string;
+  siiPasswordCertificadoPersonal?: string;
+  siiPasswordPersonal?: string;
+  siiRazonSocialPersonal?: string;
+  siiRutPersonal?: string;
 }

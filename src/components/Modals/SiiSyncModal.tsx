@@ -51,9 +51,12 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
   const [alertMessage, setAlertMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, currentRole } = useAuthStore();
   const { createEmpresaBySii, loading } = useEmpresa();
   const { getMyInfo } = useUsers();
+
+  const isSynced = currentRole?.empresa?.siiSyncEnabled === true;
+  const defaultRut = currentRole?.empresa?.siiRut || "";
 
   const handleSyncSii = async (values: SiiSyncFormData) => {
     try {
@@ -91,9 +94,10 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
 
   const formik = useFormik<SiiSyncFormData>({
     initialValues: {
-      siiRut: "",
+      siiRut: isSynced ? defaultRut : "",
       siiPassword: "",
     },
+    enableReinitialize: true,
     validationSchema: siiSyncSchema,
     onSubmit: handleSyncSii,
   });
@@ -172,9 +176,10 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
           value={formik.values.siiRut}
           error={formik.touched.siiRut && Boolean(formik.errors.siiRut)}
           helperText={formik.touched.siiRut && formik.errors.siiRut}
-          onChange={handleRutChange}
+          onChange={isSynced ? undefined : handleRutChange}
           onBlur={formik.handleBlur}
           disabled={loading || alertStatus === "success"}
+          InputProps={{ readOnly: isSynced }}
         />
 
         <StyledTextField

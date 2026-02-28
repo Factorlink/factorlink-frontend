@@ -40,8 +40,9 @@ import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
 import FacturaResumenCard, {
   formatCurrency,
 } from "../../../components/Facturas/FacturaResumenCard";
-import FacturaXmlCard from "../../../components/Facturas/FacturaXmlCard";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
+import UploadPdfModal from "../../../components/Modals/UploadPdfModal";
+import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
 
 const STEPS = ["Resumen Factura", "XML + Condiciones", "Resumen Final"];
 
@@ -69,6 +70,7 @@ const CotizarFactura = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(0);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
+  const [uploadPdfModalOpen, setUploadPdfModalOpen] = useState(false);
 
   // Step 2 Form State
   const [montoFinanciar, setMontoFinanciar] = useState<number>(100);
@@ -94,7 +96,9 @@ const CotizarFactura = () => {
       // Initialize form values from factura
       if (data.montoFinanciar && data.montoTotal) {
         const percentage =
-          (parseFloat(data.urlFactura ? data.montoFinanciar : data.montoTotal) / parseFloat(data.montoTotal)) * 100;
+          (parseFloat(data.urlFactura ? data.montoFinanciar : data.montoTotal) /
+            parseFloat(data.montoTotal)) *
+          100;
         setMontoFinanciar(truncateToTwo(percentage));
       }
       if (data.plazo) {
@@ -208,9 +212,15 @@ const CotizarFactura = () => {
     const xmlValidation = validateXmlMatch();
     const montoValidation = validateMontoFinanciar();
     const plazoValidation = validatePlazo();
-    const visibilidadValid = visibilidad === "TODOS" || selectedFactorings.length > 0;
+    const pdfUploaded = factura?.facturaNameFilePDF;
+    const visibilidadValid =
+      visibilidad === "TODOS" || selectedFactorings.length > 0;
     return (
-      xmlValidation.valid && montoValidation.valid && plazoValidation.valid && visibilidadValid
+      xmlValidation.valid &&
+      montoValidation.valid &&
+      plazoValidation.valid &&
+      visibilidadValid &&
+      pdfUploaded
     );
   };
 
@@ -483,11 +493,14 @@ const CotizarFactura = () => {
 
         {activeStep === 1 && (
           <>
-            {/* XML Card */}
-            <FacturaXmlCard
+            {/* Documentos Asociados */}
+            <DocumentosAsociadosCard
               factura={factura}
-              onUploadClick={() => setUploadXmlModalOpen(true)}
-              onDownloadClick={handleDownloadXml}
+              onUploadXmlClick={() => setUploadXmlModalOpen(true)}
+              onUploadPdfClick={() => setUploadPdfModalOpen(true)}
+              onDownloadXml={handleDownloadXml}
+              onDownloadPdf={handleDownloadXml}
+              onFetchSiiSuccess={(data) => setFactura(data)}
             />
 
             {/* Conditions Card */}
@@ -598,16 +611,20 @@ const CotizarFactura = () => {
                   fullWidth
                   size="small"
                   error={plazo > 180}
-                  helperText={plazo > 180 ? "El plazo máximo es de 180 días" : `Mínimo ${MIN_PLAZO} día, Máximo ${MAX_PLAZO} días`}
+                  helperText={
+                    plazo > 180
+                      ? "El plazo máximo es de 180 días"
+                      : `Mínimo ${MIN_PLAZO} día, Máximo ${MAX_PLAZO} días`
+                  }
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       "&.Mui-focused fieldset": {
-                        borderColor:  plazo > 180 ? "#DC2626" : "#00BCD4",
+                        borderColor: plazo > 180 ? "#DC2626" : "#00BCD4",
                       },
                     },
                   }}
                 />
-            </Box>
+              </Box>
             </Box>
 
             {/* Visibility Selection Card */}
@@ -676,7 +693,9 @@ const CotizarFactura = () => {
                       }
                       label="Seleccionar Factorings"
                       renderValue={(selected) => (
-                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        <Box
+                          sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
+                        >
                           {selected.map((value) => {
                             const factoring = factorings.find(
                               (f) => f.id === value,
@@ -699,7 +718,9 @@ const CotizarFactura = () => {
                       disabled={loadingFactorings}
                     >
                       {factorings.map((factoring) => {
-                        const isSelected = selectedFactorings.includes(factoring.id!);
+                        const isSelected = selectedFactorings.includes(
+                          factoring.id!,
+                        );
                         return (
                           <MenuItem
                             key={factoring.id}
@@ -708,15 +729,23 @@ const CotizarFactura = () => {
                               display: "flex",
                               justifyContent: "space-between",
                               alignItems: "center",
-                              backgroundColor: isSelected ? "#E0F7FA" : "transparent",
+                              backgroundColor: isSelected
+                                ? "#E0F7FA"
+                                : "transparent",
                               "&:hover": {
-                                backgroundColor: isSelected ? "#B2EBF2" : undefined,
+                                backgroundColor: isSelected
+                                  ? "#B2EBF2"
+                                  : undefined,
                               },
                             }}
                           >
-                            <span>{factoring.razonSocial} - {factoring.rut}</span>
+                            <span>
+                              {factoring.razonSocial} - {factoring.rut}
+                            </span>
                             {isSelected && (
-                              <Check sx={{ color: "#00BCD4", ml: 1, fontSize: 20 }} />
+                              <Check
+                                sx={{ color: "#00BCD4", ml: 1, fontSize: 20 }}
+                              />
                             )}
                           </MenuItem>
                         );
@@ -782,35 +811,79 @@ const CotizarFactura = () => {
 
         {activeStep === 2 && (
           <>
-            {/* Summary Cards */}
-            <FacturaResumenCard factura={factura} />
-
-            {/* XML Validated Card */}
             <Box
               sx={{
-                backgroundColor: "white",
-                borderRadius: 3,
-                p: 3,
-                mb: 3,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                gap: 3,
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <CheckCircle sx={{ color: "#00A86B", fontSize: 32 }} />
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 600, color: "#1E293B" }}
-                  >
-                    XML Validado
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "#64748B" }}>
-                    {factura.facturaNameFile || "factura.xml"} - Documento
-                    verificado
-                  </Typography>
+              {/* Summary Cards */}
+              <FacturaResumenCard factura={factura} />
+
+            </Box>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 3,
+              }}
+              >
+                {/* XML Validated Card */}
+                <Box
+                  sx={{
+                    backgroundColor: "white",
+                    borderRadius: 3,
+                    p: 3,
+                    mb: 3,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <CheckCircle sx={{ color: "#00A86B", fontSize: 32 }} />
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 600, color: "#1E293B" }}
+                      >
+                        XML Validado
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "#64748B" }}>
+                        {factura.facturaNameFile || "factura.xml"} - Documento
+                        verificado
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* PDF Validated Card */}
+                <Box
+                  sx={{
+                    backgroundColor: "white",
+                    borderRadius: 3,
+                    p: 3,
+                    mb: 3,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <CheckCircle sx={{ color: "#00A86B", fontSize: 32 }} />
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 600, color: "#1E293B" }}
+                      >
+                        PDF Validado
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "#64748B" }}>
+                        {factura.facturaNameFilePDF || "factura.pdf"} -
+                        Documento subido correctamente
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
               </Box>
-            </Box>
 
             {/* Financial Conditions Card */}
             <Box
@@ -849,7 +922,8 @@ const CotizarFactura = () => {
                     variant="h6"
                     sx={{ fontWeight: 700, color: "#00A86B" }}
                   >
-                    {formatCurrency(factura.montoFinanciar)} ({ truncateToTwo(montoFinanciar)}%)
+                    {formatCurrency(factura.montoFinanciar)} (
+                    {truncateToTwo(montoFinanciar)}%)
                   </Typography>
                 </Box>
                 <Box
@@ -911,13 +985,19 @@ const CotizarFactura = () => {
                   }}
                 >
                   <Visibility sx={{ color: "#00A86B", fontSize: 20 }} />
-                  <Typography variant="body2" sx={{ color: "#15803D", fontWeight: 500 }}>
-                    Esta factura será visible para todos los factorings registrados en la plataforma.
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "#15803D", fontWeight: 500 }}
+                  >
+                    Esta factura será visible para todos los factorings
+                    registrados en la plataforma.
                   </Typography>
                 </Box>
               ) : (
                 <FactoringsList
-                  factorings={factorings.filter((f) => selectedFactorings.includes(f.id!))}
+                  factorings={factorings.filter((f) =>
+                    selectedFactorings.includes(f.id!),
+                  )}
                 />
               )}
             </Box>
@@ -977,6 +1057,14 @@ const CotizarFactura = () => {
         <UploadXmlModal
           open={uploadXmlModalOpen}
           onClose={() => setUploadXmlModalOpen(false)}
+          onSuccess={handleUploadXmlSuccess}
+          facturaId={id || ""}
+        />
+
+        {/* Upload PDF Modal */}
+        <UploadPdfModal
+          open={uploadPdfModalOpen}
+          onClose={() => setUploadPdfModalOpen(false)}
           onSuccess={handleUploadXmlSuccess}
           facturaId={id || ""}
         />
