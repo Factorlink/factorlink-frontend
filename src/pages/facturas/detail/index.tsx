@@ -338,6 +338,8 @@ const FacturaDetail = () => {
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
             gap: 3,
+            gridAutoRows: "auto", // allow each row to size itself
+            alignItems: "start",  // prevent stretching children to full row height
           }}
         >
           {/* Documentos Asociados */}

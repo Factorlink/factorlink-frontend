@@ -42,12 +42,14 @@ const EmpresaTab = () => {
         />
       )}
       {currentRole?.nivel && currentRole?.nivel !== 1 && (
-        <SiiPersonalSync
-          isLinked={isPersonalLinked}
+        <Box id="sii-personal-sync-card">
+          <SiiPersonalSync
+            isLinked={isPersonalLinked}
           onLink={handleLink}
           onUpdate={handleUpdate}
-          onUnlink={() => setUnlinkModalOpen(true)}
-        />
+            onUnlink={() => setUnlinkModalOpen(true)}
+          />
+        </Box>
       )}
 
       <SiiSyncModal
