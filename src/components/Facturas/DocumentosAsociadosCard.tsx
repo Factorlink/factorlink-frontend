@@ -3,6 +3,7 @@ import { Box, Typography, Button, CircularProgress, Alert, Divider } from "@mui/
 import { Description, PictureAsPdf, Cancel, Upload, CloudDownload } from "@mui/icons-material";
 import { useFacturas } from "../../hooks/useFacturas";
 import type { Factura } from "../../types/factura";
+import useAuthStore from "../../store/authStore";
 
 interface DocumentosAsociadosCardProps {
   factura: Factura;
@@ -25,6 +26,10 @@ const DocumentosAsociadosCard = ({
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [fetchSuccess, setFetchSuccess] = useState(false);
+
+  const { currentRole } = useAuthStore();
+  const empresa = currentRole?.empresa;
+  const isPersonalLinked = empresa?.siiRutPersonal != null;
 
   const isCargada = factura.estado?.toLowerCase() === "cargada";
   const hasPdf = !!factura.facturaNameFilePDF;
@@ -251,7 +256,7 @@ const DocumentosAsociadosCard = ({
         variant="contained"
         fullWidth
         startIcon={fetching ? <CircularProgress size={20} sx={{ color: "white" }} /> : <CloudDownload />}
-        onClick={handleFetchSii}
+        onClick={isPersonalLinked ? handleFetchSii : () => {}}
         disabled={fetching}
         sx={{
           backgroundColor: "#00BCD4",
