@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Dialog,
   DialogTitle,
@@ -20,10 +20,12 @@ const SiiPersonalSyncPromptModal = ({
   onClose,
 }: SiiPersonalSyncPromptModalProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSync = () => {
     onClose();
-    navigate("/edit/empresa");
+    const returnTo = encodeURIComponent(location.pathname);
+    navigate(`/edit/empresa?returnTo=${returnTo}`);
 
     setTimeout(() => {
       const siiPersonalCard = document.getElementById("sii-personal-sync-card");

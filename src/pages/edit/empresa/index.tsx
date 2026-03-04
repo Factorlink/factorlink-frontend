@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Box } from "@mui/material";
 import AccountLevels from "../../../components/Edit/AccountLevels";
 import SiiSync from "../../../components/Edit/SiiSync";
@@ -10,6 +11,8 @@ import UnlinkSiiPersonalModal from "../../../components/Modals/UnlinkSiiPersonal
 import useAuthStore from "../../../store/authStore";
 
 const EmpresaTab = () => {
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
   const { currentRole } = useAuthStore();
   const empresa = currentRole?.empresa;
   const isPersonalLinked = empresa?.siiRutPersonal != null;
@@ -60,6 +63,7 @@ const EmpresaTab = () => {
         open={syncModalOpen}
         onClose={() => setSyncModalOpen(false)}
         isUpdate={syncModalIsUpdate}
+        returnTo={returnTo || undefined}
       />
       <UnlinkSiiPersonalModal
         open={unlinkModalOpen}

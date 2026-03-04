@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import {
@@ -36,6 +37,7 @@ interface SiiPersonalSyncModalProps {
   open: boolean;
   onClose: () => void;
   isUpdate?: boolean;
+  returnTo?: string;
 }
 
 const siiPersonalSyncSchema = yup.object({
@@ -54,6 +56,7 @@ const SiiPersonalSyncModal = ({
   open,
   onClose,
   isUpdate = false,
+  returnTo,
 }: SiiPersonalSyncModalProps) => {
   const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
     null,
@@ -62,6 +65,7 @@ const SiiPersonalSyncModal = ({
   const [showPasswordSii, setShowPasswordSii] = useState(false);
   const [showPasswordCert, setShowPasswordCert] = useState(false);
 
+  const navigate = useNavigate();
   const { currentRole } = useAuthStore();
   const { syncPersonalDataSii, loading } = useEmpresa();
 
@@ -79,13 +83,21 @@ const SiiPersonalSyncModal = ({
         empresa: response,
       } as Role);
 
-      setAlertStatus("success");
-      setAlertMessage(
-        isUpdate
-          ? "Las credenciales personales del SII han sido actualizadas correctamente."
-          : "Tu cuenta personal del SII ha sido vinculada correctamente.",
-      );
       formik.resetForm();
+
+      if (returnTo) {
+        onClose();
+        setTimeout(() => {
+          navigate(decodeURIComponent(returnTo));
+        }, 300);
+      } else {
+        setAlertStatus("success");
+        setAlertMessage(
+          isUpdate
+            ? "Las credenciales personales del SII han sido actualizadas correctamente."
+            : "Tu cuenta personal del SII ha sido vinculada correctamente.",
+        );
+      }
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string } };
