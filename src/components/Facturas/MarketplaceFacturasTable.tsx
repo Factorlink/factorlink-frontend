@@ -130,7 +130,7 @@ const MarketplaceFacturasTable = ({
   };
 
   const handleVerOfertas = () => {
-    if (selectedFactura && (selectedFactura.numeroOfertasRecibidas ?? 0) > 0) {
+    if (selectedFactura) {
       setDrawerOpen(true);
     }
     setAnchorEl(null);
