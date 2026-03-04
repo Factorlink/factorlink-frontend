@@ -189,6 +189,7 @@ const SiiPersonalSyncModal = ({
             onClose={() => {
               setAlertStatus(null);
               setAlertMessage("");
+              handleClose();
             }}
           >
             {alertMessage}
