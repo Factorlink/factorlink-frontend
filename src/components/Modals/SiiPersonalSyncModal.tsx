@@ -183,14 +183,14 @@ const SiiPersonalSyncModal = ({
           </Alert>
         )}
 
-        <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
-          {isUpdate
-            ? "Actualiza las credenciales de tu cuenta personal del SII."
-            : "Ingresa las credenciales de tu cuenta personal del SII para habilitar las funcionalidades avanzadas."}
-        </Typography>
-
         {alertStatus !== "success" && (
           <>
+            <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
+              {isUpdate
+                ? "Actualiza las credenciales de tu cuenta personal del SII."
+                : "Ingresa las credenciales de tu cuenta personal del SII para habilitar las funcionalidades avanzadas."}
+            </Typography>
+
             <StyledTextField
               fullWidth
               label="RUT Personal"

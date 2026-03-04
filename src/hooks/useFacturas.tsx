@@ -32,7 +32,7 @@ type UpdateFacturaPayload = {
   montoFinanciar?: number;
   facturaNameFilePDF?: string;
   base64FacturaPDF?: string;
-
+  porcentajeFinanciamiento?: number;
 };
 
 type SendToMarketplacePayload = {

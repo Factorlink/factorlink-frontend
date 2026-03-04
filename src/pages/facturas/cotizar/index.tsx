@@ -258,6 +258,7 @@ const CotizarFactura = () => {
       await updateFactura(id!, {
         plazo,
         montoFinanciar: calculatedMontoFinanciar,
+        porcentajeFinanciamiento: montoFinanciar,
       });
 
       // Refresh factura to get updated values
