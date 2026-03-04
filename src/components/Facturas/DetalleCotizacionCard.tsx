@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { RequestQuote } from "@mui/icons-material";
+import useAuthStore from "../../store/authStore";
 
 interface DetalleCotizacionCardProps {
   plazo: number;
@@ -22,6 +23,11 @@ const DetalleCotizacionCard = ({
   porcentajeFinanciamiento,
   montoFinanciar,
 }: DetalleCotizacionCardProps) => {
+
+  const { currentRole } = useAuthStore();
+
+  const isEmpresa = currentRole?.contexto === "empresa";
+
   return (
     <Box
       sx={{
@@ -47,7 +53,7 @@ const DetalleCotizacionCard = ({
         </Box>
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
-            Detalle de Cotización
+            {isEmpresa ? "Detalle de Cotización" : "Financiamiento Solicitado"}
           </Typography>
           <Typography variant="body2" sx={{ color: "#64748B" }}>
             Condiciones de financiamiento de la factura
