@@ -415,8 +415,8 @@
   --chart-series-singular: #2171e0;
 }
 
-/* Alternativa: seguir el tema del sistema operativo si tu app no
-   tiene un toggle propio. Deja este bloque o bórralo según el caso. */
+/* Preferencia del SO solo afecta color-scheme nativo del browser.
+   Los tokens dark se activan con data-theme="dark" (ver initTheme / AppThemeProvider). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;

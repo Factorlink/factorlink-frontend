@@ -1,5 +1,5 @@
 export { theme } from "./theme";
-export { ThemeSync } from "./ThemeSync";
+export { AppThemeProvider, useAppTheme } from "./useAppTheme";
 export {
   applyTheme,
   getStoredTheme,
@@ -9,4 +9,3 @@ export {
   THEME_STORAGE_KEY,
   type ThemeMode,
 } from "./initTheme";
-export { useAppTheme } from "./useAppTheme";

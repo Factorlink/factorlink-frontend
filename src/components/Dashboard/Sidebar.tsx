@@ -6,7 +6,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  useTheme,
   IconButton,
 } from "@mui/material";
 import { Logout, Menu } from "@mui/icons-material";
@@ -18,7 +17,6 @@ import useAuthStore from "../../store/authStore";
 const bottomItems = [{ text: "Logout", icon: Logout, path: "/login" }];
 
 const Sidebar = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
@@ -33,14 +31,13 @@ const Sidebar = () => {
       sx={{
         width: sidebarWidth,
         minHeight: "100vh",
-        backgroundColor: "background.paper",
-        borderRight: `1px solid ${theme.palette.divider}`,
+        backgroundColor: "var(--color-bg-default-primary)",
+        borderRight: "1px solid var(--color-border-default-primary)",
         display: "flex",
         flexDirection: "column",
-        transition: "width 0.2s ease-in-out",
+        transition: "width var(--duration-fast) var(--easing-ease)",
       }}
     >
-      {/* Logo */}
       <Box
         sx={{
           display: "flex",
@@ -58,27 +55,29 @@ const Sidebar = () => {
           onClick={() => setCollapsed(!collapsed)}
           sx={{ ml: collapsed ? 0 : "auto", color: "text.secondary" }}
           size="small"
+          aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
         >
           <Menu />
         </IconButton>
       </Box>
 
-
-      {/* Main Menu */}
-      {
-        <List sx={{ px: 1, flex: 1 }}>
-          {currentRole?.contexto &&
-            getMenuItemsByRole(mainMenuItems, currentRole.role).map((item) => (
+      <List sx={{ px: 1, flex: 1 }}>
+        {currentRole?.contexto &&
+          getMenuItemsByRole(mainMenuItems, currentRole.role).map((item) => {
+            const active = isActive(item.path);
+            return (
               <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
                 <ListItemButton
                   onClick={() => navigate(item.path)}
                   sx={{
-                    borderRadius: 2,
-                    backgroundColor: isActive(item.path)
-                      ? "rgba(0, 188, 212, 0.08)"
+                    borderRadius: "var(--radius-m)",
+                    backgroundColor: active
+                      ? "var(--color-bg-accent-tertiary)"
                       : "transparent",
                     "&:hover": {
-                      backgroundColor: "rgba(0, 188, 212, 0.12)",
+                      backgroundColor: active
+                        ? "var(--color-bg-accent-tertiary-hover)"
+                        : "var(--color-bg-default-primary-hover)",
                     },
                     justifyContent: collapsed ? "center" : "flex-start",
                     px: collapsed ? 1 : 2,
@@ -92,8 +91,8 @@ const Sidebar = () => {
                   >
                     <item.icon
                       sx={{
-                        color: isActive(item.path)
-                          ? "primary.main"
+                        color: active
+                          ? "var(--color-fg-accent-primary)"
                           : "text.secondary",
                       }}
                     />
@@ -103,31 +102,31 @@ const Sidebar = () => {
                       primary={item.text}
                       sx={{
                         "& .MuiTypography-root": {
-                          fontWeight: isActive(item.path) ? 600 : 400,
-                          color: isActive(item.path)
-                            ? "text.primary"
+                          fontFamily: "var(--font-heading)",
+                          fontWeight: active ? 500 : 400,
+                          color: active
+                            ? "var(--color-fg-accent-primary)"
                             : "text.secondary",
-                          fontSize: "0.95rem",
+                          fontSize: "var(--font-size-s)",
                         },
                       }}
                     />
                   )}
                 </ListItemButton>
               </ListItem>
-            ))}
-        </List>
-      }
+            );
+          })}
+      </List>
 
-      {/* Bottom Menu */}
       <List sx={{ px: 1, pb: 2 }}>
         {bottomItems.map((item) => (
           <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
               onClick={() => navigate(item.path)}
               sx={{
-                borderRadius: 2,
+                borderRadius: "var(--radius-m)",
                 "&:hover": {
-                  backgroundColor: "rgba(0, 188, 212, 0.12)",
+                  backgroundColor: "var(--color-bg-danger-tertiary)",
                 },
                 justifyContent: collapsed ? "center" : "flex-start",
                 px: collapsed ? 1 : 2,
@@ -136,15 +135,17 @@ const Sidebar = () => {
               <ListItemIcon
                 sx={{ minWidth: collapsed ? 0 : 40, justifyContent: "center" }}
               >
-                <item.icon sx={{ color: "primary.main" }} />
+                <item.icon sx={{ color: "var(--color-fg-danger-primary)" }} />
               </ListItemIcon>
               {!collapsed && (
                 <ListItemText
                   primary={item.text}
                   sx={{
                     "& .MuiTypography-root": {
-                      color: "primary.main",
-                      fontSize: "0.95rem",
+                      fontFamily: "var(--font-heading)",
+                      color: "var(--color-fg-danger-primary)",
+                      fontSize: "var(--font-size-s)",
+                      fontWeight: 500,
                     },
                   }}
                 />

@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   applyTheme,
   getStoredTheme,
@@ -7,7 +15,15 @@ import {
   type ThemeMode,
 } from "./initTheme";
 
-export function useAppTheme(): [ThemeMode, (theme: ThemeMode) => void, () => void] {
+interface AppThemeContextValue {
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
+  toggleTheme: () => void;
+}
+
+const AppThemeContext = createContext<AppThemeContextValue | null>(null);
+
+export function AppThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeMode>(() => resolveTheme());
   const [explicitPreference, setExplicitPreference] = useState(
     () => getStoredTheme() !== null,
@@ -44,7 +60,22 @@ export function useAppTheme(): [ThemeMode, (theme: ThemeMode) => void, () => voi
     setThemeState((current) => (current === "light" ? "dark" : "light"));
   }, []);
 
-  return [theme, setTheme, toggleTheme];
+  const value = useMemo(
+    () => ({ theme, setTheme, toggleTheme }),
+    [theme, setTheme, toggleTheme],
+  );
+
+  return (
+    <AppThemeContext.Provider value={value}>{children}</AppThemeContext.Provider>
+  );
+}
+
+export function useAppTheme(): AppThemeContextValue {
+  const context = useContext(AppThemeContext);
+  if (!context) {
+    throw new Error("useAppTheme must be used within AppThemeProvider");
+  }
+  return context;
 }
 
 export type { ThemeMode };

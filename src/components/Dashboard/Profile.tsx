@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   KeyboardArrowDown,
@@ -39,6 +39,13 @@ const Profile = () => {
 
   const { user, currentRole } = useAuthStore();
   const { logout, loading } = useAuth();
+
+  const minutesSinceUpdate = useMemo(() => {
+    if (!user?.updatedAt) return 0;
+    return Math.floor(
+      (Date.now() - new Date(user.updatedAt).getTime()) / 60000,
+    );
+  }, [user?.updatedAt]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -105,21 +112,17 @@ const Profile = () => {
     <>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Actualizado hace{" "}
-          {user?.updatedAt
-            ? Math.floor(
-                (Date.now() - new Date(user.updatedAt).getTime()) / 60000,
-              )
-            : 0}{" "}
-          minutos
+          Actualizado hace {minutesSinceUpdate} minutos
         </Typography>
 
         <IconButton
+          aria-label="Notificaciones"
           sx={{
-            backgroundColor: "success.main",
-            color: "white",
+            backgroundColor: "var(--color-bg-accent-primary)",
+            color: "var(--color-fg-on-accent-primary)",
+            borderRadius: "var(--radius-m)",
             "&:hover": {
-              backgroundColor: "success.dark",
+              backgroundColor: "var(--color-bg-accent-primary-hover)",
             },
           }}
         >
@@ -132,6 +135,11 @@ const Profile = () => {
             alignItems: "center",
             gap: 1.5,
             cursor: "pointer",
+            borderRadius: "var(--radius-m)",
+            px: 0.5,
+            "&:hover": {
+              backgroundColor: "var(--color-bg-default-primary-hover)",
+            },
           }}
           onClick={handleClick}
         >
@@ -139,7 +147,11 @@ const Profile = () => {
             sx={{
               width: 44,
               height: 44,
-              backgroundColor: "primary.light",
+              backgroundColor: "var(--color-bg-accent-secondary)",
+              color: "var(--color-fg-accent-primary)",
+              fontFamily: "var(--font-heading)",
+              fontWeight: 500,
+              fontSize: "var(--font-size-s)",
             }}
           >
             {user?.firstName?.charAt(0).toUpperCase() || ""}
@@ -148,8 +160,9 @@ const Profile = () => {
           <Box>
             <Typography
               sx={{
-                fontWeight: 600,
-                fontSize: "0.95rem",
+                fontFamily: "var(--font-heading)",
+                fontWeight: 500,
+                fontSize: "var(--font-size-s)",
                 color: "text.primary",
               }}
             >
@@ -157,7 +170,10 @@ const Profile = () => {
             </Typography>
             <Typography
               variant="body2"
-              sx={{ color: "text.secondary", fontSize: "0.85rem" }}
+              sx={{
+                color: "text.secondary",
+                fontSize: "var(--font-size-xs)",
+              }}
             >
               {currentRole?.contexto === "empresa"
                 ? currentRole?.empresa?.razonSocial || "N/A"
@@ -168,7 +184,7 @@ const Profile = () => {
             sx={{
               color: "text.secondary",
               transform: open ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.2s",
+              transition: "transform var(--duration-fast) var(--easing-ease)",
             }}
           />
         </Box>
@@ -190,9 +206,10 @@ const Profile = () => {
               sx: {
                 mt: 1,
                 minWidth: 200,
-                borderRadius: 2,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                backgroundColor: "background.paper",
+                borderRadius: "var(--radius-m)",
+                boxShadow: "var(--shadow-popover)",
+                backgroundColor: "var(--color-bg-default-primary)",
+                border: "1px solid var(--color-border-default-primary)",
               },
             },
           }}
@@ -203,14 +220,15 @@ const Profile = () => {
                 label={capitalizeFirstLetter(currentRole?.contexto || "")}
                 size="small"
                 sx={{
-                  backgroundColor: "primary.main",
-                  color: "white",
+                  backgroundColor: "var(--color-bg-accent-secondary)",
+                  color: "var(--color-fg-accent-primary)",
                   fontWeight: 500,
+                  fontFamily: "var(--font-heading)",
                 }}
               />
             )}
           </Box>
-          <Divider />
+          <Divider sx={{ borderColor: "var(--brand-divider)" }} />
           {menuItems.map((item, index) => (
             <MenuItem
               key={index}
@@ -219,7 +237,7 @@ const Profile = () => {
               sx={{
                 py: 1.5,
                 "&:hover": {
-                  backgroundColor: "action.hover",
+                  backgroundColor: "var(--color-bg-default-primary-hover)",
                 },
               }}
             >
@@ -233,7 +251,7 @@ const Profile = () => {
                     : item.text
                 }
                 primaryTypographyProps={{
-                  fontSize: "0.9rem",
+                  fontSize: "var(--font-size-s)",
                   color: "text.primary",
                 }}
               />
@@ -242,34 +260,37 @@ const Profile = () => {
         </Menu>
       </Box>
 
-      {/* Modal de confirmación de logout */}
       <Dialog
         open={logoutDialogOpen}
         onClose={handleLogoutCancel}
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: "var(--radius-l)",
             minWidth: 350,
             p: 1,
           },
         }}
       >
-        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Warning sx={{ color: "warning.main" }} />
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            fontFamily: "var(--font-heading)",
+            fontWeight: 500,
+          }}
+        >
+          <Warning sx={{ color: "var(--color-fg-warning-primary)" }} />
           Confirmar cierre de sesión
         </DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <DialogContentText sx={{ color: "text.secondary" }}>
             ¿Estás seguro de que deseas cerrar tu sesión? Tendrás que volver a
             iniciar sesión para acceder al sistema.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button
-            onClick={handleLogoutCancel}
-            variant="outlined"
-            sx={{ borderRadius: 2 }}
-          >
+          <Button onClick={handleLogoutCancel} variant="outlined">
             Cancelar
           </Button>
           <Button
@@ -277,7 +298,6 @@ const Profile = () => {
             variant="contained"
             color="error"
             disabled={loading}
-            sx={{ borderRadius: 2 }}
           >
             {loading ? "Cerrando..." : "Cerrar sesión"}
           </Button>
