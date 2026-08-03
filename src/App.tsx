@@ -1,7 +1,7 @@
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { theme } from "./theme/theme";
+import { theme, ThemeSync } from "./theme";
 import Login from "./pages/login";
 import EmpresasRegister from "./pages/register/empresa";
 import FactoringRegister from "./pages/register/factoring";
@@ -31,6 +31,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <ThemeSync />
       <BrowserRouter>
         <Routes>
           {/* Public routes */}

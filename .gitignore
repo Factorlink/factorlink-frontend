@@ -23,3 +23,6 @@ package-lock.json
 *.njsproj
 *.sln
 *.sw?
+
+# Local theme reference (not versioned)
+new-theme-proposal/
