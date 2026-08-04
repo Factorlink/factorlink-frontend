@@ -20,57 +20,57 @@ const getStatusConfig = (estado: string) => {
     case "CARGADA":
       return {
         label: "CARGADA",
-        color: "#64748B",
-        bgColor: "#F1F5F9",
+        color: "var(--color-fg-default-secondary)",
+        bgColor: "var(--color-bg-default-tertiary)",
         icon: <Description sx={{ fontSize: 14 }} />,
       };
     case "EN_MARKETPLACE":
       return {
         label: "EN MARKETPLACE",
-        color: "#00BCD4",
-        bgColor: "rgba(0, 188, 212, 0.1)",
+        color: "var(--color-fg-accent-primary)",
+        bgColor: "var(--color-bg-accent-secondary)",
         icon: <Business sx={{ fontSize: 14 }} />,
       };
     case "CON_OFERTAS":
       return {
         label: "CON OFERTAS",
-        color: "#00A86B",
-        bgColor: "rgba(0, 168, 107, 0.1)",
+        color: "var(--color-fg-success-primary)",
+        bgColor: "var(--color-bg-success-secondary)",
         icon: <Description sx={{ fontSize: 14 }} />,
       };
     case "CEDIDA":
       return {
         label: "CEDIDA",
-        color: "#00A86B",
-        bgColor: "rgba(0, 168, 107, 0.1)",
+        color: "var(--color-fg-success-primary)",
+        bgColor: "var(--color-bg-success-secondary)",
         icon: <Description sx={{ fontSize: 14 }} />,
       };
     case "EN_COBRANZA":
       return {
         label: "EN COBRANZA",
-        color: "#00A86B",
-        bgColor: "rgba(0, 168, 107, 0.1)",
+        color: "var(--color-fg-success-primary)",
+        bgColor: "var(--color-bg-success-secondary)",
         icon: <Description sx={{ fontSize: 14 }} />,
       };
     case "COBRADA":
       return {
         label: "COBRADA",
-        color: "#00A86B",
-        bgColor: "rgba(0, 168, 107, 0.1)",
+        color: "var(--color-fg-success-primary)",
+        bgColor: "var(--color-bg-success-secondary)",
         icon: <Description sx={{ fontSize: 14 }} />,
       };
     case "NO_COBRADA":
       return {
         label: "NO COBRADA",
-        color: "#00A86B",
-        bgColor: "rgba(0, 168, 107, 0.1)",
+        color: "var(--color-fg-success-primary)",
+        bgColor: "var(--color-bg-success-secondary)",
         icon: <Description sx={{ fontSize: 14 }} />,
       };
     default:
       return {
         label: estado || "N/A",
-        color: "#64748B",
-        bgColor: "#F1F5F9",
+        color: "var(--color-fg-default-secondary)",
+        bgColor: "var(--color-bg-default-tertiary)",
         icon: <Description sx={{ fontSize: 14 }} />,
       };
   }
@@ -104,11 +104,11 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
       {/* Card 1: Datos de la Factura */}
       <Box
         sx={{
-          backgroundColor: "white",
+          backgroundColor: "var(--color-bg-default-primary)",
           borderRadius: 3,
           p: 3,
           mb: 3,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          boxShadow: "var(--shadow-popover)",
         }}
       >
         {/* Header */}
@@ -123,7 +123,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box
               sx={{
-                backgroundColor: "#F1F5F9",
+                backgroundColor: "var(--color-bg-default-tertiary)",
                 borderRadius: 2,
                 p: 1.5,
                 display: "flex",
@@ -131,16 +131,16 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
                 justifyContent: "center",
               }}
             >
-              <Description sx={{ color: "#00BCD4", fontSize: 24 }} />
+              <Description sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
             </Box>
             <Box>
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 600, color: "#1E293B" }}
+                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
               >
                 Datos de la Factura
               </Typography>
-              <Typography variant="body2" sx={{ color: "#64748B" }}>
+              <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                 Información general del documento
               </Typography>
             </Box>
@@ -171,7 +171,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             <Typography
               variant="caption"
               sx={{
-                color: "#64748B",
+                color: "var(--color-fg-default-secondary)",
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
@@ -182,11 +182,11 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             </Typography>
             <Typography
               variant="h6"
-              sx={{ color: "#00BCD4", fontWeight: 700 }}
+              sx={{ color: "var(--color-fg-accent-primary)", fontWeight: 700 }}
             >
               #{factura.folio}
             </Typography>
-            <Typography variant="caption" sx={{ color: "#94A3B8" }}>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-default-tertiary)" }}>
               SII ID: {factura.siiId || "N/A"}
             </Typography>
           </Box>
@@ -196,7 +196,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             <Typography
               variant="caption"
               sx={{
-                color: "#64748B",
+                color: "var(--color-fg-default-secondary)",
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
@@ -207,11 +207,11 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             </Typography>
             <Typography
               variant="body1"
-              sx={{ fontWeight: 600, color: "#1E293B" }}
+              sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
             >
               {factura.razonSocialEmisor || "N/A"}
             </Typography>
-            <Typography variant="caption" sx={{ color: "#94A3B8" }}>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-default-tertiary)" }}>
               {factura.rutEmisor || ""}
             </Typography>
           </Box>
@@ -221,7 +221,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             <Typography
               variant="caption"
               sx={{
-                color: "#64748B",
+                color: "var(--color-fg-default-secondary)",
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
@@ -232,11 +232,11 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             </Typography>
             <Typography
               variant="body1"
-              sx={{ fontWeight: 600, color: "#1E293B" }}
+              sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
             >
               {factura.razonSocialReceptor || "N/A"}
             </Typography>
-            <Typography variant="caption" sx={{ color: "#94A3B8" }}>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-default-tertiary)" }}>
               {factura.rutReceptor || ""}
             </Typography>
           </Box>
@@ -246,7 +246,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             <Typography
               variant="caption"
               sx={{
-                color: "#64748B",
+                color: "var(--color-fg-default-secondary)",
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
@@ -257,7 +257,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             </Typography>
             <Typography
               variant="body1"
-              sx={{ fontWeight: 600, color: "#1E293B" }}
+              sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
             >
               {factura.rutFirmante || "N/A"}
             </Typography>
@@ -268,7 +268,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             <Typography
               variant="caption"
               sx={{
-                color: "#64748B",
+                color: "var(--color-fg-default-secondary)",
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
@@ -279,7 +279,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             </Typography>
             <Typography
               variant="body1"
-              sx={{ fontWeight: 600, color: "#1E293B" }}
+              sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
             >
               {formatDate(factura.fechaEmision)}
             </Typography>
@@ -290,7 +290,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             <Typography
               variant="caption"
               sx={{
-                color: "#64748B",
+                color: "var(--color-fg-default-secondary)",
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
@@ -301,7 +301,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             </Typography>
             <Typography
               variant="body1"
-              sx={{ fontWeight: 600, color: "#1E293B" }}
+              sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
             >
               {formatDate(factura.fechaRecepcion)}
             </Typography>
@@ -312,16 +312,16 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
       {/* Card 2: Detalle de Montos */}
       <Box
         sx={{
-          backgroundColor: "white",
+          backgroundColor: "var(--color-bg-default-primary)",
           borderRadius: 3,
           p: 3,
           mb: 3,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          boxShadow: "var(--shadow-popover)",
         }}
       >
         <Typography
           variant="subtitle1"
-          sx={{ fontWeight: 600, color: "#1E293B", mb: 2 }}
+          sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 2 }}
         >
           Detalle de Montos
         </Typography>
@@ -334,68 +334,68 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
         >
           <Box
             sx={{
-              backgroundColor: "#F8FAFC",
+              backgroundColor: "var(--color-bg-default-tertiary)",
               borderRadius: 2,
               p: 2,
             }}
           >
-            <Typography variant="caption" sx={{ color: "#64748B" }}>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
               Monto Neto
             </Typography>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 700, color: "#1E293B" }}
+              sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
             >
               {formatCurrency(factura.montoNeto)}
             </Typography>
           </Box>
           <Box
             sx={{
-              backgroundColor: "#F8FAFC",
+              backgroundColor: "var(--color-bg-default-tertiary)",
               borderRadius: 2,
               p: 2,
             }}
           >
-            <Typography variant="caption" sx={{ color: "#64748B" }}>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
               IVA (19%)
             </Typography>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 700, color: "#1E293B" }}
+              sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
             >
               {formatCurrency(factura.detalleIva)}
             </Typography>
           </Box>
           <Box
             sx={{
-              backgroundColor: "#F8FAFC",
+              backgroundColor: "var(--color-bg-default-tertiary)",
               borderRadius: 2,
               p: 2,
             }}
           >
-            <Typography variant="caption" sx={{ color: "#64748B" }}>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
               Descuento Global
             </Typography>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 700, color: "#1E293B" }}
+              sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
             >
               {formatCurrency(factura.descuentoGlobal)}
             </Typography>
           </Box>
           <Box
             sx={{
-              backgroundColor: "rgba(0, 168, 107, 0.2)",
+              backgroundColor: "var(--color-bg-success-secondary)",
               borderRadius: 2,
               p: 2,
             }}
           >
-            <Typography variant="caption" sx={{ color: "#00A86B" }}>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-success-primary)" }}>
               Monto Total
             </Typography>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 700, color: "#00A86B" }}
+              sx={{ fontWeight: 700, color: "var(--color-fg-success-primary)" }}
             >
               {formatCurrency(factura.montoTotal)}
             </Typography>

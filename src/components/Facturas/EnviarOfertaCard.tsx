@@ -155,9 +155,9 @@ const EnviarOfertaCard = ({
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
       <Box
         sx={{
-          backgroundColor: "white",
+          backgroundColor: "var(--color-bg-default-primary)",
           borderRadius: 3,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          boxShadow: "var(--shadow-popover)",
           overflow: "hidden",
           mb: 3,
         }}
@@ -392,7 +392,7 @@ const EnviarOfertaCard = ({
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
-                color: "white",
+                color: "var(--color-fg-on-accent-primary)",
                 px: 4,
                 py: 1.5,
                 borderRadius: 2,

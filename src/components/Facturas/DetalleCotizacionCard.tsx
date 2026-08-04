@@ -25,17 +25,17 @@ const DetalleCotizacionCard = ({
   return (
     <Box
       sx={{
-        backgroundColor: "white",
+        backgroundColor: "var(--color-bg-default-primary)",
         borderRadius: 3,
         p: 3,
         mb: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        boxShadow: "var(--shadow-popover)",
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         <Box
           sx={{
-            backgroundColor: "#F1F5F9",
+            backgroundColor: "var(--color-bg-default-tertiary)",
             borderRadius: 2,
             p: 1.5,
             display: "flex",
@@ -43,13 +43,13 @@ const DetalleCotizacionCard = ({
             justifyContent: "center",
           }}
         >
-          <RequestQuote sx={{ color: "#00BCD4", fontSize: 24 }} />
+          <RequestQuote sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
         </Box>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
             Detalle de Cotización
           </Typography>
-          <Typography variant="body2" sx={{ color: "#64748B" }}>
+          <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
             Condiciones de financiamiento de la factura
           </Typography>
         </Box>
@@ -62,35 +62,35 @@ const DetalleCotizacionCard = ({
           gap: 2,
         }}
       >
-        <Box sx={{ backgroundColor: "#F8FAFC", borderRadius: 2, p: 2 }}>
-          <Typography variant="caption" sx={{ color: "#64748B" }}>
+        <Box sx={{ backgroundColor: "var(--color-bg-default-tertiary)", borderRadius: 2, p: 2 }}>
+          <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
             Plazo
           </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1E293B" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
             {plazo || 0} días
           </Typography>
         </Box>
 
-        <Box sx={{ backgroundColor: "#F8FAFC", borderRadius: 2, p: 2 }}>
-          <Typography variant="caption" sx={{ color: "#64748B" }}>
+        <Box sx={{ backgroundColor: "var(--color-bg-default-tertiary)", borderRadius: 2, p: 2 }}>
+          <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
             Porcentaje de Financiamiento
           </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1E293B" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
             {porcentajeFinanciamiento || 0}%
           </Typography>
         </Box>
 
         <Box
           sx={{
-            backgroundColor: "rgba(0, 168, 107, 0.2)",
+            backgroundColor: "var(--color-bg-success-secondary)",
             borderRadius: 2,
             p: 2,
           }}
         >
-          <Typography variant="caption" sx={{ color: "#00A86B" }}>
+          <Typography variant="caption" sx={{ color: "var(--color-fg-success-primary)" }}>
             Monto a Financiar
           </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "#00A86B" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "var(--color-fg-success-primary)" }}>
             {formatCurrency(montoFinanciar)}
           </Typography>
         </Box>

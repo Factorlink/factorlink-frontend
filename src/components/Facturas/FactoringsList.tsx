@@ -26,27 +26,27 @@ const FactoringsList = ({
       <Box
         onClick={() => setExpanded(!expanded)}
         sx={{
-          backgroundColor: "#F8FAFC",
+          backgroundColor: "var(--color-bg-default-tertiary)",
           borderRadius: 2,
           p: 2,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           cursor: "pointer",
-          "&:hover": { backgroundColor: "#F1F5F9" },
+          "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
           transition: "background-color 0.2s",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Visibility sx={{ color: "#00BCD4", fontSize: 20 }} />
+          <Visibility sx={{ color: "var(--color-fg-accent-primary)", fontSize: 20 }} />
           <Typography
             variant="body2"
-            sx={{ fontWeight: 600, color: "#1E293B" }}
+            sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
           >
             {title}
           </Typography>
           {subtitle && (
-            <Typography variant="caption" sx={{ color: "#64748B" }}>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
               {subtitle}
             </Typography>
           )}
@@ -54,8 +54,8 @@ const FactoringsList = ({
             label={factorings.length}
             size="small"
             sx={{
-              backgroundColor: "#E0F7FA",
-              color: "#00838F",
+              backgroundColor: "var(--color-bg-accent-secondary)",
+              color: "var(--color-fg-accent-primary)",
               fontWeight: 700,
               minWidth: 28,
               height: 24,
@@ -63,9 +63,9 @@ const FactoringsList = ({
           />
         </Box>
         {expanded ? (
-          <ExpandLess sx={{ color: "#64748B" }} />
+          <ExpandLess sx={{ color: "var(--color-fg-default-secondary)" }} />
         ) : (
-          <ExpandMore sx={{ color: "#64748B" }} />
+          <ExpandMore sx={{ color: "var(--color-fg-default-secondary)" }} />
         )}
       </Box>
 
@@ -77,7 +77,7 @@ const FactoringsList = ({
             <Box
               key={factoring.id || index}
               sx={{
-                backgroundColor: "#F8FAFC",
+                backgroundColor: "var(--color-bg-default-tertiary)",
                 borderRadius: 2,
                 p: 2,
                 display: "flex",
@@ -85,15 +85,15 @@ const FactoringsList = ({
                 gap: 1.5,
               }}
             >
-              <Business sx={{ color: "#00BCD4", fontSize: 20 }} />
+              <Business sx={{ color: "var(--color-fg-accent-primary)", fontSize: 20 }} />
               <Box>
                 <Typography
                   variant="body2"
-                  sx={{ fontWeight: 600, color: "#1E293B" }}
+                  sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
                 >
                   {factoring.razonSocial}
                 </Typography>
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
+                <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                   {factoring.rut}
                 </Typography>
               </Box>
@@ -102,7 +102,7 @@ const FactoringsList = ({
           {factorings.length === 0 && (
             <Typography
               variant="body2"
-              sx={{ color: "#94A3B8", textAlign: "center", py: 2 }}
+              sx={{ color: "var(--color-fg-default-tertiary)", textAlign: "center", py: 2 }}
             >
               No hay factorings seleccionados
             </Typography>

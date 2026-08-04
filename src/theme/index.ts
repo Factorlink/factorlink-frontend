@@ -23,3 +23,8 @@ export {
   legalHeadingSx,
   legalSectionHeadingSx,
 } from "./authStyles";
+export {
+  getFacturaStatusConfig,
+  surface,
+  type StatusConfig,
+} from "./statusTokens";

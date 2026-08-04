@@ -64,8 +64,8 @@ const FacturaFactoringDetail = () => {
             gap: 2,
           }}
         >
-          <CircularProgress sx={{ color: "#00BCD4" }} />
-          <Typography variant="body1" sx={{ color: "#64748B" }}>
+          <CircularProgress sx={{ color: "var(--color-fg-accent-primary)" }} />
+          <Typography variant="body1" sx={{ color: "var(--color-fg-default-secondary)" }}>
             Cargando factura...
           </Typography>
         </Box>
@@ -91,11 +91,11 @@ const FacturaFactoringDetail = () => {
               gap: 2,
             }}
           >
-            <ErrorOutline sx={{ fontSize: 64, color: "#EF4444" }} />
-            <Typography variant="h6" sx={{ color: "#1E293B", fontWeight: 600 }}>
+            <ErrorOutline sx={{ fontSize: 64, color: "var(--color-fg-danger-primary)" }} />
+            <Typography variant="h6" sx={{ color: "var(--color-fg-default-primary)", fontWeight: 500, fontFamily: "var(--font-heading)" }}>
               Error al cargar la factura
             </Typography>
-            <Typography variant="body2" sx={{ color: "#64748B" }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
               {error}
             </Typography>
             <Button
@@ -103,10 +103,10 @@ const FacturaFactoringDetail = () => {
               onClick={() => window.location.reload()}
               sx={{
                 mt: 2,
-                backgroundColor: "#00BCD4",
-                "&:hover": { backgroundColor: "#00ACC1" },
+                backgroundColor: "var(--color-bg-accent-primary)",
+                "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
                 textTransform: "none",
-                color: "white",
+                color: "var(--color-fg-on-accent-primary)",
               }}
             >
               Reintentar
@@ -134,8 +134,8 @@ const FacturaFactoringDetail = () => {
               gap: 2,
             }}
           >
-            <Description sx={{ fontSize: 64, color: "#CBD5E1" }} />
-            <Typography variant="h6" sx={{ color: "#64748B" }}>
+            <Description sx={{ fontSize: 64, color: "var(--color-fg-default-tertiary)" }} />
+            <Typography variant="h6" sx={{ color: "var(--color-fg-default-secondary)" }}>
               Factura no encontrada
             </Typography>
           </Box>
@@ -153,9 +153,9 @@ const FacturaFactoringDetail = () => {
             startIcon={<ArrowBack />}
             onClick={handleBack}
             sx={{
-              color: "#64748B",
+              color: "var(--color-fg-default-secondary)",
               textTransform: "none",
-              "&:hover": { backgroundColor: "#F1F5F9" },
+              "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
             }}
           >
             Volver a Marketplace

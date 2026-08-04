@@ -42,17 +42,17 @@ const formatDateShort = (dateStr: string) => {
 const getEstadoConfig = (estado: string) => {
   switch (estado?.toLowerCase()) {
     case "aceptada":
-      return { label: "Aceptada", color: "#10B981", bg: "#ECFDF5" };
+      return { label: "Aceptada", color: "var(--color-fg-success-primary)", bg: "var(--color-bg-success-secondary)" };
     case "rechazada":
-      return { label: "Rechazada", color: "#EF4444", bg: "#FEF2F2" };
+      return { label: "Rechazada", color: "var(--color-fg-danger-primary)", bg: "var(--color-bg-danger-secondary)" };
     case "expirada":
-      return { label: "Expirada", color: "#F59E0B", bg: "#FFFBEB" };
+      return { label: "Expirada", color: "var(--color-fg-warning-primary)", bg: "var(--color-bg-warning-secondary)" };
     case "activa":
-      return { label: "Activa", color: "#00BCD4", bg: "#E0F7FA" };
+      return { label: "Activa", color: "var(--color-fg-accent-primary)", bg: "var(--color-bg-accent-secondary)" };
     case "inactiva":
-      return { label: "Inactiva", color: "#0369A1", bg: "#E0F7FA" };
+      return { label: "Inactiva", color: "var(--color-fg-accent-primary)", bg: "var(--color-bg-accent-secondary)" };
     default:
-      return { label: estado, color: "#0369A1", bg: "#E0F7FA" };
+      return { label: estado, color: "var(--color-fg-accent-primary)", bg: "var(--color-bg-accent-secondary)" };
   }
 };
 
@@ -84,9 +84,9 @@ const DetalleOfertaFactoring = ({
     >
       <Box
         sx={{
-          backgroundColor: "white",
+          backgroundColor: "var(--color-bg-default-primary)",
           borderRadius: 3,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          boxShadow: "var(--shadow-popover)",
           overflow: "hidden",
         }}
       >
@@ -101,12 +101,12 @@ const DetalleOfertaFactoring = ({
               gap: 1.5,
               p: 2,
               borderRadius: 2,
-              backgroundColor: "#E0F7FA",
+              backgroundColor: "var(--color-bg-accent-secondary)",
               mb: 3,
             }}
           >
-            <AccessTime sx={{ color: "#00BCD4", fontSize: 20 }} />
-            <Typography variant="body2" sx={{ color: "#00838F" }}>
+            <AccessTime sx={{ color: "var(--color-fg-accent-primary)", fontSize: 20 }} />
+            <Typography variant="body2" sx={{ color: "var(--color-fg-accent-primary)" }}>
               Tu oferta está en revisión por la empresa emisora.
             </Typography>
           </Box>
@@ -163,8 +163,8 @@ const DetalleOfertaFactoring = ({
                     mb: 0.5,
                   }}
                 >
-                  <Percent sx={{ fontSize: 16, color: "#64748B" }} />
-                  <Typography variant="caption" sx={{ color: "#64748B" }}>
+                  <Percent sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
+                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                     Financiamiento
                   </Typography>
                 </Box>
@@ -182,8 +182,8 @@ const DetalleOfertaFactoring = ({
                     mb: 0.5,
                   }}
                 >
-                  <Percent sx={{ fontSize: 16, color: "#64748B" }} />
-                  <Typography variant="caption" sx={{ color: "#64748B" }}>
+                  <Percent sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
+                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                     Tasa
                   </Typography>
                 </Box>
@@ -201,8 +201,8 @@ const DetalleOfertaFactoring = ({
                     mb: 0.5,
                   }}
                 >
-                  <AccountBalance sx={{ fontSize: 16, color: "#64748B" }} />
-                  <Typography variant="caption" sx={{ color: "#64748B" }}>
+                  <AccountBalance sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
+                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                     Monto adelanto
                   </Typography>
                 </Box>
@@ -223,8 +223,8 @@ const DetalleOfertaFactoring = ({
                     mb: 0.5,
                   }}
                 >
-                  <AccessTime sx={{ fontSize: 16, color: "#64748B" }} />
-                  <Typography variant="caption" sx={{ color: "#64748B" }}>
+                  <AccessTime sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
+                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                     Plazo
                   </Typography>
                 </Box>
@@ -246,14 +246,14 @@ const DetalleOfertaFactoring = ({
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <CalendarToday sx={{ fontSize: 16, color: "#94A3B8" }} />
-                <Typography variant="body2" sx={{ color: "#64748B" }}>
+                <CalendarToday sx={{ fontSize: 16, color: "var(--color-fg-default-tertiary)" }} />
+                <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                   Enviada: {formatDate(oferta.createdAt)}
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <CalendarToday sx={{ fontSize: 16, color: "#94A3B8" }} />
-                <Typography variant="body2" sx={{ color: "#64748B" }}>
+                <CalendarToday sx={{ fontSize: 16, color: "var(--color-fg-default-tertiary)" }} />
+                <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                   Expira: {formatDateShort(oferta.fechaExpiracion)}
                 </Typography>
               </Box>
@@ -264,7 +264,7 @@ const DetalleOfertaFactoring = ({
               <Box
                 sx={{ pt: 2, borderTop: "1px solid", borderColor: "divider" }}
               >
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
+                <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                   Comentario:
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5 }}>
