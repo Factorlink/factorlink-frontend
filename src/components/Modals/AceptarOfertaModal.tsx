@@ -86,7 +86,7 @@ const AceptarOfertaModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "var(--radius-l)",
           overflow: "hidden",
         },
       }}
@@ -106,8 +106,8 @@ const AceptarOfertaModal = ({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: 2,
-              backgroundColor: "#00A86B",
+              borderRadius: "var(--radius-m)",
+              backgroundColor: "var(--color-bg-success-primary)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -140,7 +140,7 @@ const AceptarOfertaModal = ({
         )}
 
         {alertStatus !== "success" && (
-          <Box sx={{ borderRadius: 2, p: 2, mt: 2 }}>
+          <Box sx={{ borderRadius: "var(--radius-m)", p: 2, mt: 2 }}>
             <Box
               sx={{
                 display: "flex",
@@ -148,16 +148,16 @@ const AceptarOfertaModal = ({
                 gap: 2,
                 mb: 2,
                 p: 2,
-                borderRadius: 2,
-                backgroundColor: "rgba(0, 0, 0, 0.04)",
+                borderRadius: "var(--radius-m)",
+                backgroundColor: "var(--color-bg-default-tertiary)",
               }}
             >
               <Box
                 sx={{
                   width: 40,
                   height: 40,
-                  borderRadius: 2,
-                  bgcolor: "rgba(0, 188, 212, 0.1)",
+                  borderRadius: "var(--radius-m)",
+                  bgcolor: "var(--color-bg-accent-secondary)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -175,7 +175,7 @@ const AceptarOfertaModal = ({
               </Box>
             </Box>
 
-            <Typography variant="body2" sx={{ color: "#00A86B", lineHeight: 1.6 }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-success-primary)", lineHeight: 1.6 }}>
               Al aceptar esta oferta, se notificará al factoring y se procederá
               con el financiamiento. Esta acción no se puede deshacer.
             </Typography>
@@ -205,7 +205,7 @@ const AceptarOfertaModal = ({
           sx={{
             flex: 1,
             py: 1.5,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             textTransform: "none",
             fontWeight: 600,
           }}
@@ -220,13 +220,13 @@ const AceptarOfertaModal = ({
             sx={{
               flex: 1,
               py: 1.5,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               textTransform: "none",
               fontWeight: 600,
               color: "white",
-              backgroundColor: "#00A86B",
+              backgroundColor: "var(--color-bg-success-primary)",
               "&:hover": {
-                backgroundColor: "#008F5B",
+                backgroundColor: "var(--color-bg-success-primary-hover)",
               },
             }}
           >

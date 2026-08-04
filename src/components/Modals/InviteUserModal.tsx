@@ -149,7 +149,7 @@ const InviteUserModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "var(--radius-l)",
           overflow: "hidden",
         },
       }}
@@ -169,8 +169,10 @@ const InviteUserModal = ({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: 2,
-              backgroundColor: isEditMode ? "#F59E0B" : "primary.main",
+              borderRadius: "var(--radius-m)",
+              backgroundColor: isEditMode
+                ? "var(--color-bg-warning-primary)"
+                : "primary.main",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -243,10 +245,10 @@ const InviteUserModal = ({
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 sx={{
-                  borderRadius: 1,
+                  borderRadius: "var(--radius-s)",
                   backgroundColor: "background.default",
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "rgba(0, 0, 0, 0.23)",
+                    borderColor: "var(--color-border-default-primary)",
                   },
                   "&:hover .MuiOutlinedInput-notchedOutline": {
                     borderColor: "primary.main",
@@ -275,7 +277,7 @@ const InviteUserModal = ({
           sx={{
             flex: 1,
             py: 1.5,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             textTransform: "none",
             fontWeight: 600,
           }}
@@ -292,13 +294,17 @@ const InviteUserModal = ({
             sx={{
               flex: 1,
               py: 1.5,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               textTransform: "none",
               fontWeight: 600,
               color: "white",
-              backgroundColor: isEditMode ? "#F59E0B" : "primary.main",
+              backgroundColor: isEditMode
+                ? "var(--color-bg-warning-primary)"
+                : "primary.main",
               "&:hover": {
-                backgroundColor: isEditMode ? "#D97706" : undefined,
+                backgroundColor: isEditMode
+                  ? "var(--color-bg-warning-primary-hover)"
+                  : undefined,
               },
             }}
           >

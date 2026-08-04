@@ -115,7 +115,7 @@ const SyncFacturasSiiModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "var(--radius-l)",
           overflow: "hidden",
         },
       }}
@@ -182,8 +182,8 @@ const SyncFacturasSiiModal = ({
               onChange={(e) => setMonth(e.target.value)}
               onBlur={() => setTouched((prev) => ({ ...prev, month: true }))}
               sx={{
-                backgroundColor: "background.white",
-                borderRadius: 2,
+                backgroundColor: "var(--color-bg-default-primary)",
+                borderRadius: "var(--radius-m)",
               }}
             >
               {MONTHS.map((m) => (
@@ -210,8 +210,8 @@ const SyncFacturasSiiModal = ({
               onChange={(e) => setYear(e.target.value)}
               onBlur={() => setTouched((prev) => ({ ...prev, year: true }))}
               sx={{
-                backgroundColor: "background.white",
-                borderRadius: 2,
+                backgroundColor: "var(--color-bg-default-primary)",
+                borderRadius: "var(--radius-m)",
               }}
             >
               {years.map((y) => (
@@ -240,7 +240,7 @@ const SyncFacturasSiiModal = ({
               padding: "12px 24px",
               fontSize: "1rem",
               fontWeight: 500,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               boxShadow: "none",
               "&:hover": {
                 backgroundColor: "secondary.dark",
@@ -270,7 +270,7 @@ const SyncFacturasSiiModal = ({
                 padding: "12px 24px",
                 fontSize: "1rem",
                 fontWeight: 500,
-                borderRadius: 2,
+                borderRadius: "var(--radius-m)",
                 boxShadow: "none",
                 "&:hover": {
                   backgroundColor: "primary.dark",

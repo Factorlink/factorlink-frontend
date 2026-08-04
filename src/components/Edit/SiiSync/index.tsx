@@ -26,6 +26,7 @@ import {
 import useAuthStore from "../../../store/authStore";
 import type { Role } from "../../../types/role";
 import siiLogo from "../../../assets/png/sii-logo.png";
+import { surface } from "../../../theme";
 
 interface SiiSyncFormData {
   siiRut: string;
@@ -109,10 +110,8 @@ const SiiSync = () => {
       <Box
         id="sii-sync-card"
         sx={{
-          backgroundColor: "background.paper",
-          borderRadius: 3,
+          ...surface.card,
           overflow: "hidden",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
         }}
       >
         <Box
@@ -195,7 +194,7 @@ const SiiSync = () => {
                   padding: "12px 24px",
                   fontSize: "1rem",
                   fontWeight: 500,
-                  borderRadius: 2,
+                  borderRadius: "var(--radius-m)",
                   boxShadow: "none",
                   "&:hover": {
                     backgroundColor: "secondary.dark",
@@ -217,7 +216,7 @@ const SiiSync = () => {
                   padding: "12px 24px",
                   fontSize: "1rem",
                   fontWeight: 500,
-                  borderRadius: 2,
+                  borderRadius: "var(--radius-m)",
                   boxShadow: "none",
                   "&:hover": {
                     backgroundColor: "success.dark",
@@ -254,7 +253,7 @@ const SiiSync = () => {
         disableEscapeKeyDown
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: "var(--radius-l)",
             minWidth: 360,
             overflow: "hidden",
           },
@@ -305,7 +304,7 @@ const SiiSync = () => {
               textTransform: "none",
               px: 4,
               py: 1,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               "&:hover": {
                 backgroundColor:
                   modalStatus === "success" ? "success.dark" : "error.dark",

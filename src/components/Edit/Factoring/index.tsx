@@ -19,6 +19,7 @@ import { handleRutInputChange } from "../../../utils/validations/shared-fields";
 import useAuthStore from "../../../store/authStore";
 import type { Role } from "../../../types/role";
 import { ROLES } from "../../../utils/consts";
+import { surface } from "../../../theme";
 
 interface FactoringFormData {
   rut: string;
@@ -134,10 +135,8 @@ const Factoring = () => {
     <>
       <Box
         sx={{
-          backgroundColor: "background.paper",
-          borderRadius: 3,
+          ...surface.card,
           overflow: "hidden",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
         }}
       >
         <Box
@@ -259,7 +258,7 @@ const Factoring = () => {
                     padding: "12px 24px",
                     fontSize: "1rem",
                     fontWeight: 500,
-                    borderRadius: 2,
+                    borderRadius: "var(--radius-m)",
                     boxShadow: "none",
                     "&:hover": {
                       backgroundColor: "secondary.dark",
@@ -283,7 +282,7 @@ const Factoring = () => {
                     padding: "12px 24px",
                     fontSize: "1rem",
                     fontWeight: 500,
-                    borderRadius: 2,
+                    borderRadius: "var(--radius-m)",
                     boxShadow: "none",
                     "&:hover": {
                       backgroundColor: "success.dark",
@@ -311,7 +310,7 @@ const Factoring = () => {
         aria-describedby="factoring-modal-description"
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: "var(--radius-l)",
             minWidth: 360,
             overflow: "hidden",
           },
@@ -375,7 +374,7 @@ const Factoring = () => {
                 textTransform: "none",
                 px: 4,
                 py: 1,
-                borderRadius: 2,
+                borderRadius: "var(--radius-m)",
                 "&:hover": {
                   backgroundColor: "success.dark",
                 },
@@ -393,7 +392,7 @@ const Factoring = () => {
                 textTransform: "none",
                 px: 4,
                 py: 1,
-                borderRadius: 2,
+                borderRadius: "var(--radius-m)",
                 "&:hover": {
                   backgroundColor: "error.dark",
                 },

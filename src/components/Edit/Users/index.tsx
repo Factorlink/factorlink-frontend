@@ -34,6 +34,7 @@ import DeleteUserModal from "../../Modals/DeleteUserModal";
 import type { Role } from "../../../types/role";
 import { ROLE_NAMES, ROLES } from "../../../utils/consts";
 import { capitalizeFirstLetter } from "../../../utils/utils";
+import { surface } from "../../../theme";
 
 const getInitials = (firstName: string, lastName: string) => {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -49,21 +50,21 @@ const getUserRole = (roles: Role[], contexto?: string, currentId?: string) => {
 
 const getRoleColor = (role: string) => {
   if (role === ROLES.EMPRESA_ADMIN || role === ROLES.FACTORING_ADMIN)
-    return "#00A86B";
-  return "#6B7280";
+    return "var(--color-fg-success-primary)";
+  return "var(--color-fg-default-secondary)";
 };
 
 const getStatusConfig = (status: string | null) => {
   if (status !== "pendiente") {
     return {
-      color: "#00A86B",
-      bgColor: "rgba(0, 168, 107, 0.1)",
+      color: "var(--color-fg-success-primary)",
+      bgColor: "var(--color-bg-success-secondary)",
       icon: <CheckCircleIcon sx={{ fontSize: 14, mr: 0.5 }} />,
     };
   }
   return {
-    color: "#F59E0B",
-    bgColor: "rgba(245, 158, 11, 0.1)",
+    color: "var(--color-fg-warning-primary)",
+    bgColor: "var(--color-bg-warning-secondary)",
     icon: <PendingIcon sx={{ fontSize: 14, mr: 0.5 }} />,
   };
 };
@@ -157,8 +158,7 @@ const Users = () => {
       {/* Header Section */}
       <Box
         sx={{
-          backgroundColor: "white",
-          borderRadius: 3,
+          ...surface.card,
           p: 3,
           display: "flex",
           justifyContent: "space-between",
@@ -168,21 +168,21 @@ const Users = () => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Box
             sx={{
-              backgroundColor: "white",
-              borderRadius: 2,
+              backgroundColor: "var(--color-bg-default-tertiary)",
+              borderRadius: "var(--radius-m)",
               p: 1.5,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <GroupIcon sx={{ color: "#64748B", fontSize: 28 }} />
+            <GroupIcon sx={{ color: "var(--color-fg-default-secondary)", fontSize: 28 }} />
           </Box>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
               Gestión de Usuarios
             </Typography>
-            <Typography variant="body2" sx={{ color: "#64748B" }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
               Administra los usuarios de tu empresa
             </Typography>
           </Box>
@@ -192,11 +192,11 @@ const Users = () => {
           startIcon={<PersonAddIcon />}
           onClick={() => setInviteModalOpen(true)}
           sx={{
-            backgroundColor: "#00BCD4;",
-            "&:hover": { backgroundColor: "#00BCD4;" },
+            backgroundColor: "var(--color-bg-accent-primary)",
+            "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
             textTransform: "none",
             fontWeight: 600,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             px: 3,
             color: "white",
           }}
@@ -211,21 +211,19 @@ const Users = () => {
         <Box
           sx={{
             flex: 1,
-            backgroundColor: "white",
-            borderRadius: 3,
+            ...surface.card,
             p: 2.5,
             display: "flex",
             alignItems: "center",
             gap: 2,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
           }}
         >
-          <GroupIcon sx={{ color: "#64748B", fontSize: 24 }} />
+          <GroupIcon sx={{ color: "var(--color-fg-default-secondary)", fontSize: 24 }} />
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
               {totalUsers}
             </Typography>
-            <Typography variant="body2" sx={{ color: "#64748B" }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
               Total usuarios
             </Typography>
           </Box>
@@ -235,21 +233,19 @@ const Users = () => {
         <Box
           sx={{
             flex: 1,
-            backgroundColor: "white",
-            borderRadius: 3,
+            ...surface.card,
             p: 2.5,
             display: "flex",
             alignItems: "center",
             gap: 2,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
           }}
         >
-          <VerifiedUserIcon sx={{ color: "#F59E0B", fontSize: 24 }} />
+          <VerifiedUserIcon sx={{ color: "var(--color-fg-warning-primary)", fontSize: 24 }} />
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
               {activeUsers}
             </Typography>
-            <Typography variant="body2" sx={{ color: "#64748B" }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
               Usuarios activos
             </Typography>
           </Box>
@@ -259,21 +255,19 @@ const Users = () => {
         <Box
           sx={{
             flex: 1,
-            backgroundColor: "white",
-            borderRadius: 3,
+            ...surface.card,
             p: 2.5,
             display: "flex",
             alignItems: "center",
             gap: 2,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
           }}
         >
-          <GroupIcon sx={{ color: "#F97316", fontSize: 24 }} />
+          <GroupIcon sx={{ color: "var(--color-fg-warning-primary)", fontSize: 24 }} />
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
               {pendingUsers}
             </Typography>
-            <Typography variant="body2" sx={{ color: "#64748B" }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
               Pendientes
             </Typography>
           </Box>
@@ -284,33 +278,33 @@ const Users = () => {
       <TableContainer
         component={Paper}
         sx={{
-          borderRadius: 3,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+          borderRadius: "var(--radius-l)",
+          boxShadow: "var(--shadow-card)",
           overflow: "hidden",
         }}
       >
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+            <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
+              <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                 Usuario
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+              <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                 Email
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+              <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                 Rol
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+              <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                 Estado
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+              <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                 Fecha Asociación
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+              <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                 Último Acceso
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+              <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                 Acciones
               </TableCell>
             </TableRow>
@@ -338,7 +332,7 @@ const Users = () => {
                 <TableRow
                   key={user.id}
                   sx={{
-                    "&:hover": { backgroundColor: "#F8FAFC" },
+                    "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
                     "&:last-child td": { borderBottom: 0 },
                   }}
                 >
@@ -348,8 +342,8 @@ const Users = () => {
                     >
                       <Avatar
                         sx={{
-                          bgcolor: "#E0E7EF",
-                          color: "#64748B",
+                          bgcolor: "var(--color-bg-neutral-secondary)",
+                          color: "var(--color-fg-default-secondary)",
                           fontWeight: 600,
                           fontSize: 14,
                           width: 36,
@@ -361,14 +355,14 @@ const Users = () => {
                       <Box>
                         <Typography
                           variant="body2"
-                          sx={{ fontWeight: 600, color: "#1E293B" }}
+                          sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
                         >
                           {user.firstName} {user.lastName}
                           {user.isCurrentUser && (
                             <Typography
                               component="span"
                               variant="caption"
-                              sx={{ color: "#64748B", ml: 0.5 }}
+                              sx={{ color: "var(--color-fg-default-secondary)", ml: 0.5 }}
                             >
                               (Tú)
                             </Typography>
@@ -378,7 +372,7 @@ const Users = () => {
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ color: "#64748B" }}>
+                    <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                       {user.email}
                     </Typography>
                   </TableCell>
@@ -406,8 +400,8 @@ const Users = () => {
                               ? currentRole?.empresaId
                               : currentRole?.factoringId,
                           )?.role === ROLES.EMPRESA_ADMIN
-                            ? "rgba(0, 168, 107, 0.1)"
-                            : "#F1F5F9",
+                            ? "var(--color-bg-success-secondary)"
+                            : "var(--color-bg-neutral-secondary)",
                         color: getRoleColor(
                           getUserRole(
                             user.roles,
@@ -448,7 +442,7 @@ const Users = () => {
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ color: "#64748B" }}>
+                    <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                       {inviteDate
                         ? new Date(inviteDate).toLocaleDateString("es-ES", {
                             day: "2-digit",
@@ -459,7 +453,7 @@ const Users = () => {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ color: "#64748B" }}>
+                    <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                       {user?.updatedAt
                         ? new Date(user.updatedAt).toLocaleDateString("es-ES", {
                             day: "2-digit",
@@ -473,7 +467,7 @@ const Users = () => {
                     <IconButton
                       size="small"
                       onClick={(e) => handleMenuOpen(e, user)}
-                      sx={{ color: "#64748B" }}
+                      sx={{ color: "var(--color-fg-default-secondary)" }}
                     >
                       <MoreVertIcon />
                     </IconButton>
@@ -494,25 +488,25 @@ const Users = () => {
         transformOrigin={{ vertical: "top", horizontal: "right" }}
         PaperProps={{
           sx: {
-            borderRadius: 2,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            borderRadius: "var(--radius-m)",
+            boxShadow: "var(--shadow-popover)",
             minWidth: 180,
           },
         }}
       >
         <MenuItem onClick={handleChangeRole}>
           <ListItemIcon>
-            <SwapHorizIcon sx={{ color: "#64748B" }} />
+            <SwapHorizIcon sx={{ color: "var(--color-fg-default-secondary)" }} />
           </ListItemIcon>
           <ListItemText primary="Cambiar rol" />
         </MenuItem>
         <MenuItem onClick={handleDeleteUser}>
           <ListItemIcon>
-            <DeleteIcon sx={{ color: "#EF4444" }} />
+            <DeleteIcon sx={{ color: "var(--color-fg-danger-primary)" }} />
           </ListItemIcon>
           <ListItemText
             primary="Eliminar usuario"
-            sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
+            sx={{ "& .MuiTypography-root": { color: "var(--color-fg-danger-primary)" } }}
           />
         </MenuItem>
       </Menu>

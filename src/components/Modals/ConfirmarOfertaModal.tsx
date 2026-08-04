@@ -47,7 +47,7 @@ const ConfirmarOfertaModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "var(--radius-l)",
           overflow: "hidden",
         },
       }}
@@ -65,8 +65,8 @@ const ConfirmarOfertaModal = ({
         {/* Summary */}
         <Box
           sx={{
-            backgroundColor: "rgba(0, 0, 0, 0.04)",
-            borderRadius: 2,
+            backgroundColor: "var(--color-bg-default-tertiary)",
+            borderRadius: "var(--radius-m)",
             p: 2.5,
             mt: 1,
             display: "flex",
@@ -110,8 +110,8 @@ const ConfirmarOfertaModal = ({
 
         {/* Warning */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2.5 }}>
-          <Warning sx={{ color: "#F59E0B", fontSize: 20 }} />
-          <Typography variant="body2" sx={{ color: "#F59E0B", fontWeight: 500 }}>
+          <Warning sx={{ color: "var(--color-fg-warning-primary)", fontSize: 20 }} />
+          <Typography variant="body2" sx={{ color: "var(--color-fg-warning-primary)", fontWeight: 500 }}>
             Una vez enviada, no podrás modificar ni reenviar esta oferta.
           </Typography>
         </Box>
@@ -125,7 +125,7 @@ const ConfirmarOfertaModal = ({
           sx={{
             px: 4,
             py: 1.2,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             textTransform: "none",
             fontWeight: 600,
           }}
@@ -139,7 +139,7 @@ const ConfirmarOfertaModal = ({
           sx={{
             px: 4,
             py: 1.2,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             textTransform: "none",
             fontWeight: 600,
             color: "white",
