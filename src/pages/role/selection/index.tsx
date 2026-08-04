@@ -31,12 +31,11 @@ const RoleSelection = () => {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#3B4D61",
+          backgroundColor: "var(--color-bg-neutral-primary)",
           display: "flex",
           flexDirection: "column",
         }}
       >
-        {/* Main Content */}
         <Box
           sx={{
             flex: 1,
@@ -50,8 +49,9 @@ const RoleSelection = () => {
           <Typography
             variant="h4"
             sx={{
-              color: "white",
-              fontWeight: 700,
+              color: "var(--color-fg-on-neutral-primary)",
+              fontFamily: "var(--font-heading)",
+              fontWeight: 400,
               mb: 1,
               textAlign: "center",
             }}
@@ -60,7 +60,8 @@ const RoleSelection = () => {
           </Typography>
           <Typography
             sx={{
-              color: "rgba(255,255,255,0.7)",
+              color: "var(--color-fg-on-neutral-primary)",
+              opacity: 0.7,
               mb: 6,
               textAlign: "center",
             }}
@@ -68,7 +69,6 @@ const RoleSelection = () => {
             Elige el rol con el que deseas iniciar sesión
           </Typography>
 
-          {/* Cards Grid */}
           <Box
             sx={{
               display: "flex",
@@ -115,20 +115,22 @@ const RoleSelection = () => {
               />
             ))}
 
-            {/* Agregar Empresa SII Card */}
             {(currentRole?.contexto === "empresa" ||
               user?.roles?.some((role) => role.contexto === "empresa")) && (
               <Card
                 sx={{
                   width: 280,
-                  borderRadius: 3,
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                  border: "2px dashed rgba(255,255,255,0.3)",
+                  borderRadius: "var(--radius-l)",
+                  backgroundColor: "transparent",
+                  border: "2px dashed color-mix(in srgb, var(--color-fg-on-neutral-primary) 35%, transparent)",
                   boxShadow: "none",
-                  transition: "all 0.2s",
+                  transition:
+                    "border-color var(--duration-fast) var(--easing-ease), background-color var(--duration-fast) var(--easing-ease)",
                   "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    borderColor: "rgba(255,255,255,0.5)",
+                    backgroundColor:
+                      "color-mix(in srgb, var(--color-fg-on-neutral-primary) 8%, transparent)",
+                    borderColor:
+                      "color-mix(in srgb, var(--color-fg-on-neutral-primary) 55%, transparent)",
                   },
                 }}
               >
@@ -146,18 +148,24 @@ const RoleSelection = () => {
                 >
                   <IconButton
                     sx={{
-                      backgroundColor: "rgba(255,255,255,0.2)",
+                      backgroundColor:
+                        "color-mix(in srgb, var(--color-fg-on-neutral-primary) 15%, transparent)",
+                      color: "var(--color-fg-on-neutral-primary)",
                       mb: 2,
-                      "&:hover": { backgroundColor: "rgba(255,255,255,0.3)" },
+                      "&:hover": {
+                        backgroundColor:
+                          "color-mix(in srgb, var(--color-fg-on-neutral-primary) 25%, transparent)",
+                      },
                     }}
                   >
-                    <Add sx={{ color: "white", fontSize: 32 }} />
+                    <Add sx={{ fontSize: 32 }} />
                   </IconButton>
                   <Typography
                     sx={{
-                      color: "white",
-                      fontWeight: 600,
-                      fontSize: "1rem",
+                      color: "var(--color-fg-on-neutral-primary)",
+                      fontFamily: "var(--font-heading)",
+                      fontWeight: 500,
+                      fontSize: "var(--font-size-m)",
                       mb: 0.5,
                     }}
                   >
@@ -165,8 +173,9 @@ const RoleSelection = () => {
                   </Typography>
                   <Typography
                     sx={{
-                      color: "rgba(255,255,255,0.6)",
-                      fontSize: "0.85rem",
+                      color: "var(--color-fg-on-neutral-primary)",
+                      opacity: 0.65,
+                      fontSize: "var(--font-size-s)",
                     }}
                   >
                     Sincroniza con SII

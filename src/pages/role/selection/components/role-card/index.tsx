@@ -1,39 +1,59 @@
 import { Card, CardActionArea, Box, Avatar, Chip, Typography } from "@mui/material";
-import { Business, Badge, Email, } from "@mui/icons-material";
+import { Business, Badge, Email } from "@mui/icons-material";
 import { ROLES, ROLE_NAMES } from "../../../../../utils/consts";
 
+/** Role chip colors — semantic tokens (accent / success / neutral). */
 const roleColors: Record<string, string> = {
-  [ROLES.EMPRESA_ADMIN]: "#00BCD4",
-  [ROLES.EMPRESA_USUARIO]: "#4A6B8A",
-  [ROLES.FACTORING_ADMIN]: "#00BCD4",
-  [ROLES.FACTORING_ANALISTA]: "#00D9A5",
-  DEFAULT: "#00BCD4",
+  [ROLES.EMPRESA_ADMIN]: "var(--color-fg-accent-primary)",
+  [ROLES.EMPRESA_USUARIO]: "var(--color-fg-neutral-secondary)",
+  [ROLES.FACTORING_ADMIN]: "var(--color-fg-accent-primary)",
+  [ROLES.FACTORING_ANALISTA]: "var(--color-fg-success-primary)",
+  DEFAULT: "var(--color-fg-accent-primary)",
 };
 
-  const getRoleColor = (roleName: string) => {
-    return roleColors[roleName] || roleColors.DEFAULT;
-  };
+const getRoleColor = (roleName: string) =>
+  roleColors[roleName] || roleColors.DEFAULT;
 
-const RoleCard = ({ roleId, currentRoleId, handleSelectRole, razonSocial, roleName, email, rut }: any) => {
+interface RoleCardProps {
+  roleId?: string;
+  currentRoleId?: string;
+  handleSelectRole: () => void;
+  razonSocial?: string;
+  roleName: string;
+  email?: string;
+  rut?: string;
+}
+
+const RoleCard = ({
+  roleId,
+  currentRoleId,
+  handleSelectRole,
+  razonSocial,
+  roleName,
+  email,
+  rut,
+}: RoleCardProps) => {
+  const isSelected = currentRoleId === roleId;
+
   return (
     <Card
-      key={roleId}
       sx={{
         width: 280,
-        borderRadius: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-        transition: "transform 0.2s, box-shadow 0.2s",
-        border:
-          currentRoleId === roleId ? "2px solid" : "none",
-        borderColor: "primary.main",
+        borderRadius: "var(--radius-l)",
+        backgroundColor: "var(--color-bg-default-primary)",
+        boxShadow: "var(--shadow-card)",
+        transition:
+          "transform var(--duration-fast) var(--easing-ease), box-shadow var(--duration-fast) var(--easing-ease)",
+        border: isSelected
+          ? "2px solid var(--color-border-accent-primary)"
+          : "1px solid var(--color-border-default-primary)",
         "&:hover": {
           transform: "translateY(-4px)",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+          boxShadow: "var(--shadow-popover)",
         },
       }}
     >
       <CardActionArea onClick={handleSelectRole} sx={{ p: 3 }}>
-        {/* Header con ícono y nombre */}
         <Box
           sx={{
             display: "flex",
@@ -46,18 +66,20 @@ const RoleCard = ({ roleId, currentRoleId, handleSelectRole, razonSocial, roleNa
             sx={{
               width: 48,
               height: 48,
-              backgroundColor: "primary.main",
-              borderRadius: 2,
+              backgroundColor: "var(--color-bg-accent-secondary)",
+              color: "var(--color-fg-accent-primary)",
+              borderRadius: "var(--radius-m)",
             }}
           >
-            <Business sx={{ color: "white" }} />
+            <Business />
           </Avatar>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               sx={{
-                fontWeight: 600,
-                fontSize: "1rem",
-                color: "text.primary",
+                fontFamily: "var(--font-heading)",
+                fontWeight: 500,
+                fontSize: "var(--font-size-m)",
+                color: "var(--color-fg-default-primary)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -71,8 +93,8 @@ const RoleCard = ({ roleId, currentRoleId, handleSelectRole, razonSocial, roleNa
               sx={{
                 backgroundColor: "transparent",
                 color: getRoleColor(roleName),
-                fontWeight: 600,
-                fontSize: "0.75rem",
+                fontWeight: 500,
+                fontSize: "var(--font-size-xs)",
                 height: 22,
                 "& .MuiChip-label": { px: 0 },
               }}
@@ -80,20 +102,34 @@ const RoleCard = ({ roleId, currentRoleId, handleSelectRole, razonSocial, roleNa
           </Box>
         </Box>
 
-        {/* Info */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Badge sx={{ color: "text.secondary", fontSize: 18 }} />
-            <Typography sx={{ color: "text.secondary", fontSize: "0.85rem" }}>
+            <Badge
+              sx={{
+                color: "var(--color-fg-default-secondary)",
+                fontSize: 18,
+              }}
+            />
+            <Typography
+              sx={{
+                color: "var(--color-fg-default-secondary)",
+                fontSize: "var(--font-size-s)",
+              }}
+            >
               RUT: {rut || "-"}
             </Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Email sx={{ color: "text.secondary", fontSize: 18 }} />
+            <Email
+              sx={{
+                color: "var(--color-fg-default-secondary)",
+                fontSize: 18,
+              }}
+            />
             <Typography
               sx={{
-                color: "text.secondary",
-                fontSize: "0.85rem",
+                color: "var(--color-fg-default-secondary)",
+                fontSize: "var(--font-size-s)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
