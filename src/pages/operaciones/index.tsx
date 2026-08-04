@@ -1,6 +1,5 @@
 import {
   Box,
-  useTheme,
   Typography,
   FormControl,
   Select,
@@ -42,15 +41,14 @@ const data = [
 ];
 
 const Operaciones = () => {
-  const theme = useTheme();
   return (
     <Layout>
       <Box sx={{ p: 3, flex: 1 }}>
-        {/* Operaciones Banner */}
         <Box
           sx={{
-            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.secondary.main} 100%)`,
-            borderRadius: 3,
+            background:
+              "linear-gradient(135deg, var(--color-bg-neutral-primary) 0%, var(--color-bg-accent-primary) 100%)",
+            borderRadius: "var(--radius-l)",
             p: 2.5,
             display: "flex",
             alignItems: "center",
@@ -61,12 +59,18 @@ const Operaciones = () => {
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Description sx={{ color: "success.main", fontSize: "1.5rem" }} />
+            <Description
+              sx={{
+                color: "var(--color-fg-success-primary)",
+                fontSize: "1.5rem",
+              }}
+            />
             <Typography
               sx={{
-                color: "common.white",
+                color: "var(--color-fg-on-neutral-primary)",
+                fontFamily: "var(--font-heading)",
                 fontWeight: 500,
-                fontSize: "1.1rem",
+                fontSize: "var(--font-size-l)",
               }}
             >
               Operaciones/Marketplace
@@ -74,27 +78,21 @@ const Operaciones = () => {
           </Box>
         </Box>
 
-        {/* Operaciones Content */}
         <Box
           sx={{
-            backgroundColor: "background.paper",
-            borderRadius: 3,
+            backgroundColor: "var(--color-bg-default-primary)",
+            borderRadius: "var(--radius-l)",
             p: 3,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            boxShadow: "var(--shadow-card)",
+            border: "1px solid var(--color-border-default-primary)",
           }}
         >
-          {/* Filters Row */}
           <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
             <FormControl size="small" sx={{ minWidth: 200 }}>
               <Select
                 defaultValue="fecha"
                 IconComponent={KeyboardArrowDown}
-                sx={{
-                  borderRadius: 2,
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "divider",
-                  },
-                }}
+                sx={{ borderRadius: "var(--radius-m)" }}
               >
                 <MenuItem value="fecha">01/08/2023 - 29/08/2024</MenuItem>
               </Select>
@@ -103,12 +101,7 @@ const Operaciones = () => {
               <Select
                 defaultValue="filtro"
                 IconComponent={KeyboardArrowDown}
-                sx={{
-                  borderRadius: 2,
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "divider",
-                  },
-                }}
+                sx={{ borderRadius: "var(--radius-m)" }}
               >
                 <MenuItem value="filtro">Filtro</MenuItem>
               </Select>
@@ -118,24 +111,20 @@ const Operaciones = () => {
               <Select
                 defaultValue="condicional"
                 IconComponent={KeyboardArrowDown}
-                sx={{
-                  borderRadius: 2,
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "divider",
-                  },
-                }}
+                sx={{ borderRadius: "var(--radius-m)" }}
               >
                 <MenuItem value="condicional">Condicional</MenuItem>
               </Select>
             </FormControl>
 
             <IconButton
+              aria-label="Descargar"
               sx={{
-                backgroundColor: "primary.main",
-                color: "white",
-                borderRadius: 2,
+                backgroundColor: "var(--color-bg-accent-primary)",
+                color: "var(--color-fg-on-accent-primary)",
+                borderRadius: "var(--radius-m)",
                 "&:hover": {
-                  backgroundColor: "primary.dark",
+                  backgroundColor: "var(--color-bg-accent-primary-hover)",
                 },
               }}
             >
@@ -143,7 +132,6 @@ const Operaciones = () => {
             </IconButton>
           </Box>
 
-          {/* Tabs */}
           <OperationsTabs tabLabels={tabLabels} data={data} />
         </Box>
       </Box>

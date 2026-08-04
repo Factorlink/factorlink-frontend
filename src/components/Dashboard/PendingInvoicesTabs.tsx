@@ -72,6 +72,12 @@ const pendingInvoices = [
   },
 ];
 
+const headerCellSx = {
+  fontWeight: 500,
+  fontFamily: "var(--font-heading)",
+  color: "var(--color-fg-default-secondary)",
+};
+
 const PendingInvoicesTabs = () => {
   const [tabValue, setTabValue] = useState(0);
 
@@ -82,30 +88,25 @@ const PendingInvoicesTabs = () => {
   return (
     <Box
       sx={{
-        backgroundColor: "background.paper",
-        borderRadius: 3,
+        backgroundColor: "var(--color-bg-default-primary)",
+        borderRadius: "var(--radius-l)",
         p: 3,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        boxShadow: "var(--shadow-card)",
+        border: "1px solid var(--color-border-default-primary)",
       }}
     >
-      {/* Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          sx={{
-            "& .MuiTab-root": {
-              textTransform: "none",
-              fontWeight: 500,
-              fontSize: "0.95rem",
-            },
-            "& .Mui-selected": {
-              color: "text.primary",
-            },
-          }}
-        >
+      <Box
+        sx={{
+          borderBottom: "1px solid var(--color-border-default-primary)",
+        }}
+      >
+        <Tabs value={tabValue} onChange={handleTabChange}>
           <Tab
-            icon={<Description sx={{ fontSize: "1.2rem" }} />}
+            icon={
+              <Description
+                sx={{ fontSize: "1.2rem", color: "inherit" }}
+              />
+            }
             iconPosition="start"
             label="Facturas pendientes a ceder"
           />
@@ -113,68 +114,62 @@ const PendingInvoicesTabs = () => {
         </Tabs>
       </Box>
 
-      {/* Tab Panel 1 */}
       <TabPanel value={tabValue} index={0}>
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
-                  Folio
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
-                  Empresa
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
-                  RUT
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
-                  Fecha Emisión
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
-                  IVA
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
-                  $ Monto factura
-                </TableCell>
-                <TableCell></TableCell>
+                <TableCell sx={headerCellSx}>Folio</TableCell>
+                <TableCell sx={headerCellSx}>Empresa</TableCell>
+                <TableCell sx={headerCellSx}>RUT</TableCell>
+                <TableCell sx={headerCellSx}>Fecha Emisión</TableCell>
+                <TableCell sx={headerCellSx}>IVA</TableCell>
+                <TableCell sx={headerCellSx}>$ Monto factura</TableCell>
+                <TableCell />
               </TableRow>
             </TableHead>
             <TableBody>
               {pendingInvoices.map((invoice) => (
-                <TableRow key={invoice.folio}>
-                  <TableCell sx={{ fontSize: "0.9rem" }}>
+                <TableRow
+                  key={invoice.folio}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "var(--color-bg-default-primary-hover)",
+                    },
+                  }}
+                >
+                  <TableCell sx={{ fontSize: "var(--font-size-s)" }}>
                     {invoice.folio}
                   </TableCell>
-                  <TableCell sx={{ fontSize: "0.9rem", color: "primary.main" }}>
+                  <TableCell
+                    sx={{
+                      fontSize: "var(--font-size-s)",
+                      color: "var(--color-fg-accent-primary)",
+                    }}
+                  >
                     {invoice.empresa}
                   </TableCell>
-                  <TableCell sx={{ fontSize: "0.9rem" }}>
+                  <TableCell sx={{ fontSize: "var(--font-size-s)" }}>
                     {invoice.rut}
                   </TableCell>
-                  <TableCell sx={{ fontSize: "0.9rem" }}>
+                  <TableCell sx={{ fontSize: "var(--font-size-s)" }}>
                     {invoice.fechaEmision}
                   </TableCell>
-                  <TableCell sx={{ fontSize: "0.9rem" }}>
+                  <TableCell sx={{ fontSize: "var(--font-size-s)" }}>
                     {invoice.iva}
                   </TableCell>
-                  <TableCell sx={{ fontSize: "0.9rem" }}>
+                  <TableCell sx={{ fontSize: "var(--font-size-s)" }}>
                     {invoice.monto}
                   </TableCell>
                   <TableCell>
                     <Button
                       variant="outlined"
+                      color="primary"
                       size="small"
                       sx={{
-                        borderColor: "success.main",
-                        color: "success.main",
                         textTransform: "none",
-                        borderRadius: 5,
-                        fontSize: "0.8rem",
-                        "&:hover": {
-                          borderColor: "success.dark",
-                          backgroundColor: "rgba(0, 217, 165, 0.08)",
-                        },
+                        borderRadius: "var(--radius-m)",
+                        fontSize: "var(--font-size-xs)",
                       }}
                     >
                       Ver ofertas
@@ -187,9 +182,14 @@ const PendingInvoicesTabs = () => {
         </TableContainer>
       </TabPanel>
 
-      {/* Tab Panel 2 */}
       <TabPanel value={tabValue} index={1}>
-        <Typography sx={{ color: "text.secondary", textAlign: "center", py: 4 }}>
+        <Typography
+          sx={{
+            color: "var(--color-fg-default-secondary)",
+            textAlign: "center",
+            py: 4,
+          }}
+        >
           No hay facturas por cotizar
         </Typography>
       </TabPanel>

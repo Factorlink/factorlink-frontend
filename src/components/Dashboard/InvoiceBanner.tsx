@@ -1,13 +1,12 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 const InvoiceBanner = () => {
-  const theme = useTheme();
-
   return (
     <Box
       sx={{
-        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.secondary.main} 100%)`,
-        borderRadius: 3,
+        background:
+          "linear-gradient(135deg, var(--color-bg-neutral-primary) 0%, var(--color-bg-accent-primary) 100%)",
+        borderRadius: "var(--radius-l)",
         p: 3,
         display: "flex",
         alignItems: "center",
@@ -16,20 +15,40 @@ const InvoiceBanner = () => {
         overflow: "hidden",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
-        <Typography sx={{ color: "rgba(255,255,255,0.9)", fontSize: "1.1rem" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "baseline",
+          gap: 1,
+          flexWrap: "wrap",
+        }}
+      >
+        <Typography
+          sx={{
+            color: "var(--color-fg-on-neutral-primary)",
+            opacity: 0.9,
+            fontSize: "var(--font-size-l)",
+          }}
+        >
           Tienes facturas por un monto de
         </Typography>
         <Typography
           sx={{
-            color: "success.main",
-            fontWeight: 700,
-            fontSize: "2.5rem",
+            color: "var(--color-fg-success-primary)",
+            fontFamily: "var(--font-heading)",
+            fontWeight: 500,
+            fontSize: "var(--font-size-3xl)",
           }}
         >
           $14.546.000
         </Typography>
-        <Typography sx={{ color: "rgba(255,255,255,0.9)", fontSize: "1.1rem" }}>
+        <Typography
+          sx={{
+            color: "var(--color-fg-on-neutral-primary)",
+            opacity: 0.9,
+            fontSize: "var(--font-size-l)",
+          }}
+        >
           para ser financiadas
         </Typography>
       </Box>
