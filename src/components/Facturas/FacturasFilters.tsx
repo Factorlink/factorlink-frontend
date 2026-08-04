@@ -99,10 +99,10 @@ const FacturasFilters = ({
   return (
     <Box
       sx={{
-        backgroundColor: "white",
+        backgroundColor: "var(--color-bg-default-primary)",
         borderRadius: 3,
         mb: 3,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+        boxShadow: "var(--shadow-card)",
         overflow: "hidden",
       }}
     >
@@ -114,20 +114,20 @@ const FacturasFilters = ({
           alignItems: "center",
           p: 2,
           cursor: "pointer",
-          "&:hover": { backgroundColor: "#F8FAFC" },
+          "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
         }}
         onClick={() => setExpanded(!expanded)}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <FilterList sx={{ color: "#64748B" }} />
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#1E293B" }}>
+          <FilterList sx={{ color: "var(--color-fg-default-secondary)" }} />
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
             Filtros de búsqueda
           </Typography>
           {hasActiveFilters && (
             <Box
               sx={{
-                backgroundColor: "#00BCD4",
-                color: "white",
+                backgroundColor: "var(--color-bg-accent-primary)",
+                color: "var(--color-fg-on-accent-primary)",
                 borderRadius: "50%",
                 width: 20,
                 height: 20,
@@ -149,7 +149,7 @@ const FacturasFilters = ({
 
       {/* Collapsible Content */}
       <Collapse in={expanded}>
-        <Box sx={{ p: 2, pt: 0, borderTop: "1px solid #E2E8F0" }} component="form" onSubmit={formik.handleSubmit}>
+        <Box sx={{ p: 2, pt: 0, borderTop: "1px solid var(--color-border-default-primary)" }} component="form" onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {/* Folio */}
             <Grid size={{ xs: 12, sm: 8, md: 3 }}>
@@ -232,7 +232,7 @@ const FacturasFilters = ({
               gap: 2,
               mt: 3,
               pt: 2,
-              borderTop: "1px solid #E2E8F0",
+              borderTop: "1px solid var(--color-border-default-primary)",
             }}
           >
             <Button
@@ -241,14 +241,14 @@ const FacturasFilters = ({
               onClick={handleClear}
               disabled={loading}
               sx={{
-                borderColor: "#E2E8F0",
-                color: "#64748B",
+                borderColor: "var(--color-border-default-primary)",
+                color: "var(--color-fg-default-secondary)",
                 textTransform: "none",
                 fontWeight: 600,
                 borderRadius: 2,
                 "&:hover": {
-                  borderColor: "#CBD5E1",
-                  backgroundColor: "#F8FAFC",
+                  borderColor: "var(--color-fg-default-tertiary)",
+                  backgroundColor: "var(--color-bg-default-tertiary)",
                 },
               }}
             >
@@ -260,13 +260,13 @@ const FacturasFilters = ({
               onClick={() => formik.handleSubmit()}
               disabled={loading || formik.isSubmitting || !formik.isValid}
               sx={{
-                backgroundColor: "#00BCD4",
-                "&:hover": { backgroundColor: "#00ACC1" },
+                backgroundColor: "var(--color-bg-accent-primary)",
+                "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
                 textTransform: "none",
                 fontWeight: 600,
                 borderRadius: 2,
                 px: 3,
-                color: "#fff",
+                color: "var(--color-fg-on-accent-primary)",
               }}
             >
               Buscar

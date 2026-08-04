@@ -35,17 +35,17 @@ const FetchSiiDocumentsCard = ({ facturaId, onSuccess, disabled }: FetchSiiDocum
   return (
     <Box
       sx={{
-        backgroundColor: "white",
+        backgroundColor: "var(--color-bg-default-primary)",
         borderRadius: 3,
         p: 3,
         mb: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        boxShadow: "var(--shadow-popover)",
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         <Box
           sx={{
-            backgroundColor: "#F1F5F9",
+            backgroundColor: "var(--color-bg-default-tertiary)",
             borderRadius: 2,
             p: 1.5,
             display: "flex",
@@ -53,13 +53,13 @@ const FetchSiiDocumentsCard = ({ facturaId, onSuccess, disabled }: FetchSiiDocum
             justifyContent: "center",
           }}
         >
-          <CloudDownload sx={{ color: "#00BCD4", fontSize: 24 }} />
+          <CloudDownload sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
         </Box>
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
             Obtener Documentos del SII
           </Typography>
-          <Typography variant="body2" sx={{ color: "#64748B" }}>
+          <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
             Obten automáticamente el XML y PDF asociados a esta factura desde el SII
           </Typography>
         </Box>
@@ -80,17 +80,17 @@ const FetchSiiDocumentsCard = ({ facturaId, onSuccess, disabled }: FetchSiiDocum
       <Button
         variant="contained"
         fullWidth
-        startIcon={fetching ? <CircularProgress size={20} sx={{ color: "white" }} /> : <CloudDownload />}
+        startIcon={fetching ? <CircularProgress size={20} sx={{ color: "var(--color-fg-on-accent-primary)" }} /> : <CloudDownload />}
         onClick={handleFetch}
         disabled={fetching || disabled}
         sx={{
-          backgroundColor: "#00BCD4",
-          "&:hover": { backgroundColor: "#00ACC1" },
+          backgroundColor: "var(--color-bg-accent-primary)",
+          "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
           "&:disabled": { opacity: 0.7 },
           textTransform: "none",
           fontWeight: 600,
           py: 1.5,
-          color: "white",
+          color: "var(--color-fg-on-accent-primary)",
         }}
       >
         {fetching ? "Obteniendo documentos..." : "Obtener Documentos"}

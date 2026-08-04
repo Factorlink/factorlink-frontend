@@ -86,7 +86,7 @@ const DeleteFacturaModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "var(--radius-l)",
           overflow: "hidden",
         },
       }}
@@ -106,8 +106,8 @@ const DeleteFacturaModal = ({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: 2,
-              backgroundColor: "#EF4444",
+              borderRadius: "var(--radius-m)",
+              backgroundColor: "var(--color-bg-danger-primary)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -142,7 +142,7 @@ const DeleteFacturaModal = ({
         {alertStatus !== "success" && (
           <Box
             sx={{
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               p: 2,
               mt: 2,
             }}
@@ -154,16 +154,16 @@ const DeleteFacturaModal = ({
                 gap: 2,
                 mb: 2,
                 p: 2,
-                borderRadius: 2,
-                backgroundColor: "rgba(0, 0, 0, 0.04)",
+                borderRadius: "var(--radius-m)",
+                backgroundColor: "var(--color-bg-default-tertiary)",
               }}
             >
               <Box
                 sx={{
                   width: 40,
                   height: 40,
-                  borderRadius: 2,
-                  bgcolor: "rgba(0, 188, 212, 0.1)",
+                  borderRadius: "var(--radius-m)",
+                  bgcolor: "var(--color-bg-accent-secondary)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -186,7 +186,7 @@ const DeleteFacturaModal = ({
 
             <Typography
               variant="body2"
-              sx={{ color: "#EF4444", lineHeight: 1.6 }}
+              sx={{ color: "var(--color-fg-danger-primary)", lineHeight: 1.6 }}
             >
               ¿Estás seguro de que deseas eliminar esta factura? Esta acción
               no se puede deshacer y se perderá toda la información asociada.
@@ -203,7 +203,7 @@ const DeleteFacturaModal = ({
           sx={{
             flex: 1,
             py: 1.5,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             textTransform: "none",
             fontWeight: 600,
           }}
@@ -218,13 +218,13 @@ const DeleteFacturaModal = ({
             sx={{
               flex: 1,
               py: 1.5,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               textTransform: "none",
               fontWeight: 600,
               color: "white",
-              backgroundColor: "#EF4444",
+              backgroundColor: "var(--color-bg-danger-primary)",
               "&:hover": {
-                backgroundColor: "#DC2626",
+                backgroundColor: "var(--color-bg-danger-primary-hover)",
               },
             }}
           >

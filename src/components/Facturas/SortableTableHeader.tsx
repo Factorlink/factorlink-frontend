@@ -20,23 +20,23 @@ const SortableTableHeader = ({
 
   const getSortIcon = () => {
     if (!isActive) {
-      return <UnfoldMore sx={{ fontSize: 16, color: "#94A3B8" }} />;
+      return <UnfoldMore sx={{ fontSize: 16, color: "var(--color-fg-default-tertiary)" }} />;
     }
     if (currentOrder === "ASC") {
-      return <ArrowUpward sx={{ fontSize: 16, color: "#00BCD4" }} />;
+      return <ArrowUpward sx={{ fontSize: 16, color: "var(--color-fg-accent-primary)" }} />;
     }
-    return <ArrowDownward sx={{ fontSize: 16, color: "#00BCD4" }} />;
+    return <ArrowDownward sx={{ fontSize: 16, color: "var(--color-fg-accent-primary)" }} />;
   };
 
   return (
     <TableCell
       sx={{
         fontWeight: 600,
-        color: isActive ? "#00BCD4" : "#64748B",
+        color: isActive ? "var(--color-fg-accent-primary)" : "var(--color-fg-default-secondary)",
         cursor: "pointer",
         userSelect: "none",
         "&:hover": {
-          backgroundColor: "#F1F5F9",
+          backgroundColor: "var(--color-bg-default-tertiary)",
         },
       }}
       onClick={() => onSort(field)}

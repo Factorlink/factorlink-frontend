@@ -20,6 +20,7 @@ import useAuthStore from "../../../store/authStore";
 import type { Role } from "../../../types/role";
 import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
+import { surface } from "../../../theme";
 
 interface EmpresaFormData {
   rut: string;
@@ -146,10 +147,8 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
     <>
       <Box
         sx={{
-          backgroundColor: "background.paper",
-          borderRadius: 3,
+          ...surface.card,
           overflow: "hidden",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
         }}
       >
         <Box
@@ -173,8 +172,8 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Box
                   sx={{
-                    backgroundColor: "#00BCD4",
-                    borderRadius: 2,
+                    backgroundColor: "var(--color-bg-accent-primary)",
+                    borderRadius: "var(--radius-m)",
                     p: 1.5,
                     display: "flex",
                     alignItems: "center",
@@ -204,16 +203,16 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
                 onClick={onUpdateCredentials}
                 sx={{
                   textTransform: "none",
-                  borderRadius: 2,
+                  borderRadius: "var(--radius-m)",
                   fontWeight: 500,
-                  backgroundColor: "#00BCD4",
+                  backgroundColor: "var(--color-bg-accent-primary)",
                   color: "common.white",
                   px: 3,
                   py: 1.2,
                   boxShadow: "none",
                   whiteSpace: "nowrap",
                   "&:hover": {
-                    backgroundColor: "#0097A7",
+                    backgroundColor: "var(--color-bg-accent-primary-hover)",
                     boxShadow: "none",
                   },
                 }}
@@ -396,7 +395,7 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
                     padding: "12px 24px",
                     fontSize: "1rem",
                     fontWeight: 500,
-                    borderRadius: 2,
+                    borderRadius: "var(--radius-m)",
                     boxShadow: "none",
                     "&:hover": {
                       backgroundColor: "secondary.dark",
@@ -418,7 +417,7 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
                     padding: "12px 24px",
                     fontSize: "1rem",
                     fontWeight: 500,
-                    borderRadius: 2,
+                    borderRadius: "var(--radius-m)",
                     boxShadow: "none",
                     "&:hover": {
                       backgroundColor: "success.dark",
@@ -446,7 +445,7 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
         aria-describedby="empresa-modal-description"
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: "var(--radius-l)",
             minWidth: 360,
             overflow: "hidden",
           },
@@ -510,7 +509,7 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
                 textTransform: "none",
                 px: 4,
                 py: 1,
-                borderRadius: 2,
+                borderRadius: "var(--radius-m)",
                 "&:hover": {
                   backgroundColor: "success.dark",
                 },
@@ -528,7 +527,7 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
                 textTransform: "none",
                 px: 4,
                 py: 1,
-                borderRadius: 2,
+                borderRadius: "var(--radius-m)",
                 "&:hover": {
                   backgroundColor: "error.dark",
                 },

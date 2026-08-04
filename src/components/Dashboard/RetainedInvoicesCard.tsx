@@ -1,19 +1,26 @@
-import { Box, Typography, IconButton, useTheme } from "@mui/material";
+import { Box, Typography, IconButton } from "@mui/material";
 import { Description, ArrowForward } from "@mui/icons-material";
 
-const RetainedInvoicesCard = () => {
-  const theme = useTheme();
+const cardSx = {
+  backgroundColor: "var(--color-bg-default-primary)",
+  borderRadius: "var(--radius-l)",
+  p: 3,
+  boxShadow: "var(--shadow-card)",
+  border: "1px solid var(--color-border-default-primary)",
+};
 
+const iconButtonSx = {
+  backgroundColor: "var(--color-bg-accent-primary)",
+  color: "var(--color-fg-on-accent-primary)",
+  borderRadius: "var(--radius-m)",
+  "&:hover": {
+    backgroundColor: "var(--color-bg-accent-primary-hover)",
+  },
+};
+
+const RetainedInvoicesCard = () => {
   return (
-    <Box
-      sx={{
-        backgroundColor: "background.paper",
-        borderRadius: 3,
-        p: 3,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-      }}
-    >
-      {/* Header */}
+    <Box sx={cardSx}>
       <Box
         sx={{
           display: "flex",
@@ -23,26 +30,23 @@ const RetainedInvoicesCard = () => {
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Description sx={{ color: "text.secondary" }} />
-          <Typography sx={{ fontWeight: 600, color: "text.primary" }}>
+          <Description sx={{ color: "var(--color-fg-default-secondary)" }} />
+          <Typography
+            sx={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 500,
+              color: "var(--color-fg-default-primary)",
+            }}
+          >
             Facturas retenidas
           </Typography>
         </Box>
-        <IconButton
-          size="small"
-          sx={{
-            backgroundColor: "primary.main",
-            color: "white",
-            "&:hover": { backgroundColor: "primary.dark" },
-          }}
-        >
+        <IconButton size="small" sx={iconButtonSx} aria-label="Ver más">
           <ArrowForward fontSize="small" />
         </IconButton>
       </Box>
 
-      {/* Content */}
       <Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
-        {/* Donut Chart */}
         <Box sx={{ position: "relative", width: 140, height: 140 }}>
           <svg viewBox="0 0 36 36" style={{ transform: "rotate(-90deg)" }}>
             <circle
@@ -50,7 +54,7 @@ const RetainedInvoicesCard = () => {
               cy="18"
               r="15.9"
               fill="transparent"
-              stroke={theme.palette.primary.main}
+              stroke="var(--chart-series-1)"
               strokeWidth="3"
               strokeDasharray="90 10"
             />
@@ -59,7 +63,7 @@ const RetainedInvoicesCard = () => {
               cy="18"
               r="15.9"
               fill="transparent"
-              stroke={theme.palette.secondary.main}
+              stroke="var(--chart-series-2)"
               strokeWidth="3"
               strokeDasharray="7.3 92.7"
               strokeDashoffset="-90"
@@ -69,13 +73,12 @@ const RetainedInvoicesCard = () => {
               cy="18"
               r="15.9"
               fill="transparent"
-              stroke={theme.palette.success.main}
+              stroke="var(--chart-series-singular)"
               strokeWidth="3"
               strokeDasharray="2.7 97.3"
               strokeDashoffset="-97.3"
             />
           </svg>
-          {/* Center labels */}
           <Box
             sx={{
               position: "absolute",
@@ -87,8 +90,8 @@ const RetainedInvoicesCard = () => {
           >
             <Typography
               sx={{
-                fontSize: "0.7rem",
-                color: "text.secondary",
+                fontSize: "var(--font-size-xs)",
+                color: "var(--color-fg-default-secondary)",
                 position: "absolute",
                 top: -40,
                 left: -20,
@@ -98,8 +101,8 @@ const RetainedInvoicesCard = () => {
             </Typography>
             <Typography
               sx={{
-                fontSize: "0.7rem",
-                color: "text.secondary",
+                fontSize: "var(--font-size-xs)",
+                color: "var(--color-fg-default-secondary)",
                 position: "absolute",
                 top: -45,
                 right: -35,
@@ -109,8 +112,8 @@ const RetainedInvoicesCard = () => {
             </Typography>
             <Typography
               sx={{
-                fontSize: "0.7rem",
-                color: "text.secondary",
+                fontSize: "var(--font-size-xs)",
+                color: "var(--color-fg-default-secondary)",
                 position: "absolute",
                 bottom: -40,
                 left: -20,
@@ -121,20 +124,23 @@ const RetainedInvoicesCard = () => {
           </Box>
         </Box>
 
-        {/* Stats */}
         <Box sx={{ flex: 1 }}>
           <Box sx={{ mb: 2 }}>
             <Typography
               variant="body2"
-              sx={{ color: "text.secondary", fontSize: "0.85rem" }}
+              sx={{
+                color: "var(--color-fg-default-secondary)",
+                fontSize: "var(--font-size-s)",
+              }}
             >
               Total factorizado
             </Typography>
             <Typography
               sx={{
-                fontWeight: 700,
-                fontSize: "1.5rem",
-                color: "primary.dark",
+                fontFamily: "var(--font-heading)",
+                fontWeight: 500,
+                fontSize: "var(--font-size-2xl)",
+                color: "var(--color-fg-default-primary)",
               }}
             >
               $24.685.000
@@ -144,15 +150,19 @@ const RetainedInvoicesCard = () => {
           <Box sx={{ mb: 2 }}>
             <Typography
               variant="body2"
-              sx={{ color: "text.secondary", fontSize: "0.85rem" }}
+              sx={{
+                color: "var(--color-fg-default-secondary)",
+                fontSize: "var(--font-size-s)",
+              }}
             >
               Retenciones
             </Typography>
             <Typography
               sx={{
-                fontWeight: 700,
-                fontSize: "1.3rem",
-                color: "primary.main",
+                fontFamily: "var(--font-heading)",
+                fontWeight: 500,
+                fontSize: "var(--font-size-xl)",
+                color: "var(--color-fg-accent-primary)",
               }}
             >
               $1.802.005
@@ -162,15 +172,19 @@ const RetainedInvoicesCard = () => {
           <Box sx={{ mb: 1 }}>
             <Typography
               variant="body2"
-              sx={{ color: "text.secondary", fontSize: "0.85rem" }}
+              sx={{
+                color: "var(--color-fg-default-secondary)",
+                fontSize: "var(--font-size-s)",
+              }}
             >
               Morosidad Acumulada
             </Typography>
             <Typography
               sx={{
-                fontWeight: 700,
-                fontSize: "1.3rem",
-                color: "success.main",
+                fontFamily: "var(--font-heading)",
+                fontWeight: 500,
+                fontSize: "var(--font-size-xl)",
+                color: "var(--color-fg-success-primary)",
               }}
             >
               $666.495
@@ -180,15 +194,19 @@ const RetainedInvoicesCard = () => {
           <Box>
             <Typography
               variant="body2"
-              sx={{ color: "success.main", fontSize: "0.75rem" }}
+              sx={{
+                color: "var(--color-fg-success-primary)",
+                fontSize: "var(--font-size-xs)",
+              }}
             >
               Morosidad Hoy
             </Typography>
             <Typography
               sx={{
-                fontWeight: 600,
-                fontSize: "1rem",
-                color: "success.main",
+                fontFamily: "var(--font-heading)",
+                fontWeight: 500,
+                fontSize: "var(--font-size-m)",
+                color: "var(--color-fg-success-primary)",
               }}
             >
               $38.624

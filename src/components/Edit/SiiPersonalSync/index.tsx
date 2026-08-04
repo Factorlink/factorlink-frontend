@@ -7,6 +7,7 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { StyledTextField } from "../../../pages/register/styles";
 import useAuthStore from "../../../store/authStore";
+import { surface } from "../../../theme";
 
 interface SiiPersonalSyncProps {
   isLinked: boolean;
@@ -34,10 +35,8 @@ const SiiPersonalSync = ({
   return (
     <Box
       sx={{
-        backgroundColor: "background.paper",
-        borderRadius: 3,
+        ...surface.card,
         overflow: "hidden",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
       }}
     >
       {/* Header */}
@@ -54,7 +53,7 @@ const SiiPersonalSync = ({
           <Box
             sx={{
               backgroundColor: "primary.main",
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               p: 1.5,
               display: "flex",
               alignItems: "center",
@@ -81,7 +80,7 @@ const SiiPersonalSync = ({
           size="small"
           sx={{
             fontWeight: 600,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             px: 1,
             color: "white",
             ...(isLinked
@@ -102,7 +101,7 @@ const SiiPersonalSync = ({
           sx={{
             border: "1px solid",
             borderColor: "divider",
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             p: 2.5,
           }}
         >
@@ -216,7 +215,7 @@ const SiiPersonalSync = ({
                 onClick={onUpdate}
                 sx={{
                   textTransform: "none",
-                  borderRadius: 2,
+                  borderRadius: "var(--radius-m)",
                   fontWeight: 500,
                   borderColor: "divider",
                   color: "text.primary",
@@ -231,7 +230,7 @@ const SiiPersonalSync = ({
                 onClick={onUnlink}
                 sx={{
                   textTransform: "none",
-                  borderRadius: 2,
+                  borderRadius: "var(--radius-m)",
                   fontWeight: 500,
                   backgroundColor: "error.main",
                   color: "common.white",
@@ -253,7 +252,7 @@ const SiiPersonalSync = ({
             onClick={onLink}
             sx={{
               textTransform: "none",
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               fontWeight: 500,
               backgroundColor: "primary.main",
               color: "common.white",

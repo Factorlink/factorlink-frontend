@@ -178,15 +178,35 @@ const Marketplace = () => {
 
     switch (estado) {
       case "aceptada":
-        return { label: "Aceptada", color: "#10B981", bg: "#ECFDF5" };
+        return {
+          label: "Aceptada",
+          color: "var(--color-fg-success-primary)",
+          bg: "var(--color-bg-success-secondary)",
+        };
       case "rechazada":
-        return { label: "Rechazada", color: "#EF4444", bg: "#FEF2F2" };
+        return {
+          label: "Rechazada",
+          color: "var(--color-fg-danger-primary)",
+          bg: "var(--color-bg-danger-secondary)",
+        };
       case "expirada":
-        return { label: "Expirada", color: "#F59E0B", bg: "#FFFBEB" };
+        return {
+          label: "Expirada",
+          color: "var(--color-fg-warning-primary)",
+          bg: "var(--color-bg-warning-secondary)",
+        };
       case "activa":
-        return { label: "Activa", color: "#00BCD4", bg: "#E0F7FA" };
+        return {
+          label: "Activa",
+          color: "var(--color-fg-accent-primary)",
+          bg: "var(--color-bg-accent-secondary)",
+        };
       default:
-        return { label: estado, color: "#00BCD4", bg: "#E0F7FA" };
+        return {
+          label: estado,
+          color: "var(--color-fg-accent-primary)",
+          bg: "var(--color-bg-accent-secondary)",
+        };
     }
   };
 
@@ -196,7 +216,7 @@ const Marketplace = () => {
         {/* Header Section */}
         <Box
           sx={{
-            backgroundColor: "white",
+            backgroundColor: "var(--color-bg-default-primary)",
             borderRadius: 3,
             p: 3,
             display: "flex",
@@ -208,7 +228,7 @@ const Marketplace = () => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box
               sx={{
-                backgroundColor: "white",
+                backgroundColor: "var(--color-bg-default-primary)",
                 borderRadius: 2,
                 p: 1.5,
                 display: "flex",
@@ -216,16 +236,16 @@ const Marketplace = () => {
                 justifyContent: "center",
               }}
             >
-              <Storefront sx={{ color: "#64748B", fontSize: 28 }} />
+              <Storefront sx={{ color: "var(--color-fg-default-secondary)", fontSize: 28 }} />
             </Box>
             <Box>
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 600, color: "#1E293B" }}
+                sx={{ fontWeight: 500, fontFamily: "var(--font-heading)", color: "var(--color-fg-default-primary)" }}
               >
                 Marketplace
               </Typography>
-              <Typography variant="body2" sx={{ color: "#64748B" }}>
+              <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                 Explora las facturas disponibles para financiamiento y envía tus
                 ofertas.
               </Typography>
@@ -242,7 +262,7 @@ const Marketplace = () => {
             mb: 2,
           }}
         >
-          <Typography variant="body2" sx={{ color: "#64748B" }}>
+          <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
             {meta.total} facturas disponibles
           </Typography>
         </Box>
@@ -252,7 +272,7 @@ const Marketplace = () => {
           component={Paper}
           sx={{
             borderRadius: 3,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+            boxShadow: "var(--shadow-card)",
             overflow: "hidden",
           }}
         >
@@ -277,14 +297,14 @@ const Marketplace = () => {
                 py: 8,
               }}
             >
-              <Storefront sx={{ fontSize: 64, color: "#CBD5E1", mb: 2 }} />
+              <Storefront sx={{ fontSize: 64, color: "var(--color-fg-default-tertiary)", mb: 2 }} />
               <Typography
                 variant="h6"
-                sx={{ color: "#64748B", fontWeight: 500 }}
+                sx={{ color: "var(--color-fg-default-secondary)", fontWeight: 500 }}
               >
                 {error || "No hay facturas disponibles en el marketplace"}
               </Typography>
-              <Typography variant="body2" sx={{ color: "#94A3B8", mt: 1 }}>
+              <Typography variant="body2" sx={{ color: "var(--color-fg-default-tertiary)", mt: 1 }}>
                 Las facturas publicadas por empresas aparecerán aquí
               </Typography>
             </Box>
@@ -292,7 +312,7 @@ const Marketplace = () => {
             <>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
+                  <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
                     {MARKETPLACE_SORTABLE_COLUMNS.map((column) => (
                       <SortableTableHeader
                         key={column.field}
@@ -303,10 +323,10 @@ const Marketplace = () => {
                         onSort={handleSort}
                       />
                     ))}
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                    <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                       Mi Oferta
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                    <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                       Acción
                     </TableCell>
                   </TableRow>
@@ -318,7 +338,7 @@ const Marketplace = () => {
                       <TableRow
                         key={factura.id}
                         sx={{
-                          "&:hover": { backgroundColor: "#F8FAFC" },
+                          "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
                           "&:last-child td": { borderBottom: 0 },
                         }}
                       >
@@ -326,13 +346,13 @@ const Marketplace = () => {
                           <Box>
                             <Typography
                               variant="body2"
-                              sx={{ fontWeight: 600, color: "#1E293B" }}
+                              sx={{ fontWeight: 500, color: "var(--color-fg-default-primary)" }}
                             >
                               {factura.razonSocialEmisor || "N/A"}
                             </Typography>
                             <Typography
                               variant="caption"
-                              sx={{ color: "#64748B" }}
+                              sx={{ color: "var(--color-fg-default-secondary)" }}
                             >
                               {factura.rutEmisor || ""}
                             </Typography>
@@ -342,13 +362,13 @@ const Marketplace = () => {
                           <Box>
                             <Typography
                               variant="body2"
-                              sx={{ fontWeight: 600, color: "#1E293B" }}
+                              sx={{ fontWeight: 500, color: "var(--color-fg-default-primary)" }}
                             >
                               {factura.razonSocialReceptor || "N/A"}
                             </Typography>
                             <Typography
                               variant="caption"
-                              sx={{ color: "#64748B" }}
+                              sx={{ color: "var(--color-fg-default-secondary)" }}
                             >
                               {factura.rutReceptor || ""}
                             </Typography>
@@ -357,20 +377,20 @@ const Marketplace = () => {
                         <TableCell>
                           <Typography
                             variant="body2"
-                            sx={{ color: "#00BCD4", fontWeight: 600 }}
+                            sx={{ color: "var(--color-fg-accent-primary)", fontWeight: 600 }}
                           >
                             {factura.folio}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ color: "#64748B" }}>
+                          <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                             {formatDate(factura.fechaEmision)}
                           </Typography>
                         </TableCell>
                         <TableCell>
                           <Typography
                             variant="body2"
-                            sx={{ color: "#1E293B", fontWeight: 500 }}
+                            sx={{ color: "var(--color-fg-default-primary)", fontWeight: 500 }}
                           >
                             {formatCurrency(factura.montoTotal)}
                           </Typography>
@@ -381,15 +401,15 @@ const Marketplace = () => {
                               label={status?.label || "N/A"}
                               size="small"
                               sx={{
-                                backgroundColor: status?.bg || "#00BCD4",
-                                color: status?.color || "#00BCD4",
+                                backgroundColor: status?.bg || "var(--color-bg-accent-secondary)",
+                                color: status?.color || "var(--color-fg-accent-primary)",
                                 fontWeight: 500,
                               }}
                             />
                           ) : (
                             <Typography
                               variant="body2"
-                              sx={{ color: "#94A3B8" }}
+                              sx={{ color: "var(--color-fg-default-tertiary)" }}
                             >
                               —
                             </Typography>
@@ -402,7 +422,7 @@ const Marketplace = () => {
                               setAnchorEl(e.currentTarget);
                               setMenuFactura(factura);
                             }}
-                            sx={{ color: "#64748B" }}
+                            sx={{ color: "var(--color-fg-default-secondary)" }}
                           >
                             <MoreVert />
                           </IconButton>
@@ -421,7 +441,7 @@ const Marketplace = () => {
                     justifyContent: "space-between",
                     alignItems: "center",
                     py: 2,
-                    borderTop: "1px solid #E2E8F0",
+                    borderTop: "1px solid var(--color-border-default-primary)",
                     px: 2,
                     gap: 2,
                   }}
@@ -449,7 +469,7 @@ const Marketplace = () => {
                     shape="rounded"
                     sx={{
                       "& .MuiPaginationItem-root.Mui-selected": {
-                        color: "white",
+                        color: "var(--color-fg-on-accent-primary)",
                       },
                     }}
                   />
@@ -471,7 +491,7 @@ const Marketplace = () => {
           PaperProps={{
             sx: {
               borderRadius: 2,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              boxShadow: "var(--shadow-popover)",
               minWidth: 180,
             },
           }}
@@ -484,7 +504,7 @@ const Marketplace = () => {
             }}
           >
             <ListItemIcon>
-              <Visibility sx={{ color: "#64748B" }} />
+              <Visibility sx={{ color: "var(--color-fg-default-secondary)" }} />
             </ListItemIcon>
             <ListItemText primary="Ver factura" />
           </MenuItem>

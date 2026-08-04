@@ -54,18 +54,32 @@ const dueInvoices = [
   },
 ];
 
+const headerCellSx = {
+  fontWeight: 500,
+  fontFamily: "var(--font-heading)",
+  color: "var(--color-fg-default-secondary)",
+  fontSize: "var(--font-size-xs)",
+  py: 1,
+};
+
+const bodyCellSx = {
+  fontSize: "var(--font-size-s)",
+  py: 1.5,
+  color: "var(--color-fg-default-primary)",
+};
+
 const DueInvoicesCard = () => {
   return (
     <Box
       sx={{
-        backgroundColor: "background.paper",
-        borderRadius: 3,
+        backgroundColor: "var(--color-bg-default-primary)",
+        borderRadius: "var(--radius-l)",
         p: 3,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        boxShadow: "var(--shadow-card)",
+        border: "1px solid var(--color-border-default-primary)",
         height: "100%",
       }}
     >
-      {/* Header */}
       <Box
         sx={{
           display: "flex",
@@ -75,81 +89,75 @@ const DueInvoicesCard = () => {
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Description sx={{ color: "text.secondary" }} />
-          <Typography sx={{ fontWeight: 600, color: "text.primary" }}>
+          <Description sx={{ color: "var(--color-fg-default-secondary)" }} />
+          <Typography
+            sx={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 500,
+              color: "var(--color-fg-default-primary)",
+            }}
+          >
             Facturas por vencer
           </Typography>
         </Box>
         <IconButton
           size="small"
+          aria-label="Ver más"
           sx={{
-            backgroundColor: "primary.main",
-            color: "white",
-            "&:hover": { backgroundColor: "primary.dark" },
+            backgroundColor: "var(--color-bg-accent-primary)",
+            color: "var(--color-fg-on-accent-primary)",
+            borderRadius: "var(--radius-m)",
+            "&:hover": {
+              backgroundColor: "var(--color-bg-accent-primary-hover)",
+            },
           }}
         >
           <ArrowForward fontSize="small" />
         </IconButton>
       </Box>
 
-      {/* Table */}
       <TableContainer>
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell
-                sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.8rem", py: 1 }}
-              >
-                #
-              </TableCell>
-              <TableCell
-                sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.8rem", py: 1 }}
-              >
-                Deudor
-              </TableCell>
-              <TableCell
-                sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.8rem", py: 1 }}
-              >
-                Factoring
-              </TableCell>
-              <TableCell
-                sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.8rem", py: 1 }}
-              >
-                Retención
-              </TableCell>
-              <TableCell
-                sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.8rem", py: 1 }}
-              >
-                Interés Día
-              </TableCell>
-              <TableCell
-                sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.8rem", py: 1 }}
-              >
-                Fecha
-              </TableCell>
+              <TableCell sx={headerCellSx}>#</TableCell>
+              <TableCell sx={headerCellSx}>Deudor</TableCell>
+              <TableCell sx={headerCellSx}>Factoring</TableCell>
+              <TableCell sx={headerCellSx}>Retención</TableCell>
+              <TableCell sx={headerCellSx}>Interés Día</TableCell>
+              <TableCell sx={headerCellSx}>Fecha</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {dueInvoices.map((invoice) => (
-              <TableRow key={invoice.id}>
-                <TableCell sx={{ fontSize: "0.85rem", py: 1.5 }}>
-                  {invoice.id}
-                </TableCell>
-                <TableCell sx={{ fontSize: "0.85rem", py: 1.5, color: "primary.main" }}>
+              <TableRow
+                key={invoice.id}
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "var(--color-bg-default-primary-hover)",
+                  },
+                }}
+              >
+                <TableCell sx={bodyCellSx}>{invoice.id}</TableCell>
+                <TableCell
+                  sx={{
+                    ...bodyCellSx,
+                    color: "var(--color-fg-accent-primary)",
+                  }}
+                >
                   {invoice.debtor}
                 </TableCell>
-                <TableCell sx={{ fontSize: "0.85rem", py: 1.5, color: "primary.main" }}>
+                <TableCell
+                  sx={{
+                    ...bodyCellSx,
+                    color: "var(--color-fg-accent-primary)",
+                  }}
+                >
                   {invoice.factoring}
                 </TableCell>
-                <TableCell sx={{ fontSize: "0.85rem", py: 1.5 }}>
-                  {invoice.retention}
-                </TableCell>
-                <TableCell sx={{ fontSize: "0.85rem", py: 1.5 }}>
-                  {invoice.interestDay}
-                </TableCell>
-                <TableCell sx={{ fontSize: "0.85rem", py: 1.5 }}>
-                  {invoice.date}
-                </TableCell>
+                <TableCell sx={bodyCellSx}>{invoice.retention}</TableCell>
+                <TableCell sx={bodyCellSx}>{invoice.interestDay}</TableCell>
+                <TableCell sx={bodyCellSx}>{invoice.date}</TableCell>
               </TableRow>
             ))}
           </TableBody>

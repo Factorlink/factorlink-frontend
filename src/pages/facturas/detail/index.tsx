@@ -153,8 +153,8 @@ const FacturaDetail = () => {
             gap: 2,
           }}
         >
-          <CircularProgress sx={{ color: "#00BCD4" }} />
-          <Typography variant="body1" sx={{ color: "#64748B" }}>
+          <CircularProgress sx={{ color: "var(--color-fg-accent-primary)" }} />
+          <Typography variant="body1" sx={{ color: "var(--color-fg-default-secondary)" }}>
             Cargando factura...
           </Typography>
         </Box>
@@ -180,11 +180,11 @@ const FacturaDetail = () => {
               gap: 2,
             }}
           >
-            <ErrorOutline sx={{ fontSize: 64, color: "#EF4444" }} />
-            <Typography variant="h6" sx={{ color: "#1E293B", fontWeight: 600 }}>
+            <ErrorOutline sx={{ fontSize: 64, color: "var(--color-fg-danger-primary)" }} />
+            <Typography variant="h6" sx={{ color: "var(--color-fg-default-primary)", fontWeight: 500, fontFamily: "var(--font-heading)" }}>
               Error al cargar la factura
             </Typography>
-            <Typography variant="body2" sx={{ color: "#64748B" }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
               {error}
             </Typography>
             <Button
@@ -192,10 +192,10 @@ const FacturaDetail = () => {
               onClick={() => window.location.reload()}
               sx={{
                 mt: 2,
-                backgroundColor: "#00BCD4",
-                "&:hover": { backgroundColor: "#00ACC1" },
+                backgroundColor: "var(--color-bg-accent-primary)",
+                "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
                 textTransform: "none",
-                color: "white",
+                color: "var(--color-fg-on-accent-primary)",
               }}
             >
               Reintentar
@@ -223,8 +223,8 @@ const FacturaDetail = () => {
               gap: 2,
             }}
           >
-            <Description sx={{ fontSize: 64, color: "#CBD5E1" }} />
-            <Typography variant="h6" sx={{ color: "#64748B" }}>
+            <Description sx={{ fontSize: 64, color: "var(--color-fg-default-tertiary)" }} />
+            <Typography variant="h6" sx={{ color: "var(--color-fg-default-secondary)" }}>
               Factura no encontrada
             </Typography>
           </Box>
@@ -247,9 +247,9 @@ const FacturaDetail = () => {
             startIcon={<ArrowBack />}
             onClick={handleBack}
             sx={{
-              color: "#64748B",
+              color: "var(--color-fg-default-secondary)",
               textTransform: "none",
-              "&:hover": { backgroundColor: "#F1F5F9" },
+              "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
             }}
           >
             Volver a facturas
@@ -271,17 +271,17 @@ const FacturaDetail = () => {
           factura.visibilidad === "SELECCIONADOS") && (
           <Box
             sx={{
-              backgroundColor: "white",
+              backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 3,
               mb: 3,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              boxShadow: "var(--shadow-popover)",
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
               <Box
                 sx={{
-                  backgroundColor: "#F1F5F9",
+                  backgroundColor: "var(--color-bg-default-tertiary)",
                   borderRadius: 2,
                   p: 1.5,
                   display: "flex",
@@ -289,16 +289,16 @@ const FacturaDetail = () => {
                   justifyContent: "center",
                 }}
               >
-                <Visibility sx={{ color: "#00BCD4", fontSize: 24 }} />
+                <Visibility sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
               </Box>
               <Box>
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 600, color: "#1E293B" }}
+                  sx={{ fontWeight: 500, fontFamily: "var(--font-heading)", color: "var(--color-fg-default-primary)" }}
                 >
                   Visibilidad en Marketplace
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#64748B" }}>
+                <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                   Factorings que pueden ver esta factura
                 </Typography>
               </Box>
@@ -307,7 +307,7 @@ const FacturaDetail = () => {
             {factura.visibilidad === "TODOS" ? (
               <Box
                 sx={{
-                  backgroundColor: "#F0FDF4",
+                  backgroundColor: "var(--color-bg-success-secondary)",
                   borderRadius: 2,
                   p: 2,
                   display: "flex",
@@ -315,10 +315,10 @@ const FacturaDetail = () => {
                   gap: 1.5,
                 }}
               >
-                <Visibility sx={{ color: "#00A86B", fontSize: 20 }} />
+                <Visibility sx={{ color: "var(--color-fg-success-primary)", fontSize: 20 }} />
                 <Typography
                   variant="body2"
-                  sx={{ color: "#15803D", fontWeight: 500 }}
+                  sx={{ color: "var(--color-fg-success-primary)", fontWeight: 500 }}
                 >
                   Esta factura es visible para todos los factorings registrados
                   en la plataforma.
@@ -371,16 +371,16 @@ const FacturaDetail = () => {
           {/* Acciones */}
           <Box
             sx={{
-              backgroundColor: "white",
+              backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 3,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              boxShadow: "var(--shadow-popover)",
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
               <Box
                 sx={{
-                  backgroundColor: "#F1F5F9",
+                  backgroundColor: "var(--color-bg-default-tertiary)",
                   borderRadius: 2,
                   p: 1.5,
                   display: "flex",
@@ -388,7 +388,7 @@ const FacturaDetail = () => {
                   justifyContent: "center",
                 }}
               >
-                <Settings sx={{ color: "#00BCD4", fontSize: 24 }} />
+                <Settings sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -406,14 +406,14 @@ const FacturaDetail = () => {
                   startIcon={<Visibility />}
                   onClick={() => setOfertasDrawerOpen(true)}
                   sx={{
-                    borderColor: "#00BCD4",
-                    color: "#00BCD4",
+                    borderColor: "var(--color-border-accent-primary)",
+                    color: "var(--color-fg-accent-primary)",
                     "&:hover": {
-                      borderColor: "#00ACC1",
-                      backgroundColor: "rgba(0,188,212,0.08)",
+                      borderColor: "var(--color-border-accent-secondary)",
+                      backgroundColor: "var(--color-bg-accent-secondary)",
                     },
                     textTransform: "none",
-                    fontWeight: 600,
+                    fontWeight: 500,
                     py: 1.5,
                   }}
                 >
@@ -427,13 +427,13 @@ const FacturaDetail = () => {
                   startIcon={<Send />}
                   onClick={handleEnviarCotizar}
                   sx={{
-                    backgroundColor: "#00BCD4",
-                    "&:hover": { backgroundColor: "#00ACC1" },
+                    backgroundColor: "var(--color-bg-accent-primary)",
+                    "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
                     "&:disabled": { opacity: 0.7 },
                     textTransform: "none",
-                    fontWeight: 600,
+                    fontWeight: 500,
                     py: 1.5,
-                    color: "white",
+                    color: "var(--color-fg-on-accent-primary)",
                   }}
                 >
                   Enviar a cotizar
@@ -446,14 +446,14 @@ const FacturaDetail = () => {
                   startIcon={<StorefrontIcon />}
                   onClick={() => setRemoveMarketplaceModalOpen(true)}
                   sx={{
-                    borderColor: "#EF4444",
-                    color: "#EF4444",
+                    borderColor: "var(--color-border-danger-primary)",
+                    color: "var(--color-fg-danger-primary)",
                     "&:hover": {
-                      borderColor: "#DC2626",
-                      backgroundColor: "rgba(239,68,68,0.1)",
+                      borderColor: "var(--color-border-danger-secondary)",
+                      backgroundColor: "var(--color-bg-danger-secondary)",
                     },
                     textTransform: "none",
-                    fontWeight: 600,
+                    fontWeight: 500,
                     py: 1.5,
                   }}
                 >
@@ -467,14 +467,14 @@ const FacturaDetail = () => {
                   startIcon={<Delete />}
                   onClick={handleEliminar}
                   sx={{
-                    borderColor: "#EF4444",
-                    color: "#EF4444",
+                    borderColor: "var(--color-border-danger-primary)",
+                    color: "var(--color-fg-danger-primary)",
                     "&:hover": {
-                      borderColor: "#DC2626",
-                      backgroundColor: "rgba(239,68,68,0.1)",
+                      borderColor: "var(--color-border-danger-secondary)",
+                      backgroundColor: "var(--color-bg-danger-secondary)",
                     },
                     textTransform: "none",
-                    fontWeight: 600,
+                    fontWeight: 500,
                     py: 1.5,
                   }}
                 >

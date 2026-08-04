@@ -1,0 +1,433 @@
+/**
+ * Factorlink Design Tokens
+ * Fuente de verdad del sistema de diseño (src/theme/).
+ * Importar una sola vez en el entrypoint junto con fonts.css.
+ * Dark mode: document.documentElement.setAttribute('data-theme', 'dark')
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ============================================================
+     1. BRAND — paleta simple del sitio de marketing (Framer)
+     Úsala para landing pages, secciones editoriales, blog.
+     ============================================================ */
+  --brand-primary: #005ad6;
+  --brand-primary-hover: #004ab0;
+  --brand-secondary: #e8f2ff;
+  --brand-surface-alt: #f5f9ff;
+  --brand-divider: #eff1f5;
+  --brand-border-neutral: #e0e4ea;
+
+  --brand-text-primary: #22262e;
+  --brand-text-secondary: #545e6d;
+  --brand-text-muted: #7a8697;
+
+  /* ============================================================
+     2. SEMANTIC — sistema de la app (product), con roles y 3
+     profundidades por rol: primary (sólido) / secondary (medio)
+     / tertiary (tenue). Úsalo para botones, badges, alerts, inputs.
+     ============================================================ */
+
+  /* Background */
+  --color-bg-default-primary: #ffffff;
+  --color-bg-default-primary-hover: #f7faff;
+  --color-bg-default-secondary: #f7faff;
+  --color-bg-default-secondary-hover: #f0f4fa;
+  --color-bg-default-tertiary: #f0f4fa;
+  --color-bg-default-tertiary-hover: #e9eef5;
+
+  --color-bg-accent-primary: #005ad6;
+  --color-bg-accent-primary-hover: #004ab0;
+  --color-bg-accent-secondary: #dcefff;
+  --color-bg-accent-secondary-hover: #c3e1ff;
+  --color-bg-accent-tertiary: #f7faff;
+  --color-bg-accent-tertiary-hover: #e9eef5;
+
+  --color-bg-success-primary: #0d8d59;
+  --color-bg-success-primary-hover: #047648;
+  --color-bg-success-secondary: #d4f7e9;
+  --color-bg-success-secondary-hover: #b8eed9;
+  --color-bg-success-tertiary: #e5fbf2;
+  --color-bg-success-tertiary-hover: #d4f7e9;
+
+  --color-bg-danger-primary: #c62b28;
+  --color-bg-danger-primary-hover: #a31714;
+  --color-bg-danger-secondary: #ffeaea;
+  --color-bg-danger-secondary-hover: #ffd8d7;
+  --color-bg-danger-tertiary: #fff1f1;
+  --color-bg-danger-tertiary-hover: #ffeaea;
+
+  --color-bg-warning-primary: #e48b27;
+  --color-bg-warning-primary-hover: #d97300;
+  --color-bg-warning-secondary: #ffeed1;
+  --color-bg-warning-secondary-hover: #ffdfb1;
+  --color-bg-warning-tertiary: #fff5e4;
+  --color-bg-warning-tertiary-hover: #ffeed1;
+
+  --color-bg-reward-primary: #c38a26;
+  --color-bg-reward-primary-hover: #a6731e;
+  --color-bg-reward-secondary: #fbf3e6;
+  --color-bg-reward-secondary-hover: #f6edd7;
+  --color-bg-reward-tertiary: #fffcf5;
+  --color-bg-reward-tertiary-hover: #fbf3e6;
+
+  --color-bg-neutral-primary: #1b2027;
+  --color-bg-neutral-primary-hover: #12161a;
+  --color-bg-neutral-secondary: #e9eef5;
+  --color-bg-neutral-secondary-hover: #dce2ea;
+  --color-bg-neutral-tertiary: #f0f4fa;
+  --color-bg-neutral-tertiary-hover: #e9eef5;
+
+  --color-bg-disabled-primary: #dce2ea;
+  --color-bg-overlay-primary: rgba(10, 12, 14, 0.6);
+
+  /* Foreground (texto) */
+  --color-fg-default-primary: #1b2027;
+  --color-fg-default-secondary: #697382;
+  --color-fg-default-tertiary: #939dac;
+
+  --color-fg-accent-primary: #005ad6;
+  --color-fg-accent-secondary: #458beb;
+  --color-fg-accent-tertiary: #96c2ff;
+  --color-fg-on-accent-primary: #f6faff;
+
+  --color-fg-success-primary: #0d8d59;
+  --color-fg-success-secondary: #42b486;
+  --color-fg-success-tertiary: #64c79f;
+  --color-fg-on-success-primary: #f7fffc;
+
+  --color-fg-danger-primary: #c62b28;
+  --color-fg-danger-secondary: #e84542;
+  --color-fg-danger-tertiary: #fa8a88;
+  --color-fg-on-danger-primary: #fff7f7;
+
+  --color-fg-warning-primary: #d97300;
+  --color-fg-warning-secondary: #f0a551;
+  --color-fg-warning-tertiary: #fbc17f;
+  --color-fg-on-warning-primary: #391f00;
+
+  --color-fg-reward-primary: #c38a26;
+  --color-fg-reward-secondary: #f1b84d;
+  --color-fg-reward-tertiary: #ffe18c;
+  --color-fg-on-reward-primary: #fffcf5;
+
+  --color-fg-neutral-primary: #313843;
+  --color-fg-neutral-secondary: #555f6d;
+  --color-fg-neutral-tertiary: #7d8897;
+  --color-fg-on-neutral-primary: #f2f2f2;
+
+  --color-fg-disabled-primary: #aab4c0;
+
+  /* Border */
+  --color-border-default-primary: #dce2ea;
+  --color-border-default-secondary: #c3cad5;
+  --color-border-default-tertiary: #939dac;
+
+  --color-border-accent-primary: #005ad6;
+  --color-border-accent-secondary: #458beb;
+  --color-border-accent-tertiary: #dcefff;
+
+  --color-border-success-primary: #047648;
+  --color-border-success-secondary: #25a06e;
+  --color-border-success-tertiary: #d4f7e9;
+
+  --color-border-danger-primary: #c62b28;
+  --color-border-danger-secondary: #f16664;
+  --color-border-danger-tertiary: #ffeaea;
+
+  --color-border-warning-primary: #593000;
+  --color-border-warning-secondary: #995100;
+  --color-border-warning-tertiary: #ffeed1;
+
+  --color-border-reward-primary: #c38a26;
+  --color-border-reward-secondary: #ffe18c;
+  --color-border-reward-tertiary: #f6edd7;
+
+  --color-border-neutral-primary: #697382;
+  --color-border-neutral-secondary: #aab4c0;
+  --color-border-neutral-tertiary: #dce2ea;
+
+  --color-border-disabled-primary: #c3cad5;
+
+  /* ============================================================
+     3. LEGACY / SIMPLE — capa antigua, más plana, que convive con
+     la semántica de arriba en algunos componentes del producto.
+     No tiene variante dark documentada; úsala solo si el agente
+     encuentra componentes que ya la referencian.
+     ============================================================ */
+  --legacy-fill-accent: #005ad6;
+  --legacy-fill-accent-hover: #62a4ff;
+  --legacy-fill-accent-active: #003f96;
+  --legacy-fill-accent-disabled: #c4c4c4;
+  --legacy-fill-success: #4bc590;
+  --legacy-fill-success-hover: #5dd6a1;
+  --legacy-fill-success-active: #079a68;
+  --legacy-fill-alert: #d55e5e;
+  --legacy-fill-alert-hover: #d56d6d;
+  --legacy-fill-alert-active: #b34144;
+  --legacy-bg-accent: #f3f6fa;
+  --legacy-bg-accent-emphasis: #e6eef9;
+  --legacy-bg-success: #f2fff9;
+  --legacy-bg-alert: #fff4f4;
+  --legacy-bg-alert-emphasis: #fde0e0;
+  --legacy-border-default: #e1e1e1;
+  --legacy-border-accent-emphasis: #005ad6;
+  --legacy-border-success-emphasis: #4bc590;
+  --legacy-border-alert-emphasis: #d55e5e;
+
+  /* ============================================================
+     4. DATA VISUALIZATION — para charts (rentabilidad, gráficos)
+     ============================================================ */
+  --chart-axis: #d3dce9;
+  --chart-grid: #d3dce9;
+  --chart-tooltip-bg: #20262e;
+  --chart-series-1: #00357f;
+  --chart-series-2: #2171e0;
+  --chart-series-3: #64a5ff;
+  --chart-series-4: #c3dfff;
+  --chart-series-5: #20262e;
+  --chart-series-6: #46566d;
+  --chart-series-7: #a2b2c8;
+  --chart-series-neutral: #e7edf5;
+  --chart-series-singular: #005ad6;
+
+  /* ============================================================
+     5. TIPOGRAFÍA
+     ============================================================ */
+  --font-heading: "Poppins", "Poppins Fallback", sans-serif;
+  --font-body: "Inter", "Inter Fallback", sans-serif;
+  --font-accent: "EB Garamond", serif; /* citas / testimonios, itálica */
+  --font-mono: "Fragment Mono", monospace; /* bloques de código */
+
+  --font-size-xs: 12px;
+  --font-size-s: 14px;
+  --font-size-m: 16px;
+  --font-size-l: 18px;
+  --font-size-xl: 21px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 34px;
+  --font-size-4xl: 43px;
+  /* tamaños de titulares editoriales (marketing), no del scale de la app */
+  --font-size-display-h1: 48px;
+  --font-size-display-h2: 40px;
+  --font-size-display-h3: 24px;
+  --font-size-display-h4: 20px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  --line-height-none: 1;
+  --line-height-xs: 1.125;
+  --line-height-s: 1.375;
+  --line-height-m: 1.5;
+  --line-height-l: 1.7;
+
+  --letter-spacing-xs: -0.015em;
+  --letter-spacing-s: -0.004em;
+  --letter-spacing-m: 0.0015em;
+  --letter-spacing-l: 0.0025em;
+  --letter-spacing-xl: 0.005em;
+  --letter-spacing-2xl: 0.0125em;
+
+  /* ============================================================
+     6. ESPACIADO, RADIOS, SOMBRAS, MOTION, BREAKPOINTS
+     ============================================================ */
+  --space-4xs: 2px;
+  --space-3xs: 4px;
+  --space-2xs: 8px;
+  --space-xs: 12px;
+  --space-s: 16px;
+  --space-m: 24px;
+  --space-l: 32px;
+  --space-xl: 40px;
+  --space-2xl: 48px;
+  --space-3xl: 56px;
+  --space-4xl: 64px;
+  --space-5xl: 72px;
+
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 24px;
+  --radius-full: 9999px;
+
+  --shadow-nav: 0px 8px 30.4px rgba(0, 0, 0, 0.06), 0px 2px 7px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0px 1px 2px rgba(10, 12, 14, 0.06);
+  --shadow-popover: 0px 8px 24px rgba(10, 12, 14, 0.12), 0px 2px 6px rgba(10, 12, 14, 0.08);
+
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 450ms;
+  --easing-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --easing-ease-in: cubic-bezier(0.42, 0, 1, 1);
+  --easing-ease-out: cubic-bezier(0, 0, 0.58, 1);
+  --easing-ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+
+  --breakpoint-s: 500px;
+  --breakpoint-m: 768px;
+  --breakpoint-l: 1012px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+
+  --z-toast: 1000;
+  --z-bottom-sheet: 9000;
+  --z-modal: 10000;
+}
+
+/* ================================================================
+   DARK MODE — activar con <html data-theme="dark"> o dejar que
+   prefers-color-scheme resuelva automáticamente (bloque al final).
+   Solo la capa SEMANTIC tiene dark documentado; BRAND y LEGACY se
+   mantienen iguales salvo que decidas adaptarlos.
+   ================================================================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Brand text/surfaces adapted for dark app surfaces */
+  --brand-text-primary: #f0f4fa;
+  --brand-text-secondary: #7d8897;
+  --brand-text-muted: #555f6d;
+  --brand-divider: #313843;
+  --brand-border-neutral: #424b58;
+  --brand-secondary: #25344a;
+  --brand-surface-alt: #192029;
+
+  --color-bg-default-primary: #12161a;
+  --color-bg-default-primary-hover: #1b2027;
+  --color-bg-default-secondary: #161a1f;
+  --color-bg-default-secondary-hover: #192029;
+  --color-bg-default-tertiary: #1b2027;
+  --color-bg-default-tertiary-hover: #313843;
+
+  --color-bg-accent-primary: #2171e0;
+  --color-bg-accent-primary-hover: #3d87e9;
+  --color-bg-accent-secondary: #25344a;
+  --color-bg-accent-secondary-hover: #2b4464;
+  --color-bg-accent-tertiary: #192029;
+  --color-bg-accent-tertiary-hover: #25344a;
+
+  --color-bg-success-primary: #178559;
+  --color-bg-success-primary-hover: #25a06e;
+  --color-bg-success-secondary: #192422;
+  --color-bg-success-secondary-hover: #23302e;
+  --color-bg-success-tertiary: #121a18;
+  --color-bg-success-tertiary-hover: #192422;
+
+  --color-bg-danger-primary: #b65256;
+  --color-bg-danger-primary-hover: #d56268;
+  --color-bg-danger-secondary: #2e2024;
+  --color-bg-danger-secondary-hover: #3c2728;
+  --color-bg-danger-tertiary: #1a1112;
+  --color-bg-danger-tertiary-hover: #2e2024;
+
+  --color-bg-warning-primary: #f0a551;
+  --color-bg-warning-primary-hover: #e48b27;
+  --color-bg-warning-secondary: #391f00;
+  --color-bg-warning-secondary-hover: #593000;
+  --color-bg-warning-tertiary: #190e00;
+  --color-bg-warning-tertiary-hover: #391f00;
+
+  --color-bg-reward-primary: #bd8b33;
+  --color-bg-reward-primary-hover: #c29f56;
+  --color-bg-reward-secondary: #2e2b26;
+  --color-bg-reward-secondary-hover: #44361a;
+  --color-bg-reward-tertiary: #242424;
+  --color-bg-reward-tertiary-hover: #2e2b26;
+
+  --color-bg-neutral-primary: #f0f4fa;
+  --color-bg-neutral-primary-hover: #e9eef5;
+  --color-bg-neutral-secondary: #313843;
+  --color-bg-neutral-secondary-hover: #424b58;
+  --color-bg-neutral-tertiary: #1b2027;
+  --color-bg-neutral-tertiary-hover: #313843;
+
+  --color-bg-disabled-primary: #313843;
+  --color-bg-overlay-primary: rgba(10, 12, 14, 0.8);
+
+  --color-fg-default-primary: #f0f4fa;
+  --color-fg-default-secondary: #7d8897;
+  --color-fg-default-tertiary: #555f6d;
+
+  --color-fg-accent-primary: #3d87e9;
+  --color-fg-accent-secondary: #2171e0;
+  --color-fg-accent-tertiary: #003a8b;
+  --color-fg-on-accent-primary: #f6faff;
+
+  --color-fg-success-primary: #25a06e;
+  --color-fg-success-secondary: #178559;
+  --color-fg-success-tertiary: #066b43;
+  --color-fg-on-success-primary: #f5fefc;
+
+  --color-fg-danger-primary: #e29a9c;
+  --color-fg-danger-secondary: #e7696f;
+  --color-fg-danger-tertiary: #b65256;
+  --color-fg-on-danger-primary: #fff4f5;
+
+  --color-fg-warning-primary: #e48b27;
+  --color-fg-warning-secondary: #b96200;
+  --color-fg-warning-tertiary: #794000;
+  --color-fg-on-warning-primary: #fffbf7;
+
+  --color-fg-reward-primary: #e2ce9a;
+  --color-fg-reward-secondary: #c29f56;
+  --color-fg-reward-tertiary: #bd8b33;
+  --color-fg-on-reward-primary: #f2efe9;
+
+  --color-fg-neutral-primary: #dce2ea;
+  --color-fg-neutral-secondary: #939dac;
+  --color-fg-neutral-tertiary: #555f6d;
+  --color-fg-on-neutral-primary: #12161a;
+
+  --color-fg-disabled-primary: #697382;
+
+  --color-border-default-primary: #313843;
+  --color-border-default-secondary: #424b58;
+  --color-border-default-tertiary: #697382;
+
+  --color-border-accent-primary: #2171e0;
+  --color-border-accent-secondary: #2b5182;
+  --color-border-accent-tertiary: #25344a;
+
+  --color-border-success-primary: #178559;
+  --color-border-success-secondary: #066b43;
+  --color-border-success-tertiary: #145143;
+
+  --color-border-danger-primary: #b65256;
+  --color-border-danger-secondary: #6e2c2f;
+  --color-border-danger-tertiary: #2e2024;
+
+  --color-border-warning-primary: #fbc17f;
+  --color-border-warning-secondary: #995100;
+  --color-border-warning-tertiary: #391f00;
+
+  --color-border-reward-primary: #e2ce9a;
+  --color-border-reward-secondary: #c29f56;
+  --color-border-reward-tertiary: #bd8b33;
+
+  --color-border-neutral-primary: #939dac;
+  --color-border-neutral-secondary: #555f6d;
+  --color-border-neutral-tertiary: #313843;
+
+  --color-border-disabled-primary: #424b58;
+
+  --chart-axis: #2a323e;
+  --chart-grid: #2a323e;
+  --chart-tooltip-bg: #f0f4f9;
+  --chart-series-1: #cfe4ff;
+  --chart-series-2: #7ab8ff;
+  --chart-series-3: #4a8ae8;
+  --chart-series-4: #182334;
+  --chart-series-5: #e7edf5;
+  --chart-series-6: #a2b2c8;
+  --chart-series-7: #46566d;
+  --chart-series-neutral: #2a323e;
+  --chart-series-singular: #2171e0;
+}
+
+/* Preferencia del SO solo afecta color-scheme nativo del browser.
+   Los tokens dark se activan con data-theme="dark" (ver initTheme / AppThemeProvider). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+  }
+}

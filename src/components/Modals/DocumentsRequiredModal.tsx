@@ -29,7 +29,7 @@ const DocumentsRequiredModal = ({ open, onClose }: DocumentsRequiredModalProps) 
       onClose={() => {}}
       disableEscapeKeyDown
       PaperProps={{
-        sx: { borderRadius: 3, maxWidth: 420, p: 1 },
+        sx: { borderRadius: "var(--radius-l)", maxWidth: 420, p: 1 },
       }}
     >
       <DialogTitle sx={{ textAlign: "center", pt: 3 }}>
@@ -41,7 +41,7 @@ const DocumentsRequiredModal = ({ open, onClose }: DocumentsRequiredModalProps) 
             gap: 2,
           }}
         >
-          <DescriptionIcon sx={{ fontSize: 64, color: "#00BCD4" }} />
+          <DescriptionIcon sx={{ fontSize: 64, color: "var(--color-fg-accent-primary)" }} />
           <Typography variant="h5" fontWeight={600}>
             Documentos requeridos
           </Typography>
@@ -63,7 +63,7 @@ const DocumentsRequiredModal = ({ open, onClose }: DocumentsRequiredModalProps) 
           sx={{
             textTransform: "none",
             px: 3,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
           }}
         >
           Más tarde
@@ -75,7 +75,7 @@ const DocumentsRequiredModal = ({ open, onClose }: DocumentsRequiredModalProps) 
             backgroundColor: "primary.main",
             textTransform: "none",
             px: 3,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             color: "white",
           }}
         >

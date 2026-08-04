@@ -27,16 +27,16 @@ const FacturaXmlCard = ({
   return (
     <Box
       sx={{
-        backgroundColor: "white",
+        backgroundColor: "var(--color-bg-default-primary)",
         borderRadius: 3,
         p: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        boxShadow: "var(--shadow-popover)",
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
         <Box
           sx={{
-            backgroundColor: "#F1F5F9",
+            backgroundColor: "var(--color-bg-default-tertiary)",
             borderRadius: 2,
             p: 1.5,
             display: "flex",
@@ -44,13 +44,13 @@ const FacturaXmlCard = ({
             justifyContent: "center",
           }}
         >
-          <Description sx={{ color: "#00BCD4", fontSize: 24 }} />
+          <Description sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
         </Box>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
             XML de la Factura
           </Typography>
-          <Typography variant="body2" sx={{ color: "#64748B" }}>
+          <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
             Documento tributario electrónico
           </Typography>
         </Box>
@@ -58,7 +58,7 @@ const FacturaXmlCard = ({
 
       <Box
         sx={{
-          backgroundColor: "#F8FAFC",
+          backgroundColor: "var(--color-bg-default-tertiary)",
           borderRadius: 2,
           p: 2,
           display: "flex",
@@ -68,36 +68,36 @@ const FacturaXmlCard = ({
       >
         {factura.urlFactura ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Description sx={{ color: "#00A86B" }} />
+            <Description sx={{ color: "var(--color-fg-success-primary)" }} />
             <Box>
               <Typography
                 variant="body2"
-                sx={{ fontWeight: 600, color: "#1E293B" }}
+                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
               >
                 <Typography
                   role="button"
-                  sx={{ color: "#00A86B", cursor: "pointer" }}
+                  sx={{ color: "var(--color-fg-success-primary)", cursor: "pointer" }}
                   onClick={handleDownload}
                 >
                   {factura.facturaNameFile || "Archivo XML"}
                 </Typography>
               </Typography>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>
+              <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                 Documento cargado
               </Typography>
             </Box>
           </Box>
         ) : (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Cancel sx={{ color: "#EF4444" }} />
+            <Cancel sx={{ color: "var(--color-fg-danger-primary)" }} />
             <Box>
               <Typography
                 variant="body2"
-                sx={{ fontWeight: 600, color: "#1E293B" }}
+                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
               >
                 XML No Cargado
               </Typography>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>
+              <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                 Adjunta el archivo XML del SII
               </Typography>
             </Box>
@@ -108,9 +108,9 @@ const FacturaXmlCard = ({
           startIcon={<Upload />}
           onClick={onUploadClick}
           sx={{
-            backgroundColor: "#00BCD4",
-            color: "white",
-            "&:hover": { backgroundColor: "#00ACC1" },
+            backgroundColor: "var(--color-bg-accent-primary)",
+            color: "var(--color-fg-on-accent-primary)",
+            "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
             textTransform: "none",
             fontWeight: 600,
           }}
@@ -121,7 +121,7 @@ const FacturaXmlCard = ({
       <Box sx={{ pt: 2, pl: 2 }}>
         <Typography
           variant="caption"
-          sx={{ color: factura.urlFactura ? "#00A86B" : "#F59E0B" }}
+          sx={{ color: factura.urlFactura ? "var(--color-fg-success-primary)" : "var(--color-fg-warning-primary)" }}
         >
           {factura.urlFactura
             ? "XML validado correctamente - Folio, RUT y monto coinciden"

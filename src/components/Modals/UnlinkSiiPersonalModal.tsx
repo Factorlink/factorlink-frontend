@@ -70,7 +70,7 @@ const UnlinkSiiPersonalModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "var(--radius-l)",
           overflow: "hidden",
         },
       }}
@@ -90,8 +90,8 @@ const UnlinkSiiPersonalModal = ({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: 2,
-              backgroundColor: "#EF4444",
+              borderRadius: "var(--radius-m)",
+              backgroundColor: "var(--color-bg-danger-primary)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -123,10 +123,10 @@ const UnlinkSiiPersonalModal = ({
         )}
 
         {alertStatus !== "success" && (
-          <Box sx={{ borderRadius: 2, p: 2, mt: 2 }}>
+          <Box sx={{ borderRadius: "var(--radius-m)", p: 2, mt: 2 }}>
             <Typography
               variant="body2"
-              sx={{ color: "#EF4444", lineHeight: 1.6 }}
+              sx={{ color: "var(--color-fg-danger-primary)", lineHeight: 1.6 }}
             >
               Al desvincular tu cuenta personal del SII perderás acceso a las
               funcionalidades avanzadas como la cesión electrónica de facturas,
@@ -151,7 +151,7 @@ const UnlinkSiiPersonalModal = ({
           sx={{
             flex: 1,
             py: 1.5,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             textTransform: "none",
             fontWeight: 600,
           }}
@@ -166,13 +166,13 @@ const UnlinkSiiPersonalModal = ({
             sx={{
               flex: 1,
               py: 1.5,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               textTransform: "none",
               fontWeight: 600,
               color: "white",
-              backgroundColor: "#EF4444",
+              backgroundColor: "var(--color-bg-danger-primary)",
               "&:hover": {
-                backgroundColor: "#DC2626",
+                backgroundColor: "var(--color-bg-danger-primary-hover)",
               },
             }}
           >

@@ -129,7 +129,7 @@ const SiiPersonalSyncModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "var(--radius-l)",
           overflow: "hidden",
         },
       }}
@@ -149,7 +149,7 @@ const SiiPersonalSyncModal = ({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               backgroundColor: "primary.main",
               display: "flex",
               alignItems: "center",
@@ -293,7 +293,7 @@ const SiiPersonalSyncModal = ({
               padding: "12px 24px",
               fontSize: "1rem",
               fontWeight: 500,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               boxShadow: "none",
               "&:hover": {
                 backgroundColor: "secondary.dark",
@@ -316,7 +316,7 @@ const SiiPersonalSyncModal = ({
                 padding: "12px 24px",
                 fontSize: "1rem",
                 fontWeight: 500,
-                borderRadius: 2,
+                borderRadius: "var(--radius-m)",
                 boxShadow: "none",
                 "&:hover": {
                   backgroundColor: "success.dark",

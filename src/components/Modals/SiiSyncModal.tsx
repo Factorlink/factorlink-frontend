@@ -114,7 +114,7 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "var(--radius-l)",
           overflow: "hidden",
         },
       }}
@@ -226,7 +226,7 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
               padding: "12px 24px",
               fontSize: "1rem",
               fontWeight: 500,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               boxShadow: "none",
               "&:hover": {
                 backgroundColor: "secondary.dark",
@@ -249,7 +249,7 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
                 padding: "12px 24px",
                 fontSize: "1rem",
                 fontWeight: 500,
-                borderRadius: 2,
+                borderRadius: "var(--radius-m)",
                 boxShadow: "none",
                 "&:hover": {
                   backgroundColor: "success.dark",

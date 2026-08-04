@@ -66,7 +66,7 @@ const getEstadoChip = (estado: string) => {
       <Chip
         label="Activa"
         size="small"
-        sx={{ backgroundColor: "#D1FAE5", color: "#065F46", fontWeight: 500 }}
+        sx={{ backgroundColor: "var(--color-bg-success-secondary)", color: "var(--color-fg-success-primary)", fontWeight: 500 }}
       />
     );
   }
@@ -75,7 +75,7 @@ const getEstadoChip = (estado: string) => {
       <Chip
         label="Aceptada"
         size="small"
-        sx={{ backgroundColor: "#D1FAE5", color: "#065F46", fontWeight: 500 }}
+        sx={{ backgroundColor: "var(--color-bg-success-secondary)", color: "var(--color-fg-success-primary)", fontWeight: 500 }}
       />
     );
   }
@@ -84,7 +84,7 @@ const getEstadoChip = (estado: string) => {
       <Chip
         label="Rechazada"
         size="small"
-        sx={{ backgroundColor: "#FEE2E2", color: "#991B1B", fontWeight: 500 }}
+        sx={{ backgroundColor: "var(--color-bg-danger-secondary)", color: "var(--color-fg-danger-primary)", fontWeight: 500 }}
       />
     );
   }
@@ -94,7 +94,7 @@ const getEstadoChip = (estado: string) => {
         icon={<span style={{ fontSize: 14 }}>⚠</span>}
         label="Expirada"
         size="small"
-        sx={{ backgroundColor: "#FEF3C7", color: "#92400E", fontWeight: 500 }}
+        sx={{ backgroundColor: "var(--color-bg-warning-secondary)", color: "var(--color-fg-warning-primary)", fontWeight: 500 }}
       />
     );
   }
@@ -103,7 +103,7 @@ const getEstadoChip = (estado: string) => {
       <Chip
         label="Inactiva"
         size="small"
-        sx={{ backgroundColor: "#E0F2FE", color: "#0369A1", fontWeight: 500 }}
+        sx={{ backgroundColor: "var(--color-bg-accent-secondary)", color: "var(--color-fg-accent-primary)", fontWeight: 500 }}
       />
     );
   }
@@ -111,7 +111,7 @@ const getEstadoChip = (estado: string) => {
     <Chip
       label="Recibida"
       size="small"
-      sx={{ backgroundColor: "#E0F2FE", color: "#0369A1", fontWeight: 500 }}
+      sx={{ backgroundColor: "var(--color-bg-accent-secondary)", color: "var(--color-fg-accent-primary)", fontWeight: 500 }}
     />
   );
 };
@@ -199,7 +199,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
             mb: 3,
           }}
         >
-          <Typography variant="h5" sx={{ fontWeight: 700, color: "#1E293B" }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
             Ofertas Recibidas
           </Typography>
           <IconButton onClick={onClose}>
@@ -214,12 +214,12 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
               p: 2.5,
               borderRadius: 3,
               mb: 3,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+              boxShadow: "var(--shadow-card)",
             }}
           >
             <Typography
               variant="subtitle1"
-              sx={{ fontWeight: 700, color: "#1E293B", mb: 1.5 }}
+              sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)", mb: 1.5 }}
             >
               Referencia de Factura
             </Typography>
@@ -232,51 +232,51 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
               }}
             >
               <Box>
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
+                <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                   Folio:
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ color: "#00BCD4", fontWeight: 600 }}
+                  sx={{ color: "var(--color-fg-accent-primary)", fontWeight: 600 }}
                 >
                   #{factura.folio}
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
+                <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                   Receptor:
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ fontWeight: 600, color: "#1E293B" }}
+                  sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
                 >
                   {factura.razonSocialReceptor || "N/A"}
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
+                <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                   Monto Total:
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ fontWeight: 700, color: "#1E293B" }}
+                  sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
                 >
                   {formatCurrency(factura.montoTotal)}
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
+                <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                   Monto a Financiar:
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ fontWeight: 700, color: "#00A86B" }}
+                  sx={{ fontWeight: 700, color: "var(--color-fg-success-primary)" }}
                 >
                   {formatCurrency(factura.montoFinanciar)}
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" sx={{ color: "#64748B" }}>
+                <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                   Estado:
                 </Typography>
                 <Chip
@@ -286,8 +286,8 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                   variant="outlined"
                   sx={{
                     fontWeight: 600,
-                    borderColor: "#334155",
-                    color: "#334155",
+                    borderColor: "var(--color-fg-default-primary)",
+                    color: "var(--color-fg-default-primary)",
                   }}
                 />
               </Box>
@@ -299,7 +299,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 700, color: "#1E293B" }}
+            sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
           >
             Ofertas disponibles
           </Typography>
@@ -317,26 +317,26 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
           </Box>
         ) : ofertas.length === 0 ? (
           <Box sx={{ textAlign: "center", py: 6 }}>
-            <Typography variant="body1" sx={{ color: "#64748B" }}>
+            <Typography variant="body1" sx={{ color: "var(--color-fg-default-secondary)" }}>
               No hay ofertas para esta factura
             </Typography>
           </Box>
         ) : (
           <TableContainer
             component={Paper}
-            sx={{ borderRadius: 3, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+            sx={{ borderRadius: 3, boxShadow: "var(--shadow-card)" }}
           >
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B", width: 48 }} />
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
+                  <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)", width: 48 }} />
+                  <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                     Factoring
                   </TableCell>
                   <SortableTableHeader field="porcentajeFinanciamiento" label="% Financiamiento" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
                   <SortableTableHeader field="tasa" label="Tasa" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
                   <SortableTableHeader field="montoAdelanto" label="Monto Adelanto" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
-                  <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                  <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                     Plazo
                   </TableCell>
                   <SortableTableHeader field="fechaExpiracion" label="Fecha Expiración" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
@@ -357,7 +357,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                         key={oferta.id}
                         sx={{
                           opacity: isNotAvailable ? 0.5 : 1,
-                          "&:hover": { backgroundColor: "#F8FAFC" },
+                          "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
                           cursor: isNotAvailable ? "default" : "pointer",
                           "& > td": { borderBottom: isExpanded ? 0 : undefined },
                         }}
@@ -374,11 +374,11 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                           <Box>
                             <Typography
                               variant="body2"
-                              sx={{ fontWeight: 600, color: "#1E293B" }}
+                              sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
                             >
                               {oferta.factoring?.razonSocial || "N/A"}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: "#64748B" }}>
+                            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                               {oferta.factoring?.rut || ""}
                             </Typography>
                           </Box>
@@ -386,7 +386,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                         <TableCell>
                           <Typography
                             variant="body2"
-                            sx={{ color: "#00A86B", fontWeight: 600 }}
+                            sx={{ color: "var(--color-fg-success-primary)", fontWeight: 600 }}
                           >
                             {parseFloat(
                               oferta.porcentajeFinanciamiento || "0",
@@ -397,7 +397,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                         <TableCell>
                           <Typography
                             variant="body2"
-                            sx={{ color: "#1E293B", fontWeight: 500 }}
+                            sx={{ color: "var(--color-fg-default-primary)", fontWeight: 500 }}
                           >
                             {parseFloat(oferta.tasa || "0").toFixed(2)}%
                           </Typography>
@@ -405,7 +405,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                         <TableCell>
                           <Typography
                             variant="body2"
-                            sx={{ color: "#00A86B", fontWeight: 600 }}
+                            sx={{ color: "var(--color-fg-success-primary)", fontWeight: 600 }}
                           >
                             {formatCurrency(oferta.montoAdelanto)}
                           </Typography>
@@ -415,8 +415,8 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                             label={`${factura?.plazo || 0} días`}
                             size="small"
                             sx={{
-                              backgroundColor: "#F1F5F9",
-                              color: "#475569",
+                              backgroundColor: "var(--color-bg-default-tertiary)",
+                              color: "var(--color-fg-default-primary)",
                               fontWeight: 500,
                             }}
                           />
@@ -424,7 +424,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                         <TableCell>
                           <Typography
                             variant="body2"
-                            sx={{ color: isNotAvailable ? "#EF4444" : "#64748B" }}
+                            sx={{ color: isNotAvailable ? "var(--color-fg-danger-primary)" : "var(--color-fg-default-secondary)" }}
                           >
                             {formatDate(oferta.fechaExpiracion)}
                           </Typography>
@@ -440,18 +440,18 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                               sx={{
                                 p: 2.5,
                                 pl: 7,
-                                backgroundColor: "#F8FAFC",
-                                borderBottom: "1px solid #E2E8F0",
+                                backgroundColor: "var(--color-bg-default-tertiary)",
+                                borderBottom: "1px solid var(--color-border-default-primary)",
                               }}
                             >
                               {/* Comentario */}
                               <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, mb: 2 }}>
-                                <Comment sx={{ fontSize: 18, color: "#64748B", mt: 0.3 }} />
+                                <Comment sx={{ fontSize: 18, color: "var(--color-fg-default-secondary)", mt: 0.3 }} />
                                 <Box>
-                                  <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 600 }}>
+                                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)", fontWeight: 600 }}>
                                     Comentario del factoring
                                   </Typography>
-                                  <Typography variant="body2" sx={{ color: "#1E293B", mt: 0.5 }}>
+                                  <Typography variant="body2" sx={{ color: "var(--color-fg-default-primary)", mt: 0.5 }}>
                                     {oferta.comentario || "Sin comentario"}
                                   </Typography>
                                 </Box>
@@ -468,14 +468,14 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                                       setAceptarModal({ open: true, oferta });
                                     }}
                                     sx={{
-                                      backgroundColor: "#00A86B",
-                                      color: "white",
+                                      backgroundColor: "var(--color-bg-success-primary)",
+                                      color: "var(--color-fg-on-accent-primary)",
                                       textTransform: "none",
                                       fontWeight: 600,
                                       borderRadius: 2,
                                       px: 3,
                                       py: 1,
-                                      "&:hover": { backgroundColor: "#008F5B" },
+                                      "&:hover": { backgroundColor: "var(--color-bg-success-primary-hover)" },
                                     }}
                                   >
                                     Aceptar oferta
@@ -488,16 +488,16 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                                       setRechazarModal({ open: true, oferta });
                                     }}
                                     sx={{
-                                      borderColor: "#EF4444",
-                                      color: "#EF4444",
+                                      borderColor: "var(--color-fg-danger-primary)",
+                                      color: "var(--color-fg-danger-primary)",
                                       textTransform: "none",
                                       fontWeight: 600,
                                       borderRadius: 2,
                                       px: 3,
                                       py: 1,
                                       "&:hover": {
-                                        borderColor: "#DC2626",
-                                        backgroundColor: "rgba(239, 68, 68, 0.04)",
+                                        borderColor: "var(--color-border-danger-secondary)",
+                                        backgroundColor: "var(--color-bg-danger-secondary)",
                                       },
                                     }}
                                   >

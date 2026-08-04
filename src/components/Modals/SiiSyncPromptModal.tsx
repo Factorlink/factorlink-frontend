@@ -55,7 +55,7 @@ const SiiSyncPromptModal = () => {
       onClose={() => {}}
       disableEscapeKeyDown
       PaperProps={{
-        sx: { borderRadius: 3, maxWidth: 420, p: 1 },
+        sx: { borderRadius: "var(--radius-l)", maxWidth: 420, p: 1 },
       }}
     >
       <DialogTitle sx={{ textAlign: "center", pt: 3 }}>
@@ -94,7 +94,7 @@ const SiiSyncPromptModal = () => {
           sx={{
             textTransform: "none",
             px: 3,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
           }}
         >
           Más tarde
@@ -106,7 +106,7 @@ const SiiSyncPromptModal = () => {
             backgroundColor: "primary.main",
             textTransform: "none",
             px: 3,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             color: "white",
           }}
         >

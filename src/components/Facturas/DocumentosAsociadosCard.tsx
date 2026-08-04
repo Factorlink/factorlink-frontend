@@ -67,17 +67,17 @@ const DocumentosAsociadosCard = ({
   return (
     <Box
       sx={{
-        backgroundColor: "white",
+        backgroundColor: "var(--color-bg-default-primary)",
         borderRadius: 3,
         p: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        boxShadow: "var(--shadow-popover)",
       }}
     >
       {/* Header */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
         <Box
           sx={{
-            backgroundColor: "#F1F5F9",
+            backgroundColor: "var(--color-bg-default-tertiary)",
             borderRadius: 2,
             p: 1.5,
             display: "flex",
@@ -85,13 +85,13 @@ const DocumentosAsociadosCard = ({
             justifyContent: "center",
           }}
         >
-          <Description sx={{ color: "#00BCD4", fontSize: 24 }} />
+          <Description sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
         </Box>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: "#1E293B" }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
             Documentos Asociados
           </Typography>
-          <Typography variant="body2" sx={{ color: "#64748B" }}>
+          <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
             XML, PDF y obtención automática desde el SII
           </Typography>
         </Box>
@@ -100,7 +100,7 @@ const DocumentosAsociadosCard = ({
       {/* Fila 1: XML */}
       <Box
         sx={{
-          backgroundColor: "#F8FAFC",
+          backgroundColor: "var(--color-bg-default-tertiary)",
           borderRadius: 2,
           p: 2,
           display: "flex",
@@ -111,30 +111,30 @@ const DocumentosAsociadosCard = ({
       >
         {factura.urlFactura ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Description sx={{ color: "#00A86B" }} />
+            <Description sx={{ color: "var(--color-fg-success-primary)" }} />
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
                 <Typography
                   role="button"
-                  sx={{ color: "#00A86B", cursor: "pointer" }}
+                  sx={{ color: "var(--color-fg-success-primary)", cursor: "pointer" }}
                   onClick={handleDownloadXml}
                 >
                   {factura.facturaNameFile || "Archivo XML"}
                 </Typography>
               </Typography>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>
+              <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                 Documento cargado
               </Typography>
             </Box>
           </Box>
         ) : (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Cancel sx={{ color: "#EF4444" }} />
+            <Cancel sx={{ color: "var(--color-fg-danger-primary)" }} />
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
                 XML No Cargado
               </Typography>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>
+              <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                 Adjunta el archivo XML del SII
               </Typography>
             </Box>
@@ -146,9 +146,9 @@ const DocumentosAsociadosCard = ({
             startIcon={<Upload />}
             onClick={onUploadXmlClick}
             sx={{
-              backgroundColor: "#00BCD4",
-              color: "white",
-              "&:hover": { backgroundColor: "#00ACC1" },
+              backgroundColor: "var(--color-bg-accent-primary)",
+              color: "var(--color-fg-on-accent-primary)",
+              "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
               textTransform: "none",
               fontWeight: 600,
             }}
@@ -160,7 +160,7 @@ const DocumentosAsociadosCard = ({
       <Box sx={{ pl: 2, mb: 2 }}>
         <Typography
           variant="caption"
-          sx={{ color: factura.urlFactura ? "#00A86B" : "#F59E0B" }}
+          sx={{ color: factura.urlFactura ? "var(--color-fg-success-primary)" : "var(--color-fg-warning-primary)" }}
         >
           {factura.urlFactura
             ? "XML validado correctamente - Folio, RUT y monto coinciden"
@@ -173,7 +173,7 @@ const DocumentosAsociadosCard = ({
       {/* Fila 2: PDF */}
       <Box
         sx={{
-          backgroundColor: "#F8FAFC",
+          backgroundColor: "var(--color-bg-default-tertiary)",
           borderRadius: 2,
           p: 2,
           display: "flex",
@@ -184,30 +184,30 @@ const DocumentosAsociadosCard = ({
       >
         {hasPdf ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <PictureAsPdf sx={{ color: "#00A86B" }} />
+            <PictureAsPdf sx={{ color: "var(--color-fg-success-primary)" }} />
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
                 <Typography
                   role="button"
-                  sx={{ color: "#00A86B", cursor: "pointer" }}
+                  sx={{ color: "var(--color-fg-success-primary)", cursor: "pointer" }}
                   onClick={handleDownloadPdf}
                 >
                   {factura.facturaNameFilePDF || "Archivo PDF"}
                 </Typography>
               </Typography>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>
+              <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                 Documento cargado
               </Typography>
             </Box>
           </Box>
         ) : (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Cancel sx={{ color: "#EF4444" }} />
+            <Cancel sx={{ color: "var(--color-fg-danger-primary)" }} />
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B" }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
                 PDF No Cargado
               </Typography>
-              <Typography variant="caption" sx={{ color: "#64748B" }}>
+              <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                 Adjunta el archivo PDF de la factura
               </Typography>
             </Box>
@@ -219,9 +219,9 @@ const DocumentosAsociadosCard = ({
             startIcon={<Upload />}
             onClick={onUploadPdfClick}
             sx={{
-              backgroundColor: "#00BCD4",
-              color: "white",
-              "&:hover": { backgroundColor: "#00ACC1" },
+              backgroundColor: "var(--color-bg-accent-primary)",
+              color: "var(--color-fg-on-accent-primary)",
+              "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
               textTransform: "none",
               fontWeight: 600,
             }}
@@ -233,7 +233,7 @@ const DocumentosAsociadosCard = ({
       <Box sx={{ pl: 2, mb: 2 }}>
         <Typography
           variant="caption"
-          sx={{ color: hasPdf ? "#00A86B" : "#F59E0B" }}
+          sx={{ color: hasPdf ? "var(--color-fg-success-primary)" : "var(--color-fg-warning-primary)" }}
         >
           {hasPdf ? "PDF cargado correctamente" : "Pendiente de subir PDF"}
         </Typography>
@@ -257,23 +257,23 @@ const DocumentosAsociadosCard = ({
       <Button
         variant="contained"
         fullWidth
-        startIcon={fetching ? <CircularProgress size={20} sx={{ color: "white" }} /> : <CloudDownload />}
+        startIcon={fetching ? <CircularProgress size={20} sx={{ color: "var(--color-fg-on-accent-primary)" }} /> : <CloudDownload />}
         onClick={isPersonalLinked ? handleFetchSii : () => setPromptModalOpen(true)}
         disabled={fetching}
         sx={{
-          backgroundColor: "#00BCD4",
-          "&:hover": { backgroundColor: "#00ACC1" },
+          backgroundColor: "var(--color-bg-accent-primary)",
+          "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
           "&:disabled": { opacity: 0.7 },
           textTransform: "none",
           fontWeight: 600,
           py: 1.5,
-          color: "white",
+          color: "var(--color-fg-on-accent-primary)",
         }}
       >
         {fetching ? "Obteniendo documentos..." : "Obtener XML y PDF desde el SII"}
       </Button>
       <Box sx={{ pl: 2, pt: 1 }}>
-        <Typography variant="caption" sx={{ color: "#64748B" }}>
+        <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
           Obten automáticamente ambos documentos asociados a esta factura desde el SII
         </Typography>
       </Box>

@@ -29,6 +29,7 @@ import { useLegalDocuments } from "../../../hooks/useLegalDocuments";
 import useAuthStore from "../../../store/authStore";
 import { DOCUMENT_NAMES } from "../../../utils/consts";
 import { capitalizeFirstLetter } from "../../../utils/utils";
+import { surface } from "../../../theme";
 
 type DocumentStatus = "aprobado" | "pendiente" | "rechazado" | "sin_subir";
 
@@ -240,9 +241,7 @@ const DocumentsTable = () => {
   return (
     <Box
       sx={{
-        bgcolor: "background.paper",
-        borderRadius: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        ...surface.card,
         p: 3,
       }}
     >
@@ -343,8 +342,8 @@ const DocumentsTable = () => {
                       sx={{
                         width: 40,
                         height: 40,
-                        borderRadius: 2,
-                        bgcolor: "rgba(0, 188, 212, 0.1)",
+                        borderRadius: "var(--radius-m)",
+                        bgcolor: "var(--color-bg-accent-secondary)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

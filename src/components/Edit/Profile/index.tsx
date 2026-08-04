@@ -32,6 +32,7 @@ import { StyledTextField, StyledDatePicker } from "../../../pages/register/style
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
+import { surface } from "../../../theme";
 
 interface ProfileFormData {
   firstName: string;
@@ -162,10 +163,8 @@ const Profile = () => {
     <>
       <Box
         sx={{
-          backgroundColor: "background.paper",
-          borderRadius: 3,
+          ...surface.card,
           overflow: "hidden",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
         }}
       >
           <Box
@@ -399,12 +398,12 @@ const Profile = () => {
                     label="Preferencia de Contacto"
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    sx={{
-                      borderRadius: 2,
-                      backgroundColor: "background.default",
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "divider",
-                      },
+                sx={{
+                  borderRadius: "var(--radius-m)",
+                  backgroundColor: "background.default",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "divider",
+                  },
                       "&:hover .MuiOutlinedInput-notchedOutline": {
                         borderColor: "primary.main",
                       },
@@ -439,7 +438,7 @@ const Profile = () => {
                       padding: "12px 24px",
                       fontSize: "1rem",
                       fontWeight: 500,
-                      borderRadius: 2,
+                      borderRadius: "var(--radius-m)",
                       boxShadow: "none",
                       "&:hover": {
                         backgroundColor: "secondary.dark",
@@ -462,7 +461,7 @@ const Profile = () => {
                       padding: "12px 24px",
                       fontSize: "1rem",
                       fontWeight: 500,
-                      borderRadius: 2,
+                      borderRadius: "var(--radius-m)",
                       boxShadow: "none",
                       "&:hover": {
                         backgroundColor: "success.dark",
@@ -490,7 +489,7 @@ const Profile = () => {
         aria-describedby="profile-modal-description"
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: "var(--radius-l)",
             minWidth: 360,
             overflow: "hidden",
           },
@@ -548,7 +547,7 @@ const Profile = () => {
                 textTransform: "none",
                 px: 4,
                 py: 1,
-                borderRadius: 2,
+                borderRadius: "var(--radius-m)",
                 "&:hover": {
                   backgroundColor: "success.dark",
                 },
@@ -566,7 +565,7 @@ const Profile = () => {
                 textTransform: "none",
                 px: 4,
                 py: 1,
-                borderRadius: 2,
+                borderRadius: "var(--radius-m)",
                 "&:hover": {
                   backgroundColor: "error.dark",
                 },

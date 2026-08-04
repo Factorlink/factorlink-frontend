@@ -24,6 +24,7 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { StyledTextField } from "../../../pages/register/styles";
+import { surface } from "../../../theme";
 
 interface ChangePasswordFormData {
   currentPassword: string;
@@ -108,10 +109,8 @@ const ChangePassword = () => {
     <>
       <Box
         sx={{
-          backgroundColor: "background.paper",
-          borderRadius: 3,
+          ...surface.card,
           overflow: "hidden",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
         }}
       >
           <Box
@@ -255,7 +254,7 @@ const ChangePassword = () => {
                       padding: "12px 24px",
                       fontSize: "1rem",
                       fontWeight: 500,
-                      borderRadius: 2,
+                      borderRadius: "var(--radius-m)",
                       boxShadow: "none",
                       "&:hover": {
                         backgroundColor: "secondary.dark",
@@ -278,7 +277,7 @@ const ChangePassword = () => {
                       padding: "12px 24px",
                       fontSize: "1rem",
                       fontWeight: 500,
-                      borderRadius: 2,
+                      borderRadius: "var(--radius-m)",
                       boxShadow: "none",
                       "&:hover": {
                         backgroundColor: "success.dark",
@@ -306,7 +305,7 @@ const ChangePassword = () => {
         aria-describedby="change-password-modal-description"
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: "var(--radius-l)",
             minWidth: 360,
             overflow: "hidden",
           },
@@ -359,7 +358,7 @@ const ChangePassword = () => {
               padding: "10px 32px",
               fontSize: "1rem",
               fontWeight: 500,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               "&:hover": {
                 backgroundColor:
                   modalStatus === "success" ? "success.dark" : "primary.dark",

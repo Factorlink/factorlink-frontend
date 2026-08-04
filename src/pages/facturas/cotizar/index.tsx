@@ -320,8 +320,8 @@ const CotizarFactura = () => {
             gap: 2,
           }}
         >
-          <CircularProgress sx={{ color: "#00BCD4" }} />
-          <Typography variant="body1" sx={{ color: "#64748B" }}>
+          <CircularProgress sx={{ color: "var(--color-fg-accent-primary)" }} />
+          <Typography variant="body1" sx={{ color: "var(--color-fg-default-secondary)" }}>
             Cargando factura...
           </Typography>
         </Box>
@@ -347,11 +347,11 @@ const CotizarFactura = () => {
               gap: 2,
             }}
           >
-            <ErrorOutline sx={{ fontSize: 64, color: "#EF4444" }} />
-            <Typography variant="h6" sx={{ color: "#1E293B", fontWeight: 600 }}>
+            <ErrorOutline sx={{ fontSize: 64, color: "var(--color-fg-danger-primary)" }} />
+            <Typography variant="h6" sx={{ color: "var(--color-fg-default-primary)", fontWeight: 600 }}>
               Error al cargar la factura
             </Typography>
-            <Typography variant="body2" sx={{ color: "#64748B" }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
               {error}
             </Typography>
             <Button
@@ -359,10 +359,10 @@ const CotizarFactura = () => {
               onClick={() => window.location.reload()}
               sx={{
                 mt: 2,
-                backgroundColor: "#00BCD4",
-                "&:hover": { backgroundColor: "#00ACC1" },
+                backgroundColor: "var(--color-bg-accent-primary)",
+                "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
                 textTransform: "none",
-                color: "white",
+                color: "var(--color-fg-on-accent-primary)",
               }}
             >
               Reintentar
@@ -390,8 +390,8 @@ const CotizarFactura = () => {
               gap: 2,
             }}
           >
-            <Description sx={{ fontSize: 64, color: "#CBD5E1" }} />
-            <Typography variant="h6" sx={{ color: "#64748B" }}>
+            <Description sx={{ fontSize: 64, color: "var(--color-fg-default-tertiary)" }} />
+            <Typography variant="h6" sx={{ color: "var(--color-fg-default-secondary)" }}>
               Factura no encontrada
             </Typography>
           </Box>
@@ -409,9 +409,9 @@ const CotizarFactura = () => {
             startIcon={<ArrowBack />}
             onClick={handleBack}
             sx={{
-              color: "#64748B",
+              color: "var(--color-fg-default-secondary)",
               textTransform: "none",
-              "&:hover": { backgroundColor: "#F1F5F9" },
+              "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
             }}
           >
             Volver a facturas
@@ -421,16 +421,16 @@ const CotizarFactura = () => {
         {/* Header with Title */}
         <Box
           sx={{
-            backgroundColor: "white",
+            backgroundColor: "var(--color-bg-default-primary)",
             borderRadius: 3,
             p: 3,
             mb: 3,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+            boxShadow: "var(--shadow-popover)",
           }}
         >
           <Typography
             variant="h5"
-            sx={{ fontWeight: 700, color: "#1E293B", mb: 3 }}
+            sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)", mb: 3 }}
           >
             Cotizar Factura #{factura.folio}
           </Typography>
@@ -441,7 +441,7 @@ const CotizarFactura = () => {
             alternativeLabel
             sx={{
               "& .MuiStepLabel-root .Mui-active .MuiStepIcon-text": {
-                fill: "white",
+                fill: "var(--color-fg-on-accent-primary)",
               },
             }}
           >
@@ -451,12 +451,12 @@ const CotizarFactura = () => {
                   sx={{
                     "& .MuiStepLabel-label": {
                       fontWeight: index === activeStep ? 600 : 400,
-                      color: index === activeStep ? "#00BCD4" : "#64748B",
+                      color: index === activeStep ? "var(--color-fg-accent-primary)" : "var(--color-fg-default-secondary)",
                     },
                     "& .MuiStepIcon-root": {
-                      color: index <= activeStep ? "#00BCD4" : "#CBD5E1",
-                      "&.Mui-completed": { color: "#00A86B" },
-                      "&.Mui-active": { color: "#00BCD4" },
+                      color: index <= activeStep ? "var(--color-fg-accent-primary)" : "var(--color-fg-default-tertiary)",
+                      "&.Mui-completed": { color: "var(--color-fg-success-primary)" },
+                      "&.Mui-active": { color: "var(--color-fg-accent-primary)" },
                     },
                   }}
                 >
@@ -476,13 +476,13 @@ const CotizarFactura = () => {
                 variant="contained"
                 onClick={handleNext}
                 sx={{
-                  backgroundColor: "#00BCD4",
-                  "&:hover": { backgroundColor: "#00ACC1" },
+                  backgroundColor: "var(--color-bg-accent-primary)",
+                  "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
                   textTransform: "none",
                   fontWeight: 600,
                   px: 4,
                   py: 1.5,
-                  color: "white",
+                  color: "var(--color-fg-on-accent-primary)",
                 }}
               >
                 Continuar
@@ -506,16 +506,16 @@ const CotizarFactura = () => {
             {/* Conditions Card */}
             <Box
               sx={{
-                backgroundColor: "white",
+                backgroundColor: "var(--color-bg-default-primary)",
                 borderRadius: 3,
                 p: 3,
                 mt: 3,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                boxShadow: "var(--shadow-popover)",
               }}
             >
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 600, color: "#1E293B", mb: 3 }}
+                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 3 }}
               >
                 Condiciones de Financiamiento
               </Typography>
@@ -544,7 +544,7 @@ const CotizarFactura = () => {
               <Box sx={{ mb: 4 }}>
                 <Typography
                   variant="subtitle2"
-                  sx={{ color: "#64748B", mb: 1 }}
+                  sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}
                 >
                   Monto a Financiar: {truncateToTwo(montoFinanciar)}%
                 </Typography>
@@ -557,12 +557,12 @@ const CotizarFactura = () => {
                   valueLabelDisplay="auto"
                   valueLabelFormat={(value) => `${truncateToTwo(value)}%`}
                   sx={{
-                    color: "#00BCD4",
+                    color: "var(--color-fg-accent-primary)",
                     "& .MuiSlider-thumb": {
-                      backgroundColor: "#00BCD4",
+                      backgroundColor: "var(--color-bg-accent-primary)",
                     },
                     "& .MuiSlider-track": {
-                      backgroundColor: "#00BCD4",
+                      backgroundColor: "var(--color-bg-accent-primary)",
                     },
                   }}
                 />
@@ -574,14 +574,14 @@ const CotizarFactura = () => {
                     mt: 1,
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: "#94A3B8" }}>
+                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-tertiary)" }}>
                     Monto Total: {formatCurrency(factura.montoTotal)}
                   </Typography>
                   <Chip
                     label={`A Financiar: ${formatCurrency(calculatedMontoFinanciar)}`}
                     sx={{
-                      backgroundColor: "rgba(0, 168, 107, 0.2)",
-                      color: "#00A86B",
+                      backgroundColor: "var(--color-bg-success-secondary)",
+                      color: "var(--color-fg-success-primary)",
                       fontWeight: 600,
                     }}
                   />
@@ -592,7 +592,7 @@ const CotizarFactura = () => {
               <Box>
                 <Typography
                   variant="subtitle2"
-                  sx={{ color: "#64748B", mb: 1 }}
+                  sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}
                 >
                   Plazo (días)
                 </Typography>
@@ -619,7 +619,7 @@ const CotizarFactura = () => {
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       "&.Mui-focused fieldset": {
-                        borderColor: plazo > 180 ? "#DC2626" : "#00BCD4",
+                        borderColor: plazo > 180 ? "var(--color-border-danger-secondary)" : "var(--color-border-accent-primary)",
                       },
                     },
                   }}
@@ -630,22 +630,22 @@ const CotizarFactura = () => {
             {/* Visibility Selection Card */}
             <Box
               sx={{
-                backgroundColor: "white",
+                backgroundColor: "var(--color-bg-default-primary)",
                 borderRadius: 3,
                 p: 3,
                 mt: 3,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                boxShadow: "var(--shadow-popover)",
               }}
             >
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 600, color: "#1E293B", mb: 2 }}
+                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 2 }}
               >
                 Visibilidad en Marketplace
               </Typography>
 
               <FormControl component="fieldset">
-                <FormLabel component="legend" sx={{ color: "#64748B", mb: 1 }}>
+                <FormLabel component="legend" sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}>
                   ¿Quién puede ver esta factura?
                 </FormLabel>
                 <RadioGroup
@@ -659,8 +659,8 @@ const CotizarFactura = () => {
                     control={
                       <Radio
                         sx={{
-                          color: "#64748B",
-                          "&.Mui-checked": { color: "#00BCD4" },
+                          color: "var(--color-fg-default-secondary)",
+                          "&.Mui-checked": { color: "var(--color-fg-accent-primary)" },
                         }}
                       />
                     }
@@ -671,8 +671,8 @@ const CotizarFactura = () => {
                     control={
                       <Radio
                         sx={{
-                          color: "#64748B",
-                          "&.Mui-checked": { color: "#00BCD4" },
+                          color: "var(--color-fg-default-secondary)",
+                          "&.Mui-checked": { color: "var(--color-fg-accent-primary)" },
                         }}
                       />
                     }
@@ -706,8 +706,8 @@ const CotizarFactura = () => {
                                 label={factoring?.razonSocial || value}
                                 size="small"
                                 sx={{
-                                  backgroundColor: "#E0F7FA",
-                                  color: "#00838F",
+                                  backgroundColor: "var(--color-bg-accent-secondary)",
+                                  color: "var(--color-fg-accent-primary)",
                                   fontWeight: 500,
                                 }}
                               />
@@ -730,11 +730,11 @@ const CotizarFactura = () => {
                               justifyContent: "space-between",
                               alignItems: "center",
                               backgroundColor: isSelected
-                                ? "#E0F7FA"
+                                ? "var(--color-bg-accent-secondary)"
                                 : "transparent",
                               "&:hover": {
                                 backgroundColor: isSelected
-                                  ? "#B2EBF2"
+                                  ? "var(--color-bg-accent-secondary-hover)"
                                   : undefined,
                               },
                             }}
@@ -744,7 +744,7 @@ const CotizarFactura = () => {
                             </span>
                             {isSelected && (
                               <Check
-                                sx={{ color: "#00BCD4", ml: 1, fontSize: 20 }}
+                                sx={{ color: "var(--color-fg-accent-primary)", ml: 1, fontSize: 20 }}
                               />
                             )}
                           </MenuItem>
@@ -768,15 +768,15 @@ const CotizarFactura = () => {
                 variant="outlined"
                 onClick={handlePrevious}
                 sx={{
-                  borderColor: "#64748B",
-                  color: "#64748B",
+                  borderColor: "var(--color-fg-default-secondary)",
+                  color: "var(--color-fg-default-secondary)",
                   textTransform: "none",
                   fontWeight: 600,
                   px: 4,
                   py: 1.5,
                   "&:hover": {
-                    borderColor: "#475569",
-                    backgroundColor: "#F1F5F9",
+                    borderColor: "var(--color-fg-default-primary)",
+                    backgroundColor: "var(--color-bg-default-tertiary)",
                   },
                 }}
               >
@@ -787,16 +787,16 @@ const CotizarFactura = () => {
                 onClick={handleNext}
                 disabled={!isStep2Valid() || savingStep2}
                 sx={{
-                  backgroundColor: "#00BCD4",
-                  "&:hover": { backgroundColor: "#00ACC1" },
+                  backgroundColor: "var(--color-bg-accent-primary)",
+                  "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
                   "&:disabled": {
-                    backgroundColor: "#CBD5E1",
+                    backgroundColor: "var(--color-bg-disabled-primary)",
                   },
                   textTransform: "none",
                   fontWeight: 600,
                   px: 4,
                   py: 1.5,
-                  color: "white",
+                  color: "var(--color-fg-on-accent-primary)",
                 }}
               >
                 {savingStep2 ? (
@@ -833,23 +833,23 @@ const CotizarFactura = () => {
                 {/* XML Validated Card */}
                 <Box
                   sx={{
-                    backgroundColor: "white",
+                    backgroundColor: "var(--color-bg-default-primary)",
                     borderRadius: 3,
                     p: 3,
                     mb: 3,
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                    boxShadow: "var(--shadow-popover)",
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <CheckCircle sx={{ color: "#00A86B", fontSize: 32 }} />
+                    <CheckCircle sx={{ color: "var(--color-fg-success-primary)", fontSize: 32 }} />
                     <Box>
                       <Typography
                         variant="h6"
-                        sx={{ fontWeight: 600, color: "#1E293B" }}
+                        sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
                       >
                         XML Validado
                       </Typography>
-                      <Typography variant="body2" sx={{ color: "#64748B" }}>
+                      <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                         {factura.facturaNameFile || "factura.xml"} - Documento
                         verificado
                       </Typography>
@@ -860,23 +860,23 @@ const CotizarFactura = () => {
                 {/* PDF Validated Card */}
                 <Box
                   sx={{
-                    backgroundColor: "white",
+                    backgroundColor: "var(--color-bg-default-primary)",
                     borderRadius: 3,
                     p: 3,
                     mb: 3,
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                    boxShadow: "var(--shadow-popover)",
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <CheckCircle sx={{ color: "#00A86B", fontSize: 32 }} />
+                    <CheckCircle sx={{ color: "var(--color-fg-success-primary)", fontSize: 32 }} />
                     <Box>
                       <Typography
                         variant="h6"
-                        sx={{ fontWeight: 600, color: "#1E293B" }}
+                        sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
                       >
                         PDF Validado
                       </Typography>
-                      <Typography variant="body2" sx={{ color: "#64748B" }}>
+                      <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                         {factura.facturaNameFilePDF || "factura.pdf"} -
                         Documento subido correctamente
                       </Typography>
@@ -888,16 +888,16 @@ const CotizarFactura = () => {
             {/* Financial Conditions Card */}
             <Box
               sx={{
-                backgroundColor: "white",
+                backgroundColor: "var(--color-bg-default-primary)",
                 borderRadius: 3,
                 p: 3,
                 mb: 3,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                boxShadow: "var(--shadow-popover)",
               }}
             >
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 600, color: "#1E293B", mb: 2 }}
+                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 2 }}
               >
                 Condiciones Financieras
               </Typography>
@@ -910,17 +910,17 @@ const CotizarFactura = () => {
               >
                 <Box
                   sx={{
-                    backgroundColor: "#F8FAFC",
+                    backgroundColor: "var(--color-bg-default-tertiary)",
                     borderRadius: 2,
                     p: 2,
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: "#64748B" }}>
+                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                     Monto a Financiar
                   </Typography>
                   <Typography
                     variant="h6"
-                    sx={{ fontWeight: 700, color: "#00A86B" }}
+                    sx={{ fontWeight: 700, color: "var(--color-fg-success-primary)" }}
                   >
                     {formatCurrency(factura.montoFinanciar)} (
                     {truncateToTwo(montoFinanciar)}%)
@@ -928,17 +928,17 @@ const CotizarFactura = () => {
                 </Box>
                 <Box
                   sx={{
-                    backgroundColor: "#F8FAFC",
+                    backgroundColor: "var(--color-bg-default-tertiary)",
                     borderRadius: 2,
                     p: 2,
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: "#64748B" }}>
+                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                     Plazo
                   </Typography>
                   <Typography
                     variant="h6"
-                    sx={{ fontWeight: 700, color: "#1E293B" }}
+                    sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
                   >
                     {factura.plazo} días
                   </Typography>
@@ -949,16 +949,16 @@ const CotizarFactura = () => {
             {/* Visibility Summary Card */}
             <Box
               sx={{
-                backgroundColor: "white",
+                backgroundColor: "var(--color-bg-default-primary)",
                 borderRadius: 3,
                 p: 3,
                 mb: 3,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                boxShadow: "var(--shadow-popover)",
               }}
             >
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 600, color: "#1E293B", mb: 2 }}
+                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 2 }}
               >
                 Visibilidad en Marketplace
               </Typography>
@@ -976,7 +976,7 @@ const CotizarFactura = () => {
               {visibilidad === "TODOS" ? (
                 <Box
                   sx={{
-                    backgroundColor: "#F0FDF4",
+                    backgroundColor: "var(--color-bg-success-secondary)",
                     borderRadius: 2,
                     p: 2,
                     display: "flex",
@@ -984,10 +984,10 @@ const CotizarFactura = () => {
                     gap: 1.5,
                   }}
                 >
-                  <Visibility sx={{ color: "#00A86B", fontSize: 20 }} />
+                  <Visibility sx={{ color: "var(--color-fg-success-primary)", fontSize: 20 }} />
                   <Typography
                     variant="body2"
-                    sx={{ color: "#15803D", fontWeight: 500 }}
+                    sx={{ color: "var(--color-fg-success-primary)", fontWeight: 500 }}
                   >
                     Esta factura será visible para todos los factorings
                     registrados en la plataforma.
@@ -1014,15 +1014,15 @@ const CotizarFactura = () => {
                 variant="outlined"
                 onClick={handlePrevious}
                 sx={{
-                  borderColor: "#64748B",
-                  color: "#64748B",
+                  borderColor: "var(--color-fg-default-secondary)",
+                  color: "var(--color-fg-default-secondary)",
                   textTransform: "none",
                   fontWeight: 600,
                   px: 4,
                   py: 1.5,
                   "&:hover": {
-                    borderColor: "#475569",
-                    backgroundColor: "#F1F5F9",
+                    borderColor: "var(--color-fg-default-primary)",
+                    backgroundColor: "var(--color-bg-default-tertiary)",
                   },
                 }}
               >
@@ -1034,13 +1034,13 @@ const CotizarFactura = () => {
                 onClick={handleSendToMarketplace}
                 disabled={sendingToMarketplace}
                 sx={{
-                  backgroundColor: "#00BCD4",
-                  "&:hover": { backgroundColor: "#00ACC1" },
+                  backgroundColor: "var(--color-bg-accent-primary)",
+                  "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
                   textTransform: "none",
                   fontWeight: 600,
                   px: 4,
                   py: 1.5,
-                  color: "white",
+                  color: "var(--color-fg-on-accent-primary)",
                 }}
               >
                 {sendingToMarketplace ? (

@@ -22,10 +22,11 @@ const CollapsibleSection = ({
   return (
     <Box
       sx={{
-        backgroundColor: "white",
-        borderRadius: 3,
+        backgroundColor: "var(--color-bg-default-primary)",
+        borderRadius: "var(--radius-l)",
         mb: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        boxShadow: "var(--shadow-card)",
+        border: "1px solid var(--color-border-default-primary)",
         overflow: "hidden",
       }}
     >
@@ -37,16 +38,19 @@ const CollapsibleSection = ({
           justifyContent: "space-between",
           p: 3,
           cursor: "pointer",
-          "&:hover": { backgroundColor: "#F8FAFC" },
-          transition: "background-color 0.2s",
+          "&:hover": {
+            backgroundColor: "var(--color-bg-default-primary-hover)",
+          },
+          transition:
+            "background-color var(--duration-fast) var(--easing-ease)",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           {icon && (
             <Box
               sx={{
-                backgroundColor: "#F1F5F9",
-                borderRadius: 2,
+                backgroundColor: "var(--color-bg-default-tertiary)",
+                borderRadius: "var(--radius-m)",
                 p: 1.5,
                 display: "flex",
                 alignItems: "center",
@@ -60,7 +64,10 @@ const CollapsibleSection = ({
             {title}
 
             {subtitle && (
-              <Typography variant="body2" sx={{ color: "#64748B" }}>
+              <Typography
+                variant="body2"
+                sx={{ color: "var(--color-fg-default-secondary)" }}
+              >
                 {subtitle}
               </Typography>
             )}

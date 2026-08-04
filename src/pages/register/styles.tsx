@@ -2,72 +2,92 @@ import { TextField, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
-export const StyledTextField = styled(TextField)(({ theme }) => ({
+export const StyledTextField = styled(TextField)(() => ({
   paddingBottom: 16,
   "& .MuiOutlinedInput-root": {
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: "var(--color-bg-default-primary)",
+    borderRadius: "var(--radius-m)",
     "& fieldset": {
-      borderColor: theme.palette.divider,
+      borderColor: "var(--color-border-default-primary)",
     },
     "&:hover fieldset": {
-      borderColor: theme.palette.text.disabled,
+      borderColor: "var(--color-border-default-secondary)",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "var(--color-border-accent-primary)",
+      borderWidth: "1.5px",
+    },
+    "&.Mui-error fieldset": {
+      borderColor: "var(--color-border-danger-primary)",
+    },
+    "&.Mui-error": {
+      backgroundColor: "var(--color-bg-danger-tertiary)",
     },
     "& input": {
-      color: theme.palette.text.secondary,
+      color: "var(--color-fg-default-primary)",
     },
     "& input::placeholder": {
-      color: theme.palette.text.disabled,
+      color: "var(--color-fg-disabled-primary)",
       opacity: 1,
     },
-    "& input::label": {
-      color: theme.palette.text.disabled,
-      opacity: 1,
+  },
+  "& .MuiInputLabel-root": {
+    color: "var(--color-fg-default-secondary)",
+    "&.Mui-focused": {
+      color: "var(--color-fg-accent-primary)",
+    },
+    "&.Mui-error": {
+      color: "var(--color-fg-danger-primary)",
     },
   },
 }));
 
-export const StyledDatePicker = styled(DatePicker)(({ theme }) => ({
+export const StyledDatePicker = styled(DatePicker)(() => ({
   "& .MuiPickersOutlinedInput-root": {
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: "var(--color-bg-default-primary)",
+    borderRadius: "var(--radius-m)",
   },
   "& .MuiInputBase-root": {
     paddingBottom: 16,
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: "var(--color-bg-default-primary)",
     "& fieldset": {
-      borderColor: theme.palette.divider,
+      borderColor: "var(--color-border-default-primary)",
     },
     "&:hover fieldset": {
-      borderColor: theme.palette.text.disabled,
+      borderColor: "var(--color-border-default-secondary)",
     },
     "& input": {
-      color: theme.palette.text.secondary,
+      color: "var(--color-fg-default-primary)",
     },
     "& input::placeholder": {
-      color: theme.palette.text.disabled,
+      color: "var(--color-fg-disabled-primary)",
       opacity: 1,
     },
     "& label": {
-      color: theme.palette.text.disabled,
+      color: "var(--color-fg-default-secondary)",
     },
     "&.Mui-focused fieldset": {
-      borderColor: theme.palette.primary.main,
+      borderColor: "var(--color-border-accent-primary)",
+      borderWidth: "1.5px",
     },
   },
 }));
 
-export const StyledSelect = styled(Select)(({ theme }) => ({
+export const StyledSelect = styled(Select)(() => ({
   marginBottom: 16,
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: "var(--color-bg-default-primary)",
+  borderRadius: "var(--radius-m)",
   "& .MuiOutlinedInput-notchedOutline": {
-    borderColor: theme.palette.divider,
+    borderColor: "var(--color-border-default-primary)",
   },
   "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: theme.palette.text.disabled,
+    borderColor: "var(--color-border-default-secondary)",
   },
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: theme.palette.primary.main,
+    borderColor: "var(--color-border-accent-primary)",
+    borderWidth: "1.5px",
   },
   "& .MuiSelect-select": {
-    color: theme.palette.text.secondary,
+    color: "var(--color-fg-default-primary)",
   },
 }));

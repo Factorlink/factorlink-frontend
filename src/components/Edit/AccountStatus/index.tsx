@@ -2,6 +2,7 @@ import { Box, Typography, Chip } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { surface } from "../../../theme";
 
 interface AccountStatusProps {
   isActive?: boolean;
@@ -11,9 +12,7 @@ const AccountStatus = ({ isActive }: AccountStatusProps) => {
   return (
     <Box
       sx={{
-        backgroundColor: "background.paper",
-        borderRadius: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        ...surface.card,
         p: 3,
       }}
     >

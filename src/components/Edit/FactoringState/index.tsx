@@ -2,6 +2,7 @@ import { Box, Typography, Chip } from "@mui/material";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { surface } from "../../../theme";
 
 interface FactoringStateProps {
   estadoEnrolamiento?: string;
@@ -80,9 +81,7 @@ const FactoringState = ({ estadoEnrolamiento }: FactoringStateProps) => {
   return (
     <Box
       sx={{
-        backgroundColor: "background.paper",
-        borderRadius: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        ...surface.card,
         p: 3,
       }}
     >

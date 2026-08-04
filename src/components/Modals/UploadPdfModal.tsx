@@ -158,7 +158,7 @@ const UploadPdfModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "var(--radius-l)",
           overflow: "hidden",
         },
       }}
@@ -178,7 +178,7 @@ const UploadPdfModal = ({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               backgroundColor: "primary.main",
               display: "flex",
               alignItems: "center",
@@ -245,14 +245,14 @@ const UploadPdfModal = ({
                   justifyContent: "center",
                   border: "2px dashed",
                   borderColor: touched && !base64File ? "error.main" : "divider",
-                  borderRadius: 2,
+                  borderRadius: "var(--radius-m)",
                   p: 4,
                   cursor: "pointer",
                   transition: "all 0.2s ease",
                   backgroundColor: "background.default",
                   "&:hover": {
                     borderColor: "primary.main",
-                    backgroundColor: "rgba(0, 188, 212, 0.04)",
+                    backgroundColor: "var(--color-bg-accent-tertiary-hover)",
                   },
                 }}
               >
@@ -274,9 +274,9 @@ const UploadPdfModal = ({
                   justifyContent: "space-between",
                   border: "1px solid",
                   borderColor: "success.main",
-                  borderRadius: 2,
+                  borderRadius: "var(--radius-m)",
                   p: 2,
-                  backgroundColor: "rgba(76, 175, 80, 0.08)",
+                  backgroundColor: "var(--color-bg-success-tertiary)",
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -284,7 +284,7 @@ const UploadPdfModal = ({
                     sx={{
                       width: 40,
                       height: 40,
-                      borderRadius: 1,
+                      borderRadius: "var(--radius-s)",
                       backgroundColor: "success.main",
                       display: "flex",
                       alignItems: "center",
@@ -334,7 +334,7 @@ const UploadPdfModal = ({
           sx={{
             flex: 1,
             py: 1.5,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             textTransform: "none",
             fontWeight: 600,
           }}
@@ -349,7 +349,7 @@ const UploadPdfModal = ({
             sx={{
               flex: 1,
               py: 1.5,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               textTransform: "none",
               fontWeight: 600,
               color: "white",

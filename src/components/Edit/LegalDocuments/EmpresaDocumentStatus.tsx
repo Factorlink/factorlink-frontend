@@ -1,6 +1,7 @@
 import { Box, Typography, Chip } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { surface } from "../../../theme";
 
 interface EmpresaDocumentStatusProps {
   currentLevel?: number;
@@ -44,9 +45,7 @@ const EmpresaDocumentStatus = ({
   return (
     <Box
       sx={{
-        backgroundColor: "background.paper",
-        borderRadius: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        ...surface.card,
         p: 3,
       }}
     >
@@ -55,7 +54,7 @@ const EmpresaDocumentStatus = ({
           sx={{
             width: 40,
             height: 40,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             backgroundColor: "primary.main",
             display: "flex",
             alignItems: "center",
@@ -97,7 +96,7 @@ const EmpresaDocumentStatus = ({
                 alignItems: "flex-start",
                 gap: 1,
                 backgroundColor: "primary.main",
-                borderRadius: 1.5,
+                borderRadius: "var(--radius-m)",
                 p: 1.5,
               }}
             >

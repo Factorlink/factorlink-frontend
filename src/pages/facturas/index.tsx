@@ -54,46 +54,7 @@ import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { INITIAL_FILTERS, SORTABLE_COLUMNS } from "../../utils/consts";
-
-const getStatusConfig = (estado: string) => {
-  switch (estado) {
-    case "CARGADA":
-      return {
-        label: "CARGADA",
-        color: "#64748B",
-        bgColor: "#F1F5F9",
-        icon: <Description sx={{ fontSize: 14 }} />,
-      };
-    case "EN_MARKETPLACE":
-      return {
-        label: "EN MARKETPLACE",
-        color: "#00BCD4",
-        bgColor: "rgba(0, 188, 212, 0.1)",
-        icon: <Storefront sx={{ fontSize: 14 }} />,
-      };
-    case "CEDIDA":
-      return {
-        label: "CEDIDA",
-        color: "#00A86B",
-        bgColor: "rgba(0, 168, 107, 0.1)",
-        icon: <CheckCircle sx={{ fontSize: 14 }} />,
-      };
-    case "CON_OFERTAS":
-      return {
-        label: "CON OFERTAS",
-        color: "#00A86B",
-        bgColor: "rgba(0, 168, 107, 0.1)",
-        icon: <CheckCircle sx={{ fontSize: 14 }} />,
-      };
-    default:
-      return {
-        label: estado || "N/A",
-        color: "#64748B",
-        bgColor: "#F1F5F9",
-        icon: <Description sx={{ fontSize: 14 }} />,
-      };
-  }
-};
+import { getFacturaStatusConfig } from "../../theme";
 
 const formatCurrency = (value: string | number) => {
   const numValue = typeof value === "string" ? parseFloat(value) : value;
@@ -415,7 +376,7 @@ const Facturas = () => {
         {/* Header Section */}
         <Box
           sx={{
-            backgroundColor: "white",
+            backgroundColor: "var(--color-bg-default-primary)",
             borderRadius: 3,
             p: 3,
             display: "flex",
@@ -427,7 +388,7 @@ const Facturas = () => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box
               sx={{
-                backgroundColor: "white",
+                backgroundColor: "var(--color-bg-default-primary)",
                 borderRadius: 2,
                 p: 1.5,
                 display: "flex",
@@ -435,16 +396,16 @@ const Facturas = () => {
                 justifyContent: "center",
               }}
             >
-              <Description sx={{ color: "#64748B", fontSize: 28 }} />
+              <Description sx={{ color: "var(--color-fg-default-secondary)", fontSize: 28 }} />
             </Box>
             <Box>
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 600, color: "#1E293B" }}
+                sx={{ fontWeight: 500, fontFamily: "var(--font-heading)", color: "var(--color-fg-default-primary)" }}
               >
                 Gestión de Facturas
               </Typography>
-              <Typography variant="body2" sx={{ color: "#64748B" }}>
+              <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                 Administra las facturas de tu empresa
               </Typography>
             </Box>
@@ -455,13 +416,13 @@ const Facturas = () => {
               startIcon={<Sync />}
               onClick={() => setSyncModalOpen(true)}
               sx={{
-                backgroundColor: "#00BCD4",
-                "&:hover": { backgroundColor: "#334155" },
+                backgroundColor: "var(--color-bg-accent-primary)",
+                "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
                 textTransform: "none",
-                fontWeight: 600,
+                fontWeight: 500,
                 borderRadius: 2,
                 px: 3,
-                color: "white",
+                color: "var(--color-fg-on-accent-primary)",
               }}
             >
               Sincronizar SII
@@ -474,64 +435,64 @@ const Facturas = () => {
           <Box
             sx={{
               flex: 1,
-              backgroundColor: "white",
+              backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+              boxShadow: "var(--shadow-card)",
             }}
           >
-            <Typography variant="body2" sx={{ color: "#64748B", mb: 0.5 }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)", mb: 0.5 }}>
               Total Facturas
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
               {meta.totalGeneral}
             </Typography>
           </Box>
           <Box
             sx={{
               flex: 1,
-              backgroundColor: "white",
+              backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+              boxShadow: "var(--shadow-card)",
             }}
           >
-            <Typography variant="body2" sx={{ color: "#64748B", mb: 0.5 }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)", mb: 0.5 }}>
               Cargadas
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "#1E293B" }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
               {meta.totalCargada}
             </Typography>
           </Box>
           <Box
             sx={{
               flex: 1,
-              backgroundColor: "white",
+              backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+              boxShadow: "var(--shadow-card)",
             }}
           >
-            <Typography variant="body2" sx={{ color: "#64748B", mb: 0.5 }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)", mb: 0.5 }}>
               En Marketplace
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "#00BCD4" }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-accent-primary)" }}>
               {meta.totalEnMarketplace}
             </Typography>
           </Box>
           <Box
             sx={{
               flex: 1,
-              backgroundColor: "white",
+              backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+              boxShadow: "var(--shadow-card)",
             }}
           >
-            <Typography variant="body2" sx={{ color: "#64748B", mb: 0.5 }}>
+            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)", mb: 0.5 }}>
               Cedidas
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "#00A86B" }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-success-primary)" }}>
               {meta.totalCedida}
             </Typography>
           </Box>
@@ -560,8 +521,8 @@ const Facturas = () => {
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: activeTab === 0 ? "#00BCD4" : "#64748B",
-                        color: "white",
+                        backgroundColor: activeTab === 0 ? "var(--color-bg-accent-primary)" : "var(--color-bg-neutral-secondary)",
+                        color: "var(--color-fg-on-accent-primary)",
                       }}
                     />
                   )}
@@ -583,8 +544,8 @@ const Facturas = () => {
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: activeTab === 1 ? "#00BCD4" : "#64748B",
-                        color: "white",
+                        backgroundColor: activeTab === 1 ? "var(--color-bg-accent-primary)" : "var(--color-bg-neutral-secondary)",
+                        color: "var(--color-fg-on-accent-primary)",
                       }}
                     />
                   )}
@@ -606,8 +567,8 @@ const Facturas = () => {
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: activeTab === 2 ? "#00BCD4" : "#64748B",
-                        color: "white",
+                        backgroundColor: activeTab === 2 ? "var(--color-bg-accent-primary)" : "var(--color-bg-neutral-secondary)",
+                        color: "var(--color-fg-on-accent-primary)",
                       }}
                     />
                   )}
@@ -629,8 +590,8 @@ const Facturas = () => {
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: activeTab === 3 ? "#00BCD4" : "#64748B",
-                        color: "white",
+                        backgroundColor: activeTab === 3 ? "var(--color-bg-accent-primary)" : "var(--color-bg-neutral-secondary)",
+                        color: "var(--color-fg-on-accent-primary)",
                       }}
                     />
                   )}
@@ -655,7 +616,7 @@ const Facturas = () => {
               component={Paper}
               sx={{
                 borderRadius: 3,
-                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                boxShadow: "var(--shadow-card)",
                 overflow: "hidden",
               }}
             >
@@ -680,14 +641,14 @@ const Facturas = () => {
                     py: 8,
                   }}
                 >
-                  <Description sx={{ fontSize: 64, color: "#CBD5E1", mb: 2 }} />
+                  <Description sx={{ fontSize: 64, color: "var(--color-fg-default-tertiary)", mb: 2 }} />
                   <Typography
                     variant="h6"
-                    sx={{ color: "#64748B", fontWeight: 500 }}
+                    sx={{ color: "var(--color-fg-default-secondary)", fontWeight: 500 }}
                   >
                     No hay facturas disponibles
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#94A3B8", mt: 1 }}>
+                  <Typography variant="body2" sx={{ color: "var(--color-fg-default-tertiary)", mt: 1 }}>
                     {Object.values(filters).some((v) => v !== "")
                       ? "No se encontraron facturas con los criterios de búsqueda"
                       : "Sincroniza con el SII o agrega facturas manualmente para comenzar"}
@@ -697,7 +658,7 @@ const Facturas = () => {
                 <>
                   <Table>
                     <TableHead>
-                      <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
+                      <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
                         {SORTABLE_COLUMNS.map((column) => (
                           <SortableTableHeader
                             key={column.field}
@@ -708,26 +669,26 @@ const Facturas = () => {
                             onSort={handleSort}
                           />
                         ))}
-                        <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
+                        <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
                           Acciones
                         </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {facturas.map((factura) => {
-                        const statusConfig = getStatusConfig(factura.estado);
+                        const statusConfig = getFacturaStatusConfig(factura.estado);
                         return (
                           <TableRow
                             key={factura.id}
                             sx={{
-                              "&:hover": { backgroundColor: "#F8FAFC" },
+                              "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
                               "&:last-child td": { borderBottom: 0 },
                             }}
                           >
                             <TableCell>
                               <Typography
                                 variant="body2"
-                                sx={{ color: "#00BCD4", fontWeight: 600 }}
+                                sx={{ color: "var(--color-fg-accent-primary)", fontWeight: 600 }}
                               >
                                 {factura.folio}
                               </Typography>
@@ -736,27 +697,27 @@ const Facturas = () => {
                               <Box>
                                 <Typography
                                   variant="body2"
-                                  sx={{ fontWeight: 600, color: "#1E293B" }}
+                                  sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
                                 >
                                   {factura.razonSocialReceptor || "N/A"}
                                 </Typography>
                                 <Typography
                                   variant="caption"
-                                  sx={{ color: "#64748B" }}
+                                  sx={{ color: "var(--color-fg-default-secondary)" }}
                                 >
                                   {factura.rutReceptor || ""}
                                 </Typography>
                               </Box>
                             </TableCell>
                             <TableCell>
-                              <Typography variant="body2" sx={{ color: "#64748B" }}>
+                              <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                                 {formatDate(factura.fechaEmision)}
                               </Typography>
                             </TableCell>
                             <TableCell>
                               <Typography
                                 variant="body2"
-                                sx={{ color: "#1E293B", fontWeight: 500 }}
+                                sx={{ color: "var(--color-fg-default-primary)", fontWeight: 500 }}
                               >
                                 {formatCurrency(factura.montoTotal)}
                               </Typography>
@@ -764,7 +725,7 @@ const Facturas = () => {
                             <TableCell>
                               <Typography
                                 variant="body2"
-                                sx={{ color: "#00A86B", fontWeight: 600 }}
+                                sx={{ color: "var(--color-fg-success-primary)", fontWeight: 600 }}
                               >
                                 {formatCurrency(factura.montoFinanciar)}
                               </Typography>
@@ -774,15 +735,15 @@ const Facturas = () => {
                                 label={`${factura.plazo || 0} días`}
                                 size="small"
                                 sx={{
-                                  backgroundColor: "#F1F5F9",
-                                  color: "#475569",
+                                  backgroundColor: "var(--color-bg-default-tertiary)",
+                                  color: "var(--color-fg-default-primary)",
                                   fontWeight: 500,
                                 }}
                               />
                             </TableCell>
                             <TableCell>
                               <Chip
-                                icon={statusConfig.icon}
+                                icon={statusConfig.icon as React.ReactElement}
                                 label={statusConfig.label}
                                 size="small"
                                 sx={{
@@ -799,7 +760,7 @@ const Facturas = () => {
                               <IconButton
                                 size="small"
                                 onClick={(e) => handleMenuOpen(e, factura)}
-                                sx={{ color: "#64748B" }}
+                                sx={{ color: "var(--color-fg-default-secondary)" }}
                               >
                                 <MoreVert />
                               </IconButton>
@@ -818,7 +779,7 @@ const Facturas = () => {
                         justifyContent: "space-between",
                         alignItems: "center",
                         py: 2,
-                        borderTop: "1px solid #E2E8F0",
+                        borderTop: "1px solid var(--color-border-default-primary)",
                         px: 2,
                         gap: 2,
                       }}
@@ -844,7 +805,7 @@ const Facturas = () => {
                         shape="rounded"
                         sx={{
                           "& .MuiPaginationItem-root.Mui-selected": {
-                            color: "white",
+                            color: "var(--color-fg-on-accent-primary)",
                           },
                         }}
                       />
@@ -882,14 +843,14 @@ const Facturas = () => {
           PaperProps={{
             sx: {
               borderRadius: 2,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              boxShadow: "var(--shadow-popover)",
               minWidth: 180,
             },
           }}
         >
           <MenuItem onClick={handleVerDetalle}>
             <ListItemIcon>
-              <Visibility sx={{ color: "#64748B" }} />
+              <Visibility sx={{ color: "var(--color-fg-default-secondary)" }} />
             </ListItemIcon>
             <ListItemText primary="Ver detalle" />
           </MenuItem>
@@ -897,11 +858,11 @@ const Facturas = () => {
             isInMarketplace(selectedFactura) && (
               <MenuItem onClick={handleEliminar}>
                 <ListItemIcon>
-                  <StorefrontIcon sx={{ color: "#EF4444" }} />
+                  <StorefrontIcon sx={{ color: "var(--color-fg-danger-primary)" }} />
                 </ListItemIcon>
                 <ListItemText
                   primary="Quitar del marketplace"
-                  sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
+                  sx={{ "& .MuiTypography-root": { color: "var(--color-fg-danger-primary)" } }}
                 />
               </MenuItem>
             )
@@ -910,11 +871,11 @@ const Facturas = () => {
             isCargada(selectedFactura) && (
               <MenuItem onClick={handleEliminar}>
               <ListItemIcon>
-                <Delete sx={{ color: "#EF4444" }} />
+                <Delete sx={{ color: "var(--color-fg-danger-primary)" }} />
               </ListItemIcon>
               <ListItemText
                 primary="Eliminar"
-                sx={{ "& .MuiTypography-root": { color: "#EF4444" } }}
+                sx={{ "& .MuiTypography-root": { color: "var(--color-fg-danger-primary)" } }}
               />
             </MenuItem>
             )
@@ -922,11 +883,11 @@ const Facturas = () => {
           {canEnviarCotizar(selectedFactura) && (
             <MenuItem onClick={handleEnviarCotizar}>
               <ListItemIcon>
-                <Send sx={{ color: "#00BCD4" }} />
+                <Send sx={{ color: "var(--color-fg-accent-primary)" }} />
               </ListItemIcon>
               <ListItemText
                 primary="Enviar a cotizar"
-                sx={{ "& .MuiTypography-root": { color: "#00BCD4" } }}
+                sx={{ "& .MuiTypography-root": { color: "var(--color-fg-accent-primary)" } }}
               />
             </MenuItem>
           )}

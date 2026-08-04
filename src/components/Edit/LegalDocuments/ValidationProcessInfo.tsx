@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { surface } from "../../../theme";
 
 const validationItems = [
   "Los documentos pueden estar en estado: PENDIENTE, APROBADO o RECHAZADO",
@@ -13,9 +14,7 @@ const ValidationProcessInfo = () => {
   return (
     <Box
       sx={{
-        backgroundColor: "background.paper",
-        borderRadius: 3,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        ...surface.card,
         p: 3,
       }}
     >
@@ -24,7 +23,7 @@ const ValidationProcessInfo = () => {
           sx={{
             width: 40,
             height: 40,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             backgroundColor: "warning.main",
             display: "flex",
             alignItems: "center",

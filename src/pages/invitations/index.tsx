@@ -24,8 +24,6 @@ import { useInvitation } from "../../hooks/useInvitation";
 import useAuthStore from "../../store/authStore";
 import { useUsers } from "../../hooks/useUsers";
 
-
-
 interface Invitation {
   empresaId?: string;
   factoringId?: string;
@@ -64,7 +62,7 @@ const Invitations: FC = () => {
       setError(null);
       const data = await getPendingInvites();
       setInvitations(data || { empresas: [], factorings: [] });
-    } catch (err) {
+    } catch {
       setError("Error al cargar las invitaciones");
     } finally {
       setLoadingData(false);
@@ -87,8 +85,8 @@ const Invitations: FC = () => {
         });
       }
 
-      const {user: updatedUser} = await getMyInfo();
-      
+      const { user: updatedUser } = await getMyInfo();
+
       setUser({ ...user!, roles: updatedUser.roles });
 
       setSuccessMessage("Invitación aceptada correctamente");
@@ -127,81 +125,96 @@ const Invitations: FC = () => {
     fetchInvitations();
   }, []);
 
+  const pendingCount =
+    invitations.empresas.length + invitations.factorings.length;
+
   const getTypeConfig = (type: string) => {
     if (type === "empresa") {
       return {
         icon: <BusinessIcon sx={{ fontSize: 14, mr: 0.5 }} />,
         label: "Empresa",
-        color: "#3B82F6",
-        bgColor: "rgba(59, 130, 246, 0.1)",
+        color: "var(--color-fg-accent-primary)",
+        bgColor: "var(--color-bg-accent-secondary)",
       };
     }
     return {
       icon: <AccountBalanceIcon sx={{ fontSize: 14, mr: 0.5 }} />,
       label: "Factoring",
-      color: "#8B5CF6",
-      bgColor: "rgba(139, 92, 246, 0.1)",
+      color: "var(--color-fg-success-primary)",
+      bgColor: "var(--color-bg-success-secondary)",
     };
   };
 
   return (
     <Layout>
       <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3 }}>
-        {/* Header Section */}
         <Box
           sx={{
-            backgroundColor: "white",
-            borderRadius: 3,
+            backgroundColor: "var(--color-bg-default-primary)",
+            borderRadius: "var(--radius-l)",
             p: 3,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            boxShadow: "var(--shadow-card)",
+            border: "1px solid var(--color-border-default-primary)",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box
               sx={{
-                backgroundColor: "#00BCD4",
-                borderRadius: 2,
+                backgroundColor: "var(--color-bg-accent-primary)",
+                borderRadius: "var(--radius-m)",
                 p: 1.5,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <MailOutlineIcon sx={{ color: "white", fontSize: 28 }} />
+              <MailOutlineIcon
+                sx={{
+                  color: "var(--color-fg-on-accent-primary)",
+                  fontSize: 28,
+                }}
+              />
             </Box>
             <Box>
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 600, color: "#1E293B" }}
+                sx={{
+                  fontFamily: "var(--font-heading)",
+                  fontWeight: 500,
+                  color: "var(--color-fg-default-primary)",
+                }}
               >
                 Invitaciones Pendientes
               </Typography>
-              <Typography variant="body2" sx={{ color: "#64748B" }}>
+              <Typography
+                variant="body2"
+                sx={{ color: "var(--color-fg-default-secondary)" }}
+              >
                 Gestiona las invitaciones que has recibido para unirte a
                 organizaciones
               </Typography>
             </Box>
           </Box>
           <Chip
-            label={`${invitations.empresas.length + invitations.factorings.length} pendiente${invitations.empresas.length + invitations.factorings.length !== 1 ? "s" : ""}`}
+            label={`${pendingCount} pendiente${pendingCount !== 1 ? "s" : ""}`}
             sx={{
               backgroundColor:
-                invitations.empresas.length + invitations.factorings.length > 0
-                  ? "rgba(245, 158, 11, 0.1)"
-                  : "rgba(100, 116, 139, 0.1)",
+                pendingCount > 0
+                  ? "var(--color-bg-warning-secondary)"
+                  : "var(--color-bg-neutral-secondary)",
               color:
-                invitations.empresas.length + invitations.factorings.length > 0
-                  ? "#F59E0B"
-                  : "#64748B",
-              fontWeight: 600,
+                pendingCount > 0
+                  ? "var(--color-fg-warning-primary)"
+                  : "var(--color-fg-default-secondary)",
+              fontWeight: 500,
+              fontFamily: "var(--font-heading)",
             }}
           />
         </Box>
 
-        {/* Alerts */}
         {successMessage && (
           <Alert severity="success" onClose={() => setSuccessMessage(null)}>
             {successMessage}
@@ -213,199 +226,243 @@ const Invitations: FC = () => {
           </Alert>
         )}
 
-        {/* Loading State */}
         {loadingData && (
           <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
             <CircularProgress />
           </Box>
         )}
 
-        {/* Empty State */}
-        {!loadingData &&
-          invitations.empresas.length + invitations.factorings.length === 0 && (
-            <Box
+        {!loadingData && pendingCount === 0 && (
+          <Box
+            sx={{
+              backgroundColor: "var(--color-bg-default-primary)",
+              borderRadius: "var(--radius-l)",
+              p: 6,
+              textAlign: "center",
+              boxShadow: "var(--shadow-card)",
+              border: "1px solid var(--color-border-default-primary)",
+            }}
+          >
+            <MailOutlineIcon
               sx={{
-                backgroundColor: "white",
-                borderRadius: 3,
-                p: 6,
-                textAlign: "center",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                fontSize: 64,
+                color: "var(--color-fg-default-tertiary)",
+                mb: 2,
+              }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                color: "var(--color-fg-default-secondary)",
+                mb: 1,
+                fontFamily: "var(--font-heading)",
+                fontWeight: 500,
               }}
             >
-              <MailOutlineIcon sx={{ fontSize: 64, color: "#CBD5E1", mb: 2 }} />
-              <Typography variant="h6" sx={{ color: "#64748B", mb: 1 }}>
-                No tienes invitaciones pendientes
-              </Typography>
-              <Typography variant="body2" sx={{ color: "#94A3B8" }}>
-                Cuando alguien te invite a una organización, aparecerá aquí
-              </Typography>
-            </Box>
-          )}
-
-        {/* Invitations Table */}
-        {!loadingData &&
-          invitations.empresas.length + invitations.factorings.length > 0 && (
-            <TableContainer
-              component={Paper}
-              sx={{
-                borderRadius: 3,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                overflow: "hidden",
-              }}
+              No tienes invitaciones pendientes
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: "var(--color-fg-default-tertiary)" }}
             >
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Organización
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Tipo
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Fecha
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>
-                      Acciones
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {[...invitations.empresas, ...invitations.factorings].map(
-                    (invitation) => {
-                      const typeConfig = getTypeConfig(invitation.empresaId ? "empresa" : "factoring");
-                      const isLoading = loading;
+              Cuando alguien te invite a una organización, aparecerá aquí
+            </Typography>
+          </Box>
+        )}
 
-                      return (
-                        <TableRow
-                          key={invitation.empresaId || invitation.factoringId}
-                          sx={{
-                            "&:hover": { backgroundColor: "#F8FAFC" },
-                            "&:last-child td": { borderBottom: 0 },
-                          }}
-                        >
-                          <TableCell>
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: 600, color: "#1E293B" }}
-                            >
-                              {invitation.razonSocial}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              icon={typeConfig.icon}
-                              label={typeConfig.label}
-                              size="small"
-                              sx={{
-                                backgroundColor: typeConfig.bgColor,
+        {!loadingData && pendingCount > 0 && (
+          <TableContainer
+            component={Paper}
+            sx={{
+              borderRadius: "var(--radius-l)",
+              boxShadow: "var(--shadow-card)",
+              overflow: "hidden",
+              border: "1px solid var(--color-border-default-primary)",
+              backgroundColor: "var(--color-bg-default-primary)",
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow
+                  sx={{
+                    backgroundColor: "var(--color-bg-default-tertiary)",
+                  }}
+                >
+                  <TableCell
+                    sx={{
+                      fontWeight: 500,
+                      color: "var(--color-fg-default-secondary)",
+                      fontFamily: "var(--font-heading)",
+                    }}
+                  >
+                    Organización
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 500,
+                      color: "var(--color-fg-default-secondary)",
+                      fontFamily: "var(--font-heading)",
+                    }}
+                  >
+                    Tipo
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 500,
+                      color: "var(--color-fg-default-secondary)",
+                      fontFamily: "var(--font-heading)",
+                    }}
+                  >
+                    Fecha
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 500,
+                      color: "var(--color-fg-default-secondary)",
+                      fontFamily: "var(--font-heading)",
+                    }}
+                  >
+                    Acciones
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[...invitations.empresas, ...invitations.factorings].map(
+                  (invitation) => {
+                    const typeConfig = getTypeConfig(
+                      invitation.empresaId ? "empresa" : "factoring",
+                    );
+                    const isLoading = loading;
+
+                    return (
+                      <TableRow
+                        key={invitation.empresaId || invitation.factoringId}
+                        sx={{
+                          "&:hover": {
+                            backgroundColor:
+                              "var(--color-bg-default-primary-hover)",
+                          },
+                          "&:last-child td": { borderBottom: 0 },
+                        }}
+                      >
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 500,
+                              color: "var(--color-fg-default-primary)",
+                            }}
+                          >
+                            {invitation.razonSocial}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            icon={typeConfig.icon}
+                            label={typeConfig.label}
+                            size="small"
+                            sx={{
+                              backgroundColor: typeConfig.bgColor,
+                              color: typeConfig.color,
+                              fontWeight: 500,
+                              "& .MuiChip-icon": {
                                 color: typeConfig.color,
+                              },
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "var(--color-fg-default-secondary)",
+                            }}
+                          >
+                            {invitation.inviteDate
+                              ? new Date(
+                                  invitation.inviteDate,
+                                ).toLocaleDateString("es-ES", {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                })
+                              : "N/A"}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: "flex", gap: 1 }}>
+                            <Button
+                              variant="contained"
+                              color="success"
+                              size="small"
+                              startIcon={
+                                isLoading ? (
+                                  <CircularProgress
+                                    size={14}
+                                    color="inherit"
+                                  />
+                                ) : (
+                                  <CheckCircleIcon />
+                                )
+                              }
+                              onClick={() =>
+                                handleAccept(
+                                  invitation,
+                                  invitation?.empresaId
+                                    ? "empresa"
+                                    : "factoring",
+                                )
+                              }
+                              disabled={isLoading}
+                              sx={{
+                                textTransform: "none",
                                 fontWeight: 500,
-                                "& .MuiChip-icon": {
-                                  color: typeConfig.color,
-                                },
+                                minWidth: 100,
                               }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: "#64748B" }}
                             >
-                              {invitation.inviteDate
-                                ? new Date(
-                                    invitation.inviteDate,
-                                  ).toLocaleDateString("es-ES", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                  })
-                                : "N/A"}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: "flex", gap: 1 }}>
-                              <Button
-                                variant="contained"
-                                size="small"
-                                startIcon={
-                                  isLoading ? (
-                                    <CircularProgress
-                                      size={14}
-                                      color="inherit"
-                                    />
-                                  ) : (
-                                    <CheckCircleIcon />
-                                  )
-                                }
-                                onClick={() =>
-                                  handleAccept(
-                                    invitation,
-                                    invitation?.empresaId
-                                      ? "empresa"
-                                      : "factoring",
-                                  )
-                                }
-                                disabled={isLoading}
-                                sx={{
-                                  backgroundColor: "#00D9A5",
-                                  "&:hover": { backgroundColor: "#00D9A5" },
-                                  color: "white",
-                                  textTransform: "none",
-                                  fontWeight: 600,
-                                  borderRadius: 2,
-                                  minWidth: 100,
-                                }}
-                              >
-                                Aceptar
-                              </Button>
-                              <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={
-                                  isLoading ? (
-                                    <CircularProgress
-                                      size={14}
-                                      color="inherit"
-                                    />
-                                  ) : (
-                                    <CancelIcon />
-                                  )
-                                }
-                                onClick={() =>
-                                  handleReject(
-                                    invitation,
-                                    invitation?.empresaId
-                                      ? "empresa"
-                                      : "factoring",
-                                  )
-                                }
-                                disabled={isLoading}
-                                sx={{
-                                  borderColor: "#EF4444",
-                                  color: "#EF4444",
-                                  "&:hover": {
-                                    backgroundColor: "rgba(239, 68, 68, 0.1)",
-                                    borderColor: "#EF4444",
-                                  },
-                                  textTransform: "none",
-                                  fontWeight: 600,
-                                  borderRadius: 2,
-                                  minWidth: 100,
-                                }}
-                              >
-                                Rechazar
-                              </Button>
-                            </Box>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    },
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+                              Aceptar
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              size="small"
+                              startIcon={
+                                isLoading ? (
+                                  <CircularProgress
+                                    size={14}
+                                    color="inherit"
+                                  />
+                                ) : (
+                                  <CancelIcon />
+                                )
+                              }
+                              onClick={() =>
+                                handleReject(
+                                  invitation,
+                                  invitation?.empresaId
+                                    ? "empresa"
+                                    : "factoring",
+                                )
+                              }
+                              disabled={isLoading}
+                              sx={{
+                                textTransform: "none",
+                                fontWeight: 500,
+                                minWidth: 100,
+                              }}
+                            >
+                              Rechazar
+                            </Button>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  },
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Box>
     </Layout>
   );

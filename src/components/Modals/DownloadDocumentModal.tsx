@@ -92,7 +92,7 @@ const DownloadDocumentModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: "var(--radius-l)",
           overflow: "hidden",
         },
       }}
@@ -112,7 +112,7 @@ const DownloadDocumentModal = ({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               backgroundColor: "primary.main",
               display: "flex",
               alignItems: "center",
@@ -147,7 +147,7 @@ const DownloadDocumentModal = ({
         {alertStatus !== "success" && (
           <Box
             sx={{
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               p: 2,
               mt: 2,
             }}
@@ -159,16 +159,16 @@ const DownloadDocumentModal = ({
                 gap: 2,
                 mb: 2,
                 p: 2,
-                borderRadius: 2,
-                backgroundColor: "rgba(0, 0, 0, 0.04)",
+                borderRadius: "var(--radius-m)",
+                backgroundColor: "var(--color-bg-default-tertiary)",
               }}
             >
               <Box
                 sx={{
                   width: 40,
                   height: 40,
-                  borderRadius: 2,
-                  bgcolor: "rgba(0, 188, 212, 0.1)",
+                  borderRadius: "var(--radius-m)",
+                  bgcolor: "var(--color-bg-accent-secondary)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -202,7 +202,7 @@ const DownloadDocumentModal = ({
           sx={{
             flex: 1,
             py: 1.5,
-            borderRadius: 2,
+            borderRadius: "var(--radius-m)",
             textTransform: "none",
             fontWeight: 600,
           }}
@@ -217,7 +217,7 @@ const DownloadDocumentModal = ({
             sx={{
               flex: 1,
               py: 1.5,
-              borderRadius: 2,
+              borderRadius: "var(--radius-m)",
               textTransform: "none",
               fontWeight: 600,
               color: "white",

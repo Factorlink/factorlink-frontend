@@ -1,0 +1,83 @@
+/**
+ * Factorlink — tipografías y estilos base.
+ * Importar después de tokens.css en el entrypoint.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&family=Inter:wght@400;500;700&family=EB+Garamond:ital,wght@1,400;1,500&family=Fragment+Mono&display=swap");
+
+html {
+  box-sizing: border-box;
+}
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--font-size-m);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-m);
+  color: var(--color-fg-default-primary);
+  background: var(--color-bg-default-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+button,
+.font-heading {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-default-primary);
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--font-size-display-h1);
+  line-height: 1.33;
+}
+h2 {
+  font-size: var(--font-size-display-h2);
+  line-height: 1.4;
+}
+h3 {
+  font-size: var(--font-size-display-h3);
+  line-height: 1.33;
+}
+h4 {
+  font-size: var(--font-size-display-h4);
+  line-height: 1.4;
+}
+
+p {
+  margin: 0;
+  color: var(--color-fg-default-secondary);
+}
+
+.font-accent {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-size: var(--font-size-l);
+}
+
+.font-mono,
+code,
+pre {
+  font-family: var(--font-mono);
+}
+
+a {
+  color: var(--color-fg-accent-primary);
+  text-decoration: underline;
+}
+a:hover {
+  color: var(--color-fg-accent-secondary);
+}

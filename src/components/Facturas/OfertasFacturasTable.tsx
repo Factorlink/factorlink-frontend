@@ -171,7 +171,7 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
       component={Paper}
       sx={{
         borderRadius: 3,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+        boxShadow: "var(--shadow-card)",
         overflow: "hidden",
       }}
     >
@@ -196,11 +196,11 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
             py: 8,
           }}
         >
-          <Description sx={{ fontSize: 64, color: "#CBD5E1", mb: 2 }} />
-          <Typography variant="h6" sx={{ color: "#64748B", fontWeight: 500 }}>
+          <Description sx={{ fontSize: 64, color: "var(--color-fg-default-tertiary)", mb: 2 }} />
+          <Typography variant="h6" sx={{ color: "var(--color-fg-default-secondary)", fontWeight: 500 }}>
             No hay facturas con ofertas
           </Typography>
-          <Typography variant="body2" sx={{ color: "#94A3B8", mt: 1 }}>
+          <Typography variant="body2" sx={{ color: "var(--color-fg-default-tertiary)", mt: 1 }}>
             Las facturas que reciban ofertas aparecerán aquí
           </Typography>
         </Box>
@@ -208,15 +208,15 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
         <>
           <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#F8FAFC" }}>
+              <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
                 <SortableTableHeader field="folio" label="Folio" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
                 <SortableTableHeader field="razonSocialReceptor" label="Receptor" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
                 <SortableTableHeader field="fechaEmision" label="Fecha Emisión" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
                 <SortableTableHeader field="montoTotal" label="Monto Total" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
                 <SortableTableHeader field="montoFinanciar" label="Monto a Financiar" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
                 <SortableTableHeader field="plazo" label="Plazo" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Ofertas Recibidas</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "#64748B" }}>Acciones</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>Ofertas Recibidas</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -224,14 +224,14 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
                 <TableRow
                   key={factura.id}
                   sx={{
-                    "&:hover": { backgroundColor: "#F8FAFC" },
+                    "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
                     "&:last-child td": { borderBottom: 0 },
                   }}
                 >
                   <TableCell>
                     <Typography
                       variant="body2"
-                      sx={{ color: "#00BCD4", fontWeight: 600 }}
+                      sx={{ color: "var(--color-fg-accent-primary)", fontWeight: 600 }}
                     >
                       {factura.folio}
                     </Typography>
@@ -240,24 +240,24 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
                     <Box>
                       <Typography
                         variant="body2"
-                        sx={{ fontWeight: 600, color: "#1E293B" }}
+                        sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
                       >
                         {factura.razonSocialReceptor || "N/A"}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: "#64748B" }}>
+                      <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
                         {factura.rutReceptor || ""}
                       </Typography>
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ color: "#64748B" }}>
+                    <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                       {formatDate(factura.fechaEmision)}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography
                       variant="body2"
-                      sx={{ color: "#1E293B", fontWeight: 500 }}
+                      sx={{ color: "var(--color-fg-default-primary)", fontWeight: 500 }}
                     >
                       {formatCurrency(factura.montoTotal)}
                     </Typography>
@@ -265,7 +265,7 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
                   <TableCell>
                     <Typography
                       variant="body2"
-                      sx={{ color: "#00A86B", fontWeight: 600 }}
+                      sx={{ color: "var(--color-fg-success-primary)", fontWeight: 600 }}
                     >
                       {formatCurrency(factura.montoFinanciar)}
                     </Typography>
@@ -275,8 +275,8 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
                       label={`${factura.plazo || 0} días`}
                       size="small"
                       sx={{
-                        backgroundColor: "#F1F5F9",
-                        color: "#475569",
+                        backgroundColor: "var(--color-bg-default-tertiary)",
+                        color: "var(--color-fg-default-primary)",
                         fontWeight: 500,
                       }}
                     />
@@ -285,10 +285,10 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
                     <Box
                       sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
                     >
-                      <Groups sx={{ fontSize: 18, color: "#64748B" }} />
+                      <Groups sx={{ fontSize: 18, color: "var(--color-fg-default-secondary)" }} />
                       <Typography
                         variant="body2"
-                        sx={{ color: "#1E293B", fontWeight: 500 }}
+                        sx={{ color: "var(--color-fg-default-primary)", fontWeight: 500 }}
                       >
                         {getOfertasCount(factura)}
                       </Typography>
@@ -298,7 +298,7 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
                     <IconButton
                       size="small"
                       onClick={(e) => handleMenuOpen(e, factura)}
-                      sx={{ color: "#64748B" }}
+                      sx={{ color: "var(--color-fg-default-secondary)" }}
                     >
                       <MoreVert />
                     </IconButton>
@@ -316,7 +316,7 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
                 justifyContent: "space-between",
                 alignItems: "center",
                 py: 2,
-                borderTop: "1px solid #E2E8F0",
+                borderTop: "1px solid var(--color-border-default-primary)",
                 px: 2,
                 gap: 2,
               }}
@@ -342,7 +342,7 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
                 shape="rounded"
                 sx={{
                   "& .MuiPaginationItem-root.Mui-selected": {
-                    color: "white",
+                    color: "var(--color-fg-on-accent-primary)",
                   },
                 }}
               />
@@ -361,14 +361,14 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
         PaperProps={{
           sx: {
             borderRadius: 2,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            boxShadow: "var(--shadow-popover)",
             minWidth: 180,
           },
         }}
       >
         <MenuItem onClick={handleVerOfertas}>
           <ListItemIcon>
-            <Visibility sx={{ color: "#64748B" }} />
+            <Visibility sx={{ color: "var(--color-fg-default-secondary)" }} />
           </ListItemIcon>
           <ListItemText primary="Ver ofertas" />
         </MenuItem>
