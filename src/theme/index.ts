@@ -9,3 +9,17 @@ export {
   THEME_STORAGE_KEY,
   type ThemeMode,
 } from "./initTheme";
+export {
+  authPageSx,
+  authCardSx,
+  authTabSx,
+  authLogoColumnSx,
+  authSecondaryButtonSx,
+  authPrimaryButtonSx,
+  authLinkSx,
+  authCheckboxSx,
+  legalPageSx,
+  legalPaperSx,
+  legalHeadingSx,
+  legalSectionHeadingSx,
+} from "./authStyles";

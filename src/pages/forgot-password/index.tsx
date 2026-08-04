@@ -8,7 +8,6 @@ import {
   Button,
   Typography,
   Container,
-  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -21,6 +20,14 @@ import { StyledTextField } from "../register/styles";
 import logo from "../../assets/png/factorlink-logo.png";
 import { useAuth } from "../../hooks/useAuth";
 import { emailValidation } from "../../utils/validations/shared-fields";
+import {
+  authCardSx,
+  authLogoColumnSx,
+  authPageSx,
+  authPrimaryButtonSx,
+  authSecondaryButtonSx,
+  authTabSx,
+} from "../../theme";
 
 
 const validationSchema = Yup.object({
@@ -28,7 +35,6 @@ const validationSchema = Yup.object({
 });
 
 const ForgotPassword = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
@@ -85,39 +91,10 @@ const ForgotPassword = () => {
   });
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundColor: "primary.dark",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 2,
-      }}
-    >
+    <Box sx={authPageSx}>
       <Container maxWidth="md">
-        <Box
-          sx={{
-            backgroundColor: "background.paper",
-            borderRadius: 3,
-            overflow: "hidden",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          }}
-        >
-          {/* Suite Tab */}
-          <Box
-            sx={{
-              backgroundColor: "primary.main",
-              color: "common.white",
-              padding: "12px 28px",
-              width: "fit-content",
-              borderRadius: "0 0 16px 0",
-              fontWeight: 500,
-              fontSize: "1rem",
-            }}
-          >
-            Recuperar contraseña
-          </Box>
+        <Box sx={authCardSx}>
+          <Box sx={authTabSx}>Recuperar contraseña</Box>
 
           <Box
             sx={{
@@ -129,20 +106,7 @@ const ForgotPassword = () => {
               minHeight: 300,
             }}
           >
-            {/* Left Side - Factorlink Logo */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                borderRight: {
-                  xs: "none",
-                  md: `1px solid ${theme.palette.divider}`,
-                },
-                paddingRight: { md: 4 },
-                height: "100%",
-              }}
-            >
+            <Box sx={authLogoColumnSx}>
               <Box
                 sx={{
                   display: "flex",
@@ -154,7 +118,6 @@ const ForgotPassword = () => {
               </Box>
             </Box>
 
-            {/* Right Side - Form */}
             <Box sx={{ paddingLeft: { md: 2 } }}>
               <Typography
                 variant="body1"
@@ -164,7 +127,6 @@ const ForgotPassword = () => {
                 Ingresa tu correo electrónico y te enviaremos instrucciones para restablecer tu contraseña.
               </Typography>
 
-              {/* Form Fields */}
               <Box>
                 <StyledTextField
                   fullWidth
@@ -187,20 +149,7 @@ const ForgotPassword = () => {
                     variant="contained"
                     fullWidth
                     href="/login"
-                    sx={{
-                      backgroundColor: "secondary.main",
-                      color: "white",
-                      textTransform: "none",
-                      padding: "12px",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      borderRadius: 2,
-                      boxShadow: "none",
-                      "&:hover": {
-                        backgroundColor: "secondary.dark",
-                        boxShadow: "none",
-                      },
-                    }}
+                    sx={authSecondaryButtonSx}
                   >
                     Volver al login
                   </Button>
@@ -211,23 +160,10 @@ const ForgotPassword = () => {
                     type="submit"
                     onClick={() => formik.handleSubmit()}
                     disabled={!formik.isValid || !formik.dirty || loading}
-                    sx={{
-                      backgroundColor: "success.main",
-                      color: "white",
-                      textTransform: "none",
-                      padding: "12px",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      borderRadius: 2,
-                      boxShadow: "none",
-                      "&:hover": {
-                        backgroundColor: "success.dark",
-                        boxShadow: "none",
-                      },
-                    }}
+                    sx={authPrimaryButtonSx}
                   >
                     {loading ? (
-                      <CircularProgress size={24} sx={{ color: "white" }} />
+                      <CircularProgress size={24} color="inherit" />
                     ) : (
                       "Enviar"
                     )}
@@ -247,7 +183,7 @@ const ForgotPassword = () => {
         aria-describedby="forgot-password-modal-description"
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: "var(--radius-l)",
             minWidth: 360,
             overflow: "hidden",
           },
@@ -263,11 +199,11 @@ const ForgotPassword = () => {
             }}
           >
             {modalStatus === "success" ? (
-              <CheckCircleOutlineIcon sx={{ fontSize: 64, color: "success.main", display: "block" }} />
+              <CheckCircleOutlineIcon sx={{ fontSize: 64, color: "var(--color-fg-success-primary)", display: "block" }} />
             ) : (
-              <ErrorOutlineIcon sx={{ fontSize: 64, color: "error.main", display: "block" }} />
+              <ErrorOutlineIcon sx={{ fontSize: 64, color: "var(--color-fg-danger-primary)", display: "block" }} />
             )}
-            <Typography variant="h5" fontWeight={600} component="span">
+            <Typography variant="h5" component="span" sx={{ fontFamily: "var(--font-heading)", fontWeight: 500 }}>
               {modalStatus === "success" ? "¡Correo enviado!" : "Error"}
             </Typography>
           </Box>
@@ -283,39 +219,11 @@ const ForgotPassword = () => {
 
         <DialogActions sx={{ justifyContent: "center", px: 3, pt: 2, pb: 3 }}>
           {modalStatus === "success" ? (
-            <Button
-              variant="contained"
-              onClick={handleContinue}
-              sx={{
-                backgroundColor: "success.main",
-                color: "common.white",
-                textTransform: "none",
-                px: 4,
-                py: 1,
-                borderRadius: 2,
-                "&:hover": {
-                  backgroundColor: "success.dark",
-                },
-              }}
-            >
+            <Button variant="contained" color="primary" onClick={handleContinue} sx={{ px: 4, py: 1 }}>
               Ir al login
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              onClick={handleCloseModal}
-              sx={{
-                backgroundColor: "error.main",
-                color: "common.white",
-                textTransform: "none",
-                px: 4,
-                py: 1,
-                borderRadius: 2,
-                "&:hover": {
-                  backgroundColor: "error.dark",
-                },
-              }}
-            >
+            <Button variant="contained" color="error" onClick={handleCloseModal} sx={{ px: 4, py: 1 }}>
               Cerrar
             </Button>
           )}

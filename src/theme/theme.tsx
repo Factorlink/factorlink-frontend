@@ -43,8 +43,8 @@ export const theme = createTheme({
       paper: "var(--color-bg-default-primary)",
     },
     text: {
-      primary: "var(--brand-text-primary)",
-      secondary: "var(--brand-text-secondary)",
+      primary: "var(--color-fg-default-primary)",
+      secondary: "var(--color-fg-default-secondary)",
       disabled: "var(--color-fg-disabled-primary)",
     },
     divider: "var(--color-border-default-primary)",
@@ -111,7 +111,7 @@ export const theme = createTheme({
       styleOverrides: {
         body: {
           backgroundColor: "var(--color-bg-default-primary)",
-          color: "var(--brand-text-primary)",
+          color: "var(--color-fg-default-primary)",
         },
       },
     },
@@ -161,7 +161,7 @@ export const theme = createTheme({
         },
         outlined: {
           borderColor: "var(--brand-border-neutral)",
-          color: "var(--brand-text-primary)",
+          color: "var(--color-fg-default-primary)",
           backgroundColor: "var(--color-bg-default-primary)",
           "&:hover": {
             borderColor: "var(--color-border-accent-primary)",
@@ -193,14 +193,14 @@ export const theme = createTheme({
           },
         },
         input: {
-          color: "var(--brand-text-primary)",
+          color: "var(--color-fg-default-primary)",
         },
       },
     },
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          color: "var(--brand-text-secondary)",
+          color: "var(--color-fg-default-secondary)",
           "&.Mui-focused": {
             color: "var(--color-fg-accent-primary)",
           },
@@ -269,13 +269,13 @@ export const theme = createTheme({
           fontFamily: "var(--font-heading)",
           fontWeight: 500,
           fontSize: "var(--font-size-s)",
-          color: "var(--brand-text-secondary)",
+          color: "var(--color-fg-default-secondary)",
           backgroundColor: "var(--color-bg-default-tertiary)",
           borderBottom: "1px solid var(--color-border-default-primary)",
         },
         body: {
           fontSize: "var(--font-size-s)",
-          color: "var(--brand-text-primary)",
+          color: "var(--color-fg-default-primary)",
           borderBottom: "1px solid var(--brand-divider)",
         },
       },
@@ -328,7 +328,7 @@ export const theme = createTheme({
           fontWeight: 500,
           fontSize: "var(--font-size-s)",
           textTransform: "none",
-          color: "var(--brand-text-secondary)",
+          color: "var(--color-fg-default-secondary)",
           "&.Mui-selected": {
             color: "var(--color-fg-accent-primary)",
           },
@@ -413,7 +413,7 @@ export const theme = createTheme({
         root: {
           boxShadow: "var(--shadow-nav)",
           backgroundColor: "var(--color-bg-default-primary)",
-          color: "var(--brand-text-primary)",
+          color: "var(--color-fg-default-primary)",
         },
       },
     },

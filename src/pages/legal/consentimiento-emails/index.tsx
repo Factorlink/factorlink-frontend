@@ -1,16 +1,22 @@
 import { Box, Container, Typography, Paper, List, ListItem, ListItemText } from "@mui/material";
+import {
+  legalHeadingSx,
+  legalPageSx,
+  legalPaperSx,
+  legalSectionHeadingSx,
+} from "../../../theme";
 
 const ConsentimientoEmails = () => {
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "primary.dark", py: 6 }}>
+    <Box sx={legalPageSx}>
       <Container maxWidth="md">
-        <Paper sx={{ p: { xs: 3, md: 5 } }}>
-          <Typography variant="h4" gutterBottom color="primary.dark" fontWeight={600}>
+        <Paper sx={legalPaperSx}>
+          <Typography variant="h4" gutterBottom sx={legalHeadingSx}>
             Consentimiento para el Envío de Correos Electrónicos (Opt-In)
           </Typography>
 
           <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" gutterBottom color="primary.dark">
+            <Typography variant="h6" gutterBottom sx={legalSectionHeadingSx}>
               Texto de consentimiento
             </Typography>
             <Typography paragraph color="text.secondary">

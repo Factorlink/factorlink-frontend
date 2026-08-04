@@ -283,6 +283,15 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
+  /* Brand text/surfaces adapted for dark app surfaces */
+  --brand-text-primary: #f0f4fa;
+  --brand-text-secondary: #7d8897;
+  --brand-text-muted: #555f6d;
+  --brand-divider: #313843;
+  --brand-border-neutral: #424b58;
+  --brand-secondary: #25344a;
+  --brand-surface-alt: #192029;
+
   --color-bg-default-primary: #12161a;
   --color-bg-default-primary-hover: #1b2027;
   --color-bg-default-secondary: #161a1f;

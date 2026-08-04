@@ -228,7 +228,7 @@ const Profile = () => {
               />
             )}
           </Box>
-          <Divider sx={{ borderColor: "var(--brand-divider)" }} />
+          <Divider sx={{ borderColor: "var(--color-border-default-primary)" }} />
           {menuItems.map((item, index) => (
             <MenuItem
               key={index}
@@ -236,12 +236,15 @@ const Profile = () => {
               disabled={item.text === "Cerrar sesión" && loading}
               sx={{
                 py: 1.5,
+                color: "var(--color-fg-default-primary)",
                 "&:hover": {
                   backgroundColor: "var(--color-bg-default-primary-hover)",
                 },
               }}
             >
-              <ListItemIcon sx={{ color: "text.secondary" }}>
+              <ListItemIcon
+                sx={{ color: "var(--color-fg-default-secondary)", minWidth: 36 }}
+              >
                 {item.icon}
               </ListItemIcon>
               <ListItemText
@@ -252,7 +255,7 @@ const Profile = () => {
                 }
                 primaryTypographyProps={{
                   fontSize: "var(--font-size-s)",
-                  color: "text.primary",
+                  color: "var(--color-fg-default-primary)",
                 }}
               />
             </MenuItem>

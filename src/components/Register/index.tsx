@@ -15,7 +15,6 @@ import {
   Typography,
   Link,
   Container,
-  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -36,6 +35,16 @@ import {
   handleRutInputChange,
   handlePasswordInputChange,
 } from "../../utils/validations/shared-fields";
+import {
+  authCardSx,
+  authCheckboxSx,
+  authLinkSx,
+  authLogoColumnSx,
+  authPageSx,
+  authPrimaryButtonSx,
+  authSecondaryButtonSx,
+  authTabSx,
+} from "../../theme";
 
 interface RegisterFormProps {
   roleType: string;
@@ -52,7 +61,6 @@ const RegisterForm = ({
   tabLabel,
   renderAdditionalFields,
 }: RegisterFormProps) => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
@@ -143,39 +151,10 @@ const RegisterForm = ({
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundColor: "primary.dark",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 2,
-      }}
-    >
+    <Box sx={authPageSx}>
       <Container maxWidth="md">
-        <Box
-          sx={{
-            backgroundColor: "background.paper",
-            borderRadius: 3,
-            overflow: "hidden",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          }}
-        >
-          {/* Suite Tab */}
-          <Box
-            sx={{
-              backgroundColor: "primary.main",
-              color: "common.white",
-              padding: "12px 28px",
-              width: "fit-content",
-              borderRadius: "0 0 16px 0",
-              fontWeight: 500,
-              fontSize: "1rem",
-            }}
-          >
-            {tabLabel}
-          </Box>
+        <Box sx={authCardSx}>
+          <Box sx={authTabSx}>{tabLabel}</Box>
 
           <Box
             sx={{
@@ -187,20 +166,7 @@ const RegisterForm = ({
               minHeight: 400,
             }}
           >
-            {/* Left Side - Factorlink Logo */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                borderRight: {
-                  xs: "none",
-                  md: `1px solid ${theme.palette.divider}`,
-                },
-                paddingRight: { md: 4 },
-                height: "100%",
-              }}
-            >
+            <Box sx={authLogoColumnSx}>
               <Box
                 sx={{
                   display: "flex",
@@ -374,19 +340,14 @@ const RegisterForm = ({
                       onChange={formik.handleChange}
                       disabled={loading}
                       size="small"
-                      sx={{
-                        color: "text.disabled",
-                        "&.Mui-checked": {
-                          color: "success.main",
-                        },
-                      }}
+                      sx={authCheckboxSx}
                     />
                   }
                   label={
                     <Typography
                       variant="body2"
                       sx={{
-                        fontSize: "0.875rem",
+                        fontSize: "var(--font-size-s)",
                         color: "text.secondary",
                       }}
                     >
@@ -394,13 +355,7 @@ const RegisterForm = ({
                       <Link
                         href="/terminos-condiciones"
                         target="_blank"
-                        sx={{
-                          color: "success.main",
-                          textDecoration: "none",
-                          "&:hover": {
-                            textDecoration: "underline",
-                          },
-                        }}
+                        sx={authLinkSx}
                       >
                         términos y condiciones de uso
                       </Link>
@@ -418,19 +373,14 @@ const RegisterForm = ({
                       onChange={formik.handleChange}
                       disabled={loading}
                       size="small"
-                      sx={{
-                        color: "text.disabled",
-                        "&.Mui-checked": {
-                          color: "success.main",
-                        },
-                      }}
+                      sx={authCheckboxSx}
                     />
                   }
                   label={
                     <Typography
                       variant="body2"
                       sx={{
-                        fontSize: "0.875rem",
+                        fontSize: "var(--font-size-s)",
                         color: "text.secondary",
                       }}
                     >
@@ -438,13 +388,7 @@ const RegisterForm = ({
                       <Link
                         href="/politica-privacidad"
                         target="_blank"
-                        sx={{
-                          color: "success.main",
-                          textDecoration: "none",
-                          "&:hover": {
-                            textDecoration: "underline",
-                          },
-                        }}
+                        sx={authLinkSx}
                       >
                         Política de Privacidad
                       </Link>
@@ -462,19 +406,14 @@ const RegisterForm = ({
                       onChange={formik.handleChange}
                       disabled={loading}
                       size="small"
-                      sx={{
-                        color: "text.disabled",
-                        "&.Mui-checked": {
-                          color: "success.main",
-                        },
-                      }}
+                      sx={authCheckboxSx}
                     />
                   }
                   label={
                     <Typography
                       variant="body2"
                       sx={{
-                        fontSize: "0.875rem",
+                        fontSize: "var(--font-size-s)",
                         color: "text.secondary",
                       }}
                     >
@@ -482,13 +421,7 @@ const RegisterForm = ({
                       <Link
                         href="/consentimiento-emails"
                         target="_blank"
-                        sx={{
-                          color: "success.main",
-                          textDecoration: "none",
-                          "&:hover": {
-                            textDecoration: "underline",
-                          },
-                        }}
+                        sx={authLinkSx}
                       >
                         recibir comunicaciones por correo electrónico
                       </Link>
@@ -502,20 +435,7 @@ const RegisterForm = ({
                     variant="contained"
                     fullWidth
                     href="/login"
-                    sx={{
-                      backgroundColor: "secondary.main",
-                      color: "white",
-                      textTransform: "none",
-                      padding: "12px",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      borderRadius: 2,
-                      boxShadow: "none",
-                      "&:hover": {
-                        backgroundColor: "secondary.dark",
-                        boxShadow: "none",
-                      },
-                    }}
+                    sx={authSecondaryButtonSx}
                   >
                     Ya tengo cuenta
                   </Button>
@@ -526,23 +446,10 @@ const RegisterForm = ({
                     type="submit"
                     onClick={() => formik.handleSubmit()}
                     disabled={!formik.isValid || !formik.dirty || loading}
-                    sx={{
-                      backgroundColor: "success.main",
-                      color: "white",
-                      textTransform: "none",
-                      padding: "12px",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      borderRadius: 2,
-                      boxShadow: "none",
-                      "&:hover": {
-                        backgroundColor: "success.dark",
-                        boxShadow: "none",
-                      },
-                    }}
+                    sx={authPrimaryButtonSx}
                   >
                     {loading ? (
-                      <CircularProgress size={24} sx={{ color: "white" }} />
+                      <CircularProgress size={24} color="inherit" />
                     ) : (
                       "Crear cuenta"
                     )}
@@ -563,7 +470,7 @@ const RegisterForm = ({
         aria-describedby="register-modal-description"
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: "var(--radius-l)",
             minWidth: 360,
             overflow: "hidden",
           },
@@ -583,14 +490,26 @@ const RegisterForm = ({
           >
             {modalStatus === "success" ? (
               <CheckCircleOutlineIcon
-                sx={{ fontSize: 64, color: "success.main", display: "block" }}
+                sx={{
+                  fontSize: 64,
+                  color: "var(--color-fg-success-primary)",
+                  display: "block",
+                }}
               />
             ) : (
               <ErrorOutlineIcon
-                sx={{ fontSize: 64, color: "error.main", display: "block" }}
+                sx={{
+                  fontSize: 64,
+                  color: "var(--color-fg-danger-primary)",
+                  display: "block",
+                }}
               />
             )}
-            <Typography variant="h5" fontWeight={600} component="span">
+            <Typography
+              variant="h5"
+              component="span"
+              sx={{ fontFamily: "var(--font-heading)", fontWeight: 500 }}
+            >
               {modalStatus === "success"
                 ? "¡Registro exitoso!"
                 : "Error en el registro"}
@@ -614,36 +533,18 @@ const RegisterForm = ({
           {modalStatus === "success" ? (
             <Button
               variant="contained"
+              color="primary"
               onClick={handleContinue}
-              sx={{
-                backgroundColor: "success.main",
-                color: "common.white",
-                textTransform: "none",
-                px: 4,
-                py: 1,
-                borderRadius: 2,
-                "&:hover": {
-                  backgroundColor: "success.dark",
-                },
-              }}
+              sx={{ px: 4, py: 1 }}
             >
               Continuar
             </Button>
           ) : (
             <Button
               variant="contained"
+              color="error"
               onClick={handleCloseModal}
-              sx={{
-                backgroundColor: "error.main",
-                color: "common.white",
-                textTransform: "none",
-                px: 4,
-                py: 1,
-                borderRadius: 2,
-                "&:hover": {
-                  backgroundColor: "error.dark",
-                },
-              }}
+              sx={{ px: 4, py: 1 }}
             >
               Cerrar
             </Button>

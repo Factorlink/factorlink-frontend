@@ -6,7 +6,6 @@ import {
   Typography,
   Link,
   Container,
-  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -24,6 +23,15 @@ import { useAuth } from "../../hooks/useAuth";
 import useAuthStore from "../../store/authStore";
 import { loginValidationSchema } from "./validation-schema";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import {
+  authCardSx,
+  authLinkSx,
+  authLogoColumnSx,
+  authPageSx,
+  authPrimaryButtonSx,
+  authSecondaryButtonSx,
+  authTabSx,
+} from "../../theme";
 
 // Mapeo de errores del backend a mensajes amigables
 const mapLoginError = (error: unknown): string => {
@@ -62,7 +70,6 @@ const mapLoginError = (error: unknown): string => {
 };
 
 const Login = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -122,39 +129,10 @@ const Login = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundColor: "primary.dark",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 2,
-      }}
-    >
+    <Box sx={authPageSx}>
       <Container maxWidth="md">
-        <Box
-          sx={{
-            backgroundColor: "background.paper",
-            borderRadius: 3,
-            overflow: "hidden",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          }}
-        >
-          {/* Suite Empresa Tab */}
-          <Box
-            sx={{
-              backgroundColor: "primary.main",
-              color: "common.white",
-              padding: "12px 28px",
-              width: "fit-content",
-              borderRadius: "0 0 16px 0",
-              fontWeight: 500,
-              fontSize: "1rem",
-            }}
-          >
-            Inicio de sesión
-          </Box>
+        <Box sx={authCardSx}>
+          <Box sx={authTabSx}>Inicio de sesión</Box>
 
           <Box
             sx={{
@@ -166,20 +144,7 @@ const Login = () => {
               minHeight: 400,
             }}
           >
-            {/* Left Side - Factorlink Logo */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                borderRight: {
-                  xs: "none",
-                  md: `1px solid ${theme.palette.divider}`,
-                },
-                paddingRight: { md: 4 },
-                height: "100%",
-              }}
-            >
+            <Box sx={authLogoColumnSx}>
               <Box
                 sx={{
                   display: "flex",
@@ -234,21 +199,7 @@ const Login = () => {
                   error={formik.touched.email && Boolean(formik.errors.email)}
                   helperText={formik.touched.email && formik.errors.email}
                   disabled={loading}
-                  sx={{
-                    mb: 2,
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "background.default",
-                      "& fieldset": {
-                        borderColor: "divider",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "text.disabled",
-                      },
-                      "& input": {
-                        color: "text.secondary",
-                      },
-                    },
-                  }}
+                  sx={{ mb: 2 }}
                 />
 
                 <TextField
@@ -270,22 +221,7 @@ const Login = () => {
                   }
                   helperText={formik.touched.password && formik.errors.password}
                   disabled={loading}
-                  sx={{
-                    mb: 1,
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "background.default",
-                      "& fieldset": {
-                        borderColor: "divider",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "text.disabled",
-                      },
-                      "& input::placeholder": {
-                        color: "text.disabled",
-                        opacity: 1,
-                      },
-                    },
-                  }}
+                  sx={{ mb: 1 }}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -304,19 +240,7 @@ const Login = () => {
 
                 {/* Link de recuperar contraseña */}
                 <Box sx={{ textAlign: "right", mb: 2 }}>
-                  <Link
-                    href="/forgot-password"
-                    sx={{
-                      color: "success.main",
-                      textDecoration: "none",
-                      fontSize: "0.875rem",
-                      cursor: "pointer",
-                      "&:hover": {
-                        textDecoration: "underline",
-                      },
-                    }}
-                    title="Próximamente"
-                  >
+                  <Link href="/forgot-password" sx={authLinkSx}>
                     ¿Olvidaste tu contraseña?
                   </Link>
                 </Box>
@@ -327,20 +251,7 @@ const Login = () => {
                     fullWidth
                     disabled={loading}
                     onClick={() => navigate("/register")}
-                    sx={{
-                      backgroundColor: "secondary.main",
-                      color: "white",
-                      textTransform: "none",
-                      padding: "12px",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      borderRadius: 2,
-                      boxShadow: "none",
-                      "&:hover": {
-                        backgroundColor: "secondary.dark",
-                        boxShadow: "none",
-                      },
-                    }}
+                    sx={authSecondaryButtonSx}
                   >
                     Registrarse
                   </Button>
@@ -351,20 +262,7 @@ const Login = () => {
                     type="submit"
                     onClick={() => formik.handleSubmit()}
                     disabled={loading || !formik.isValid || !formik.dirty}
-                    sx={{
-                      backgroundColor: "success.main",
-                      color: "white",
-                      textTransform: "none",
-                      padding: "12px",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      borderRadius: 2,
-                      boxShadow: "none",
-                      "&:hover": {
-                        backgroundColor: "success.dark",
-                        boxShadow: "none",
-                      },
-                    }}
+                    sx={authPrimaryButtonSx}
                   >
                     {loading ? (
                       <CircularProgress size={24} color="inherit" />
@@ -390,7 +288,7 @@ const Login = () => {
         disableEscapeKeyDown
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: "var(--radius-l)",
             minWidth: 350,
             padding: 2,
           },
@@ -407,12 +305,18 @@ const Login = () => {
           >
             {modalStatus === "success" ? (
               <CheckCircleOutlineIcon
-                sx={{ fontSize: 48, color: "success.main" }}
+                sx={{ fontSize: 48, color: "var(--color-fg-success-primary)" }}
               />
             ) : (
-              <ErrorOutlineIcon sx={{ fontSize: 48, color: "error.main" }} />
+              <ErrorOutlineIcon
+                sx={{ fontSize: 48, color: "var(--color-fg-danger-primary)" }}
+              />
             )}
-            <Typography variant="h6" component="span">
+            <Typography
+              variant="h6"
+              component="span"
+              sx={{ fontFamily: "var(--font-heading)", fontWeight: 500 }}
+            >
               {modalStatus === "success"
                 ? "¡Inicio de sesión exitoso!"
                 : "Error en el inicio de sesión"}
@@ -429,18 +333,9 @@ const Login = () => {
         <DialogActions sx={{ justifyContent: "center", pt: 1, pb: 2 }}>
           <Button
             variant="contained"
+            color={modalStatus === "success" ? "primary" : "error"}
             onClick={handleCloseModal}
-            sx={{
-              backgroundColor:
-                modalStatus === "success" ? "success.main" : "error.main",
-              color: "white",
-              textTransform: "none",
-              px: 4,
-              "&:hover": {
-                backgroundColor:
-                  modalStatus === "success" ? "success.dark" : "error.dark",
-              },
-            }}
+            sx={{ px: 4 }}
           >
             {modalStatus === "success" ? "Continuar" : "Cerrar"}
           </Button>

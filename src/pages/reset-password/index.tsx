@@ -8,7 +8,6 @@ import {
   Button,
   Typography,
   Container,
-  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -29,6 +28,14 @@ import {
   confirmPasswordValidation,
   handlePasswordInputChange,
 } from "../../utils/validations/shared-fields";
+import {
+  authCardSx,
+  authLogoColumnSx,
+  authPageSx,
+  authPrimaryButtonSx,
+  authSecondaryButtonSx,
+  authTabSx,
+} from "../../theme";
 
 const validationSchema = Yup.object({
   password: passwordValidation,
@@ -36,7 +43,6 @@ const validationSchema = Yup.object({
 });
 
 const ResetPassword = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
@@ -109,32 +115,19 @@ const ResetPassword = () => {
     handlePasswordInputChange(e, formik.setFieldValue);
   };
 
-  // Si no hay token, mostrar mensaje de error
   if (!token) {
     return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          backgroundColor: "primary.dark",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 2,
-        }}
-      >
+      <Box sx={authPageSx}>
         <Container maxWidth="sm">
           <Box
             sx={{
-              backgroundColor: "background.paper",
-              borderRadius: 3,
-              overflow: "hidden",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              ...authCardSx,
               textAlign: "center",
               p: 4,
             }}
           >
-            <ErrorOutlineIcon sx={{ fontSize: 64, color: "error.main", mb: 2 }} />
-            <Typography variant="h5" fontWeight={600} sx={{ mb: 2 }}>
+            <ErrorOutlineIcon sx={{ fontSize: 64, color: "var(--color-fg-danger-primary)", mb: 2 }} />
+            <Typography variant="h5" sx={{ mb: 2, fontFamily: "var(--font-heading)", fontWeight: 500 }}>
               Enlace inválido
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
@@ -142,18 +135,9 @@ const ResetPassword = () => {
             </Typography>
             <Button
               variant="contained"
+              color="primary"
               href="/forgot-password"
-              sx={{
-                backgroundColor: "primary.main",
-                color: "white",
-                textTransform: "none",
-                px: 4,
-                py: 1,
-                borderRadius: 2,
-                "&:hover": {
-                  backgroundColor: "primary.dark",
-                },
-              }}
+              sx={{ px: 4 }}
             >
               Solicitar nuevo enlace
             </Button>
@@ -164,39 +148,10 @@ const ResetPassword = () => {
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundColor: "primary.dark",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 2,
-      }}
-    >
+    <Box sx={authPageSx}>
       <Container maxWidth="md">
-        <Box
-          sx={{
-            backgroundColor: "background.paper",
-            borderRadius: 3,
-            overflow: "hidden",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          }}
-        >
-          {/* Suite Tab */}
-          <Box
-            sx={{
-              backgroundColor: "primary.main",
-              color: "common.white",
-              padding: "12px 28px",
-              width: "fit-content",
-              borderRadius: "0 0 16px 0",
-              fontWeight: 500,
-              fontSize: "1rem",
-            }}
-          >
-            Restablecer contraseña
-          </Box>
+        <Box sx={authCardSx}>
+          <Box sx={authTabSx}>Restablecer contraseña</Box>
 
           <Box
             sx={{
@@ -208,20 +163,7 @@ const ResetPassword = () => {
               minHeight: 300,
             }}
           >
-            {/* Left Side - Factorlink Logo */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                borderRight: {
-                  xs: "none",
-                  md: `1px solid ${theme.palette.divider}`,
-                },
-                paddingRight: { md: 4 },
-                height: "100%",
-              }}
-            >
+            <Box sx={authLogoColumnSx}>
               <Box
                 sx={{
                   display: "flex",
@@ -233,7 +175,6 @@ const ResetPassword = () => {
               </Box>
             </Box>
 
-            {/* Right Side - Form */}
             <Box sx={{ paddingLeft: { md: 2 } }}>
               <Typography
                 variant="body1"
@@ -243,7 +184,6 @@ const ResetPassword = () => {
                 Ingresa tu nueva contraseña para restablecer el acceso a tu cuenta.
               </Typography>
 
-              {/* Form Fields */}
               <Box>
                 <StyledTextField
                   fullWidth
@@ -311,20 +251,7 @@ const ResetPassword = () => {
                     fullWidth
                     href="/login"
                     disabled={loading}
-                    sx={{
-                      backgroundColor: "secondary.main",
-                      color: "white",
-                      textTransform: "none",
-                      padding: "12px",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      borderRadius: 2,
-                      boxShadow: "none",
-                      "&:hover": {
-                        backgroundColor: "secondary.dark",
-                        boxShadow: "none",
-                      },
-                    }}
+                    sx={authSecondaryButtonSx}
                   >
                     Cancelar
                   </Button>
@@ -335,23 +262,10 @@ const ResetPassword = () => {
                     type="submit"
                     onClick={() => formik.handleSubmit()}
                     disabled={!formik.isValid || !formik.dirty || loading}
-                    sx={{
-                      backgroundColor: "success.main",
-                      color: "white",
-                      textTransform: "none",
-                      padding: "12px",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      borderRadius: 2,
-                      boxShadow: "none",
-                      "&:hover": {
-                        backgroundColor: "success.dark",
-                        boxShadow: "none",
-                      },
-                    }}
+                    sx={authPrimaryButtonSx}
                   >
                     {loading ? (
-                      <CircularProgress size={24} sx={{ color: "white" }} />
+                      <CircularProgress size={24} color="inherit" />
                     ) : (
                       "Restablecer"
                     )}
@@ -371,7 +285,7 @@ const ResetPassword = () => {
         aria-describedby="reset-password-modal-description"
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: "var(--radius-l)",
             minWidth: 360,
             overflow: "hidden",
           },
@@ -387,11 +301,11 @@ const ResetPassword = () => {
             }}
           >
             {modalStatus === "success" ? (
-              <CheckCircleOutlineIcon sx={{ fontSize: 64, color: "success.main", display: "block" }} />
+              <CheckCircleOutlineIcon sx={{ fontSize: 64, color: "var(--color-fg-success-primary)", display: "block" }} />
             ) : (
-              <ErrorOutlineIcon sx={{ fontSize: 64, color: "error.main", display: "block" }} />
+              <ErrorOutlineIcon sx={{ fontSize: 64, color: "var(--color-fg-danger-primary)", display: "block" }} />
             )}
-            <Typography variant="h5" fontWeight={600} component="span">
+            <Typography variant="h5" component="span" sx={{ fontFamily: "var(--font-heading)", fontWeight: 500 }}>
               {modalStatus === "success" ? "¡Contraseña actualizada!" : "Error"}
             </Typography>
           </Box>
@@ -407,58 +321,15 @@ const ResetPassword = () => {
 
         <DialogActions sx={{ justifyContent: "center", px: 3, pt: 2, pb: 3 }}>
           {modalStatus === "success" ? (
-            <Button
-              variant="contained"
-              onClick={handleContinue}
-              sx={{
-                backgroundColor: "success.main",
-                color: "common.white",
-                textTransform: "none",
-                px: 4,
-                py: 1,
-                borderRadius: 2,
-                "&:hover": {
-                  backgroundColor: "success.dark",
-                },
-              }}
-            >
+            <Button variant="contained" color="primary" onClick={handleContinue} sx={{ px: 4, py: 1 }}>
               Ir al login
             </Button>
           ) : (
             <Box sx={{ display: "flex", gap: 2 }}>
-              <Button
-                variant="outlined"
-                onClick={handleCloseModal}
-                sx={{
-                  borderColor: "grey.400",
-                  color: "text.primary",
-                  textTransform: "none",
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  "&:hover": {
-                    borderColor: "grey.600",
-                    backgroundColor: "grey.50",
-                  },
-                }}
-              >
+              <Button variant="outlined" onClick={handleCloseModal} sx={{ px: 3, py: 1 }}>
                 Cerrar
               </Button>
-              <Button
-                variant="contained"
-                href="/forgot-password"
-                sx={{
-                  backgroundColor: "primary.main",
-                  color: "common.white",
-                  textTransform: "none",
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  "&:hover": {
-                    backgroundColor: "primary.dark",
-                  },
-                }}
-              >
+              <Button variant="contained" color="primary" href="/forgot-password" sx={{ px: 3, py: 1 }}>
                 Solicitar nuevo enlace
               </Button>
             </Box>
