@@ -10,7 +10,7 @@ export const theme = createTheme({
   palette: {
     primary: {
       main: "var(--color-bg-accent-primary)",
-      dark: "var(--color-bg-neutral-primary)",
+      dark: "var(--color-bg-accent-primary-hover)",
       light: "var(--color-bg-accent-secondary)",
       contrastText: "var(--color-fg-on-accent-primary)",
     },
