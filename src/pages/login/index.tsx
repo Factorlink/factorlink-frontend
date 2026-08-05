@@ -5,7 +5,6 @@ import {
   Button,
   Typography,
   Link,
-  Container,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -24,13 +23,14 @@ import useAuthStore from "../../store/authStore";
 import { loginValidationSchema } from "./validation-schema";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
-  authCardSx,
+  authCenteredPageSx,
+  authFooterTextSx,
+  authFormSx,
   authLinkSx,
-  authLogoColumnSx,
-  authPageSx,
+  authLogoImgSx,
+  authLogoLinkSx,
   authPrimaryButtonSx,
-  authSecondaryButtonSx,
-  authTabSx,
+  authTitleSx,
 } from "../../theme";
 
 // Mapeo de errores del backend a mensajes amigables
@@ -129,155 +129,112 @@ const Login = () => {
   };
 
   return (
-    <Box sx={authPageSx}>
-      <Container maxWidth="md">
-        <Box sx={authCardSx}>
-          <Box sx={authTabSx}>Inicio de sesión</Box>
+    <Box sx={authCenteredPageSx}>
+      <Box component="a" href="/" sx={authLogoLinkSx}>
+        <Box
+          component="img"
+          src={logo}
+          alt="Factorlink"
+          sx={authLogoImgSx}
+        />
+      </Box>
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "1fr 1.2fr" },
-              gap: 4,
-              padding: { xs: 3, md: 5 },
-              alignItems: "center",
-              minHeight: 400,
-            }}
-          >
-            <Box sx={authLogoColumnSx}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                }}
-              >
-                {/* Diamond Logo */}
-                <img
-                  src={logo}
-                  alt="Factorlink Logo"
-                  style={{ maxWidth: 250 }}
-                />
-              </Box>
-            </Box>
+      <Typography variant="h3" component="h1" sx={authTitleSx}>
+        Entra a tu cuenta
+      </Typography>
 
-            {/* Right Side - Form */}
-            <Box sx={{ paddingLeft: { md: 2 } }}>
-              {/* SII Logo and Description */}
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 2,
-                  mb: 3,
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                    fontSize: "0.9rem",
-                    lineHeight: 1.5,
-                    flex: 1,
-                  }}
+      <Box
+        component="form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          formik.handleSubmit();
+        }}
+        sx={authFormSx}
+      >
+        <TextField
+          fullWidth
+          variant="outlined"
+          label="Correo electrónico"
+          placeholder="correo@ejemplo.com"
+          name="email"
+          autoComplete="email"
+          value={formik.values.email}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.email && Boolean(formik.errors.email)}
+          helperText={formik.touched.email && formik.errors.email}
+          disabled={loading}
+          sx={{ mb: 2 }}
+        />
+
+        <TextField
+          fullWidth
+          variant="outlined"
+          type={showPassword ? "text" : "password"}
+          label="Contraseña"
+          placeholder="Contraseña"
+          name="password"
+          inputProps={{
+            maxLength: 128,
+            autoComplete: "current-password",
+          }}
+          value={formik.values.password}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.password && Boolean(formik.errors.password)}
+          helperText={formik.touched.password && formik.errors.password}
+          disabled={loading}
+          sx={{ mb: 3 }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={() => setShowPassword(!showPassword)}
+                  edge="end"
+                  disabled={loading}
                 >
-                  Ingresa tu correo o email y contraseña para iniciar sesión
-                </Typography>
-              </Box>
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
 
-              {/* Form Fields */}
-              <Box component="form">
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  label="Correo electrónico"
-                  placeholder="correo@ejemplo.com"
-                  name="email"
-                  value={formik.values.email}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.email && Boolean(formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
-                  disabled={loading}
-                  sx={{ mb: 2 }}
-                />
+        <Button
+          variant="contained"
+          fullWidth
+          type="submit"
+          disabled={loading || !formik.isValid || !formik.dirty}
+          sx={authPrimaryButtonSx}
+        >
+          {loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            "Entrar"
+          )}
+        </Button>
 
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  type={showPassword ? "text" : "password"}
-                  label="Contraseña"
-                  placeholder="Contraseña"
-                  name="password"
-                  inputProps={{
-                    maxLength: 128,
-                    autoComplete: "current-password",
-                  }}
-                  value={formik.values.password}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={
-                    formik.touched.password && Boolean(formik.errors.password)
-                  }
-                  helperText={formik.touched.password && formik.errors.password}
-                  disabled={loading}
-                  sx={{ mb: 1 }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                          disabled={loading}
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+        <Link
+          href="/forgot-password"
+          sx={{
+            ...authLinkSx,
+            display: "block",
+            textAlign: "center",
+            mt: 2.5,
+          }}
+        >
+          Olvidé mi contraseña
+        </Link>
 
-                {/* Link de recuperar contraseña */}
-                <Box sx={{ textAlign: "right", mb: 2 }}>
-                  <Link href="/forgot-password" sx={authLinkSx}>
-                    ¿Olvidaste tu contraseña?
-                  </Link>
-                </Box>
+        <Typography variant="body2" sx={authFooterTextSx}>
+          ¿No tienes una cuenta?{" "}
+          <Link href="/register" sx={authLinkSx}>
+            Crea una aquí
+          </Link>
+        </Typography>
+      </Box>
 
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    disabled={loading}
-                    onClick={() => navigate("/register")}
-                    sx={authSecondaryButtonSx}
-                  >
-                    Registrarse
-                  </Button>
-
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    type="submit"
-                    onClick={() => formik.handleSubmit()}
-                    disabled={loading || !formik.isValid || !formik.dirty}
-                    sx={authPrimaryButtonSx}
-                  >
-                    {loading ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : (
-                      "Iniciar sesión"
-                    )}
-                  </Button>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-      </Container>
-
-      {/* Modal de resultado */}
       <Dialog
         open={modalOpen}
         onClose={(_, reason) => {
