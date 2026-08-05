@@ -7,7 +7,7 @@ import {
   Box,
   Button,
   Typography,
-  Container,
+  Link,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -29,12 +29,13 @@ import {
   handlePasswordInputChange,
 } from "../../utils/validations/shared-fields";
 import {
-  authCardSx,
-  authLogoColumnSx,
-  authPageSx,
+  authCenteredPageSx,
+  authFormSx,
+  authLinkSx,
+  authLogoImgSx,
+  authLogoLinkSx,
   authPrimaryButtonSx,
-  authSecondaryButtonSx,
-  authTabSx,
+  authTitleSx,
 } from "../../theme";
 
 const validationSchema = Yup.object({
@@ -48,7 +49,9 @@ const ResetPassword = () => {
   const token = searchParams.get("token");
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
+  const [modalStatus, setModalStatus] = useState<"success" | "error">(
+    "success"
+  );
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -68,7 +71,10 @@ const ResetPassword = () => {
     navigate("/login");
   };
 
-  const handleResetPassword = async (values: { password: string; confirmPassword: string }) => {
+  const handleResetPassword = async (values: {
+    password: string;
+    confirmPassword: string;
+  }) => {
     if (!token) {
       setErrorMessage("Token de recuperación no válido o expirado.");
       setModalStatus("error");
@@ -84,11 +90,21 @@ const ResetPassword = () => {
       setModalOpen(true);
       formik.resetForm();
     } catch (error: unknown) {
-      const axiosError = error as { response?: { status?: number; data?: { message?: string[] } } };
-      
-      if (axiosError?.response?.status === 400 || axiosError?.response?.status === 401) {
-        setErrorMessage("El enlace de recuperación no es válido o ha expirado.");
-      } else if (axiosError?.response?.status && axiosError.response.status >= 500) {
+      const axiosError = error as {
+        response?: { status?: number; data?: { message?: string[] } };
+      };
+
+      if (
+        axiosError?.response?.status === 400 ||
+        axiosError?.response?.status === 401
+      ) {
+        setErrorMessage(
+          "El enlace de recuperación no es válido o ha expirado."
+        );
+      } else if (
+        axiosError?.response?.status &&
+        axiosError.response.status >= 500
+      ) {
         setErrorMessage("Ocurrió un error de conexión. Intenta nuevamente.");
       } else {
         setErrorMessage("Ocurrió un error al restablecer la contraseña.");
@@ -117,165 +133,179 @@ const ResetPassword = () => {
 
   if (!token) {
     return (
-      <Box sx={authPageSx}>
-        <Container maxWidth="sm">
+      <Box sx={authCenteredPageSx}>
+        <Box component="a" href="/login" sx={authLogoLinkSx}>
           <Box
+            component="img"
+            src={logo}
+            alt="Factorlink"
+            sx={authLogoImgSx}
+          />
+        </Box>
+
+        <ErrorOutlineIcon
+          sx={{
+            fontSize: 64,
+            color: "var(--color-fg-danger-primary)",
+          }}
+        />
+
+        <Typography variant="h3" component="h1" sx={authTitleSx}>
+          Enlace inválido
+        </Typography>
+
+        <Box sx={{ ...authFormSx, alignItems: "center" }}>
+          <Typography
+            variant="body2"
             sx={{
-              ...authCardSx,
               textAlign: "center",
-              p: 4,
+              mb: 3,
+              color: "var(--color-fg-default-secondary)",
             }}
           >
-            <ErrorOutlineIcon sx={{ fontSize: 64, color: "var(--color-fg-danger-primary)", mb: 2 }} />
-            <Typography variant="h5" sx={{ mb: 2, fontFamily: "var(--font-heading)", fontWeight: 500 }}>
-              Enlace inválido
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-              El enlace de recuperación no es válido o ha expirado.
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              href="/forgot-password"
-              sx={{ px: 4 }}
-            >
-              Solicitar nuevo enlace
-            </Button>
-          </Box>
-        </Container>
+            El enlace de recuperación no es válido o ha expirado.
+          </Typography>
+
+          <Button
+            variant="contained"
+            fullWidth
+            href="/forgot-password"
+            sx={authPrimaryButtonSx}
+          >
+            Solicitar nuevo enlace
+          </Button>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <Box sx={authPageSx}>
-      <Container maxWidth="md">
-        <Box sx={authCardSx}>
-          <Box sx={authTabSx}>Restablecer contraseña</Box>
+    <Box sx={authCenteredPageSx}>
+      <Box component="a" href="/login" sx={authLogoLinkSx}>
+        <Box
+          component="img"
+          src={logo}
+          alt="Factorlink"
+          sx={authLogoImgSx}
+        />
+      </Box>
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "1fr 1.2fr" },
-              gap: 4,
-              padding: { xs: 3, md: 5 },
-              alignItems: "center",
-              minHeight: 300,
-            }}
-          >
-            <Box sx={authLogoColumnSx}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                }}
-              >
-                <img src={logo} alt="Factorlink Logo" style={{ maxWidth: 250 }} />
-              </Box>
-            </Box>
+      <Typography variant="h3" component="h1" sx={authTitleSx}>
+        Restablece tu contraseña
+      </Typography>
 
-            <Box sx={{ paddingLeft: { md: 2 } }}>
-              <Typography
-                variant="body1"
-                color="text.secondary"
-                sx={{ mb: 3 }}
-              >
-                Ingresa tu nueva contraseña para restablecer el acceso a tu cuenta.
-              </Typography>
+      <Box
+        component="form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          formik.handleSubmit();
+        }}
+        sx={authFormSx}
+      >
+        <Typography
+          variant="body2"
+          sx={{
+            textAlign: "center",
+            mb: 3,
+            color: "var(--color-fg-default-secondary)",
+          }}
+        >
+          Ingresa tu nueva contraseña para restablecer el acceso a tu cuenta.
+        </Typography>
 
-              <Box>
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Nueva contraseña"
-                  placeholder="Nueva contraseña"
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  inputProps={{ maxLength: 128, autoComplete: "new-password" }}
+        <StyledTextField
+          fullWidth
+          variant="outlined"
+          label="Nueva contraseña"
+          placeholder="Nueva contraseña"
+          id="password"
+          name="password"
+          type={showPassword ? "text" : "password"}
+          inputProps={{ maxLength: 128, autoComplete: "new-password" }}
+          disabled={loading}
+          value={formik.values.password}
+          error={formik.touched.password && Boolean(formik.errors.password)}
+          helperText={formik.touched.password && formik.errors.password}
+          onChange={handlePasswordChange}
+          onBlur={formik.handleBlur}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() => setShowPassword(!showPassword)}
+                  edge="end"
                   disabled={loading}
-                  value={formik.values.password}
-                  error={formik.touched.password && Boolean(formik.errors.password)}
-                  helperText={formik.touched.password && formik.errors.password}
-                  onChange={handlePasswordChange}
-                  onBlur={formik.handleBlur}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                          disabled={loading}
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+                  aria-label="toggle password visibility"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
 
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Confirmar contraseña"
-                  placeholder="Confirmar contraseña"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  inputProps={{ maxLength: 128, autoComplete: "new-password" }}
+        <StyledTextField
+          fullWidth
+          variant="outlined"
+          label="Confirmar contraseña"
+          placeholder="Confirmar contraseña"
+          id="confirmPassword"
+          name="confirmPassword"
+          type={showConfirmPassword ? "text" : "password"}
+          inputProps={{ maxLength: 128, autoComplete: "new-password" }}
+          disabled={loading}
+          value={formik.values.confirmPassword}
+          error={
+            formik.touched.confirmPassword &&
+            Boolean(formik.errors.confirmPassword)
+          }
+          helperText={
+            formik.touched.confirmPassword && formik.errors.confirmPassword
+          }
+          onChange={handlePasswordChange}
+          onBlur={formik.handleBlur}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  edge="end"
                   disabled={loading}
-                  value={formik.values.confirmPassword}
-                  error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
-                  helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
-                  onChange={handlePasswordChange}
-                  onBlur={formik.handleBlur}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          edge="end"
-                          disabled={loading}
-                        >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+                  aria-label="toggle confirm password visibility"
+                >
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
 
-                <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    href="/login"
-                    disabled={loading}
-                    sx={authSecondaryButtonSx}
-                  >
-                    Cancelar
-                  </Button>
+        <Button
+          variant="contained"
+          fullWidth
+          type="submit"
+          disabled={!formik.isValid || !formik.dirty || loading}
+          sx={{ ...authPrimaryButtonSx, mt: 1 }}
+        >
+          {loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            "Restablecer"
+          )}
+        </Button>
 
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    type="submit"
-                    onClick={() => formik.handleSubmit()}
-                    disabled={!formik.isValid || !formik.dirty || loading}
-                    sx={authPrimaryButtonSx}
-                  >
-                    {loading ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : (
-                      "Restablecer"
-                    )}
-                  </Button>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-      </Container>
+        <Link
+          href="/login"
+          sx={{
+            ...authLinkSx,
+            display: "block",
+            textAlign: "center",
+            mt: 2.5,
+          }}
+        >
+          Volver al login
+        </Link>
+      </Box>
 
       <Dialog
         open={modalOpen}
@@ -291,7 +321,10 @@ const ResetPassword = () => {
           },
         }}
       >
-        <DialogTitle id="reset-password-modal-title" sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}>
+        <DialogTitle
+          id="reset-password-modal-title"
+          sx={{ textAlign: "center", px: 3, pt: 3, pb: 1 }}
+        >
           <Box
             sx={{
               display: "flex",
@@ -301,18 +334,40 @@ const ResetPassword = () => {
             }}
           >
             {modalStatus === "success" ? (
-              <CheckCircleOutlineIcon sx={{ fontSize: 64, color: "var(--color-fg-success-primary)", display: "block" }} />
+              <CheckCircleOutlineIcon
+                sx={{
+                  fontSize: 64,
+                  color: "var(--color-fg-success-primary)",
+                  display: "block",
+                }}
+              />
             ) : (
-              <ErrorOutlineIcon sx={{ fontSize: 64, color: "var(--color-fg-danger-primary)", display: "block" }} />
+              <ErrorOutlineIcon
+                sx={{
+                  fontSize: 64,
+                  color: "var(--color-fg-danger-primary)",
+                  display: "block",
+                }}
+              />
             )}
-            <Typography variant="h5" component="span" sx={{ fontFamily: "var(--font-heading)", fontWeight: 500 }}>
-              {modalStatus === "success" ? "¡Contraseña actualizada!" : "Error"}
+            <Typography
+              variant="h5"
+              component="span"
+              sx={{ fontFamily: "var(--font-heading)", fontWeight: 500 }}
+            >
+              {modalStatus === "success"
+                ? "¡Contraseña actualizada!"
+                : "Error"}
             </Typography>
           </Box>
         </DialogTitle>
 
         <DialogContent sx={{ textAlign: "center", px: 3, pt: 0, pb: 0 }}>
-          <Typography id="reset-password-modal-description" variant="body1" color="text.secondary">
+          <Typography
+            id="reset-password-modal-description"
+            variant="body1"
+            color="text.secondary"
+          >
             {modalStatus === "success"
               ? "Tu contraseña ha sido restablecida exitosamente. Ya puedes iniciar sesión con tu nueva contraseña."
               : errorMessage}
@@ -321,15 +376,29 @@ const ResetPassword = () => {
 
         <DialogActions sx={{ justifyContent: "center", px: 3, pt: 2, pb: 3 }}>
           {modalStatus === "success" ? (
-            <Button variant="contained" color="primary" onClick={handleContinue} sx={{ px: 4, py: 1 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleContinue}
+              sx={{ px: 4, py: 1 }}
+            >
               Ir al login
             </Button>
           ) : (
             <Box sx={{ display: "flex", gap: 2 }}>
-              <Button variant="outlined" onClick={handleCloseModal} sx={{ px: 3, py: 1 }}>
+              <Button
+                variant="outlined"
+                onClick={handleCloseModal}
+                sx={{ px: 3, py: 1 }}
+              >
                 Cerrar
               </Button>
-              <Button variant="contained" color="primary" href="/forgot-password" sx={{ px: 3, py: 1 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                href="/forgot-password"
+                sx={{ px: 3, py: 1 }}
+              >
                 Solicitar nuevo enlace
               </Button>
             </Box>

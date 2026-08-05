@@ -10,6 +10,69 @@ export const authPageSx: SxProps<Theme> = {
   padding: 2,
 };
 
+/** Centered single-column auth shell (login, forgot, reset). */
+export const authCenteredPageSx: SxProps<Theme> = {
+  minHeight: "100vh",
+  backgroundColor: "var(--color-bg-default-secondary)",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 3,
+  px: 2,
+  py: 3,
+};
+
+/** Same shell but top-aligned for long forms (register). */
+export const authCenteredPageTopSx: SxProps<Theme> = {
+  ...authCenteredPageSx,
+  justifyContent: "flex-start",
+  alignItems: "center",
+  py: 4,
+};
+
+export const authLogoLinkSx: SxProps<Theme> = {
+  display: "block",
+  lineHeight: 0,
+  textDecoration: "none",
+};
+
+export const authLogoImgSx: SxProps<Theme> = {
+  maxWidth: { xs: 140, sm: 180 },
+  width: "100%",
+  height: "auto",
+  display: "block",
+};
+
+export const authTitleSx: SxProps<Theme> = {
+  textAlign: "center",
+  fontFamily: "var(--font-heading)",
+  fontWeight: 400,
+  color: "var(--color-fg-default-primary)",
+  fontSize: {
+    xs: "var(--font-size-display-h4)",
+    sm: "var(--font-size-display-h3)",
+  },
+};
+
+export const authFormSx: SxProps<Theme> = {
+  width: "100%",
+  maxWidth: 400,
+  display: "flex",
+  flexDirection: "column",
+};
+
+export const authFormWideSx: SxProps<Theme> = {
+  ...authFormSx,
+  maxWidth: 480,
+};
+
+export const authFooterTextSx: SxProps<Theme> = {
+  textAlign: "center",
+  mt: 3,
+  color: "var(--color-fg-default-secondary)",
+};
+
 export const authCardSx: SxProps<Theme> = {
   backgroundColor: "var(--color-bg-default-primary)",
   borderRadius: "var(--radius-l)",

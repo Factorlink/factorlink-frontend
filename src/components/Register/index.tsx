@@ -14,7 +14,6 @@ import {
   FormControlLabel,
   Typography,
   Link,
-  Container,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -36,14 +35,15 @@ import {
   handlePasswordInputChange,
 } from "../../utils/validations/shared-fields";
 import {
-  authCardSx,
+  authCenteredPageTopSx,
   authCheckboxSx,
+  authFooterTextSx,
+  authFormWideSx,
   authLinkSx,
-  authLogoColumnSx,
-  authPageSx,
+  authLogoImgSx,
+  authLogoLinkSx,
   authPrimaryButtonSx,
-  authSecondaryButtonSx,
-  authTabSx,
+  authTitleSx,
 } from "../../theme";
 
 interface RegisterFormProps {
@@ -63,7 +63,9 @@ const RegisterForm = ({
 }: RegisterFormProps) => {
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error">("success");
+  const [modalStatus, setModalStatus] = useState<"success" | "error">(
+    "success"
+  );
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -151,317 +153,336 @@ const RegisterForm = ({
   };
 
   return (
-    <Box sx={authPageSx}>
-      <Container maxWidth="md">
-        <Box sx={authCardSx}>
-          <Box sx={authTabSx}>{tabLabel}</Box>
+    <Box sx={authCenteredPageTopSx}>
+      <Box component="a" href="/login" sx={authLogoLinkSx}>
+        <Box
+          component="img"
+          src={logo}
+          alt="Factorlink"
+          sx={authLogoImgSx}
+        />
+      </Box>
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "1fr 1.2fr" },
-              gap: 4,
-              padding: { xs: 3, md: 5 },
-              alignItems: "center",
-              minHeight: 400,
-            }}
-          >
-            <Box sx={authLogoColumnSx}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                }}
-              >
-                <img
-                  src={logo}
-                  alt="Factorlink Logo"
-                  style={{ maxWidth: 250 }}
-                />
-              </Box>
-            </Box>
+      <Typography variant="h3" component="h1" sx={authTitleSx}>
+        Crea tu cuenta
+      </Typography>
 
-            {/* Right Side - Form */}
-            <Box sx={{ paddingLeft: { md: 2 } }}>
-              <Box>
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Nombre"
-                  placeholder="Nombre"
-                  id="firstName"
-                  name="firstName"
-                  inputProps={{ maxLength: 50 }}
-                  disabled={loading}
-                  value={formik.values.firstName}
-                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-                  helperText={formik.touched.firstName && formik.errors.firstName}
-                  onChange={handleNameChange}
-                  onBlur={formik.handleBlur}
-                />
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Apellido"
-                  placeholder="Apellido"
-                  id="lastName"
-                  name="lastName"
-                  inputProps={{ maxLength: 50 }}
-                  disabled={loading}
-                  value={formik.values.lastName}
-                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-                  helperText={formik.touched.lastName && formik.errors.lastName}
-                  onChange={handleNameChange}
-                  onBlur={formik.handleBlur}
-                />
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="RUT"
-                  placeholder="12.345.678-9"
-                  id="rut"
-                  name="rut"
-                  inputProps={{ maxLength: 20 }}
-                  disabled={loading}
-                  value={formik.values.rut}
-                  error={formik.touched.rut && Boolean(formik.errors.rut)}
-                  helperText={formik.touched.rut && formik.errors.rut}
-                  onChange={handleRutChange}
-                  onBlur={formik.handleBlur}
-                />
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Correo electrónico"
-                  placeholder="correo@ejemplo.com"
-                  id="email"
-                  name="email"
-                  type="email"
-                  disabled={loading}
-                  inputProps={{ maxLength: 100 }}
-                  value={formik.values.email}
-                  error={formik.touched.email && Boolean(formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  label="Teléfono móvil"
-                  placeholder="+56999650987"
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  disabled={loading}
-                  value={formik.values.phone}
-                  error={formik.touched.phone && Boolean(formik.errors.phone)}
-                  helperText={formik.touched.phone && formik.errors.phone}
-                  onChange={handlePhoneChange}
-                  onBlur={formik.handleBlur}
-                />
+      <Typography
+        variant="body2"
+        sx={{
+          textAlign: "center",
+          color: "var(--color-fg-default-secondary)",
+          mt: -1,
+        }}
+      >
+        Regístrate como {tabLabel}
+      </Typography>
 
-                {/* Slot para campos adicionales */}
-                {renderAdditionalFields?.(formik, loading, handleRutChange)}
-
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  type={showPassword ? "text" : "password"}
-                  label="Contraseña"
-                  placeholder="Mínimo 8 caracteres"
-                  id="password"
-                  name="password"
-                  inputProps={{ maxLength: 128, autoComplete: "new-password" }}
-                  disabled={loading}
-                  value={formik.values.password}
-                  error={formik.touched.password && Boolean(formik.errors.password)}
-                  helperText={formik.touched.password && formik.errors.password}
-                  onChange={handlePasswordChange}
-                  onBlur={formik.handleBlur}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                          disabled={loading}
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <StyledTextField
-                  fullWidth
-                  variant="outlined"
-                  type={showConfirmPassword ? "text" : "password"}
-                  label="Confirmar contraseña"
-                  placeholder="Repite tu contraseña"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  inputProps={{ maxLength: 128, autoComplete: "new-password" }}
-                  disabled={loading}
-                  value={formik.values.confirmPassword}
-                  error={
-                    formik.touched.confirmPassword &&
-                    Boolean(formik.errors.confirmPassword)
-                  }
-                  helperText={
-                    formik.touched.confirmPassword && formik.errors.confirmPassword
-                  }
-                  onChange={handlePasswordChange}
-                  onBlur={formik.handleBlur}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle confirm password visibility"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          edge="end"
-                          disabled={loading}
-                        >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      id="acceptedTerms"
-                      name="termsConditions"
-                      checked={formik.values.termsConditions}
-                      onChange={formik.handleChange}
-                      disabled={loading}
-                      size="small"
-                      sx={authCheckboxSx}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: "var(--font-size-s)",
-                        color: "text.secondary",
-                      }}
-                    >
-                      He leído y acepto los{" "}
-                      <Link
-                        href="/terminos-condiciones"
-                        target="_blank"
-                        sx={authLinkSx}
-                      >
-                        términos y condiciones de uso
-                      </Link>
-                    </Typography>
-                  }
-                  sx={{ mb: 1 }}
-                />
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      id="acceptedPrivacy"
-                      name="privacyPolicy"
-                      checked={formik.values.privacyPolicy ?? false}
-                      onChange={formik.handleChange}
-                      disabled={loading}
-                      size="small"
-                      sx={authCheckboxSx}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: "var(--font-size-s)",
-                        color: "text.secondary",
-                      }}
-                    >
-                      He leído y acepto la{" "}
-                      <Link
-                        href="/politica-privacidad"
-                        target="_blank"
-                        sx={authLinkSx}
-                      >
-                        Política de Privacidad
-                      </Link>
-                    </Typography>
-                  }
-                  sx={{ mb: 1 }}
-                />
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      id="acceptedEmailConsent"
-                      name="emailConsent"
-                      checked={formik.values.emailConsent ?? false}
-                      onChange={formik.handleChange}
-                      disabled={loading}
-                      size="small"
-                      sx={authCheckboxSx}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: "var(--font-size-s)",
-                        color: "text.secondary",
-                      }}
-                    >
-                      He leído y acepto{" "}
-                      <Link
-                        href="/consentimiento-emails"
-                        target="_blank"
-                        sx={authLinkSx}
-                      >
-                        recibir comunicaciones por correo electrónico
-                      </Link>
-                    </Typography>
-                  }
-                  sx={{ mb: 3 }}
-                />
-
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    href="/login"
-                    sx={authSecondaryButtonSx}
-                  >
-                    Ya tengo cuenta
-                  </Button>
-
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    type="submit"
-                    onClick={() => formik.handleSubmit()}
-                    disabled={!formik.isValid || !formik.dirty || loading}
-                    sx={authPrimaryButtonSx}
-                  >
-                    {loading ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : (
-                      "Crear cuenta"
-                    )}
-                  </Button>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
+      <Box
+        component="form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          formik.handleSubmit();
+        }}
+        sx={authFormWideSx}
+      >
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+            gap: { sm: 2 },
+          }}
+        >
+          <StyledTextField
+            fullWidth
+            variant="outlined"
+            label="Nombre"
+            placeholder="Nombre"
+            id="firstName"
+            name="firstName"
+            inputProps={{ maxLength: 50 }}
+            disabled={loading}
+            value={formik.values.firstName}
+            error={
+              formik.touched.firstName && Boolean(formik.errors.firstName)
+            }
+            helperText={formik.touched.firstName && formik.errors.firstName}
+            onChange={handleNameChange}
+            onBlur={formik.handleBlur}
+          />
+          <StyledTextField
+            fullWidth
+            variant="outlined"
+            label="Apellido"
+            placeholder="Apellido"
+            id="lastName"
+            name="lastName"
+            inputProps={{ maxLength: 50 }}
+            disabled={loading}
+            value={formik.values.lastName}
+            error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+            helperText={formik.touched.lastName && formik.errors.lastName}
+            onChange={handleNameChange}
+            onBlur={formik.handleBlur}
+          />
         </Box>
-      </Container>
 
-      {/* Modal de feedback */}
+        <StyledTextField
+          fullWidth
+          variant="outlined"
+          label="RUT"
+          placeholder="12.345.678-9"
+          id="rut"
+          name="rut"
+          inputProps={{ maxLength: 20 }}
+          disabled={loading}
+          value={formik.values.rut}
+          error={formik.touched.rut && Boolean(formik.errors.rut)}
+          helperText={formik.touched.rut && formik.errors.rut}
+          onChange={handleRutChange}
+          onBlur={formik.handleBlur}
+        />
+        <StyledTextField
+          fullWidth
+          variant="outlined"
+          label="Correo electrónico"
+          placeholder="correo@ejemplo.com"
+          id="email"
+          name="email"
+          type="email"
+          disabled={loading}
+          inputProps={{ maxLength: 100 }}
+          value={formik.values.email}
+          error={formik.touched.email && Boolean(formik.errors.email)}
+          helperText={formik.touched.email && formik.errors.email}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+        />
+        <StyledTextField
+          fullWidth
+          variant="outlined"
+          label="Teléfono móvil"
+          placeholder="+56999650987"
+          type="tel"
+          id="phone"
+          name="phone"
+          disabled={loading}
+          value={formik.values.phone}
+          error={formik.touched.phone && Boolean(formik.errors.phone)}
+          helperText={formik.touched.phone && formik.errors.phone}
+          onChange={handlePhoneChange}
+          onBlur={formik.handleBlur}
+        />
+
+        {renderAdditionalFields?.(formik, loading, handleRutChange)}
+
+        <StyledTextField
+          fullWidth
+          variant="outlined"
+          type={showPassword ? "text" : "password"}
+          label="Contraseña"
+          placeholder="Mínimo 8 caracteres"
+          id="password"
+          name="password"
+          inputProps={{ maxLength: 128, autoComplete: "new-password" }}
+          disabled={loading}
+          value={formik.values.password}
+          error={formik.touched.password && Boolean(formik.errors.password)}
+          helperText={formik.touched.password && formik.errors.password}
+          onChange={handlePasswordChange}
+          onBlur={formik.handleBlur}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={() => setShowPassword(!showPassword)}
+                  edge="end"
+                  disabled={loading}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        <StyledTextField
+          fullWidth
+          variant="outlined"
+          type={showConfirmPassword ? "text" : "password"}
+          label="Confirmar contraseña"
+          placeholder="Repite tu contraseña"
+          id="confirmPassword"
+          name="confirmPassword"
+          inputProps={{ maxLength: 128, autoComplete: "new-password" }}
+          disabled={loading}
+          value={formik.values.confirmPassword}
+          error={
+            formik.touched.confirmPassword &&
+            Boolean(formik.errors.confirmPassword)
+          }
+          helperText={
+            formik.touched.confirmPassword && formik.errors.confirmPassword
+          }
+          onChange={handlePasswordChange}
+          onBlur={formik.handleBlur}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle confirm password visibility"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                  edge="end"
+                  disabled={loading}
+                >
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              id="acceptedTerms"
+              name="termsConditions"
+              checked={formik.values.termsConditions}
+              onChange={formik.handleChange}
+              disabled={loading}
+              size="small"
+              sx={{ ...authCheckboxSx, p: 0.5 }}
+            />
+          }
+          label={
+            <Typography
+              variant="body2"
+              sx={{
+                fontSize: "var(--font-size-s)",
+                lineHeight: 1.4,
+                color: "text.secondary",
+              }}
+            >
+              He leído y acepto los{" "}
+              <Link
+                href="/terminos-condiciones"
+                target="_blank"
+                sx={authLinkSx}
+              >
+                términos y condiciones de uso
+              </Link>
+            </Typography>
+          }
+          sx={{
+            mb: 1,
+            ml: 0,
+            alignItems: "center",
+            "& .MuiCheckbox-root": { alignSelf: "center" },
+          }}
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              id="acceptedPrivacy"
+              name="privacyPolicy"
+              checked={formik.values.privacyPolicy ?? false}
+              onChange={formik.handleChange}
+              disabled={loading}
+              size="small"
+              sx={{ ...authCheckboxSx, p: 0.5 }}
+            />
+          }
+          label={
+            <Typography
+              variant="body2"
+              sx={{
+                fontSize: "var(--font-size-s)",
+                lineHeight: 1.4,
+                color: "text.secondary",
+              }}
+            >
+              He leído y acepto la{" "}
+              <Link
+                href="/politica-privacidad"
+                target="_blank"
+                sx={authLinkSx}
+              >
+                Política de Privacidad
+              </Link>
+            </Typography>
+          }
+          sx={{
+            mb: 1,
+            ml: 0,
+            alignItems: "center",
+            "& .MuiCheckbox-root": { alignSelf: "center" },
+          }}
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              id="acceptedEmailConsent"
+              name="emailConsent"
+              checked={formik.values.emailConsent ?? false}
+              onChange={formik.handleChange}
+              disabled={loading}
+              size="small"
+              sx={{ ...authCheckboxSx, p: 0.5 }}
+            />
+          }
+          label={
+            <Typography
+              variant="body2"
+              sx={{
+                fontSize: "var(--font-size-s)",
+                lineHeight: 1.4,
+                color: "text.secondary",
+              }}
+            >
+              He leído y acepto{" "}
+              <Link
+                href="/consentimiento-emails"
+                target="_blank"
+                sx={authLinkSx}
+              >
+                recibir comunicaciones por correo electrónico
+              </Link>
+            </Typography>
+          }
+          sx={{
+            mb: 3,
+            ml: 0,
+            alignItems: "center",
+            "& .MuiCheckbox-root": { alignSelf: "center" },
+          }}
+        />
+
+        <Button
+          variant="contained"
+          fullWidth
+          type="submit"
+          disabled={!formik.isValid || !formik.dirty || loading}
+          sx={authPrimaryButtonSx}
+        >
+          {loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            "Crear cuenta"
+          )}
+        </Button>
+
+        <Typography variant="body2" sx={authFooterTextSx}>
+          ¿Ya tienes una cuenta?{" "}
+          <Link href="/login" sx={authLinkSx}>
+            Inicia sesión
+          </Link>
+        </Typography>
+      </Box>
+
       <Dialog
         open={modalOpen}
         onClose={handleCloseModal}

@@ -116,6 +116,7 @@ const UnlinkSiiPersonalModal = ({
             onClose={() => {
               setAlertStatus(null);
               setAlertMessage("");
+              handleClose();
             }}
           >
             {alertMessage}

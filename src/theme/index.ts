@@ -11,6 +11,14 @@ export {
 } from "./initTheme";
 export {
   authPageSx,
+  authCenteredPageSx,
+  authCenteredPageTopSx,
+  authLogoLinkSx,
+  authLogoImgSx,
+  authTitleSx,
+  authFormSx,
+  authFormWideSx,
+  authFooterTextSx,
   authCardSx,
   authTabSx,
   authLogoColumnSx,

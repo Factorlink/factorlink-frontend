@@ -274,6 +274,10 @@
   --z-modal: 10000;
 }
 
+[data-theme="light"] {
+  color-scheme: light;
+}
+
 /* ================================================================
    DARK MODE — activar con <html data-theme="dark"> o dejar que
    prefers-color-scheme resuelva automáticamente (bloque al final).
@@ -424,10 +428,11 @@
   --chart-series-singular: #2171e0;
 }
 
-/* Preferencia del SO solo afecta color-scheme nativo del browser.
+/* Preferencia del SO solo afecta color-scheme nativo del browser
+   cuando aún no hay data-theme (fallback pre-init).
    Los tokens dark se activan con data-theme="dark" (ver initTheme / AppThemeProvider). */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme]) {
     color-scheme: dark;
   }
 }

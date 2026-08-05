@@ -194,6 +194,14 @@ export const theme = createTheme({
         },
         input: {
           color: "var(--color-fg-default-primary)",
+          "&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active":
+            {
+              WebkitTextFillColor: "var(--color-fg-default-primary)",
+              caretColor: "var(--color-fg-default-primary)",
+              WebkitBoxShadow:
+                "0 0 0 1000px var(--color-bg-default-primary) inset",
+              transition: "background-color 99999s ease-in-out 0s",
+            },
         },
       },
     },
