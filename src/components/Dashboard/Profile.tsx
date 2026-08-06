@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   KeyboardArrowDown,
-  Notifications,
   Logout,
   Warning,
   Edit,
@@ -12,7 +11,6 @@ import {
 import {
   Avatar,
   Box,
-  IconButton,
   Typography,
   Menu,
   MenuItem,
@@ -30,6 +28,7 @@ import {
 import useAuthStore from "../../store/authStore";
 import { useAuth } from "../../hooks/useAuth";
 import { capitalizeFirstLetter } from "../../utils/utils";
+import NotificationBell from "../Notificaciones/NotificationBell";
 
 const Profile = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -115,19 +114,7 @@ const Profile = () => {
           Actualizado hace {minutesSinceUpdate} minutos
         </Typography>
 
-        <IconButton
-          aria-label="Notificaciones"
-          sx={{
-            backgroundColor: "var(--color-bg-accent-primary)",
-            color: "var(--color-fg-on-accent-primary)",
-            borderRadius: "var(--radius-m)",
-            "&:hover": {
-              backgroundColor: "var(--color-bg-accent-primary-hover)",
-            },
-          }}
-        >
-          <Notifications />
-        </IconButton>
+        <NotificationBell />
 
         <Box
           sx={{
