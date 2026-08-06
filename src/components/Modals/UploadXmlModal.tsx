@@ -204,14 +204,7 @@ const UploadXmlModal = ({
 
       <DialogContent sx={{ px: 3, pb: 3 }}>
         {alertStatus && (
-          <Alert
-            severity={alertStatus}
-            sx={{ mb: 3 }}
-            onClose={() => {
-              setAlertStatus(null);
-              setAlertMessage("");
-            }}
-          >
+          <Alert severity={alertStatus} sx={{ mb: 3 }}>
             {alertMessage}
           </Alert>
         )}

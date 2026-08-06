@@ -110,15 +110,7 @@ const UnlinkSiiPersonalModal = ({
 
       <DialogContent sx={{ px: 3, pb: 3 }}>
         {alertStatus && (
-          <Alert
-            severity={alertStatus}
-            sx={{ mb: 3 }}
-            onClose={() => {
-              setAlertStatus(null);
-              setAlertMessage("");
-              handleClose();
-            }}
-          >
+          <Alert severity={alertStatus} sx={{ mb: 3 }}>
             {alertMessage}
           </Alert>
         )}
