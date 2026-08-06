@@ -521,8 +521,14 @@ const Facturas = () => {
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: activeTab === 0 ? "var(--color-bg-accent-primary)" : "var(--color-bg-neutral-secondary)",
-                        color: "var(--color-fg-on-accent-primary)",
+                        backgroundColor:
+                          activeTab === 0
+                            ? "var(--color-bg-accent-primary)"
+                            : "var(--color-bg-neutral-secondary)",
+                        color:
+                          activeTab === 0
+                            ? "var(--color-fg-on-accent-primary)"
+                            : "var(--color-fg-default-primary)",
                       }}
                     />
                   )}
@@ -544,8 +550,14 @@ const Facturas = () => {
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: activeTab === 1 ? "var(--color-bg-accent-primary)" : "var(--color-bg-neutral-secondary)",
-                        color: "var(--color-fg-on-accent-primary)",
+                        backgroundColor:
+                          activeTab === 1
+                            ? "var(--color-bg-accent-primary)"
+                            : "var(--color-bg-neutral-secondary)",
+                        color:
+                          activeTab === 1
+                            ? "var(--color-fg-on-accent-primary)"
+                            : "var(--color-fg-default-primary)",
                       }}
                     />
                   )}
@@ -567,8 +579,14 @@ const Facturas = () => {
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: activeTab === 2 ? "var(--color-bg-accent-primary)" : "var(--color-bg-neutral-secondary)",
-                        color: "var(--color-fg-on-accent-primary)",
+                        backgroundColor:
+                          activeTab === 2
+                            ? "var(--color-bg-accent-primary)"
+                            : "var(--color-bg-neutral-secondary)",
+                        color:
+                          activeTab === 2
+                            ? "var(--color-fg-on-accent-primary)"
+                            : "var(--color-fg-default-primary)",
                       }}
                     />
                   )}
@@ -590,8 +608,14 @@ const Facturas = () => {
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: activeTab === 3 ? "var(--color-bg-accent-primary)" : "var(--color-bg-neutral-secondary)",
-                        color: "var(--color-fg-on-accent-primary)",
+                        backgroundColor:
+                          activeTab === 3
+                            ? "var(--color-bg-accent-primary)"
+                            : "var(--color-bg-neutral-secondary)",
+                        color:
+                          activeTab === 3
+                            ? "var(--color-fg-on-accent-primary)"
+                            : "var(--color-fg-default-primary)",
                       }}
                     />
                   )}

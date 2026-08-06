@@ -78,19 +78,11 @@ const SiiPersonalSync = ({
         <Chip
           label={isLinked ? "Vinculada" : "No vinculada"}
           size="small"
+          color={isLinked ? "success" : "error"}
           sx={{
             fontWeight: 600,
             borderRadius: "var(--radius-m)",
             px: 1,
-            color: "white",
-            ...(isLinked
-              ? {
-                  backgroundColor: "success.light",
-                  "& .MuiChip-icon": { color: "success.dark" },
-                }
-              : {
-                  backgroundColor: "error.light",
-                }),
           }}
         />
       </Box>

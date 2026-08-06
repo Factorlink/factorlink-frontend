@@ -111,15 +111,7 @@ const RemoveMarketplaceModal = ({
 
       <DialogContent sx={{ px: 3, pb: 3 }}>
         {alertStatus && (
-          <Alert
-            severity={alertStatus}
-            sx={{ mb: 3 }}
-            onClose={() => {
-              handleClose();
-              setAlertStatus(null);
-              setAlertMessage("");
-            }}
-          >
+          <Alert severity={alertStatus} sx={{ mb: 3 }}>
             {alertMessage}
           </Alert>
         )}

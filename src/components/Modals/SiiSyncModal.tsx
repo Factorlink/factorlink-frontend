@@ -151,14 +151,7 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
 
       <DialogContent sx={{ px: 3, pb: 3 }}>
         {alertStatus && (
-          <Alert
-            severity={alertStatus}
-            sx={{ mb: 3 }}
-            onClose={() => {
-              setAlertStatus(null);
-              setAlertMessage("");
-            }}
-          >
+          <Alert severity={alertStatus} sx={{ mb: 3 }}>
             {alertMessage}
           </Alert>
         )}
@@ -216,22 +209,15 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
           sx={{ display: "flex", gap: 2, mt: 3, justifyContent: "flex-end" }}
         >
           <Button
-            variant="contained"
+            variant="outlined"
             onClick={handleClose}
             disabled={loading}
             sx={{
-              backgroundColor: "secondary.main",
-              color: "white",
               textTransform: "none",
               padding: "12px 24px",
               fontSize: "1rem",
               fontWeight: 500,
               borderRadius: "var(--radius-m)",
-              boxShadow: "none",
-              "&:hover": {
-                backgroundColor: "secondary.dark",
-                boxShadow: "none",
-              },
             }}
           >
             {alertStatus === "success" ? "Cerrar" : "Cancelar"}
