@@ -14,8 +14,15 @@ import logo from "../../assets/png/factorlink-logo.png";
 import { getMenuItemsByRole, mainMenuItems } from "../../config/menuConfig";
 import useAuthStore from "../../store/authStore";
 
+const SIDEBAR_EXPANDED = 260;
+const SIDEBAR_RAIL = 72;
+
 const bottomItems = [{ text: "Logout", icon: Logout, path: "/login" }];
 
+/**
+ * CSS-first rail below `md` (768): width and labels follow viewport,
+ * independent of `collapsed`. On `md+`, `collapsed` controls expand/rail.
+ */
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,17 +31,23 @@ const Sidebar = () => {
   const isActive = (path: string) => location.pathname === path;
   const { currentRole } = useAuthStore();
 
-  const sidebarWidth = collapsed ? 72 : 260;
+  const railOnMd = collapsed;
 
   return (
     <Box
       sx={{
-        width: sidebarWidth,
-        minHeight: "100vh",
+        width: {
+          xs: SIDEBAR_RAIL,
+          md: railOnMd ? SIDEBAR_RAIL : SIDEBAR_EXPANDED,
+        },
+        flexShrink: 0,
+        height: "100%",
+        minHeight: 0,
         backgroundColor: "var(--color-bg-default-primary)",
         borderRight: "1px solid var(--color-border-default-primary)",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
         transition: "width var(--duration-fast) var(--easing-ease)",
       }}
     >
@@ -45,15 +58,36 @@ const Sidebar = () => {
           gap: 1,
           p: 2,
           pb: 3,
-          justifyContent: collapsed ? "center" : "flex-start",
+          flexShrink: 0,
+          justifyContent: {
+            xs: "center",
+            md: railOnMd ? "center" : "flex-start",
+          },
         }}
       >
-        {!collapsed && (
-          <img src={logo} alt="factorlink-logo" style={{ maxWidth: 150 }} />
-        )}
+        <Box
+          component="img"
+          src={logo}
+          alt="factorlink-logo"
+          sx={{
+            maxWidth: 150,
+            width: "100%",
+            height: "auto",
+            display: {
+              xs: "none",
+              md: railOnMd ? "none" : "block",
+            },
+          }}
+        />
         <IconButton
           onClick={() => setCollapsed(!collapsed)}
-          sx={{ ml: collapsed ? 0 : "auto", color: "text.secondary" }}
+          sx={{
+            ml: {
+              xs: 0,
+              md: railOnMd ? 0 : "auto",
+            },
+            color: "text.secondary",
+          }}
           size="small"
           aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
         >
@@ -61,7 +95,14 @@ const Sidebar = () => {
         </IconButton>
       </Box>
 
-      <List sx={{ px: 1, flex: 1 }}>
+      <List
+        sx={{
+          px: 1,
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+        }}
+      >
         {currentRole?.contexto &&
           getMenuItemsByRole(mainMenuItems, currentRole.role).map((item) => {
             const active = isActive(item.path);
@@ -79,13 +120,22 @@ const Sidebar = () => {
                         ? "var(--color-bg-accent-tertiary-hover)"
                         : "var(--color-bg-default-primary-hover)",
                     },
-                    justifyContent: collapsed ? "center" : "flex-start",
-                    px: collapsed ? 1 : 2,
+                    justifyContent: {
+                      xs: "center",
+                      md: railOnMd ? "center" : "flex-start",
+                    },
+                    px: {
+                      xs: 1,
+                      md: railOnMd ? 1 : 2,
+                    },
                   }}
                 >
                   <ListItemIcon
                     sx={{
-                      minWidth: collapsed ? 0 : 40,
+                      minWidth: {
+                        xs: 0,
+                        md: railOnMd ? 0 : 40,
+                      },
                       justifyContent: "center",
                     }}
                   >
@@ -97,28 +147,30 @@ const Sidebar = () => {
                       }}
                     />
                   </ListItemIcon>
-                  {!collapsed && (
-                    <ListItemText
-                      primary={item.text}
-                      sx={{
-                        "& .MuiTypography-root": {
-                          fontFamily: "var(--font-heading)",
-                          fontWeight: active ? 500 : 400,
-                          color: active
-                            ? "var(--color-fg-accent-primary)"
-                            : "text.secondary",
-                          fontSize: "var(--font-size-s)",
-                        },
-                      }}
-                    />
-                  )}
+                  <ListItemText
+                    primary={item.text}
+                    sx={{
+                      display: {
+                        xs: "none",
+                        md: railOnMd ? "none" : "block",
+                      },
+                      "& .MuiTypography-root": {
+                        fontFamily: "var(--font-heading)",
+                        fontWeight: active ? 500 : 400,
+                        color: active
+                          ? "var(--color-fg-accent-primary)"
+                          : "text.secondary",
+                        fontSize: "var(--font-size-s)",
+                      },
+                    }}
+                  />
                 </ListItemButton>
               </ListItem>
             );
           })}
       </List>
 
-      <List sx={{ px: 1, pb: 2 }}>
+      <List sx={{ px: 1, pb: 2, flexShrink: 0 }}>
         {bottomItems.map((item) => (
           <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
@@ -128,28 +180,42 @@ const Sidebar = () => {
                 "&:hover": {
                   backgroundColor: "var(--color-bg-danger-tertiary)",
                 },
-                justifyContent: collapsed ? "center" : "flex-start",
-                px: collapsed ? 1 : 2,
+                justifyContent: {
+                  xs: "center",
+                  md: railOnMd ? "center" : "flex-start",
+                },
+                px: {
+                  xs: 1,
+                  md: railOnMd ? 1 : 2,
+                },
               }}
             >
               <ListItemIcon
-                sx={{ minWidth: collapsed ? 0 : 40, justifyContent: "center" }}
+                sx={{
+                  minWidth: {
+                    xs: 0,
+                    md: railOnMd ? 0 : 40,
+                  },
+                  justifyContent: "center",
+                }}
               >
                 <item.icon sx={{ color: "var(--color-fg-danger-primary)" }} />
               </ListItemIcon>
-              {!collapsed && (
-                <ListItemText
-                  primary={item.text}
-                  sx={{
-                    "& .MuiTypography-root": {
-                      fontFamily: "var(--font-heading)",
-                      color: "var(--color-fg-danger-primary)",
-                      fontSize: "var(--font-size-s)",
-                      fontWeight: 500,
-                    },
-                  }}
-                />
-              )}
+              <ListItemText
+                primary={item.text}
+                sx={{
+                  display: {
+                    xs: "none",
+                    md: railOnMd ? "none" : "block",
+                  },
+                  "& .MuiTypography-root": {
+                    fontFamily: "var(--font-heading)",
+                    color: "var(--color-fg-danger-primary)",
+                    fontSize: "var(--font-size-s)",
+                    fontWeight: 500,
+                  },
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}

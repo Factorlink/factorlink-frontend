@@ -152,7 +152,7 @@ const FacturasFilters = ({
         <Box sx={{ p: 2, pt: 0, borderTop: "1px solid var(--color-border-default-primary)" }} component="form" onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {/* Folio */}
-            <Grid size={{ xs: 12, sm: 8, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -170,7 +170,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* RUT Receptor */}
-            <Grid size={{ xs: 12, sm: 8, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -186,7 +186,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Razón Social Receptor */}
-            <Grid size={{ xs: 12, sm: 8, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -202,7 +202,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Estado */}
-            <Grid size={{ xs: 12, sm: 8, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <FormControl fullWidth size="small" error={formik.touched.estado && Boolean(formik.errors.estado)}>
                 <InputLabel>Estado</InputLabel>
                 <Select
@@ -228,6 +228,7 @@ const FacturasFilters = ({
           <Box
             sx={{
               display: "flex",
+              flexWrap: "wrap",
               justifyContent: "flex-end",
               gap: 2,
               mt: 3,

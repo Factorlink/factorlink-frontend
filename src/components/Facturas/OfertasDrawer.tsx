@@ -32,6 +32,11 @@ import type { Oferta } from "../../types/oferta";
 import AceptarOfertaModal from "../Modals/AceptarOfertaModal";
 import RechazarOfertaModal from "../Modals/RechazarOfertaModal";
 import SortableTableHeader from "./SortableTableHeader";
+import {
+  tableShellSx,
+  tableScrollSx,
+  tableWideSx,
+} from "../../theme/layoutStyles";
 
 interface OfertasDrawerProps {
   open: boolean;
@@ -187,22 +192,34 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
         open={open}
         onClose={onClose}
         PaperProps={{
-          sx: { width: { xs: "100%", md: "75%", lg: "65%" }, p: 3 },
+          sx: {
+            width: { xs: "100%", md: "75%", lg: "65%" },
+            p: { xs: 2, md: 3 },
+          },
         }}
       >
         {/* Header */}
         <Box
           sx={{
             display: "flex",
+            flexWrap: "wrap",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: 2,
             mb: 3,
           }}
         >
-          <Typography variant="h5" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 700,
+              color: "var(--color-fg-default-primary)",
+              minWidth: 0,
+            }}
+          >
             Ofertas Recibidas
           </Typography>
-          <IconButton onClick={onClose}>
+          <IconButton onClick={onClose} sx={{ flexShrink: 0 }}>
             <Close />
           </IconButton>
         </Box>
@@ -322,11 +339,9 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
             </Typography>
           </Box>
         ) : (
-          <TableContainer
-            component={Paper}
-            sx={{ borderRadius: 3, boxShadow: "var(--shadow-card)" }}
-          >
-            <Table>
+          <TableContainer component={Paper} sx={tableShellSx}>
+            <Box sx={tableScrollSx}>
+            <Table sx={tableWideSx}>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
                   <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)", width: 48 }} />
@@ -514,6 +529,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                 })}
               </TableBody>
             </Table>
+            </Box>
           </TableContainer>
         )}
       </Drawer>

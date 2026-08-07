@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Description } from "@mui/icons-material";
+import { tableScrollSx, tableCompactSx } from "../../theme/layoutStyles";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -100,7 +101,13 @@ const PendingInvoicesTabs = () => {
           borderBottom: "1px solid var(--color-border-default-primary)",
         }}
       >
-        <Tabs value={tabValue} onChange={handleTabChange}>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+        >
           <Tab
             icon={
               <Description
@@ -115,8 +122,8 @@ const PendingInvoicesTabs = () => {
       </Box>
 
       <TabPanel value={tabValue} index={0}>
-        <TableContainer>
-          <Table>
+        <TableContainer sx={tableScrollSx}>
+          <Table sx={tableCompactSx}>
             <TableHead>
               <TableRow>
                 <TableCell sx={headerCellSx}>Folio</TableCell>

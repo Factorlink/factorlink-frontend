@@ -35,6 +35,13 @@ import type { Role } from "../../../types/role";
 import { ROLE_NAMES, ROLES } from "../../../utils/consts";
 import { capitalizeFirstLetter } from "../../../utils/utils";
 import { surface } from "../../../theme";
+import {
+  tableShellSx,
+  tableScrollSx,
+  tableWideSx,
+  pageHeaderSx,
+  statsRowThreeSx,
+} from "../../../theme/layoutStyles";
 
 const getInitials = (firstName: string, lastName: string) => {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -157,15 +164,16 @@ const Users = () => {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       {/* Header Section */}
       <Box
-        sx={{
-          ...surface.card,
-          p: 3,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
+        sx={[
+          pageHeaderSx,
+          {
+            ...surface.card,
+            p: 3,
+            mb: 0,
+          },
+        ]}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
           <Box
             sx={{
               backgroundColor: "var(--color-bg-default-tertiary)",
@@ -174,11 +182,12 @@ const Users = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              flexShrink: 0,
             }}
           >
             <GroupIcon sx={{ color: "var(--color-fg-default-secondary)", fontSize: 28 }} />
           </Box>
-          <Box>
+          <Box sx={{ minWidth: 0 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
               Gestión de Usuarios
             </Typography>
@@ -199,6 +208,7 @@ const Users = () => {
             borderRadius: "var(--radius-m)",
             px: 3,
             color: "white",
+            flexShrink: 0,
           }}
         >
           Invitar Usuario
@@ -206,11 +216,11 @@ const Users = () => {
       </Box>
 
       {/* Stats Cards */}
-      <Box sx={{ display: "flex", gap: 2 }}>
+      <Box sx={[statsRowThreeSx, { mb: 0 }]}>
         {/* Total Users */}
         <Box
           sx={{
-            flex: 1,
+            minWidth: 0,
             ...surface.card,
             p: 2.5,
             display: "flex",
@@ -232,7 +242,7 @@ const Users = () => {
         {/* Active Users */}
         <Box
           sx={{
-            flex: 1,
+            minWidth: 0,
             ...surface.card,
             p: 2.5,
             display: "flex",
@@ -254,7 +264,7 @@ const Users = () => {
         {/* Pending Users */}
         <Box
           sx={{
-            flex: 1,
+            minWidth: 0,
             ...surface.card,
             p: 2.5,
             display: "flex",
@@ -277,13 +287,10 @@ const Users = () => {
       {/* Users Table */}
       <TableContainer
         component={Paper}
-        sx={{
-          borderRadius: "var(--radius-l)",
-          boxShadow: "var(--shadow-card)",
-          overflow: "hidden",
-        }}
+        sx={[tableShellSx, { borderRadius: "var(--radius-l)" }]}
       >
-        <Table>
+        <Box sx={tableScrollSx}>
+        <Table sx={tableWideSx}>
           <TableHead>
             <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
               <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
@@ -477,6 +484,7 @@ const Users = () => {
             })}
           </TableBody>
         </Table>
+        </Box>
       </TableContainer>
 
       {/* Actions Menu */}

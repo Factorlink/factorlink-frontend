@@ -55,6 +55,16 @@ import type { Meta } from "../../types/meta";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { INITIAL_FILTERS, SORTABLE_COLUMNS } from "../../utils/consts";
 import { getFacturaStatusConfig } from "../../theme";
+import {
+  tableShellSx,
+  tableScrollSx,
+  tableWideSx,
+  toolbarRowSx,
+  paginationSelectSx,
+  pageHeaderSx,
+  statsRowSx,
+  appContentSx,
+} from "../../theme/layoutStyles";
 
 const formatCurrency = (value: string | number) => {
   const numValue = typeof value === "string" ? parseFloat(value) : value;
@@ -372,20 +382,19 @@ const Facturas = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, flex: 1 }}>
+      <Box sx={appContentSx}>
         {/* Header Section */}
         <Box
-          sx={{
-            backgroundColor: "var(--color-bg-default-primary)",
-            borderRadius: 3,
-            p: 3,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-          }}
+          sx={[
+            pageHeaderSx,
+            {
+              backgroundColor: "var(--color-bg-default-primary)",
+              borderRadius: 3,
+              p: 3,
+            },
+          ]}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
             <Box
               sx={{
                 backgroundColor: "var(--color-bg-default-primary)",
@@ -394,11 +403,12 @@ const Facturas = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0,
               }}
             >
               <Description sx={{ color: "var(--color-fg-default-secondary)", fontSize: 28 }} />
             </Box>
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
               <Typography
                 variant="h6"
                 sx={{ fontWeight: 500, fontFamily: "var(--font-heading)", color: "var(--color-fg-default-primary)" }}
@@ -410,7 +420,7 @@ const Facturas = () => {
               </Typography>
             </Box>
           </Box>
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, flexShrink: 0 }}>
             <Button
               variant="contained"
               startIcon={<Sync />}
@@ -431,10 +441,10 @@ const Facturas = () => {
         </Box>
 
         {/* Stats Cards */}
-        <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+        <Box sx={statsRowSx}>
           <Box
             sx={{
-              flex: 1,
+              minWidth: 0,
               backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
@@ -450,7 +460,7 @@ const Facturas = () => {
           </Box>
           <Box
             sx={{
-              flex: 1,
+              minWidth: 0,
               backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
@@ -466,7 +476,7 @@ const Facturas = () => {
           </Box>
           <Box
             sx={{
-              flex: 1,
+              minWidth: 0,
               backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
@@ -482,7 +492,7 @@ const Facturas = () => {
           </Box>
           <Box
             sx={{
-              flex: 1,
+              minWidth: 0,
               backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
@@ -505,6 +515,9 @@ const Facturas = () => {
             onChange={(_e, newValue) => {
               navigate(TAB_ROUTES[newValue]);
             }}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
           >
             <Tab
               icon={<Description sx={{ fontSize: 18 }} />}
@@ -636,14 +649,7 @@ const Facturas = () => {
               loading={loading}
             />
             {/* Table */}
-            <TableContainer
-              component={Paper}
-              sx={{
-                borderRadius: 3,
-                boxShadow: "var(--shadow-card)",
-                overflow: "hidden",
-              }}
-            >
+            <TableContainer component={Paper} sx={tableShellSx}>
               {loading ? (
                 <Box
                   sx={{
@@ -680,7 +686,8 @@ const Facturas = () => {
                 </Box>
               ) : (
                 <>
-                  <Table>
+                  <Box sx={tableScrollSx}>
+                  <Table sx={tableWideSx}>
                     <TableHead>
                       <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
                         {SORTABLE_COLUMNS.map((column) => (
@@ -794,21 +801,17 @@ const Facturas = () => {
                       })}
                     </TableBody>
                   </Table>
+                  </Box>
 
                   {/* Pagination */}
                   {meta.lastPage > 1 && (
                     <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        py: 2,
-                        borderTop: "1px solid var(--color-border-default-primary)",
-                        px: 2,
-                        gap: 2,
-                      }}
+                      sx={[
+                        toolbarRowSx,
+                        { borderTop: "1px solid var(--color-border-default-primary)" },
+                      ]}
                     >
-                      <FormControl size="small" sx={{ minWidth: 160 }}>
+                      <FormControl size="small" sx={paginationSelectSx}>
                         <InputLabel id="limit-label">Filas por página</InputLabel>
                         <Select
                           labelId="limit-label"

@@ -30,6 +30,11 @@ import type { Factura } from "../../types/factura";
 import RemoveMarketplaceModal from "../Modals/RemoveMarketplaceModal";
 import OfertasDrawer from "./OfertasDrawer";
 import SortableTableHeader from "./SortableTableHeader";
+import {
+  tableShellSx,
+  tableScrollSx,
+  tableWideSx,
+} from "../../theme/layoutStyles";
 
 interface MarketplaceFacturasTableProps {
   empresaId: string;
@@ -149,14 +154,7 @@ const MarketplaceFacturasTable = ({
 
   return (
     <>
-      <TableContainer
-        component={Paper}
-        sx={{
-          borderRadius: 3,
-          boxShadow: "var(--shadow-card)",
-          overflow: "hidden",
-        }}
-      >
+      <TableContainer component={Paper} sx={tableShellSx}>
         {loading ? (
           <Box
             sx={{
@@ -187,7 +185,8 @@ const MarketplaceFacturasTable = ({
             </Typography>
           </Box>
         ) : (
-          <Table>
+          <Box sx={tableScrollSx}>
+          <Table sx={tableWideSx}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
                 <SortableTableHeader field="folio" label="Folio" currentSortBy={sortBy} currentOrder={order} onSort={handleSort} />
@@ -283,6 +282,7 @@ const MarketplaceFacturasTable = ({
               ))}
             </TableBody>
           </Table>
+          </Box>
         )}
       </TableContainer>
 

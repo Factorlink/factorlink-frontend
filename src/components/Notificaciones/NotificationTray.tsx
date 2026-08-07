@@ -180,7 +180,7 @@ const NotificationTray: FC<NotificationTrayProps> = ({
   };
 
   return (
-    <Box sx={{ width: 380, maxWidth: "100vw" }}>
+    <Box sx={{ width: "min(380px, calc(100vw - 24px))", maxWidth: "100%" }}>
       <Box sx={{ px: 2, pt: 2, pb: 1 }}>
         <Typography
           sx={{

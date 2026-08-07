@@ -8,13 +8,13 @@ const UsuarioTab = () => {
   const { user } = useAuthStore();
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 3 } }}>
       <AccountStatus isActive={user?.isActive} />
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-          gap: 3,
+          gap: { xs: 2, md: 3 },
           alignItems: "start",
         }}
       >

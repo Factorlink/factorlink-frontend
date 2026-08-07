@@ -12,6 +12,7 @@ import {
   Pagination,
 } from "@mui/material";
 import { useState } from "react";
+import { tableScrollSx, tableCompactSx } from "../../theme/layoutStyles";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -71,7 +72,13 @@ const OperationsTabs = ({
           borderBottom: "1px solid var(--color-border-default-primary)",
         }}
       >
-        <Tabs value={tabValue} onChange={handleTabChange}>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+        >
           {tabLabels.map((label) => (
             <Tab key={label} iconPosition="start" label={label} />
           ))}
@@ -80,8 +87,8 @@ const OperationsTabs = ({
 
       {tabLabels.map((_, index) => (
         <TabPanel key={index} value={tabValue} index={index}>
-          <TableContainer>
-            <Table>
+          <TableContainer sx={tableScrollSx}>
+            <Table sx={tableCompactSx}>
               <TableHead>
                 <TableRow>
                   <TableCell sx={headerCellSx}>Folio</TableCell>

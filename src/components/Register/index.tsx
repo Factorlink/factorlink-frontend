@@ -492,7 +492,6 @@ const RegisterForm = ({
         PaperProps={{
           sx: {
             borderRadius: "var(--radius-l)",
-            minWidth: 360,
             overflow: "hidden",
           },
         }}

@@ -30,6 +30,15 @@ import useAuthStore from "../../store/authStore";
 import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
 import type { SelectChangeEvent } from "@mui/material/Select";
+import {
+  tableShellSx,
+  tableScrollSx,
+  tableWideSx,
+  toolbarRowSx,
+  paginationSelectSx,
+  pageHeaderSx,
+  appContentSx,
+} from "../../theme/layoutStyles";
 
 const MARKETPLACE_SORTABLE_COLUMNS = [
   { field: "razonSocialEmisor", label: "Empresa Emisora" },
@@ -212,20 +221,19 @@ const Marketplace = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, flex: 1 }}>
+      <Box sx={appContentSx}>
         {/* Header Section */}
         <Box
-          sx={{
-            backgroundColor: "var(--color-bg-default-primary)",
-            borderRadius: 3,
-            p: 3,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-          }}
+          sx={[
+            pageHeaderSx,
+            {
+              backgroundColor: "var(--color-bg-default-primary)",
+              borderRadius: 3,
+              p: 3,
+            },
+          ]}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
             <Box
               sx={{
                 backgroundColor: "var(--color-bg-default-primary)",
@@ -234,11 +242,12 @@ const Marketplace = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0,
               }}
             >
               <Storefront sx={{ color: "var(--color-fg-default-secondary)", fontSize: 28 }} />
             </Box>
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
               <Typography
                 variant="h6"
                 sx={{ fontWeight: 500, fontFamily: "var(--font-heading)", color: "var(--color-fg-default-primary)" }}
@@ -268,14 +277,7 @@ const Marketplace = () => {
         </Box>
 
         {/* Table */}
-        <TableContainer
-          component={Paper}
-          sx={{
-            borderRadius: 3,
-            boxShadow: "var(--shadow-card)",
-            overflow: "hidden",
-          }}
-        >
+        <TableContainer component={Paper} sx={tableShellSx}>
           {loading ? (
             <Box
               sx={{
@@ -310,7 +312,8 @@ const Marketplace = () => {
             </Box>
           ) : (
             <>
-              <Table>
+              <Box sx={tableScrollSx}>
+              <Table sx={tableWideSx}>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
                     {MARKETPLACE_SORTABLE_COLUMNS.map((column) => (
@@ -432,21 +435,17 @@ const Marketplace = () => {
                   })}
                 </TableBody>
               </Table>
+              </Box>
 
               {/* Pagination */}
               {meta.lastPage > 1 && (
                 <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    py: 2,
-                    borderTop: "1px solid var(--color-border-default-primary)",
-                    px: 2,
-                    gap: 2,
-                  }}
+                  sx={[
+                    toolbarRowSx,
+                    { borderTop: "1px solid var(--color-border-default-primary)" },
+                  ]}
                 >
-                  <FormControl size="small" sx={{ minWidth: 160 }}>
+                  <FormControl size="small" sx={paginationSelectSx}>
                     <InputLabel id="marketplace-limit-label">
                       Filas por página
                     </InputLabel>

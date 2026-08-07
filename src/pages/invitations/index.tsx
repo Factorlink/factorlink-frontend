@@ -23,6 +23,13 @@ import Layout from "../../components/Layout";
 import { useInvitation } from "../../hooks/useInvitation";
 import useAuthStore from "../../store/authStore";
 import { useUsers } from "../../hooks/useUsers";
+import {
+  tableShellSx,
+  tableScrollSx,
+  tableCompactSx,
+  pageHeaderSx,
+  appContentSx,
+} from "../../theme/layoutStyles";
 
 interface Invitation {
   empresaId?: string;
@@ -147,20 +154,21 @@ const Invitations: FC = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={[appContentSx, { display: "flex", flexDirection: "column", gap: 3 }]}>
         <Box
-          sx={{
-            backgroundColor: "var(--color-bg-default-primary)",
-            borderRadius: "var(--radius-l)",
-            p: 3,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            boxShadow: "var(--shadow-card)",
-            border: "1px solid var(--color-border-default-primary)",
-          }}
+          sx={[
+            pageHeaderSx,
+            {
+              backgroundColor: "var(--color-bg-default-primary)",
+              borderRadius: "var(--radius-l)",
+              p: 3,
+              mb: 0,
+              boxShadow: "var(--shadow-card)",
+              border: "1px solid var(--color-border-default-primary)",
+            },
+          ]}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
             <Box
               sx={{
                 backgroundColor: "var(--color-bg-accent-primary)",
@@ -169,6 +177,7 @@ const Invitations: FC = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0,
               }}
             >
               <MailOutlineIcon
@@ -178,7 +187,7 @@ const Invitations: FC = () => {
                 }}
               />
             </Box>
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
               <Typography
                 variant="h6"
                 sx={{
@@ -211,6 +220,7 @@ const Invitations: FC = () => {
                   : "var(--color-fg-default-secondary)",
               fontWeight: 500,
               fontFamily: "var(--font-heading)",
+              flexShrink: 0,
             }}
           />
         </Box>
@@ -273,15 +283,17 @@ const Invitations: FC = () => {
         {!loadingData && pendingCount > 0 && (
           <TableContainer
             component={Paper}
-            sx={{
-              borderRadius: "var(--radius-l)",
-              boxShadow: "var(--shadow-card)",
-              overflow: "hidden",
-              border: "1px solid var(--color-border-default-primary)",
-              backgroundColor: "var(--color-bg-default-primary)",
-            }}
+            sx={[
+              tableShellSx,
+              {
+                borderRadius: "var(--radius-l)",
+                border: "1px solid var(--color-border-default-primary)",
+                backgroundColor: "var(--color-bg-default-primary)",
+              },
+            ]}
           >
-            <Table>
+            <Box sx={tableScrollSx}>
+            <Table sx={tableCompactSx}>
               <TableHead>
                 <TableRow
                   sx={{
@@ -461,6 +473,7 @@ const Invitations: FC = () => {
                 )}
               </TableBody>
             </Table>
+            </Box>
           </TableContainer>
         )}
       </Box>

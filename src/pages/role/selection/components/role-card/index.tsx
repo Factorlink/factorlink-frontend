@@ -38,7 +38,8 @@ const RoleCard = ({
   return (
     <Card
       sx={{
-        width: 280,
+        width: "100%",
+        maxWidth: 280,
         borderRadius: "var(--radius-l)",
         backgroundColor: "var(--color-bg-default-primary)",
         boxShadow: "var(--shadow-card)",

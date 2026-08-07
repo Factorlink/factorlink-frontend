@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { Description, ArrowForward } from "@mui/icons-material";
+import { tableScrollSx, tableCompactSx } from "../../theme/layoutStyles";
 
 const dueInvoices = [
   {
@@ -116,8 +117,8 @@ const DueInvoicesCard = () => {
         </IconButton>
       </Box>
 
-      <TableContainer>
-        <Table size="small">
+      <TableContainer sx={tableScrollSx}>
+        <Table size="small" sx={tableCompactSx}>
           <TableHead>
             <TableRow>
               <TableCell sx={headerCellSx}>#</TableCell>
