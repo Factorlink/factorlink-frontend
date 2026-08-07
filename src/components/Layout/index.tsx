@@ -16,14 +16,36 @@ const Layout = ({
     <Box
       sx={{
         display: "flex",
-        minHeight: "100vh",
+        height: "100%",
+        maxHeight: "100dvh",
+        overflow: "hidden",
         backgroundColor: "var(--color-bg-default-secondary)",
       }}
     >
       {!hideMenu && <Sidebar />}
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          minHeight: 0,
+          overflow: "hidden",
+        }}
+      >
         <Header hideSuite={hideSuite} />
-        {children}
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            minHeight: 0,
+            overflow: "auto",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   );

@@ -30,7 +30,8 @@ const RoleSelection = () => {
     <Layout hideSuite={true} hideMenu={true}>
       <Box
         sx={{
-          minHeight: "100vh",
+          flex: 1,
+          minHeight: 0,
           backgroundColor: "var(--color-bg-neutral-primary)",
           display: "flex",
           flexDirection: "column",
