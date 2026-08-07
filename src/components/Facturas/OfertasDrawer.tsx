@@ -192,22 +192,34 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
         open={open}
         onClose={onClose}
         PaperProps={{
-          sx: { width: { xs: "100%", md: "75%", lg: "65%" }, p: 3 },
+          sx: {
+            width: { xs: "100%", md: "75%", lg: "65%" },
+            p: { xs: 2, md: 3 },
+          },
         }}
       >
         {/* Header */}
         <Box
           sx={{
             display: "flex",
+            flexWrap: "wrap",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: 2,
             mb: 3,
           }}
         >
-          <Typography variant="h5" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 700,
+              color: "var(--color-fg-default-primary)",
+              minWidth: 0,
+            }}
+          >
             Ofertas Recibidas
           </Typography>
-          <IconButton onClick={onClose}>
+          <IconButton onClick={onClose} sx={{ flexShrink: 0 }}>
             <Close />
           </IconButton>
         </Box>

@@ -120,7 +120,8 @@ const RoleSelection = () => {
               user?.roles?.some((role) => role.contexto === "empresa")) && (
               <Card
                 sx={{
-                  width: 280,
+                  width: "100%",
+                  maxWidth: 280,
                   borderRadius: "var(--radius-l)",
                   backgroundColor: "transparent",
                   border: "2px dashed color-mix(in srgb, var(--color-fg-on-neutral-primary) 35%, transparent)",

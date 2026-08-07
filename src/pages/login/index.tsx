@@ -246,7 +246,6 @@ const Login = () => {
         PaperProps={{
           sx: {
             borderRadius: "var(--radius-l)",
-            minWidth: 350,
             padding: 2,
           },
         }}

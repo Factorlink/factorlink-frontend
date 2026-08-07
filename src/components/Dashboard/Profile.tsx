@@ -256,7 +256,6 @@ const Profile = () => {
         PaperProps={{
           sx: {
             borderRadius: "var(--radius-l)",
-            minWidth: 350,
             p: 1,
           },
         }}

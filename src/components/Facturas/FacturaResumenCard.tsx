@@ -328,7 +328,11 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" },
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+              md: "repeat(4, minmax(0, 1fr))",
+            },
             gap: 2,
           }}
         >

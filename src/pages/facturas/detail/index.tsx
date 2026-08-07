@@ -28,6 +28,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import useAuthStore from "../../../store/authStore";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
 import OfertasDrawer from "../../../components/Facturas/OfertasDrawer";
+import { appContentSx } from "../../../theme/layoutStyles";
 import FacturaResumenCard from "../../../components/Facturas/FacturaResumenCard";
 import DetalleCotizacionCard from "../../../components/Facturas/DetalleCotizacionCard";
 import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
@@ -166,7 +167,7 @@ const FacturaDetail = () => {
   if (error) {
     return (
       <Layout>
-        <Box sx={{ p: 3 }}>
+        <Box sx={appContentSx}>
           <IconButton onClick={handleBack} sx={{ mb: 2 }}>
             <ArrowBack />
           </IconButton>
@@ -209,7 +210,7 @@ const FacturaDetail = () => {
   if (!factura) {
     return (
       <Layout>
-        <Box sx={{ p: 3 }}>
+        <Box sx={appContentSx}>
           <IconButton onClick={handleBack} sx={{ mb: 2 }}>
             <ArrowBack />
           </IconButton>
@@ -240,7 +241,7 @@ const FacturaDetail = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, flex: 1 }}>
+      <Box sx={appContentSx}>
         {/* Back Button */}
         <Box sx={{ mb: 2 }}>
           <Button
@@ -337,7 +338,7 @@ const FacturaDetail = () => {
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
-            gap: 3,
+            gap: { xs: 2, md: 3 },
             gridAutoRows: "auto", // allow each row to size itself
             alignItems: "start",  // prevent stretching children to full row height
           }}

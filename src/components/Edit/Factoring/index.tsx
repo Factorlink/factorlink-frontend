@@ -304,7 +304,6 @@ const Factoring = () => {
         PaperProps={{
           sx: {
             borderRadius: "var(--radius-l)",
-            minWidth: 360,
             overflow: "hidden",
           },
         }}

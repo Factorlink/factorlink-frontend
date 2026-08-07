@@ -442,7 +442,6 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
         PaperProps={{
           sx: {
             borderRadius: "var(--radius-l)",
-            minWidth: 360,
             overflow: "hidden",
           },
         }}

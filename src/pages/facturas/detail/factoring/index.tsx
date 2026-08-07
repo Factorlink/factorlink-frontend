@@ -17,6 +17,7 @@ import EnviarOfertaCard from "../../../../components/Facturas/EnviarOfertaCard";
 import DetalleOfertaFactoring from "../../../../components/Ofertas/DetalleOfertaFactoring";
 import HistorialOfertasFactoring from "../../../../components/Ofertas/HistorialOfertasFactoring";
 import DetalleCotizacionCard from "../../../../components/Facturas/DetalleCotizacionCard";
+import { appContentSx } from "../../../../theme/layoutStyles";
 
 const FacturaFactoringDetail = () => {
   const { getFacturaByIdAndFactoringId, loading } = useFacturas();
@@ -77,7 +78,7 @@ const FacturaFactoringDetail = () => {
   if (error) {
     return (
       <Layout>
-        <Box sx={{ p: 3 }}>
+        <Box sx={appContentSx}>
           <IconButton onClick={handleBack} sx={{ mb: 2 }}>
             <ArrowBack />
           </IconButton>
@@ -120,7 +121,7 @@ const FacturaFactoringDetail = () => {
   if (!factura) {
     return (
       <Layout>
-        <Box sx={{ p: 3 }}>
+        <Box sx={appContentSx}>
           <IconButton onClick={handleBack} sx={{ mb: 2 }}>
             <ArrowBack />
           </IconButton>
@@ -146,7 +147,7 @@ const FacturaFactoringDetail = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, flex: 1 }}>
+      <Box sx={appContentSx}>
         {/* Back Button */}
         <Box sx={{ mb: 2 }}>
           <Button

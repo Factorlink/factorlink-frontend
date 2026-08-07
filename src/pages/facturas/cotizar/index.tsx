@@ -43,6 +43,7 @@ import FacturaResumenCard, {
 import FactoringsList from "../../../components/Facturas/FactoringsList";
 import UploadPdfModal from "../../../components/Modals/UploadPdfModal";
 import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
+import { appContentSx } from "../../../theme/layoutStyles";
 
 const STEPS = ["Resumen Factura", "XML + Condiciones", "Resumen Final"];
 
@@ -333,7 +334,7 @@ const CotizarFactura = () => {
   if (error) {
     return (
       <Layout>
-        <Box sx={{ p: 3 }}>
+        <Box sx={appContentSx}>
           <IconButton onClick={handleBack} sx={{ mb: 2 }}>
             <ArrowBack />
           </IconButton>
@@ -376,7 +377,7 @@ const CotizarFactura = () => {
   if (!factura) {
     return (
       <Layout>
-        <Box sx={{ p: 3 }}>
+        <Box sx={appContentSx}>
           <IconButton onClick={handleBack} sx={{ mb: 2 }}>
             <ArrowBack />
           </IconButton>
@@ -402,7 +403,7 @@ const CotizarFactura = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, flex: 1 }}>
+      <Box sx={appContentSx}>
         {/* Back Button */}
         <Box sx={{ mb: 2 }}>
           <Button
@@ -826,10 +827,10 @@ const CotizarFactura = () => {
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
                 gap: 3,
               }}
-              >
+            >
                 {/* XML Validated Card */}
                 <Box
                   sx={{

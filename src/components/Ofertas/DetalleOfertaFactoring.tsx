@@ -124,8 +124,10 @@ const DetalleOfertaFactoring = ({
             <Box
               sx={{
                 display: "flex",
+                flexWrap: "wrap",
                 justifyContent: "space-between",
                 alignItems: "center",
+                gap: 1.5,
                 mb: 3,
               }}
             >
@@ -149,7 +151,11 @@ const DetalleOfertaFactoring = ({
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: { xs: "1fr 1fr", md: "1fr 1fr 1fr 1fr" },
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  md: "repeat(4, minmax(0, 1fr))",
+                },
                 gap: 3,
                 mb: 3,
               }}
