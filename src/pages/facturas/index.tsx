@@ -63,6 +63,7 @@ import {
   paginationSelectSx,
   pageHeaderSx,
   statsRowSx,
+  appContentSx,
 } from "../../theme/layoutStyles";
 
 const formatCurrency = (value: string | number) => {
@@ -381,7 +382,7 @@ const Facturas = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, flex: 1 }}>
+      <Box sx={appContentSx}>
         {/* Header Section */}
         <Box
           sx={[

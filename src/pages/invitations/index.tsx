@@ -28,6 +28,7 @@ import {
   tableScrollSx,
   tableCompactSx,
   pageHeaderSx,
+  appContentSx,
 } from "../../theme/layoutStyles";
 
 interface Invitation {
@@ -153,7 +154,7 @@ const Invitations: FC = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={[appContentSx, { display: "flex", flexDirection: "column", gap: 3 }]}>
         <Box
           sx={[
             pageHeaderSx,

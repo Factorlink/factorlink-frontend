@@ -4,6 +4,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Layout from "../../components/Layout";
 import useAuthStore from "../../store/authStore";
 import { ROLES } from "../../utils/consts";
+import { appContentSx } from "../../theme/layoutStyles";
 
 const Edit = () => {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ const Edit = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, flex: 1 }}>
+      <Box sx={appContentSx}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs
             value={getTabValue()}
@@ -72,7 +73,7 @@ const Edit = () => {
           </Tabs>
         </Box>
 
-        <Box sx={{ pt: 3 }}>
+        <Box sx={{ pt: { xs: 2, md: 3 } }}>
           <Outlet />
         </Box>
       </Box>

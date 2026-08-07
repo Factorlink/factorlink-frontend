@@ -37,6 +37,7 @@ import {
   toolbarRowSx,
   paginationSelectSx,
   pageHeaderSx,
+  appContentSx,
 } from "../../theme/layoutStyles";
 
 const MARKETPLACE_SORTABLE_COLUMNS = [
@@ -220,7 +221,7 @@ const Marketplace = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, flex: 1 }}>
+      <Box sx={appContentSx}>
         {/* Header Section */}
         <Box
           sx={[

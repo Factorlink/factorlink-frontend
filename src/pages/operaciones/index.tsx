@@ -13,7 +13,7 @@ import {
 } from "@mui/icons-material";
 import Layout from "../../components/Layout";
 import OperationsTabs from "../../components/Dashboard/OperationsTabs";
-import { pageHeaderSx, paginationSelectSx } from "../../theme/layoutStyles";
+import { pageHeaderSx, paginationSelectSx, appContentSx } from "../../theme/layoutStyles";
 
 const tabLabels = [
   "Marketplace",
@@ -44,7 +44,7 @@ const data = [
 const Operaciones = () => {
   return (
     <Layout>
-      <Box sx={{ p: 3, flex: 1 }}>
+      <Box sx={appContentSx}>
         <Box
           sx={[
             pageHeaderSx,
