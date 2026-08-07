@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Description } from "@mui/icons-material";
+import { tableScrollSx, tableCompactSx } from "../../theme/layoutStyles";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -115,8 +116,8 @@ const PendingInvoicesTabs = () => {
       </Box>
 
       <TabPanel value={tabValue} index={0}>
-        <TableContainer>
-          <Table>
+        <TableContainer sx={tableScrollSx}>
+          <Table sx={tableCompactSx}>
             <TableHead>
               <TableRow>
                 <TableCell sx={headerCellSx}>Folio</TableCell>

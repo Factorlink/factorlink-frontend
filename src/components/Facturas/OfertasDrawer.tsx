@@ -32,6 +32,11 @@ import type { Oferta } from "../../types/oferta";
 import AceptarOfertaModal from "../Modals/AceptarOfertaModal";
 import RechazarOfertaModal from "../Modals/RechazarOfertaModal";
 import SortableTableHeader from "./SortableTableHeader";
+import {
+  tableShellSx,
+  tableScrollSx,
+  tableWideSx,
+} from "../../theme/layoutStyles";
 
 interface OfertasDrawerProps {
   open: boolean;
@@ -322,11 +327,9 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
             </Typography>
           </Box>
         ) : (
-          <TableContainer
-            component={Paper}
-            sx={{ borderRadius: 3, boxShadow: "var(--shadow-card)" }}
-          >
-            <Table>
+          <TableContainer component={Paper} sx={tableShellSx}>
+            <Box sx={tableScrollSx}>
+            <Table sx={tableWideSx}>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
                   <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)", width: 48 }} />
@@ -514,6 +517,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                 })}
               </TableBody>
             </Table>
+            </Box>
           </TableContainer>
         )}
       </Drawer>

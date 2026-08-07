@@ -55,6 +55,13 @@ import type { Meta } from "../../types/meta";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { INITIAL_FILTERS, SORTABLE_COLUMNS } from "../../utils/consts";
 import { getFacturaStatusConfig } from "../../theme";
+import {
+  tableShellSx,
+  tableScrollSx,
+  tableWideSx,
+  toolbarRowSx,
+  paginationSelectSx,
+} from "../../theme/layoutStyles";
 
 const formatCurrency = (value: string | number) => {
   const numValue = typeof value === "string" ? parseFloat(value) : value;
@@ -636,14 +643,7 @@ const Facturas = () => {
               loading={loading}
             />
             {/* Table */}
-            <TableContainer
-              component={Paper}
-              sx={{
-                borderRadius: 3,
-                boxShadow: "var(--shadow-card)",
-                overflow: "hidden",
-              }}
-            >
+            <TableContainer component={Paper} sx={tableShellSx}>
               {loading ? (
                 <Box
                   sx={{
@@ -680,7 +680,8 @@ const Facturas = () => {
                 </Box>
               ) : (
                 <>
-                  <Table>
+                  <Box sx={tableScrollSx}>
+                  <Table sx={tableWideSx}>
                     <TableHead>
                       <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
                         {SORTABLE_COLUMNS.map((column) => (
@@ -794,21 +795,17 @@ const Facturas = () => {
                       })}
                     </TableBody>
                   </Table>
+                  </Box>
 
                   {/* Pagination */}
                   {meta.lastPage > 1 && (
                     <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        py: 2,
-                        borderTop: "1px solid var(--color-border-default-primary)",
-                        px: 2,
-                        gap: 2,
-                      }}
+                      sx={[
+                        toolbarRowSx,
+                        { borderTop: "1px solid var(--color-border-default-primary)" },
+                      ]}
                     >
-                      <FormControl size="small" sx={{ minWidth: 160 }}>
+                      <FormControl size="small" sx={paginationSelectSx}>
                         <InputLabel id="limit-label">Filas por página</InputLabel>
                         <Select
                           labelId="limit-label"

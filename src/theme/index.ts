@@ -42,6 +42,10 @@ export {
   pageHeaderSx,
   statsRowSx,
   tableShellSx,
+  tableScrollSx,
+  tableWideSx,
+  tableCompactSx,
   toolbarRowSx,
+  paginationSelectSx,
   dialogPaperFluidSx,
 } from "./layoutStyles";

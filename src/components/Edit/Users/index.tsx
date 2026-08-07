@@ -35,6 +35,11 @@ import type { Role } from "../../../types/role";
 import { ROLE_NAMES, ROLES } from "../../../utils/consts";
 import { capitalizeFirstLetter } from "../../../utils/utils";
 import { surface } from "../../../theme";
+import {
+  tableShellSx,
+  tableScrollSx,
+  tableWideSx,
+} from "../../../theme/layoutStyles";
 
 const getInitials = (firstName: string, lastName: string) => {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -277,13 +282,10 @@ const Users = () => {
       {/* Users Table */}
       <TableContainer
         component={Paper}
-        sx={{
-          borderRadius: "var(--radius-l)",
-          boxShadow: "var(--shadow-card)",
-          overflow: "hidden",
-        }}
+        sx={[tableShellSx, { borderRadius: "var(--radius-l)" }]}
       >
-        <Table>
+        <Box sx={tableScrollSx}>
+        <Table sx={tableWideSx}>
           <TableHead>
             <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
               <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
@@ -477,6 +479,7 @@ const Users = () => {
             })}
           </TableBody>
         </Table>
+        </Box>
       </TableContainer>
 
       {/* Actions Menu */}

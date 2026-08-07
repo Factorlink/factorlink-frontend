@@ -23,6 +23,11 @@ import Layout from "../../components/Layout";
 import { useInvitation } from "../../hooks/useInvitation";
 import useAuthStore from "../../store/authStore";
 import { useUsers } from "../../hooks/useUsers";
+import {
+  tableShellSx,
+  tableScrollSx,
+  tableCompactSx,
+} from "../../theme/layoutStyles";
 
 interface Invitation {
   empresaId?: string;
@@ -273,15 +278,17 @@ const Invitations: FC = () => {
         {!loadingData && pendingCount > 0 && (
           <TableContainer
             component={Paper}
-            sx={{
-              borderRadius: "var(--radius-l)",
-              boxShadow: "var(--shadow-card)",
-              overflow: "hidden",
-              border: "1px solid var(--color-border-default-primary)",
-              backgroundColor: "var(--color-bg-default-primary)",
-            }}
+            sx={[
+              tableShellSx,
+              {
+                borderRadius: "var(--radius-l)",
+                border: "1px solid var(--color-border-default-primary)",
+                backgroundColor: "var(--color-bg-default-primary)",
+              },
+            ]}
           >
-            <Table>
+            <Box sx={tableScrollSx}>
+            <Table sx={tableCompactSx}>
               <TableHead>
                 <TableRow
                   sx={{
@@ -461,6 +468,7 @@ const Invitations: FC = () => {
                 )}
               </TableBody>
             </Table>
+            </Box>
           </TableContainer>
         )}
       </Box>

@@ -28,6 +28,7 @@ import DownloadDocumentModal from "../../Modals/DownloadDocumentModal";
 import { useLegalDocuments } from "../../../hooks/useLegalDocuments";
 import useAuthStore from "../../../store/authStore";
 import { DOCUMENT_NAMES } from "../../../utils/consts";
+import { tableScrollSx, tableCompactSx } from "../../../theme/layoutStyles";
 import { capitalizeFirstLetter } from "../../../utils/utils";
 import { surface } from "../../../theme";
 
@@ -275,8 +276,8 @@ const DocumentsTable = () => {
         )}
       </Box>
 
-      <TableContainer>
-        <Table>
+      <TableContainer sx={tableScrollSx}>
+        <Table sx={tableCompactSx}>
           <TableHead>
             <TableRow>
               <TableCell

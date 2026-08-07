@@ -1,4 +1,5 @@
-import type { SxProps, Theme } from "@mui/material/styles";
+import type { Theme } from "@mui/material/styles";
+import type { SystemStyleObject } from "@mui/system";
 
 /**
  * Layout breakpoints (px) — keep in sync with:
@@ -23,7 +24,7 @@ export const layoutBreakpoints = {
 } as const;
 
 /** Authenticated page content pane (inside Layout children). */
-export const appContentSx: SxProps<Theme> = {
+export const appContentSx: SystemStyleObject<Theme> = {
   flex: 1,
   minWidth: 0,
   minHeight: 0,
@@ -32,7 +33,7 @@ export const appContentSx: SxProps<Theme> = {
 };
 
 /** Page title row + primary actions. */
-export const pageHeaderSx: SxProps<Theme> = {
+export const pageHeaderSx: SystemStyleObject<Theme> = {
   display: "flex",
   flexWrap: "wrap",
   alignItems: "center",
@@ -42,7 +43,7 @@ export const pageHeaderSx: SxProps<Theme> = {
 };
 
 /** Metric / summary cards row. */
-export const statsRowSx: SxProps<Theme> = {
+export const statsRowSx: SystemStyleObject<Theme> = {
   display: "grid",
   gridTemplateColumns: {
     xs: "1fr 1fr",
@@ -53,18 +54,34 @@ export const statsRowSx: SxProps<Theme> = {
 };
 
 /**
- * TableContainer shell: horizontal scroll instead of clipping columns.
- * Keep borderRadius/shadow at the call site or merge with this preset.
+ * Outer Paper / TableContainer: clips border radius.
+ * Wrap the <Table> in a Box with `tableScrollSx` so pagination footers
+ * stay fixed while columns scroll horizontally.
  */
-export const tableShellSx: SxProps<Theme> = {
-  overflowX: "auto",
-  overflowY: "hidden",
+export const tableShellSx: SystemStyleObject<Theme> = {
+  overflow: "hidden",
   borderRadius: 3,
   boxShadow: "var(--shadow-card)",
 };
 
+/** Horizontal scroll region wrapping <Table>. */
+export const tableScrollSx: SystemStyleObject<Theme> = {
+  overflowX: "auto",
+  width: "100%",
+};
+
+/** ~7–8 column factura / marketplace / users tables. */
+export const tableWideSx: SystemStyleObject<Theme> = {
+  minWidth: 900,
+};
+
+/** ~4–6 column compact tables (invitations, documents, dashboard). */
+export const tableCompactSx: SystemStyleObject<Theme> = {
+  minWidth: 720,
+};
+
 /** Pagination / filter toolbars under tables. */
-export const toolbarRowSx: SxProps<Theme> = {
+export const toolbarRowSx: SystemStyleObject<Theme> = {
   display: "flex",
   flexWrap: "wrap",
   alignItems: "center",
@@ -73,8 +90,13 @@ export const toolbarRowSx: SxProps<Theme> = {
   p: 2,
 };
 
+/** "Rows per page" select — fluid min width. */
+export const paginationSelectSx: SystemStyleObject<Theme> = {
+  minWidth: { xs: 120, sm: 160 },
+};
+
 /** Prefer over hardcoded PaperProps minWidth on dialogs. */
-export const dialogPaperFluidSx: SxProps<Theme> = {
+export const dialogPaperFluidSx: SystemStyleObject<Theme> = {
   width: "100%",
   maxWidth: "100%",
 };
