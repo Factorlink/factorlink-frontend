@@ -263,6 +263,15 @@
   --easing-ease-out: cubic-bezier(0, 0, 0.58, 1);
   --easing-ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
 
+  /*
+   * Layout breakpoints (layout-driven, not device categories).
+   * Keep in sync with theme.breakpoints.values / layoutBreakpoints in layoutStyles.ts:
+   *   s  → MUI sm  — toolbars stack, dialogs fluid
+   *   m  → MUI md  — sidebar rail, page headers stack
+   *   l  → MUI lg  — multi-column forms/detail
+   *   xl → MUI xl  — wide dashboard splits
+   *   2xl          — optional content max-width (CSS-only for now)
+   */
   --breakpoint-s: 500px;
   --breakpoint-m: 768px;
   --breakpoint-l: 1012px;

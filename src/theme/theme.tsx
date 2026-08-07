@@ -1,4 +1,5 @@
 import { createTheme } from "@mui/material/styles";
+import { layoutBreakpoints } from "./layoutStyles";
 
 const radiusM = "var(--radius-m)";
 const radiusL = "var(--radius-l)";
@@ -6,6 +7,16 @@ const radiusL = "var(--radius-l)";
 export const theme = createTheme({
   cssVariables: {
     nativeColor: true,
+  },
+  // Aligned with --breakpoint-* in tokens.css (see layoutBreakpoints).
+  breakpoints: {
+    values: {
+      xs: layoutBreakpoints.xs,
+      sm: layoutBreakpoints.sm,
+      md: layoutBreakpoints.md,
+      lg: layoutBreakpoints.lg,
+      xl: layoutBreakpoints.xl,
+    },
   },
   palette: {
     primary: {
@@ -109,9 +120,16 @@ export const theme = createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: {
+        html: {
+          height: "100%",
+        },
         body: {
+          height: "100%",
           backgroundColor: "var(--color-bg-default-primary)",
           color: "var(--color-fg-default-primary)",
+        },
+        "#root": {
+          height: "100%",
         },
       },
     },
