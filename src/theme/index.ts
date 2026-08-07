@@ -41,6 +41,7 @@ export {
   appContentSx,
   pageHeaderSx,
   statsRowSx,
+  statsRowThreeSx,
   tableShellSx,
   tableScrollSx,
   tableWideSx,

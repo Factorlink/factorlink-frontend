@@ -61,6 +61,8 @@ import {
   tableWideSx,
   toolbarRowSx,
   paginationSelectSx,
+  pageHeaderSx,
+  statsRowSx,
 } from "../../theme/layoutStyles";
 
 const formatCurrency = (value: string | number) => {
@@ -382,17 +384,16 @@ const Facturas = () => {
       <Box sx={{ p: 3, flex: 1 }}>
         {/* Header Section */}
         <Box
-          sx={{
-            backgroundColor: "var(--color-bg-default-primary)",
-            borderRadius: 3,
-            p: 3,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-          }}
+          sx={[
+            pageHeaderSx,
+            {
+              backgroundColor: "var(--color-bg-default-primary)",
+              borderRadius: 3,
+              p: 3,
+            },
+          ]}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
             <Box
               sx={{
                 backgroundColor: "var(--color-bg-default-primary)",
@@ -401,11 +402,12 @@ const Facturas = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0,
               }}
             >
               <Description sx={{ color: "var(--color-fg-default-secondary)", fontSize: 28 }} />
             </Box>
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
               <Typography
                 variant="h6"
                 sx={{ fontWeight: 500, fontFamily: "var(--font-heading)", color: "var(--color-fg-default-primary)" }}
@@ -417,7 +419,7 @@ const Facturas = () => {
               </Typography>
             </Box>
           </Box>
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, flexShrink: 0 }}>
             <Button
               variant="contained"
               startIcon={<Sync />}
@@ -438,10 +440,10 @@ const Facturas = () => {
         </Box>
 
         {/* Stats Cards */}
-        <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+        <Box sx={statsRowSx}>
           <Box
             sx={{
-              flex: 1,
+              minWidth: 0,
               backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
@@ -457,7 +459,7 @@ const Facturas = () => {
           </Box>
           <Box
             sx={{
-              flex: 1,
+              minWidth: 0,
               backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
@@ -473,7 +475,7 @@ const Facturas = () => {
           </Box>
           <Box
             sx={{
-              flex: 1,
+              minWidth: 0,
               backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
@@ -489,7 +491,7 @@ const Facturas = () => {
           </Box>
           <Box
             sx={{
-              flex: 1,
+              minWidth: 0,
               backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 2.5,
@@ -512,6 +514,9 @@ const Facturas = () => {
             onChange={(_e, newValue) => {
               navigate(TAB_ROUTES[newValue]);
             }}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
           >
             <Tab
               icon={<Description sx={{ fontSize: 18 }} />}

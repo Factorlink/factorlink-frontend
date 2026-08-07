@@ -36,6 +36,7 @@ import {
   tableWideSx,
   toolbarRowSx,
   paginationSelectSx,
+  pageHeaderSx,
 } from "../../theme/layoutStyles";
 
 const MARKETPLACE_SORTABLE_COLUMNS = [
@@ -222,17 +223,16 @@ const Marketplace = () => {
       <Box sx={{ p: 3, flex: 1 }}>
         {/* Header Section */}
         <Box
-          sx={{
-            backgroundColor: "var(--color-bg-default-primary)",
-            borderRadius: 3,
-            p: 3,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-          }}
+          sx={[
+            pageHeaderSx,
+            {
+              backgroundColor: "var(--color-bg-default-primary)",
+              borderRadius: 3,
+              p: 3,
+            },
+          ]}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
             <Box
               sx={{
                 backgroundColor: "var(--color-bg-default-primary)",
@@ -241,11 +241,12 @@ const Marketplace = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0,
               }}
             >
               <Storefront sx={{ color: "var(--color-fg-default-secondary)", fontSize: 28 }} />
             </Box>
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
               <Typography
                 variant="h6"
                 sx={{ fontWeight: 500, fontFamily: "var(--font-heading)", color: "var(--color-fg-default-primary)" }}

@@ -59,7 +59,13 @@ const Edit = () => {
     <Layout>
       <Box sx={{ p: 3, flex: 1 }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs value={getTabValue()} onChange={handleTabChange}>
+          <Tabs
+            value={getTabValue()}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
             {buildTabs().map((t) => (
               <Tab key={t.path} label={t.label} />
             ))}

@@ -21,6 +21,7 @@ import type { Role } from "../../../types/role";
 import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import { surface } from "../../../theme";
+import { pageHeaderSx } from "../../../theme/layoutStyles";
 
 interface EmpresaFormData {
   rut: string;
@@ -162,14 +163,15 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
         >
           <Box sx={{ paddingLeft: { md: 2 } }}>
             <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingBottom: 3
-              }}
+              sx={[
+                pageHeaderSx,
+                {
+                  mb: 0,
+                  paddingBottom: 3,
+                },
+              ]}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
                 <Box
                   sx={{
                     backgroundColor: "var(--color-bg-accent-primary)",
@@ -178,13 +180,14 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    flexShrink: 0,
                   }}
                 >
                   <ApartmentOutlinedIcon
                     sx={{ color: "white", fontSize: 28 }}
                   />
                 </Box>
-                <Box>
+                <Box sx={{ minWidth: 0 }}>
                   <Typography
                     variant="h6"
                     sx={{ color: "text.primary", fontWeight: 600 }}
@@ -210,7 +213,7 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
                   px: 3,
                   py: 1.2,
                   boxShadow: "none",
-                  whiteSpace: "nowrap",
+                  flexShrink: 0,
                   "&:hover": {
                     backgroundColor: "var(--color-bg-accent-primary-hover)",
                     boxShadow: "none",

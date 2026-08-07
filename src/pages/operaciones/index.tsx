@@ -13,6 +13,7 @@ import {
 } from "@mui/icons-material";
 import Layout from "../../components/Layout";
 import OperationsTabs from "../../components/Dashboard/OperationsTabs";
+import { pageHeaderSx, paginationSelectSx } from "../../theme/layoutStyles";
 
 const tabLabels = [
   "Marketplace",
@@ -45,24 +46,24 @@ const Operaciones = () => {
     <Layout>
       <Box sx={{ p: 3, flex: 1 }}>
         <Box
-          sx={{
-            background:
-              "linear-gradient(135deg, var(--color-bg-neutral-primary) 0%, var(--color-bg-accent-primary) 100%)",
-            borderRadius: "var(--radius-l)",
-            p: 2.5,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            position: "relative",
-            overflow: "hidden",
-            mb: 3,
-          }}
+          sx={[
+            pageHeaderSx,
+            {
+              background:
+                "linear-gradient(135deg, var(--color-bg-neutral-primary) 0%, var(--color-bg-accent-primary) 100%)",
+              borderRadius: "var(--radius-l)",
+              p: 2.5,
+              position: "relative",
+              overflow: "hidden",
+            },
+          ]}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
             <Description
               sx={{
                 color: "var(--color-fg-success-primary)",
                 fontSize: "1.5rem",
+                flexShrink: 0,
               }}
             />
             <Typography
@@ -88,7 +89,7 @@ const Operaciones = () => {
           }}
         >
           <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
-            <FormControl size="small" sx={{ minWidth: 200 }}>
+            <FormControl size="small" sx={[paginationSelectSx, { minWidth: { xs: 160, sm: 200 } }]}>
               <Select
                 defaultValue="fecha"
                 IconComponent={KeyboardArrowDown}
@@ -97,7 +98,7 @@ const Operaciones = () => {
                 <MenuItem value="fecha">01/08/2023 - 29/08/2024</MenuItem>
               </Select>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
+            <FormControl size="small" sx={{ minWidth: { xs: 100, sm: 120 } }}>
               <Select
                 defaultValue="filtro"
                 IconComponent={KeyboardArrowDown}
@@ -107,7 +108,7 @@ const Operaciones = () => {
               </Select>
             </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 140 }}>
+            <FormControl size="small" sx={{ minWidth: { xs: 120, sm: 140 } }}>
               <Select
                 defaultValue="condicional"
                 IconComponent={KeyboardArrowDown}

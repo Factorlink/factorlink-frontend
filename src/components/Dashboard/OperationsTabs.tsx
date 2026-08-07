@@ -72,7 +72,13 @@ const OperationsTabs = ({
           borderBottom: "1px solid var(--color-border-default-primary)",
         }}
       >
-        <Tabs value={tabValue} onChange={handleTabChange}>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+        >
           {tabLabels.map((label) => (
             <Tab key={label} iconPosition="start" label={label} />
           ))}

@@ -42,12 +42,24 @@ export const pageHeaderSx: SystemStyleObject<Theme> = {
   mb: 3,
 };
 
-/** Metric / summary cards row. */
+/** Metric / summary cards row (4 metrics). */
 export const statsRowSx: SystemStyleObject<Theme> = {
   display: "grid",
   gridTemplateColumns: {
-    xs: "1fr 1fr",
+    xs: "repeat(2, minmax(0, 1fr))",
     lg: "repeat(4, minmax(0, 1fr))",
+  },
+  gap: 2,
+  mb: 3,
+};
+
+/** Metric row for 3 cards (e.g. Users). */
+export const statsRowThreeSx: SystemStyleObject<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "1fr",
+    sm: "repeat(2, minmax(0, 1fr))",
+    md: "repeat(3, minmax(0, 1fr))",
   },
   gap: 2,
   mb: 3,

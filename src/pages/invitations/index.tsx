@@ -27,6 +27,7 @@ import {
   tableShellSx,
   tableScrollSx,
   tableCompactSx,
+  pageHeaderSx,
 } from "../../theme/layoutStyles";
 
 interface Invitation {
@@ -154,18 +155,19 @@ const Invitations: FC = () => {
     <Layout>
       <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3 }}>
         <Box
-          sx={{
-            backgroundColor: "var(--color-bg-default-primary)",
-            borderRadius: "var(--radius-l)",
-            p: 3,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            boxShadow: "var(--shadow-card)",
-            border: "1px solid var(--color-border-default-primary)",
-          }}
+          sx={[
+            pageHeaderSx,
+            {
+              backgroundColor: "var(--color-bg-default-primary)",
+              borderRadius: "var(--radius-l)",
+              p: 3,
+              mb: 0,
+              boxShadow: "var(--shadow-card)",
+              border: "1px solid var(--color-border-default-primary)",
+            },
+          ]}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
             <Box
               sx={{
                 backgroundColor: "var(--color-bg-accent-primary)",
@@ -174,6 +176,7 @@ const Invitations: FC = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0,
               }}
             >
               <MailOutlineIcon
@@ -183,7 +186,7 @@ const Invitations: FC = () => {
                 }}
               />
             </Box>
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
               <Typography
                 variant="h6"
                 sx={{
@@ -216,6 +219,7 @@ const Invitations: FC = () => {
                   : "var(--color-fg-default-secondary)",
               fontWeight: 500,
               fontFamily: "var(--font-heading)",
+              flexShrink: 0,
             }}
           />
         </Box>
