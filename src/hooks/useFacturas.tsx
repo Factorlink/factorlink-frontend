@@ -1,14 +1,14 @@
 import { useState } from "react";
 import api from "../lib/axios";
 
-type GetFacturasParams = {
+export type GetFacturasParams = {
   page: number;
   limit: number;
   empresaId?: string;
   factoringId?: string;
   rutEmisor?: string;
   rutReceptor?: string;
-  razonSocialReceptor?: string;
+  razonSocialReceptor?: string | string[];
   montoTotal?: number;
   minMontoTotal?: number;
   maxMontoTotal?: number;
@@ -19,7 +19,7 @@ type GetFacturasParams = {
   minDetalleIva?: number;
   maxDetalleIva?: number;
   folio?: string;
-  estado?: string;
+  estado?: string | string[];
   sortBy?: string;
   order?: string;
 };
@@ -40,6 +40,19 @@ type SendToMarketplacePayload = {
   factoringIds: string[];
 };
 
+const appendParam = (
+  search: URLSearchParams,
+  key: string,
+  value?: string | string[],
+) => {
+  if (value == null) return;
+  const values = (Array.isArray(value) ? value : [value])
+    .map((v) => (typeof v === "string" ? v : String(v)))
+    .filter((v) => v !== "")
+    .filter((v, i, arr) => arr.indexOf(v) === i);
+  values.forEach((v) => search.append(key, v));
+};
+
 export const useFacturas = () => {
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +66,7 @@ export const useFacturas = () => {
 
       if (params.rutEmisor) search.set("rutEmisor", params.rutEmisor);
       if (params.rutReceptor) search.set("rutReceptor", params.rutReceptor);
-      if (params.razonSocialReceptor) search.set("razonSocialReceptor", params.razonSocialReceptor);
+      appendParam(search, "razonSocialReceptor", params.razonSocialReceptor);
       if (params.montoTotal) search.set("montoTotal", String(params.montoTotal));
       if (params.minMontoTotal) search.set("minMontoTotal", String(params.minMontoTotal));
       if (params.maxMontoTotal) search.set("maxMontoTotal", String(params.maxMontoTotal));
@@ -64,7 +77,7 @@ export const useFacturas = () => {
       if (params.minDetalleIva) search.set("minDetalleIva", String(params.minDetalleIva));
       if (params.maxDetalleIva) search.set("maxDetalleIva", String(params.maxDetalleIva));
       if (params.folio) search.set("folio", params.folio);
-      if (params.estado) search.set("estado", params.estado);
+      appendParam(search, "estado", params.estado);
       if (params.sortBy) search.set("sortBy", params.sortBy);
       if (params.order) search.set("order", params.order);
 
@@ -74,6 +87,17 @@ export const useFacturas = () => {
       throw error;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getRazonesSociales = async (empresaId: string) => {
+    try {
+      const search = new URLSearchParams();
+      search.set("empresaId", empresaId);
+      const response = await api.get(`facturas/razones-sociales?${search.toString()}`);
+      return (response.data || []) as string[];
+    } catch (error) {
+      throw error;
     }
   };
 
@@ -171,7 +195,7 @@ export const useFacturas = () => {
       search.set("page", String(params.page));
       search.set("limit", String(params.limit));
       search.set("empresaId", params.empresaId || "");
-      if (params.estado) search.set("estado", params.estado);
+      appendParam(search, "estado", params.estado);
       if (params.sortBy) search.set("sortBy", params.sortBy);
       if (params.order) search.set("order", params.order);
       
@@ -195,7 +219,7 @@ export const useFacturas = () => {
       if (params.empresaId) search.set("empresaId", params.empresaId || "");
       if (params.rutEmisor) search.set("rutEmisor", params.rutEmisor);
       if (params.rutReceptor) search.set("rutReceptor", params.rutReceptor);
-      if (params.razonSocialReceptor) search.set("razonSocialReceptor", params.razonSocialReceptor);
+      appendParam(search, "razonSocialReceptor", params.razonSocialReceptor);
       if (params.montoTotal) search.set("montoTotal", String(params.montoTotal));
       if (params.minMontoTotal) search.set("minMontoTotal", String(params.minMontoTotal));
       if (params.maxMontoTotal) search.set("maxMontoTotal", String(params.maxMontoTotal));
@@ -206,7 +230,7 @@ export const useFacturas = () => {
       if (params.minDetalleIva) search.set("minDetalleIva", String(params.minDetalleIva));
       if (params.maxDetalleIva) search.set("maxDetalleIva", String(params.maxDetalleIva));
       if (params.folio) search.set("folio", params.folio);
-      if (params.estado) search.set("estado", params.estado);
+      appendParam(search, "estado", params.estado);
       if (params.sortBy) search.set("sortBy", params.sortBy);
       if (params.order) search.set("order", params.order);
 
@@ -239,7 +263,7 @@ export const useFacturas = () => {
       search.set("page", String(params.page));
       search.set("limit", String(params.limit));
       search.set("empresaId", params.empresaId || "");
-      if (params.estado) search.set("estado", params.estado);
+      appendParam(search, "estado", params.estado);
       if (params.sortBy) search.set("sortBy", params.sortBy);
       if (params.order) search.set("order", params.order);
 
@@ -259,7 +283,7 @@ export const useFacturas = () => {
       search.set("page", String(params.page));
       search.set("limit", String(params.limit));
       search.set("empresaId", params.empresaId || "");
-      if (params.estado) search.set("estado", params.estado);
+      appendParam(search, "estado", params.estado);
       if (params.sortBy) search.set("sortBy", params.sortBy);
       if (params.order) search.set("order", params.order);
 
@@ -287,6 +311,7 @@ export const useFacturas = () => {
   return {
     loading,
     getFacturas,
+    getRazonesSociales,
     getFacturaById,
     syncFacturasSii,
     updateFactura,

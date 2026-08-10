@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useFormik } from "formik";
 import {
@@ -14,6 +14,9 @@ import {
   Grid,
   IconButton,
   FormHelperText,
+  Chip,
+  CircularProgress,
+  InputAdornment,
 } from "@mui/material";
 import {
   FilterList,
@@ -21,10 +24,15 @@ import {
   ExpandLess,
   Clear,
   Search,
+  Check,
+  Refresh,
 } from "@mui/icons-material";
+import type { SelectChangeEvent } from "@mui/material/Select";
 import { FACTURAS_STATES, INITIAL_FILTERS } from "../../utils/consts";
 import { facturasFiltersSchema } from "./validation-schema";
 import { handleRutInputChange, handlePositiveNumberInputChange } from "../../utils/validations/shared-fields";
+import { useFacturas } from "../../hooks/useFacturas";
+import useAuthStore from "../../store/authStore";
 
 // Bloquea teclas no numéricas en campos numéricos (evita +, -, ., e, etc.)
 const blockNonNumericKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -38,7 +46,7 @@ const blockNonNumericKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
 export interface FacturasFiltersValues {
   rutEmisor: string;
   rutReceptor: string;
-  razonSocialReceptor: string;
+  razonSocialReceptor: string[];
   montoTotal: string;
   minMontoTotal: string;
   maxMontoTotal: string;
@@ -49,10 +57,32 @@ export interface FacturasFiltersValues {
   minDetalleIva: string;
   maxDetalleIva: string;
   folio: string;
-  estado: string;
+  estado: string[];
   sortBy: string;
   order: string;
 }
+
+export const ARRAY_FILTER_KEYS = ["estado", "razonSocialReceptor"] as const;
+
+export type FacturasArrayFilterKey = (typeof ARRAY_FILTER_KEYS)[number];
+
+export const isArrayFilterKey = (
+  key: keyof FacturasFiltersValues,
+): key is FacturasArrayFilterKey =>
+  (ARRAY_FILTER_KEYS as readonly string[]).includes(key);
+
+export const isFilterValueActive = (
+  value: FacturasFiltersValues[keyof FacturasFiltersValues],
+): boolean => {
+  if (Array.isArray(value)) return value.length > 0;
+  return value !== "" && value !== "ASC" && value !== "DESC";
+};
+
+const chipSx = {
+  backgroundColor: "var(--color-bg-accent-secondary)",
+  color: "var(--color-fg-accent-primary)",
+  fontWeight: 500,
+};
 
 interface FacturasFiltersProps {
   onApplyFilters: (filters: FacturasFiltersValues) => void;
@@ -67,10 +97,54 @@ const FacturasFilters = ({
 }: FacturasFiltersProps) => {
   const [expanded, setExpanded] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const { currentRole } = useAuthStore();
+  const { getRazonesSociales } = useFacturas();
 
-  const getInitialValues = () => {
+  const [razonesSociales, setRazonesSociales] = useState<string[]>([]);
+  const [loadingRazones, setLoadingRazones] = useState(false);
+  const [razonesError, setRazonesError] = useState(false);
+  const lastEmpresaIdRef = useRef<string | undefined>(undefined);
+  const getRazonesSocialesRef = useRef(getRazonesSociales);
+  getRazonesSocialesRef.current = getRazonesSociales;
+
+  const fetchRazonesSociales = useCallback(async (empresaId: string) => {
+    try {
+      setLoadingRazones(true);
+      setRazonesError(false);
+      const data = await getRazonesSocialesRef.current(empresaId);
+      setRazonesSociales(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error fetching razones sociales:", err);
+      setRazonesSociales([]);
+      setRazonesError(true);
+    } finally {
+      setLoadingRazones(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const empresaId = currentRole?.empresaId;
+    if (!empresaId) {
+      setRazonesSociales([]);
+      setRazonesError(false);
+      lastEmpresaIdRef.current = undefined;
+      return;
+    }
+    if (lastEmpresaIdRef.current === empresaId) return;
+    lastEmpresaIdRef.current = empresaId;
+    fetchRazonesSociales(empresaId);
+  }, [currentRole?.empresaId, fetchRazonesSociales]);
+
+  const getInitialValues = (): FacturasFiltersValues => {
     const newFilters = { ...INITIAL_FILTERS };
     (Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+      if (isArrayFilterKey(key)) {
+        const values = searchParams.getAll(key);
+        if (values.length > 0) {
+          newFilters[key] = values;
+        }
+        return;
+      }
       const value = searchParams.get(key);
       if (value !== null) {
         newFilters[key] = value;
@@ -94,7 +168,45 @@ const FacturasFilters = ({
     onClearFilters();
   };
 
-  const hasActiveFilters = Object.values(formik.values).some((val) => val !== "" && val !== "ASC" && val !== "DESC");
+  const handleMultiSelectChange = (
+    field: FacturasArrayFilterKey,
+  ) => (event: SelectChangeEvent<string[]>) => {
+    const value = event.target.value;
+    formik.setFieldValue(
+      field,
+      typeof value === "string" ? value.split(",") : value,
+    );
+  };
+
+  const removeArrayValue = (field: FacturasArrayFilterKey, valueToRemove: string) => {
+    formik.setFieldValue(
+      field,
+      formik.values[field].filter((value) => value !== valueToRemove),
+    );
+  };
+
+  const clearArrayField = (field: FacturasArrayFilterKey) => {
+    formik.setFieldValue(field, []);
+  };
+
+  const getEstadoLabel = (value: string) =>
+    FACTURAS_STATES.find((estado) => estado.value === value)?.label || value;
+
+  const activeFilterCount = Object.values(formik.values).filter(isFilterValueActive).length;
+  const hasActiveFilters = activeFilterCount > 0;
+
+  const razonesHelperText = (() => {
+    if (razonesError) {
+      return "No pudimos cargar las razones sociales. Intenta nuevamente.";
+    }
+    if (!loadingRazones && razonesSociales.length === 0 && currentRole?.empresaId) {
+      return "No hay razones sociales disponibles.";
+    }
+    if (formik.touched.razonSocialReceptor && formik.errors.razonSocialReceptor) {
+      return formik.errors.razonSocialReceptor as string;
+    }
+    return undefined;
+  })();
 
   return (
     <Box
@@ -138,7 +250,7 @@ const FacturasFilters = ({
                 fontWeight: 600,
               }}
             >
-              {Object.values(formik.values).filter((val) => val !== "" && val !== "ASC" && val !== "DESC").length}
+              {activeFilterCount}
             </Box>
           )}
         </Box>
@@ -187,18 +299,96 @@ const FacturasFilters = ({
 
             {/* Razón Social Receptor */}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField
+              <FormControl
                 fullWidth
                 size="small"
-                name="razonSocialReceptor"
-                label="Razón Social Receptor"
-                placeholder="Nombre empresa"
-                value={formik.values.razonSocialReceptor}
-                onChange={formik.handleChange}
-                error={formik.touched.razonSocialReceptor && Boolean(formik.errors.razonSocialReceptor)}
-                helperText={formik.touched.razonSocialReceptor && formik.errors.razonSocialReceptor}
-                onBlur={formik.handleBlur}
-              />
+                error={Boolean(razonesError) || (formik.touched.razonSocialReceptor && Boolean(formik.errors.razonSocialReceptor))}
+              >
+                <InputLabel>Razón Social Receptor</InputLabel>
+                <Select
+                  multiple
+                  name="razonSocialReceptor"
+                  value={formik.values.razonSocialReceptor}
+                  label="Razón Social Receptor"
+                  onChange={handleMultiSelectChange("razonSocialReceptor")}
+                  disabled={loadingRazones || (!razonesError && razonesSociales.length === 0)}
+                  endAdornment={
+                    <InputAdornment position="end" sx={{ mr: 2 }}>
+                      {loadingRazones && <CircularProgress size={16} />}
+                      {razonesError && !loadingRazones && currentRole?.empresaId && (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            fetchRazonesSociales(currentRole.empresaId!);
+                          }}
+                          aria-label="Reintentar carga de razones sociales"
+                        >
+                          <Refresh fontSize="small" />
+                        </IconButton>
+                      )}
+                      {!loadingRazones && formik.values.razonSocialReceptor.length > 0 && (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearArrayField("razonSocialReceptor");
+                          }}
+                          aria-label="Limpiar razones sociales"
+                        >
+                          <Clear fontSize="small" />
+                        </IconButton>
+                      )}
+                    </InputAdornment>
+                  }
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip
+                          key={value}
+                          label={value}
+                          size="small"
+                          sx={chipSx}
+                          onDelete={(e) => {
+                            e.stopPropagation();
+                            removeArrayValue("razonSocialReceptor", value);
+                          }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {razonesSociales.map((razon) => {
+                    const isSelected = formik.values.razonSocialReceptor.includes(razon);
+                    return (
+                      <MenuItem
+                        key={razon}
+                        value={razon}
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          backgroundColor: isSelected
+                            ? "var(--color-bg-accent-secondary)"
+                            : "transparent",
+                          "&:hover": {
+                            backgroundColor: isSelected
+                              ? "var(--color-bg-accent-secondary-hover)"
+                              : undefined,
+                          },
+                        }}
+                      >
+                        <span>{razon}</span>
+                        {isSelected && <Check fontSize="small" />}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+                {razonesHelperText && (
+                  <FormHelperText>{razonesHelperText}</FormHelperText>
+                )}
+              </FormControl>
             </Grid>
 
             {/* Estado */}
@@ -206,19 +396,73 @@ const FacturasFilters = ({
               <FormControl fullWidth size="small" error={formik.touched.estado && Boolean(formik.errors.estado)}>
                 <InputLabel>Estado</InputLabel>
                 <Select
+                  multiple
                   name="estado"
                   value={formik.values.estado}
                   label="Estado"
-                  onChange={formik.handleChange}
+                  onChange={handleMultiSelectChange("estado")}
+                  endAdornment={
+                    formik.values.estado.length > 0 ? (
+                      <InputAdornment position="end" sx={{ mr: 2 }}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearArrayField("estado");
+                          }}
+                          aria-label="Limpiar estados"
+                        >
+                          <Clear fontSize="small" />
+                        </IconButton>
+                      </InputAdornment>
+                    ) : undefined
+                  }
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip
+                          key={value}
+                          label={getEstadoLabel(value)}
+                          size="small"
+                          sx={chipSx}
+                          onDelete={(e) => {
+                            e.stopPropagation();
+                            removeArrayValue("estado", value);
+                          }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        />
+                      ))}
+                    </Box>
+                  )}
                 >
-                  {FACTURAS_STATES.map((estado) => (
-                    <MenuItem key={estado.value} value={estado.value}>
-                      {estado.label}
-                    </MenuItem>
-                  ))}
+                  {FACTURAS_STATES.map((estado) => {
+                    const isSelected = formik.values.estado.includes(estado.value);
+                    return (
+                      <MenuItem
+                        key={estado.value}
+                        value={estado.value}
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          backgroundColor: isSelected
+                            ? "var(--color-bg-accent-secondary)"
+                            : "transparent",
+                          "&:hover": {
+                            backgroundColor: isSelected
+                              ? "var(--color-bg-accent-secondary-hover)"
+                              : undefined,
+                          },
+                        }}
+                      >
+                        <span>{estado.label}</span>
+                        {isSelected && <Check fontSize="small" />}
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
                 {formik.touched.estado && formik.errors.estado && (
-                  <FormHelperText>{formik.errors.estado}</FormHelperText>
+                  <FormHelperText>{formik.errors.estado as string}</FormHelperText>
                 )}
               </FormControl>
             </Grid>

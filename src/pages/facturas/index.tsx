@@ -44,11 +44,13 @@ import RemoveMarketplaceModal from "../../components/Modals/RemoveMarketplaceMod
 import DocumentsRequiredModal from "../../components/Modals/DocumentsRequiredModal";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import FacturasFilters, {
+  isArrayFilterKey,
+  isFilterValueActive,
   type FacturasFiltersValues,
 } from "../../components/Facturas/FacturasFilters";
 import SortableTableHeader from "../../components/Facturas/SortableTableHeader";
 import Layout from "../../components/Layout";
-import { useFacturas } from "../../hooks/useFacturas";
+import { useFacturas, type GetFacturasParams } from "../../hooks/useFacturas";
 import useAuthStore from "../../store/authStore";
 import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
@@ -109,6 +111,13 @@ const Facturas = () => {
     (
       Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>
     ).forEach((key) => {
+      if (isArrayFilterKey(key)) {
+        const values = searchParams.getAll(key);
+        if (values.length > 0) {
+          newFilters[key] = values;
+        }
+        return;
+      }
       const value = searchParams.get(key);
       if (value !== null) {
         newFilters[key] = value;
@@ -213,7 +222,7 @@ const Facturas = () => {
     async (currentFilters: FacturasFiltersValues) => {
       if (!currentRole?.empresaId) return;
 
-      const params: Record<string, string | number> = {
+      const params: GetFacturasParams = {
         page: meta.page,
         limit: meta.limit,
         empresaId: currentRole.empresaId,
@@ -223,10 +232,10 @@ const Facturas = () => {
       if (currentFilters.rutEmisor) params.rutEmisor = currentFilters.rutEmisor;
       if (currentFilters.rutReceptor)
         params.rutReceptor = currentFilters.rutReceptor;
-      if (currentFilters.razonSocialReceptor)
+      if (currentFilters.razonSocialReceptor.length > 0)
         params.razonSocialReceptor = currentFilters.razonSocialReceptor;
       if (currentFilters.folio) params.folio = currentFilters.folio;
-      if (currentFilters.estado) params.estado = currentFilters.estado;
+      if (currentFilters.estado.length > 0) params.estado = currentFilters.estado;
       if (currentFilters.montoTotal)
         params.montoTotal = Number(currentFilters.montoTotal);
       if (currentFilters.minMontoTotal)
@@ -248,7 +257,7 @@ const Facturas = () => {
       if (currentFilters.sortBy) params.sortBy = currentFilters.sortBy;
       if (currentFilters.order) params.order = currentFilters.order;
 
-      const { data, meta: metaResponse } = await getFacturas(params as any);
+      const { data, meta: metaResponse } = await getFacturas(params);
       setFacturas(data || []);
       setMeta(metaResponse);
     },
@@ -316,9 +325,15 @@ const Facturas = () => {
     // Add filter params
     (Object.keys(newFilters) as Array<keyof FacturasFiltersValues>).forEach(
       (key) => {
-        if (newFilters[key]) {
-          newSearchParams.set(key, newFilters[key]);
+        const value = newFilters[key];
+        if (!isFilterValueActive(value)) return;
+        if (isArrayFilterKey(key)) {
+          (value as string[]).forEach((item) => {
+            if (item) newSearchParams.append(key, item);
+          });
+          return;
         }
+        newSearchParams.set(key, value as string);
       },
     );
     setSearchParams(newSearchParams);
