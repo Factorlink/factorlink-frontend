@@ -24,9 +24,9 @@ const optionalNumberValidation = yup
 export const facturasFiltersSchema = yup.object({
   rutEmisor: optionalRutValidation,
   rutReceptor: optionalRutValidation,
-  razonSocialReceptor: yup.string().trim(),
+  razonSocialReceptor: yup.array().of(yup.string()),
   folio: optionalNumberValidation,
-  estado: yup.string(),
+  estado: yup.array().of(yup.string()),
   
   montoTotal: optionalNumberValidation,
   minMontoTotal: optionalNumberValidation,

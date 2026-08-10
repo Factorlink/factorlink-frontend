@@ -79,7 +79,7 @@ export const FACTURAS_STATES = [
 export const INITIAL_FILTERS: FacturasFiltersValues = {
   rutEmisor: "",
   rutReceptor: "",
-  razonSocialReceptor: "",
+  razonSocialReceptor: [],
   montoTotal: "",
   minMontoTotal: "",
   maxMontoTotal: "",
@@ -90,7 +90,7 @@ export const INITIAL_FILTERS: FacturasFiltersValues = {
   minDetalleIva: "",
   maxDetalleIva: "",
   folio: "",
-  estado: "",
+  estado: [],
   sortBy: "",
   order: "",
 }
