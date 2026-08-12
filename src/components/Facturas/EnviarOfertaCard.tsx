@@ -584,12 +584,28 @@ const EnviarOfertaCard = ({
         onConfirm={handleConfirm}
         loading={loading}
         data={{
-          porcentajeFinanciamiento: Number(
-            formik.values.porcentajeFinanciamiento,
-          ),
+          porcentajeFinanciamiento: formik.values.porcentajeFinanciamiento,
           montoAdelanto,
-          tasa: Number(formik.values.tasa),
+          tasa: formik.values.tasa,
           plazo: factura.plazo || 0,
+          fechaExpiracion: formik.values.fechaExpiracion,
+          tipoDocumento: formik.values.tipoDocumento,
+          fechaOperacion: formik.values.fechaOperacion,
+          numeroDocumentos: formik.values.numeroDocumentos,
+          plazoPromedioPago: formik.values.plazoPromedioPago,
+          montoDocumentos: formik.values.montoDocumentos,
+          tasaComision: formik.values.tasaComision,
+          diferenciaPrecio: formik.values.diferenciaPrecio,
+          montoComision: formik.values.montoComision,
+          retencion: formik.values.retencion,
+          notaria: formik.values.notaria,
+          gastosCobrados: formik.values.gastosCobrados,
+          iva: formik.values.iva,
+          recuperacionGastos: formik.values.recuperacionGastos,
+          recaudacion: formik.values.recaudacion,
+          excedentes: formik.values.excedentes,
+          montoAGirar: formik.values.montoAGirar,
+          comentario: formik.values.comentario,
         }}
       />
     </LocalizationProvider>
