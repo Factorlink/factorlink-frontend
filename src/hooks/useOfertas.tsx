@@ -1,15 +1,9 @@
 import { useState } from "react";
 import api from "../lib/axios";
-
-type CreateOfertaPayload = {
-  facturaId: string;
-  factoringId: string;
-  porcentajeFinanciamiento: number;
-  tasa: number;
-  montoAdelanto: number;
-  fechaExpiracion: string;
-  comentario: string;
-};
+import {
+  buildCreateOfertaPayload,
+  type OfertaPayloadInput,
+} from "../utils/ofertaPayload";
 
 type GetOfertasParams = {
   orderBy?: string;
@@ -19,10 +13,11 @@ type GetOfertasParams = {
 export const useOfertas = () => {
   const [loading, setLoading] = useState(false);
 
-  const createOferta = async (data: CreateOfertaPayload) => {
+  const createOferta = async (data: OfertaPayloadInput) => {
     try {
       setLoading(true);
-      const response = await api.post("/ofertas", data);
+      const payload = buildCreateOfertaPayload(data);
+      const response = await api.post("/ofertas", payload);
       return response.data;
     } catch (error) {
       throw error;
