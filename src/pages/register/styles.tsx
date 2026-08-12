@@ -1,6 +1,6 @@
 import { TextField, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DatePicker, type DatePickerProps } from "@mui/x-date-pickers/DatePicker";
 
 export const StyledTextField = styled(TextField)(() => ({
   paddingBottom: 16,
@@ -42,19 +42,26 @@ export const StyledTextField = styled(TextField)(() => ({
   },
 }));
 
-export const StyledDatePicker = styled(DatePicker)(() => ({
-  "& .MuiPickersOutlinedInput-root": {
+const datePickerFieldStyles = {
+  paddingBottom: 16,
+  "& .MuiOutlinedInput-root": {
     backgroundColor: "var(--color-bg-default-primary)",
     borderRadius: "var(--radius-m)",
-  },
-  "& .MuiInputBase-root": {
-    paddingBottom: 16,
-    backgroundColor: "var(--color-bg-default-primary)",
     "& fieldset": {
       borderColor: "var(--color-border-default-primary)",
     },
     "&:hover fieldset": {
       borderColor: "var(--color-border-default-secondary)",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "var(--color-border-accent-primary)",
+      borderWidth: "1.5px",
+    },
+    "&.Mui-error fieldset": {
+      borderColor: "var(--color-border-danger-primary)",
+    },
+    "&.Mui-error": {
+      backgroundColor: "var(--color-bg-danger-tertiary)",
     },
     "& input": {
       color: "var(--color-fg-default-primary)",
@@ -63,15 +70,29 @@ export const StyledDatePicker = styled(DatePicker)(() => ({
       color: "var(--color-fg-disabled-primary)",
       opacity: 1,
     },
-    "& label": {
-      color: "var(--color-fg-default-secondary)",
+  },
+  "& .MuiInputLabel-root": {
+    color: "var(--color-fg-default-secondary)",
+    "&.Mui-focused": {
+      color: "var(--color-fg-accent-primary)",
     },
-    "&.Mui-focused fieldset": {
-      borderColor: "var(--color-border-accent-primary)",
-      borderWidth: "1.5px",
+    "&.Mui-error": {
+      color: "var(--color-fg-danger-primary)",
     },
   },
-}));
+  "& .MuiInputAdornment-root .MuiIconButton-root": {
+    color: "var(--color-fg-disabled-primary)",
+  },
+} as const;
+
+const DatePickerRoot = styled(DatePicker)<DatePickerProps<false>>(
+  () => datePickerFieldStyles,
+);
+
+/** Uses MUI TextField (legacy field DOM) so styles match StyledTextField. */
+export const StyledDatePicker = (props: DatePickerProps<false>) => (
+  <DatePickerRoot {...props} enableAccessibleFieldDOMStructure={false} />
+);
 
 export const StyledSelect = styled(Select)(() => ({
   marginBottom: 16,

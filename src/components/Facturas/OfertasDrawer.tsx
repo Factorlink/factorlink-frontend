@@ -31,10 +31,10 @@ import type { Factura } from "../../types/factura";
 import type { Oferta } from "../../types/oferta";
 import AceptarOfertaModal from "../Modals/AceptarOfertaModal";
 import RechazarOfertaModal from "../Modals/RechazarOfertaModal";
+import OfertaCamposDetalle from "../Ofertas/OfertaCamposDetalle";
 import SortableTableHeader from "./SortableTableHeader";
 import {
   tableShellSx,
-  tableScrollSx,
   tableWideSx,
 } from "../../theme/layoutStyles";
 
@@ -195,6 +195,10 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
           sx: {
             width: { xs: "100%", md: "75%", lg: "65%" },
             p: { xs: 2, md: 3 },
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            overflow: "hidden",
           },
         }}
       >
@@ -207,6 +211,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
             alignItems: "center",
             gap: 2,
             mb: 3,
+            flexShrink: 0,
           }}
         >
           <Typography
@@ -232,6 +237,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
               borderRadius: 3,
               mb: 3,
               boxShadow: "var(--shadow-card)",
+              flexShrink: 0,
             }}
           >
             <Typography
@@ -313,7 +319,7 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
         )}
 
         {/* Ofertas disponibles */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2, flexShrink: 0 }}>
           <Typography
             variant="subtitle1"
             sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
@@ -339,8 +345,15 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
             </Typography>
           </Box>
         ) : (
-          <TableContainer component={Paper} sx={tableShellSx}>
-            <Box sx={tableScrollSx}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              ...tableShellSx,
+              flex: 1,
+              minHeight: 0,
+              overflow: "auto",
+            }}
+          >
             <Table sx={tableWideSx}>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
@@ -472,9 +485,11 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                                 </Box>
                               </Box>
 
+                              <OfertaCamposDetalle oferta={oferta} />
+
                               {/* Action buttons */}
                               {!isRespondida && !isNotAvailable && !aceptadas && (
-                                <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+                                <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                                   <Button
                                     variant="contained"
                                     startIcon={<CheckCircle />}
@@ -529,7 +544,6 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                 })}
               </TableBody>
             </Table>
-            </Box>
           </TableContainer>
         )}
       </Drawer>
@@ -546,6 +560,8 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
             montoAdelanto: aceptarModal.oferta.montoAdelanto,
             tasa: aceptarModal.oferta.tasa,
             porcentajeFinanciamiento: aceptarModal.oferta.porcentajeFinanciamiento,
+            montoAGirar: aceptarModal.oferta.montoAGirar,
+            retencion: aceptarModal.oferta.retencion,
           }}
         />
       )}
@@ -560,6 +576,8 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
             montoAdelanto: rechazarModal.oferta.montoAdelanto,
             tasa: rechazarModal.oferta.tasa,
             porcentajeFinanciamiento: rechazarModal.oferta.porcentajeFinanciamiento,
+            montoAGirar: rechazarModal.oferta.montoAGirar,
+            retencion: rechazarModal.oferta.retencion,
           }}
         />
       )}

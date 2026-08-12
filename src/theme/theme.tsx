@@ -60,6 +60,7 @@ export const theme = createTheme({
     },
     divider: "var(--color-border-default-primary)",
     action: {
+      active: "var(--color-fg-default-secondary)",
       disabled: "var(--color-fg-disabled-primary)",
       disabledBackground: "var(--color-bg-disabled-primary)",
     },

@@ -7,17 +7,9 @@ import {
   CalendarToday,
 } from "@mui/icons-material";
 import type { Oferta } from "../../types/oferta";
+import { formatMoney } from "../../utils/ofertaFormatters";
 import CollapsibleSection from "../CollapsibleSection";
-
-const formatCurrency = (value: string | number) => {
-  const num = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(num)) return "$0";
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    minimumFractionDigits: 0,
-  }).format(num);
-};
+import OfertaCamposDetalle from "./OfertaCamposDetalle";
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -90,10 +82,7 @@ const DetalleOfertaFactoring = ({
           overflow: "hidden",
         }}
       >
-        
-
         <Box sx={{ p: 3 }}>
-          {/* Info banner */}
           <Box
             sx={{
               display: "flex",
@@ -111,7 +100,6 @@ const DetalleOfertaFactoring = ({
             </Typography>
           </Box>
 
-          {/* Card */}
           <Box
             sx={{
               border: "1px solid",
@@ -120,7 +108,6 @@ const DetalleOfertaFactoring = ({
               p: 3,
             }}
           >
-            {/* Title + Badge */}
             <Box
               sx={{
                 display: "flex",
@@ -147,7 +134,6 @@ const DetalleOfertaFactoring = ({
               />
             </Box>
 
-            {/* Data grid */}
             <Box
               sx={{
                 display: "grid",
@@ -216,7 +202,7 @@ const DetalleOfertaFactoring = ({
                   variant="h6"
                   sx={{ fontWeight: 700, color: "primary.main" }}
                 >
-                  {formatCurrency(oferta.montoAdelanto)}
+                  {formatMoney(oferta.montoAdelanto)}
                 </Typography>
               </Box>
 
@@ -240,12 +226,14 @@ const DetalleOfertaFactoring = ({
               </Box>
             </Box>
 
-            {/* Dates */}
+            <OfertaCamposDetalle oferta={oferta} />
+
             <Box
               sx={{
                 display: "flex",
                 gap: 3,
                 mb: oferta.comentario ? 3 : 0,
+                mt: 3,
                 pt: 2,
                 borderTop: "1px solid",
                 borderColor: "divider",
@@ -265,7 +253,6 @@ const DetalleOfertaFactoring = ({
               </Box>
             </Box>
 
-            {/* Comment */}
             {oferta.comentario && (
               <Box
                 sx={{ pt: 2, borderTop: "1px solid", borderColor: "divider" }}

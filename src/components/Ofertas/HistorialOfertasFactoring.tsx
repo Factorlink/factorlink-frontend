@@ -21,17 +21,12 @@ import {
   CheckCircle,
 } from "@mui/icons-material";
 import type { Oferta } from "../../types/oferta";
+import {
+  formatMoney,
+  isInformed,
+} from "../../utils/ofertaFormatters";
 import CollapsibleSection from "../CollapsibleSection";
-
-const formatCurrency = (value: string | number) => {
-  const num = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(num)) return "$0";
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    minimumFractionDigits: 0,
-  }).format(num);
-};
+import OfertaCamposDetalle from "./OfertaCamposDetalle";
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -197,7 +192,10 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
                     {formatDateShort(oferta.createdAt)}
                   </Typography>
                   <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Tasa {oferta.tasa}% · {formatCurrency(oferta.montoAdelanto)}
+                    Tasa {oferta.tasa}% · {formatMoney(oferta.montoAdelanto)}
+                    {isInformed(oferta.montoAGirar)
+                      ? ` · Monto a girar ${formatMoney(oferta.montoAGirar)}`
+                      : ""}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -266,7 +264,7 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
                         </Typography>
                       </Box>
                       <Typography variant="h6" sx={{ fontWeight: 700, color: "primary.main" }}>
-                        {formatCurrency(oferta.montoAdelanto)}
+                        {formatMoney(oferta.montoAdelanto)}
                       </Typography>
                     </Box>
 
@@ -283,12 +281,15 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
                     </Box>
                   </Box>
 
+                  <OfertaCamposDetalle oferta={oferta} />
+
                   {/* Dates */}
                   <Box
                     sx={{
                       display: "flex",
                       gap: 3,
                       mb: 3,
+                      mt: 3,
                       pt: 2,
                       borderTop: "1px solid",
                       borderColor: "divider",
