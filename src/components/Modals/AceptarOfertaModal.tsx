@@ -16,6 +16,12 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DescriptionIcon from "@mui/icons-material/Description";
 import TextField from "@mui/material/TextField";
 import { useOfertas } from "../../hooks/useOfertas";
+import {
+  formatMoney,
+  formatPercent,
+  isInformed,
+  type OptionalValue,
+} from "../../utils/ofertaFormatters";
 
 interface AceptarOfertaModalProps {
   open: boolean;
@@ -27,17 +33,23 @@ interface AceptarOfertaModalProps {
     montoAdelanto: string;
     tasa: string;
     porcentajeFinanciamiento: string;
+    montoAGirar?: OptionalValue;
+    retencion?: OptionalValue;
   };
 }
 
-const formatCurrency = (value: string | number) => {
-  const numValue = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(numValue)) return "$0";
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    minimumFractionDigits: 0,
-  }).format(numValue);
+const buildResumenLine = (ofertaData: AceptarOfertaModalProps["ofertaData"]) => {
+  const parts = [
+    `Adelanto: ${formatMoney(ofertaData.montoAdelanto)}`,
+    `Tasa: ${formatPercent(ofertaData.tasa)}`,
+  ];
+  if (isInformed(ofertaData.montoAGirar)) {
+    parts.push(`Monto a girar: ${formatMoney(ofertaData.montoAGirar)}`);
+  }
+  if (isInformed(ofertaData.retencion)) {
+    parts.push(`Retención: ${formatMoney(ofertaData.retencion)}`);
+  }
+  return parts.join(" • ");
 };
 
 const AceptarOfertaModal = ({
@@ -162,7 +174,7 @@ const AceptarOfertaModal = ({
                   {ofertaData.factoringName}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  Adelanto: {formatCurrency(ofertaData.montoAdelanto)} • Tasa: {parseFloat(ofertaData.tasa || "0").toFixed(2)}%
+                  {buildResumenLine(ofertaData)}
                 </Typography>
               </Box>
             </Box>
