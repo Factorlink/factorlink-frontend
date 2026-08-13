@@ -19,7 +19,7 @@ body {
   font-family: var(--font-body);
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-m);
+  line-height: var(--line-height-s);
   color: var(--color-fg-default-primary);
   background: var(--color-bg-default-primary);
   -webkit-font-smoothing: antialiased;
