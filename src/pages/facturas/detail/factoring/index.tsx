@@ -9,15 +9,36 @@ import {
   Button,
   CircularProgress,
   IconButton,
+  Tab,
+  Tabs,
   Typography,
 } from "@mui/material";
-import { ArrowBack, Description, ErrorOutline } from "@mui/icons-material";
+import {
+  ArrowBack,
+  Description,
+  ErrorOutline,
+  History,
+  InfoOutlined,
+  Send,
+} from "@mui/icons-material";
 import FacturaResumenCard from "../../../../components/Facturas/FacturaResumenCard";
 import EnviarOfertaCard from "../../../../components/Facturas/EnviarOfertaCard";
 import DetalleOfertaFactoring from "../../../../components/Ofertas/DetalleOfertaFactoring";
 import HistorialOfertasFactoring from "../../../../components/Ofertas/HistorialOfertasFactoring";
 import DetalleCotizacionCard from "../../../../components/Facturas/DetalleCotizacionCard";
 import { appContentSx } from "../../../../theme/layoutStyles";
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+const TabPanel = ({ children, value, index }: TabPanelProps) => (
+  <div role="tabpanel" hidden={value !== index}>
+    <Box sx={{ pt: 3 }}>{children}</Box>
+  </div>
+);
 
 const FacturaFactoringDetail = () => {
   const { getFacturaByIdAndFactoringId, loading } = useFacturas();
@@ -26,6 +47,7 @@ const FacturaFactoringDetail = () => {
   const navigate = useNavigate();
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
 
   const fetchFactura = async () => {
     try {
@@ -163,37 +185,116 @@ const FacturaFactoringDetail = () => {
           </Button>
         </Box>
 
-        <FacturaResumenCard factura={factura} />
+        <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 1 }}>
+          <Tabs
+            value={activeTab}
+            onChange={(_e, newValue) => setActiveTab(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
+            <Tab
+              icon={<Description sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label="Detalle de la factura"
+            />
+            <Tab
+              icon={<Send sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label={factura.ofertaFactoring ? "Tu oferta" : "Enviar oferta"}
+            />
+            <Tab
+              icon={<History sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label="Historial de ofertas"
+            />
+          </Tabs>
+        </Box>
 
-        {factura.estado !== "CARGADA" && (
-          <DetalleCotizacionCard
-            plazo={factura.plazo}
-            porcentajeFinanciamiento={factura.porcentajeFinanciamiento || "0"}
-            montoFinanciar={factura.montoFinanciar}
-          />
-        )}
+        <TabPanel value={activeTab} index={0}>
+          <FacturaResumenCard factura={factura} />
 
-        {/* Oferta: detalle si ya existe, formulario si no */}
-        {factura.ofertaFactoring ? (
-          <DetalleOfertaFactoring
-            oferta={factura.ofertaFactoring}
-            plazo={factura.plazo || 0}
-          />
-        ) : (
-          <EnviarOfertaCard
-            factura={factura}
-            factoringId={currentRole?.factoringId!}
-            onSuccess={fetchFactura}
-          />
-        )}
+          {factura.estado !== "CARGADA" && (
+            <DetalleCotizacionCard
+              plazo={factura.plazo}
+              porcentajeFinanciamiento={factura.porcentajeFinanciamiento || "0"}
+              montoFinanciar={factura.montoFinanciar}
+            />
+          )}
 
-        {/* Historial de ofertas anteriores */}
-        {factura.historyOfertas && factura.historyOfertas.length > 0 && (
+          {!factura.ofertaFactoring && (
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 2,
+                mt: 1,
+                p: 2.5,
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: "divider",
+                backgroundColor: "var(--color-bg-default-primary)",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, minWidth: 0 }}>
+                <InfoOutlined
+                  sx={{ color: "var(--color-fg-accent-primary)", mt: 0.25, flexShrink: 0 }}
+                />
+                <Box>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
+                  >
+                    ¿Listo para enviar tu oferta?
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "var(--color-fg-default-secondary)" }}
+                  >
+                    Con esta información podrás definir las condiciones de tu oferta y enviarla a la empresa.
+                  </Typography>
+                </Box>
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<Send />}
+                onClick={() => setActiveTab(1)}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  color: "var(--color-fg-on-accent-primary)",
+                  flexShrink: 0,
+                }}
+              >
+                Continuar para enviar oferta
+              </Button>
+            </Box>
+          )}
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={1}>
+          {factura.ofertaFactoring ? (
+            <DetalleOfertaFactoring
+              oferta={factura.ofertaFactoring}
+              plazo={factura.plazo || 0}
+            />
+          ) : (
+            <EnviarOfertaCard
+              factura={factura}
+              factoringId={currentRole?.factoringId!}
+              onSuccess={fetchFactura}
+            />
+          )}
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={2}>
           <HistorialOfertasFactoring
-            ofertas={factura.historyOfertas}
+            ofertas={factura.historyOfertas || []}
             plazo={factura.plazo || 0}
           />
-        )}
+        </TabPanel>
       </Box>
     </Layout>
   );
