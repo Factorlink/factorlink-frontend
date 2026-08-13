@@ -47,7 +47,7 @@ const DetalleCotizacionCard = ({
         </Box>
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
-            Detalle de Cotización
+            Información de cotización solicitada
           </Typography>
           <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
             Condiciones de financiamiento de la factura

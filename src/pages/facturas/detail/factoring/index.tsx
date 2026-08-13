@@ -40,6 +40,33 @@ const TabPanel = ({ children, value, index }: TabPanelProps) => (
   </div>
 );
 
+const getPageHeader = (tab: number, hasOferta: boolean) => {
+  if (tab === 1) {
+    return hasOferta
+      ? {
+          title: "Tu oferta",
+          subtitle: "Revisa el estado de la oferta enviada para esta factura",
+        }
+      : {
+          title: "Enviar oferta",
+          subtitle:
+            "Completa la información para enviar tu oferta por esta factura",
+        };
+  }
+
+  if (tab === 2) {
+    return {
+      title: "Historial de ofertas",
+      subtitle: "Consulta todas las ofertas que has enviado para esta factura",
+    };
+  }
+
+  return {
+    title: "Detalle de la factura",
+    subtitle: "Revisa la información de la factura antes de enviar tu oferta",
+  };
+};
+
 const FacturaFactoringDetail = () => {
   const { getFacturaByIdAndFactoringId, loading } = useFacturas();
   const { currentRole } = useAuthStore();
@@ -167,6 +194,11 @@ const FacturaFactoringDetail = () => {
     );
   }
 
+  const { title, subtitle } = getPageHeader(
+    activeTab,
+    Boolean(factura.ofertaFactoring),
+  );
+
   return (
     <Layout>
       <Box sx={appContentSx}>
@@ -183,6 +215,25 @@ const FacturaFactoringDetail = () => {
           >
             Volver a Marketplace
           </Button>
+        </Box>
+
+        <Box sx={{ mb: 3 }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 600,
+              fontFamily: "var(--font-heading)",
+              color: "var(--color-fg-default-primary)",
+            }}
+          >
+            {title}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ color: "var(--color-fg-default-secondary)", mt: 0.5 }}
+          >
+            {subtitle}
+          </Typography>
         </Box>
 
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 1 }}>
@@ -233,9 +284,7 @@ const FacturaFactoringDetail = () => {
                 mt: 1,
                 p: 2.5,
                 borderRadius: 2,
-                border: "1px solid",
-                borderColor: "divider",
-                backgroundColor: "var(--color-bg-default-primary)",
+                backgroundColor: "var(--color-bg-accent-secondary)",
               }}
             >
               <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, minWidth: 0 }}>
@@ -285,6 +334,7 @@ const FacturaFactoringDetail = () => {
               factura={factura}
               factoringId={currentRole?.factoringId!}
               onSuccess={fetchFactura}
+              onCancel={() => setActiveTab(0)}
             />
           )}
         </TabPanel>

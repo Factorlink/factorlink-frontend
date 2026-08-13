@@ -100,7 +100,7 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
     <CollapsibleSection
       title={
         <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
-            Historial de ofertas anteriores
+            Listado de ofertas enviadas
           </Typography>
       }
       subtitle={
