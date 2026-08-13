@@ -201,13 +201,13 @@
   --font-mono: "Fragment Mono", monospace; /* bloques de código */
 
   --font-size-xs: 12px;
-  --font-size-s: 14px;
-  --font-size-m: 16px;
-  --font-size-l: 18px;
-  --font-size-xl: 21px;
-  --font-size-2xl: 24px;
-  --font-size-3xl: 34px;
-  --font-size-4xl: 43px;
+  --font-size-s: 13px;
+  --font-size-m: 14px;
+  --font-size-l: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 28px;
+  --font-size-4xl: 36px;
   /* tamaños de titulares editoriales (marketing), no del scale de la app */
   --font-size-display-h1: 48px;
   --font-size-display-h2: 40px;

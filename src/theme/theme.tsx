@@ -8,6 +8,7 @@ export const theme = createTheme({
   cssVariables: {
     nativeColor: true,
   },
+  spacing: 6,
   // Aligned with --breakpoint-* in tokens.css (see layoutBreakpoints).
   breakpoints: {
     values: {
@@ -108,7 +109,7 @@ export const theme = createTheme({
     },
     body1: {
       fontSize: "var(--font-size-m)",
-      lineHeight: "var(--line-height-m)",
+      lineHeight: "var(--line-height-s)",
     },
     body2: {
       fontSize: "var(--font-size-s)",
@@ -135,12 +136,15 @@ export const theme = createTheme({
       },
     },
     MuiButton: {
+      defaultProps: {
+        size: "small",
+      },
       styleOverrides: {
         root: {
           borderRadius: radiusM,
           textTransform: "none",
           fontWeight: 500,
-          padding: "10px 24px",
+          padding: "6px 14px",
           boxShadow: "none",
           "&:hover": {
             boxShadow: "none",
@@ -149,6 +153,9 @@ export const theme = createTheme({
             outline: "2px solid var(--color-border-accent-primary)",
             outlineOffset: "2px",
           },
+        },
+        sizeSmall: {
+          padding: "6px 14px",
         },
         containedPrimary: {
           backgroundColor: "var(--color-bg-accent-primary)",
@@ -247,6 +254,9 @@ export const theme = createTheme({
       },
     },
     MuiSelect: {
+      defaultProps: {
+        size: "small",
+      },
       styleOverrides: {
         root: {
           borderRadius: radiusM,
@@ -333,6 +343,9 @@ export const theme = createTheme({
       },
     },
     MuiTextField: {
+      defaultProps: {
+        size: "small",
+      },
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
@@ -341,8 +354,21 @@ export const theme = createTheme({
         },
       },
     },
+    MuiFormControl: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiTable: {
+      defaultProps: {
+        size: "small",
+      },
+    },
     MuiTabs: {
       styleOverrides: {
+        root: {
+          minHeight: 36,
+        },
         indicator: {
           backgroundColor: "var(--color-bg-accent-primary)",
         },
@@ -355,6 +381,7 @@ export const theme = createTheme({
           fontWeight: 500,
           fontSize: "var(--font-size-s)",
           textTransform: "none",
+          minHeight: 36,
           color: "var(--color-fg-default-secondary)",
           "&.Mui-selected": {
             color: "var(--color-fg-accent-primary)",
@@ -387,6 +414,9 @@ export const theme = createTheme({
       },
     },
     MuiChip: {
+      defaultProps: {
+        size: "small",
+      },
       styleOverrides: {
         root: {
           borderRadius: radiusM,
