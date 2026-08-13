@@ -100,7 +100,7 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
     <CollapsibleSection
       title={
         <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
-            Historial de ofertas anteriores
+            Listado de ofertas enviadas
           </Typography>
       }
       subtitle={
@@ -109,7 +109,16 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
           </Typography>
       }
       icon={<History sx={{ color: "primary.main", fontSize: 24 }} />}
+      defaultExpanded
     >
+    {ofertas.length === 0 ? (
+      <Typography
+        variant="body2"
+        sx={{ color: "var(--color-fg-default-secondary)" }}
+      >
+        No hay ofertas anteriores para esta factura
+      </Typography>
+    ) : (
     <Box
       sx={{
         backgroundColor: "var(--color-bg-default-primary)",
@@ -359,6 +368,7 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
         })}
       </Box>
     </Box>
+    )}
     </CollapsibleSection>
   );
 };

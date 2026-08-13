@@ -2,12 +2,18 @@ import { useState } from "react";
 import {
   Box,
   Typography,
-  Button,
   Alert,
   InputAdornment,
   Tooltip,
 } from "@mui/material";
-import { Send, AccountBalance } from "@mui/icons-material";
+import {
+  Send,
+  AccountBalance,
+  Comment,
+  Description,
+  InfoOutlined,
+  Lock,
+} from "@mui/icons-material";
 import { useFormik } from "formik";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -16,13 +22,16 @@ import { StyledTextField, StyledDatePicker } from "../../pages/register/styles";
 import { useOfertas } from "../../hooks/useOfertas";
 import type { Factura } from "../../types/factura";
 import ConfirmarOfertaModal from "../Modals/ConfirmarOfertaModal";
+import CollapsibleSection from "../CollapsibleSection";
+import ResumenOfertaAside from "./ResumenOfertaAside";
 import { formatMoney } from "../../utils/ofertaFormatters";
-import { handleTextInputChange } from "../../utils/validations/shared-fields";
 import {
   createOfertaFormSchema,
   handleDecimalRateInputChange,
   handleNonNegativeIntegerInputChange,
 } from "../../utils/validations/oferta-fields";
+
+const TIPO_DOCUMENTO_OFERTA = "Factura Electrónica";
 
 const today = new Date();
 const tomorrow = new Date(today);
@@ -79,6 +88,7 @@ interface EnviarOfertaCardProps {
   factura: Factura;
   factoringId: string;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 const sectionTitleSx = {
@@ -97,6 +107,7 @@ const EnviarOfertaCard = ({
   factura,
   factoringId,
   onSuccess,
+  onCancel,
 }: EnviarOfertaCardProps) => {
   const { createOferta, loading } = useOfertas();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -116,7 +127,7 @@ const EnviarOfertaCard = ({
       tasa: 0 as number | string,
       fechaExpiracion: null as Date | null,
       comentario: "",
-      tipoDocumento: factura.tipoDocumento || "",
+      tipoDocumento: TIPO_DOCUMENTO_OFERTA,
       fechaOperacion: null as Date | null,
       numeroDocumentos: "",
       plazoPromedioPago: "",
@@ -163,7 +174,7 @@ const EnviarOfertaCard = ({
         montoAdelanto,
         fechaExpiracion: formik.values.fechaExpiracion!,
         comentario: formik.values.comentario,
-        tipoDocumento: formik.values.tipoDocumento,
+        tipoDocumento: TIPO_DOCUMENTO_OFERTA,
         fechaOperacion: formik.values.fechaOperacion,
         numeroDocumentos: formik.values.numeroDocumentos,
         plazoPromedioPago: formik.values.plazoPromedioPago,
@@ -243,13 +254,22 @@ const EnviarOfertaCard = ({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+      <Box component="form" onSubmit={formik.handleSubmit}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 340px" },
+            gap: 3,
+            alignItems: "start",
+            mb: 3,
+          }}
+        >
       <Box
         sx={{
           backgroundColor: "var(--color-bg-default-primary)",
           borderRadius: 3,
           boxShadow: "var(--shadow-popover)",
           overflow: "hidden",
-          mb: 3,
         }}
       >
         <Box
@@ -267,11 +287,11 @@ const EnviarOfertaCard = ({
             variant="h6"
             sx={{ fontWeight: 600, color: "text.primary" }}
           >
-            Enviar oferta
+            Condiciones de tu oferta
           </Typography>
         </Box>
 
-        <Box component="form" onSubmit={formik.handleSubmit} sx={{ p: 3 }}>
+        <Box sx={{ p: 3 }}>
           {alertStatus && (
             <Alert
               severity={alertStatus}
@@ -400,29 +420,41 @@ const EnviarOfertaCard = ({
             )}
           </Box>
 
+          <CollapsibleSection
+            title={
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, color: "text.primary" }}
+              >
+                Información adicional de la operación
+              </Typography>
+            }
+            subtitle="Datos operacionales y montos de la oferta"
+            icon={<Description sx={{ color: "primary.main", fontSize: 24 }} />}
+          >
           <Typography variant="subtitle1" sx={sectionTitleSx}>
             Información de la operación
           </Typography>
           <Box sx={{ ...gridSx, mb: 1 }}>
-            <StyledTextField
-              fullWidth
-              name="tipoDocumento"
-              label="Tipo de documento"
-              value={formik.values.tipoDocumento}
-              onChange={(e) =>
-                handleTextInputChange(
-                  e as React.ChangeEvent<HTMLInputElement>,
-                  formik.setFieldValue,
-                )
-              }
-              onBlur={formik.handleBlur}
-              inputProps={{ maxLength: 100 }}
-              error={fieldError("tipoDocumento")}
-              helperText={fieldHelper(
-                "tipoDocumento",
-                "Ej: Facturas",
-              )}
-            />
+            <Tooltip
+              title="Este campo no puede ser editado. El tipo de documento es Factura Electrónica."
+              arrow
+            >
+              <StyledTextField
+                fullWidth
+                name="tipoDocumento"
+                label="Tipo de documento"
+                value={TIPO_DOCUMENTO_OFERTA}
+                InputProps={{ readOnly: true }}
+                helperText="Valor fijo de la operación"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    cursor: "not-allowed",
+                    "& input": { cursor: "not-allowed" },
+                  },
+                }}
+              />
+            </Tooltip>
 
             {renderDatePicker(
               "fechaOperacion",
@@ -526,7 +558,20 @@ const EnviarOfertaCard = ({
               />
             ))}
           </Box>
+          </CollapsibleSection>
 
+          <CollapsibleSection
+            title={
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, color: "text.primary" }}
+              >
+                Comentario
+              </Typography>
+            }
+            subtitle="Información adicional sobre tu oferta (opcional)"
+            icon={<Comment sx={{ color: "primary.main", fontSize: 24 }} />}
+          >
           <StyledTextField
             fullWidth
             name="comentario"
@@ -541,40 +586,83 @@ const EnviarOfertaCard = ({
             error={fieldError("comentario")}
             helperText={fieldHelper("comentario", "Máximo 500 caracteres")}
           />
+          </CollapsibleSection>
 
           <Box
             sx={{
               display: "flex",
-              justifyContent: "flex-end",
-              borderTop: "1px solid",
-              borderColor: "divider",
-              pt: 3,
+              alignItems: "flex-start",
+              gap: 1.5,
               mt: 1,
+              p: 2,
+              borderRadius: 2,
+              backgroundColor: "var(--color-bg-accent-secondary)",
             }}
           >
-            <Button
-              type="submit"
-              variant="contained"
-              startIcon={<Send />}
-              disabled={
-                alertStatus === "success" ||
-                !formik.isValid ||
-                !formik.dirty ||
-                !formik.values.fechaExpiracion ||
-                !formik.values.fechaOperacion
-              }
+            <InfoOutlined
               sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                color: "var(--color-fg-on-accent-primary)",
-                px: 4,
-                py: 1.5,
-                borderRadius: 2,
+                color: "var(--color-fg-accent-primary)",
+                mt: 0.25,
+                flexShrink: 0,
               }}
-            >
-              Enviar oferta
-            </Button>
+            />
+            <Box>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
+              >
+                Importante
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: "var(--color-fg-default-secondary)" }}
+              >
+                La empresa revisará tu oferta antes de aceptarla. Podrás seguir
+                el estado desde el Marketplace.
+              </Typography>
+            </Box>
           </Box>
+        </Box>
+      </Box>
+
+          <ResumenOfertaAside
+            montoTotal={factura.montoTotal}
+            porcentajeFinanciamiento={formik.values.porcentajeFinanciamiento}
+            montoFinanciar={montoFinanciar}
+            montoAdelanto={montoAdelanto}
+            tasa={formik.values.tasa}
+            plazo={factura.plazo || 0}
+            fechaExpiracion={formik.values.fechaExpiracion}
+            submitDisabled={
+              alertStatus === "success" ||
+              !formik.isValid ||
+              !formik.dirty ||
+              !formik.values.fechaExpiracion ||
+              !formik.values.fechaOperacion
+            }
+            onCancel={onCancel}
+          />
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1,
+            pb: 1,
+          }}
+        >
+          <Lock
+            sx={{ fontSize: 16, color: "var(--color-fg-default-tertiary)" }}
+          />
+          <Typography
+            variant="caption"
+            sx={{ color: "var(--color-fg-default-secondary)" }}
+          >
+            Tu oferta es confidencial y solo será visible para la empresa cuando
+            la envíes
+          </Typography>
         </Box>
       </Box>
 
@@ -583,30 +671,6 @@ const EnviarOfertaCard = ({
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleConfirm}
         loading={loading}
-        data={{
-          porcentajeFinanciamiento: formik.values.porcentajeFinanciamiento,
-          montoAdelanto,
-          tasa: formik.values.tasa,
-          plazo: factura.plazo || 0,
-          fechaExpiracion: formik.values.fechaExpiracion,
-          tipoDocumento: formik.values.tipoDocumento,
-          fechaOperacion: formik.values.fechaOperacion,
-          numeroDocumentos: formik.values.numeroDocumentos,
-          plazoPromedioPago: formik.values.plazoPromedioPago,
-          montoDocumentos: formik.values.montoDocumentos,
-          tasaComision: formik.values.tasaComision,
-          diferenciaPrecio: formik.values.diferenciaPrecio,
-          montoComision: formik.values.montoComision,
-          retencion: formik.values.retencion,
-          notaria: formik.values.notaria,
-          gastosCobrados: formik.values.gastosCobrados,
-          iva: formik.values.iva,
-          recuperacionGastos: formik.values.recuperacionGastos,
-          recaudacion: formik.values.recaudacion,
-          excedentes: formik.values.excedentes,
-          montoAGirar: formik.values.montoAGirar,
-          comentario: formik.values.comentario,
-        }}
       />
     </LocalizationProvider>
   );

@@ -10,6 +10,7 @@ import {
   CalendarToday,
 } from "@mui/icons-material";
 import type { Factura } from "../../types/factura";
+import { statsRowSx } from "../../theme/layoutStyles";
 
 interface FacturaResumenCardProps {
   factura: Factura;
@@ -138,9 +139,6 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
                 variant="h6"
                 sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
               >
-                Datos de la Factura
-              </Typography>
-              <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
                 Información general del documento
               </Typography>
             </Box>
@@ -307,6 +305,63 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             </Typography>
           </Box>
         </Box>
+
+        <Box
+          sx={[
+            statsRowSx,
+            {
+              mb: 0,
+              pt: 3,
+              borderTop: "1px solid",
+              borderColor: "divider",
+            },
+          ]}
+        >
+          <Box>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
+              Monto total
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
+            >
+              {formatCurrency(factura.montoTotal)}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
+              Financiamiento solicitado
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
+            >
+              {factura.porcentajeFinanciamiento || 0}%
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-success-primary)" }}>
+              Monto a financiar
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, color: "var(--color-fg-success-primary)" }}
+            >
+              {formatCurrency(factura.montoFinanciar)}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
+              Plazo solicitado
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
+            >
+              {factura.plazo || 0} {factura.plazo === 1 ? "día" : "días"}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
       {/* Card 2: Detalle de Montos */}
@@ -323,7 +378,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
           variant="subtitle1"
           sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 2 }}
         >
-          Detalle de Montos
+          Montos del documento
         </Typography>
         <Box
           sx={{

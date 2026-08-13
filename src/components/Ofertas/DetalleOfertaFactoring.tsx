@@ -73,6 +73,7 @@ const DetalleOfertaFactoring = ({
       }
       subtitle=""
       icon={<Send sx={{ color: "primary.main", fontSize: 24 }} />}
+      defaultExpanded
     >
       <Box
         sx={{
