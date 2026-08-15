@@ -212,13 +212,6 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
             variant="outlined"
             onClick={handleClose}
             disabled={loading}
-            sx={{
-              textTransform: "none",
-              padding: "12px 24px",
-              fontSize: "1rem",
-              fontWeight: 500,
-              borderRadius: "var(--radius-m)",
-            }}
           >
             {alertStatus === "success" ? "Cerrar" : "Cancelar"}
           </Button>
@@ -231,12 +224,6 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
               sx={{
                 backgroundColor: "success.main",
                 color: "white",
-                textTransform: "none",
-                padding: "12px 24px",
-                fontSize: "1rem",
-                fontWeight: 500,
-                borderRadius: "var(--radius-m)",
-                boxShadow: "none",
                 "&:hover": {
                   backgroundColor: "success.dark",
                   boxShadow: "none",

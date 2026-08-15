@@ -226,13 +226,6 @@ const SyncFacturasSiiModal = ({
             variant="outlined"
             onClick={handleClose}
             disabled={loading}
-            sx={{
-              textTransform: "none",
-              padding: "12px 24px",
-              fontSize: "1rem",
-              fontWeight: 500,
-              borderRadius: "var(--radius-m)",
-            }}
           >
             {alertStatus === "success" ? "Cerrar" : "Cancelar"}
           </Button>
@@ -252,12 +245,6 @@ const SyncFacturasSiiModal = ({
               sx={{
                 backgroundColor: "primary.main",
                 color: "white",
-                textTransform: "none",
-                padding: "12px 24px",
-                fontSize: "1rem",
-                fontWeight: 500,
-                borderRadius: "var(--radius-m)",
-                boxShadow: "none",
                 "&:hover": {
                   backgroundColor: "primary.dark",
                   boxShadow: "none",

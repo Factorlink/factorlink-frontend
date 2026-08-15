@@ -251,13 +251,6 @@ const Factoring = () => {
                   variant="outlined"
                   onClick={() => formik.resetForm()}
                   disabled={loading || !formik.dirty || isReadOnly}
-                  sx={{
-                    textTransform: "none",
-                    padding: "12px 24px",
-                    fontSize: "1rem",
-                    fontWeight: 500,
-                    borderRadius: "var(--radius-m)",
-                  }}
                 >
                   Cancelar
                 </Button>
@@ -271,12 +264,6 @@ const Factoring = () => {
                   sx={{
                     backgroundColor: "success.main",
                     color: "white",
-                    textTransform: "none",
-                    padding: "12px 24px",
-                    fontSize: "1rem",
-                    fontWeight: 500,
-                    borderRadius: "var(--radius-m)",
-                    boxShadow: "none",
                     "&:hover": {
                       backgroundColor: "success.dark",
                       boxShadow: "none",

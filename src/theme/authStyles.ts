@@ -107,32 +107,16 @@ export const authLogoColumnSx: SxProps<Theme> = {
 export const authSecondaryButtonSx: SxProps<Theme> = {
   backgroundColor: "var(--brand-secondary)",
   color: "var(--brand-primary)",
-  textTransform: "none",
-  padding: "12px",
-  fontSize: "var(--font-size-m)",
-  fontWeight: 500,
-  fontFamily: "var(--font-heading)",
-  borderRadius: "var(--radius-m)",
-  boxShadow: "none",
   "&:hover": {
     backgroundColor: "var(--color-bg-accent-secondary-hover)",
-    boxShadow: "none",
   },
 };
 
 export const authPrimaryButtonSx: SxProps<Theme> = {
   backgroundColor: "var(--color-bg-accent-primary)",
   color: "var(--color-fg-on-accent-primary)",
-  textTransform: "none",
-  padding: "12px",
-  fontSize: "var(--font-size-m)",
-  fontWeight: 500,
-  fontFamily: "var(--font-heading)",
-  borderRadius: "var(--radius-m)",
-  boxShadow: "none",
   "&:hover": {
     backgroundColor: "var(--color-bg-accent-primary-hover)",
-    boxShadow: "none",
   },
 };
 
