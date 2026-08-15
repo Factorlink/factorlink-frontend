@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { RequestQuote } from "@mui/icons-material";
+import SectionPanel from "../SectionPanel";
 
 interface DetalleCotizacionCardProps {
   plazo: number;
@@ -23,38 +24,11 @@ const DetalleCotizacionCard = ({
   montoFinanciar,
 }: DetalleCotizacionCardProps) => {
   return (
-    <Box
-      sx={{
-        backgroundColor: "var(--color-bg-default-primary)",
-        borderRadius: 3,
-        p: 3,
-        mb: 3,
-        boxShadow: "var(--shadow-popover)",
-      }}
+    <SectionPanel
+      title="Información de cotización solicitada"
+      subtitle="Condiciones de financiamiento de la factura"
+      icon={<RequestQuote sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-        <Box
-          sx={{
-            backgroundColor: "var(--color-bg-default-tertiary)",
-            borderRadius: 2,
-            p: 1.5,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <RequestQuote sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
-        </Box>
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
-            Información de cotización solicitada
-          </Typography>
-          <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-            Condiciones de financiamiento de la factura
-          </Typography>
-        </Box>
-      </Box>
-
       <Box
         sx={{
           display: "grid",
@@ -95,7 +69,7 @@ const DetalleCotizacionCard = ({
           </Typography>
         </Box>
       </Box>
-    </Box>
+    </SectionPanel>
   );
 };
 

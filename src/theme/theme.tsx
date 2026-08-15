@@ -117,7 +117,7 @@ export const theme = createTheme({
     },
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 4,
   },
   components: {
     MuiCssBaseline: {
@@ -144,7 +144,9 @@ export const theme = createTheme({
           borderRadius: radiusM,
           textTransform: "none",
           fontWeight: 500,
-          padding: "6px 14px",
+          fontSize: "var(--font-size-s)",
+          minHeight: "var(--control-height)",
+          padding: "8px 16px",
           boxShadow: "none",
           "&:hover": {
             boxShadow: "none",
@@ -155,7 +157,8 @@ export const theme = createTheme({
           },
         },
         sizeSmall: {
-          padding: "6px 14px",
+          minHeight: "var(--control-height)",
+          padding: "8px 16px",
         },
         containedPrimary: {
           backgroundColor: "var(--color-bg-accent-primary)",
@@ -200,6 +203,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: radiusM,
+          minHeight: "var(--control-height)",
           backgroundColor: "var(--color-bg-default-primary)",
           "& fieldset": {
             borderColor: "var(--color-border-default-primary)",
@@ -219,6 +223,7 @@ export const theme = createTheme({
           },
         },
         input: {
+          padding: "8.5px 14px",
           color: "var(--color-fg-default-primary)",
           "&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active":
             {

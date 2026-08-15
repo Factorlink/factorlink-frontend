@@ -25,7 +25,7 @@ import {
   formatMoney,
   isInformed,
 } from "../../utils/ofertaFormatters";
-import CollapsibleSection from "../CollapsibleSection";
+import SectionPanel from "../SectionPanel";
 import OfertaCamposDetalle from "./OfertaCamposDetalle";
 
 const formatDate = (dateStr: string) => {
@@ -97,19 +97,10 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
   };
 
   return (
-    <CollapsibleSection
-      title={
-        <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
-            Listado de ofertas enviadas
-          </Typography>
-      }
-      subtitle={
-        <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-            {ofertas.length} oferta{ofertas.length !== 1 ? "s" : ""} en total
-          </Typography>
-      }
+    <SectionPanel
+      title="Listado de ofertas enviadas"
+      subtitle={`${ofertas.length} oferta${ofertas.length !== 1 ? "s" : ""} en total`}
       icon={<History sx={{ color: "primary.main", fontSize: 24 }} />}
-      defaultExpanded
     >
     {ofertas.length === 0 ? (
       <Typography
@@ -119,23 +110,13 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
         No hay ofertas anteriores para esta factura
       </Typography>
     ) : (
-    <Box
-      sx={{
-        backgroundColor: "var(--color-bg-default-primary)",
-        borderRadius: 3,
-        boxShadow: "var(--shadow-popover)",
-        overflow: "hidden",
-        mt: 3,
-      }}
-    >
-
-      {/* Resumen de estados */}
+    <>
       <Box
         sx={{
           display: "flex",
           gap: 1.5,
-          px: 3,
-          py: 2,
+          pb: 2,
+          mb: 2,
           borderBottom: "1px solid",
           borderColor: "divider",
           flexWrap: "wrap",
@@ -156,8 +137,7 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
         ))}
       </Box>
 
-      {/* Ofertas list */}
-      <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {ofertas.map((oferta, index) => {
           const isExpanded = expandedId === oferta.id;
           const estadoConfig = getEstadoConfig(oferta.estado);
@@ -367,9 +347,9 @@ const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoring
           );
         })}
       </Box>
-    </Box>
+    </>
     )}
-    </CollapsibleSection>
+    </SectionPanel>
   );
 };
 

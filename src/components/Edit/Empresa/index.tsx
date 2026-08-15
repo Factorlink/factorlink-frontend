@@ -391,13 +391,6 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
                   variant="outlined"
                   onClick={() => formik.resetForm()}
                   disabled={loading || !formik.dirty}
-                  sx={{
-                    textTransform: "none",
-                    padding: "12px 24px",
-                    fontSize: "1rem",
-                    fontWeight: 500,
-                    borderRadius: "var(--radius-m)",
-                  }}
                 >
                   Cancelar
                 </Button>
@@ -409,12 +402,6 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
                   sx={{
                     backgroundColor: "success.main",
                     color: "white",
-                    textTransform: "none",
-                    padding: "12px 24px",
-                    fontSize: "1rem",
-                    fontWeight: 500,
-                    borderRadius: "var(--radius-m)",
-                    boxShadow: "none",
                     "&:hover": {
                       backgroundColor: "success.dark",
                       boxShadow: "none",

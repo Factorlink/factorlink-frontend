@@ -72,7 +72,7 @@ export const statsRowThreeSx: SystemStyleObject<Theme> = {
  */
 export const tableShellSx: SystemStyleObject<Theme> = {
   overflow: "hidden",
-  borderRadius: 3,
+  borderRadius: "var(--radius-m)",
   boxShadow: "var(--shadow-card)",
 };
 
