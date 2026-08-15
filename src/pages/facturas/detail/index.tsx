@@ -311,7 +311,10 @@ const FacturaDetail = () => {
           </Button>
         </Box>
 
-        <FacturaResumenCard factura={factura} />
+        <FacturaResumenCard
+          factura={factura}
+          showSolicitudFields={!isCargada}
+        />
 
         {factura.estado !== "CARGADA" && (
           <DetalleCotizacionCard

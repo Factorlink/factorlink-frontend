@@ -401,6 +401,8 @@ const CotizarFactura = () => {
     );
   }
 
+  const showSolicitudFields = factura.estado?.toLowerCase() !== "cargada";
+
   return (
     <Layout>
       <Box sx={appContentSx}>
@@ -471,7 +473,10 @@ const CotizarFactura = () => {
         {/* Step Content */}
         {activeStep === 0 && (
           <>
-            <FacturaResumenCard factura={factura} />
+            <FacturaResumenCard
+              factura={factura}
+              showSolicitudFields={showSolicitudFields}
+            />
             <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
               <Button
                 variant="contained"
@@ -820,7 +825,10 @@ const CotizarFactura = () => {
               }}
             >
               {/* Summary Cards */}
-              <FacturaResumenCard factura={factura} />
+              <FacturaResumenCard
+                factura={factura}
+                showSolicitudFields={showSolicitudFields}
+              />
 
             </Box>
 

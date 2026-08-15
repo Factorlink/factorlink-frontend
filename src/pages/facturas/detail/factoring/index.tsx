@@ -301,7 +301,7 @@ const FacturaFactoringDetail = () => {
         </Box>
 
         <TabPanel value={activeTab} index={0}>
-          <FacturaResumenCard factura={factura} />
+          <FacturaResumenCard factura={factura} showSolicitudFields={false} />
 
           {factura.estado !== "CARGADA" && (
             <DetalleCotizacionCard
