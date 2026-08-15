@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useFacturas } from "../../../../hooks/useFacturas";
 import useAuthStore from "../../../../store/authStore";
 import { useEffect, useState } from "react";
@@ -40,6 +40,18 @@ const TabPanel = ({ children, value, index }: TabPanelProps) => (
   </div>
 );
 
+const getTabIndex = (tab: string | null) => {
+  if (tab === "oferta") return 1;
+  if (tab === "historial") return 2;
+  return 0;
+};
+
+const getTabParam = (index: number) => {
+  if (index === 1) return "oferta";
+  if (index === 2) return "historial";
+  return null;
+};
+
 const getPageHeader = (tab: number, hasOferta: boolean) => {
   if (tab === 1) {
     return hasOferta
@@ -72,9 +84,12 @@ const FacturaFactoringDetail = () => {
   const { currentRole } = useAuthStore();
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabFromUrl = getTabIndex(searchParams.get("tab"));
+  const ofertaIdParam = searchParams.get("ofertaId");
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(tabFromUrl);
 
   const fetchFactura = async () => {
     try {
@@ -96,8 +111,31 @@ const FacturaFactoringDetail = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    setActiveTab(tabFromUrl);
+  }, [tabFromUrl]);
+
   const handleBack = () => {
-    navigate(-1);
+    navigate("/marketplace");
+  };
+
+  const goToTab = (index: number) => {
+    setActiveTab(index);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        const param = getTabParam(index);
+        if (param) next.set("tab", param);
+        else next.delete("tab");
+        if (index !== 2) next.delete("ofertaId");
+        return next;
+      },
+      { replace: true },
+    );
+  };
+
+  const handleTabChange = (_event: unknown, newValue: number) => {
+    goToTab(newValue);
   };
 
   // Loading state
@@ -239,7 +277,7 @@ const FacturaFactoringDetail = () => {
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 1 }}>
           <Tabs
             value={activeTab}
-            onChange={(_e, newValue) => setActiveTab(newValue)}
+            onChange={handleTabChange}
             variant="scrollable"
             scrollButtons="auto"
             allowScrollButtonsMobile
@@ -309,7 +347,7 @@ const FacturaFactoringDetail = () => {
               <Button
                 variant="contained"
                 startIcon={<Send />}
-                onClick={() => setActiveTab(1)}
+                onClick={() => goToTab(1)}
                 sx={{
                   textTransform: "none",
                   fontWeight: 600,
@@ -334,7 +372,7 @@ const FacturaFactoringDetail = () => {
               factura={factura}
               factoringId={currentRole?.factoringId!}
               onSuccess={fetchFactura}
-              onCancel={() => setActiveTab(0)}
+              onCancel={() => goToTab(0)}
             />
           )}
         </TabPanel>
@@ -343,6 +381,7 @@ const FacturaFactoringDetail = () => {
           <HistorialOfertasFactoring
             ofertas={factura.historyOfertas || []}
             plazo={factura.plazo || 0}
+            initialOfertaId={ofertaIdParam}
           />
         </TabPanel>
       </Box>

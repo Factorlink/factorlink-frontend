@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -66,10 +66,22 @@ const getEstadoConfig = (estado: string) => {
 interface HistorialOfertasFactoringProps {
   ofertas: Oferta[];
   plazo: number;
+  initialOfertaId?: string | null;
 }
 
-const HistorialOfertasFactoring = ({ ofertas, plazo }: HistorialOfertasFactoringProps) => {
+const HistorialOfertasFactoring = ({
+  ofertas,
+  plazo,
+  initialOfertaId,
+}: HistorialOfertasFactoringProps) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!initialOfertaId) return;
+    if (ofertas.some((oferta) => oferta.id === initialOfertaId)) {
+      setExpandedId(initialOfertaId);
+    }
+  }, [initialOfertaId, ofertas]);
 
   const conteo = ofertas.reduce(
     (acc, o) => {
