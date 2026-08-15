@@ -11,8 +11,10 @@ import { Alert, Box, Tab, Tabs, Typography } from "@mui/material";
 import type { Notificacion } from "../../types/notificacion";
 import type { Role } from "../../types/role";
 import { useNotificaciones } from "../../hooks/useNotificaciones";
+import { useOfertas } from "../../hooks/useOfertas";
 import {
   getNotificationRoute,
+  isOfertaNotification,
   sortReadNotifications,
   sortUnreadNotifications,
 } from "../../utils/notificationHelpers";
@@ -56,6 +58,7 @@ const NotificationTray: FC<NotificationTrayProps> = ({
 }) => {
   const navigate = useNavigate();
   const { getUnread, getRead, markAsRead } = useNotificaciones();
+  const { getOfertaById } = useOfertas();
 
   const [tabValue, setTabValue] = useState(0);
   const [unread, setUnread] = useState<Notificacion[]>([]);
@@ -115,17 +118,30 @@ const NotificationTray: FC<NotificationTrayProps> = ({
 
   const handleNotificationClick = async (notification: Notificacion) => {
     setActionError(null);
-    const route = getNotificationRoute(notification, currentRole);
+    setMarkingId(notification.id);
 
     try {
+      const ofertaPromise =
+        isOfertaNotification(notification.tipo) && notification.entidadId
+          ? getOfertaById(notification.entidadId).catch(() => null)
+          : Promise.resolve(null);
+      const readPromise = !notification.leida
+        ? markAsRead(notification.id, userId)
+        : Promise.resolve();
+
+      const [oferta] = await Promise.all([ofertaPromise, readPromise]);
+
       if (!notification.leida) {
-        setMarkingId(notification.id);
-        await markAsRead(notification.id, userId);
         setUnread((prev) => prev.filter((item) => item.id !== notification.id));
         onUnreadCountChange(Math.max(0, unreadCount - 1));
         setHasLoadedRead(false);
       }
 
+      const route = getNotificationRoute(
+        notification,
+        currentRole,
+        oferta?.facturaId,
+      );
       if (route) {
         onClose();
         navigate(route);

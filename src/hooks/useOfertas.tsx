@@ -43,6 +43,18 @@ export const useOfertas = () => {
     }
   };
 
+  const getOfertaById = async (ofertaId: string) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/ofertas/${ofertaId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const responderOferta = async (ofertaId: string, estado: "aceptada" | "rechazada", comentarioEmpresa: string) => {
     try {
       setLoading(true);
@@ -62,6 +74,7 @@ export const useOfertas = () => {
     loading,
     createOferta,
     getOfertasByFacturaId,
+    getOfertaById,
     responderOferta,
   };
 };

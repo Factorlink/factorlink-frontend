@@ -74,18 +74,34 @@ export const formatNotificationDate = (date: string): string => {
   });
 };
 
+export const isOfertaNotification = (tipo: NotificationTipo): boolean =>
+  OFERTA_TIPOS.includes(tipo);
+
 export const getNotificationRoute = (
   notification: Notificacion,
   currentRole: Role | null,
+  facturaId?: string | null,
 ): string | null => {
   const { tipo } = notification;
 
   if (INVITACION_TIPOS.includes(tipo)) return "/invitations";
 
-  if (OFERTA_TIPOS.includes(tipo)) {
-    return currentRole?.contexto === "factoring"
-      ? "/marketplace"
-      : "/facturas/ofertas";
+  if (isOfertaNotification(tipo)) {
+    if (!facturaId) {
+      return currentRole?.contexto === "factoring"
+        ? "/marketplace"
+        : "/facturas/ofertas";
+    }
+
+    if (currentRole?.contexto === "factoring") {
+      return `/facturas/${facturaId}/factoring?tab=oferta`;
+    }
+
+    const params = new URLSearchParams({ ofertas: "true" });
+    if (tipo !== "OFERTA_EXPIRADA" && notification.entidadId) {
+      params.set("ofertaId", notification.entidadId);
+    }
+    return `/facturas/${facturaId}?${params.toString()}`;
   }
 
   if (tipo === "FACTURAS_SINCRONIZADAS") return "/facturas";
