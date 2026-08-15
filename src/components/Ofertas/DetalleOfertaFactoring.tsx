@@ -8,7 +8,7 @@ import {
 } from "@mui/icons-material";
 import type { Oferta } from "../../types/oferta";
 import { formatMoney } from "../../utils/ofertaFormatters";
-import CollapsibleSection from "../CollapsibleSection";
+import SectionPanel from "../SectionPanel";
 import OfertaCamposDetalle from "./OfertaCamposDetalle";
 
 const formatDate = (dateStr: string) => {
@@ -60,30 +60,10 @@ const DetalleOfertaFactoring = ({
   const estadoConfig = getEstadoConfig(oferta.estado);
 
   return (
-    <CollapsibleSection
-      title={
-        <>
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 600, color: "text.primary" }}
-          >
-            Estado de tu oferta
-          </Typography>
-        </>
-      }
-      subtitle=""
+    <SectionPanel
+      title="Estado de tu oferta"
       icon={<Send sx={{ color: "primary.main", fontSize: 24 }} />}
-      defaultExpanded
     >
-      <Box
-        sx={{
-          backgroundColor: "var(--color-bg-default-primary)",
-          borderRadius: 3,
-          boxShadow: "var(--shadow-popover)",
-          overflow: "hidden",
-        }}
-      >
-        <Box sx={{ p: 3 }}>
           <Box
             sx={{
               display: "flex",
@@ -267,9 +247,7 @@ const DetalleOfertaFactoring = ({
               </Box>
             )}
           </Box>
-        </Box>
-      </Box>
-    </CollapsibleSection>
+    </SectionPanel>
   );
 };
 

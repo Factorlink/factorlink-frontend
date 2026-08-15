@@ -1,29 +1,30 @@
-import { useState } from "react";
-import { Box, IconButton, Typography, Collapse } from "@mui/material";
-import { ExpandMore, ExpandLess } from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
 
-interface CollapsibleSectionProps {
+interface SectionPanelProps {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   icon?: React.ReactNode;
-  defaultExpanded?: boolean;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }
 
-const CollapsibleSection = ({
+const titleSx = {
+  fontWeight: 600,
+  color: "var(--color-fg-default-primary)",
+} as const;
+
+const SectionPanel = ({
   title,
   subtitle,
   icon,
-  defaultExpanded = false,
+  action,
   children,
-}: CollapsibleSectionProps) => {
-  const [expanded, setExpanded] = useState(defaultExpanded);
-
+}: SectionPanelProps) => {
   return (
     <Box
       sx={{
         backgroundColor: "var(--color-bg-default-primary)",
-        borderRadius: "var(--radius-l)",
+        borderRadius: "var(--radius-m)",
         mb: 3,
         boxShadow: "var(--shadow-card)",
         border: "1px solid var(--color-border-default-primary)",
@@ -31,21 +32,17 @@ const CollapsibleSection = ({
       }}
     >
       <Box
-        onClick={() => setExpanded((prev) => !prev)}
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          p: 3,
-          cursor: "pointer",
-          "&:hover": {
-            backgroundColor: "var(--color-bg-default-primary-hover)",
-          },
-          transition:
-            "background-color var(--duration-fast) var(--easing-ease)",
+          gap: 2,
+          px: 3,
+          py: 2.5,
+          borderBottom: "1px solid var(--color-border-default-primary)",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
           {icon && (
             <Box
               sx={{
@@ -55,33 +52,37 @@ const CollapsibleSection = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0,
               }}
             >
               {icon}
             </Box>
           )}
-          <Box>
-            {title}
-
-            {subtitle && (
+          <Box sx={{ minWidth: 0 }}>
+            {typeof title === "string" ? (
+              <Typography variant="h6" sx={titleSx}>
+                {title}
+              </Typography>
+            ) : (
+              title
+            )}
+            {typeof subtitle === "string" ? (
               <Typography
                 variant="body2"
                 sx={{ color: "var(--color-fg-default-secondary)" }}
               >
                 {subtitle}
               </Typography>
+            ) : (
+              subtitle
             )}
           </Box>
         </Box>
-        <IconButton size="small" sx={{ pointerEvents: "none" }}>
-          {expanded ? <ExpandLess /> : <ExpandMore />}
-        </IconButton>
+        {action && <Box sx={{ flexShrink: 0 }}>{action}</Box>}
       </Box>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <Box sx={{ px: 3, pb: 3 }}>{children}</Box>
-      </Collapse>
+      <Box sx={{ px: 3, pb: 3, pt: 3 }}>{children}</Box>
     </Box>
   );
 };
 
-export default CollapsibleSection;
+export default SectionPanel;

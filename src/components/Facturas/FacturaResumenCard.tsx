@@ -11,6 +11,7 @@ import {
 } from "@mui/icons-material";
 import type { Factura } from "../../types/factura";
 import { statsRowSx } from "../../theme/layoutStyles";
+import SectionPanel from "../SectionPanel";
 
 interface FacturaResumenCardProps {
   factura: Factura;
@@ -102,47 +103,10 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
 
   return (
     <>
-      {/* Card 1: Datos de la Factura */}
-      <Box
-        sx={{
-          backgroundColor: "var(--color-bg-default-primary)",
-          borderRadius: 3,
-          p: 3,
-          mb: 3,
-          boxShadow: "var(--shadow-popover)",
-        }}
-      >
-        {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            mb: 3,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box
-              sx={{
-                backgroundColor: "var(--color-bg-default-tertiary)",
-                borderRadius: 2,
-                p: 1.5,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Description sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
-            </Box>
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
-              >
-                Información general del documento
-              </Typography>
-            </Box>
-          </Box>
+      <SectionPanel
+        title="Información general del documento"
+        icon={<Description sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />}
+        action={
           <Chip
             icon={statusConfig.icon}
             label={statusConfig.label}
@@ -153,8 +117,8 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
               "& .MuiChip-icon": { color: statusConfig.color },
             }}
           />
-        </Box>
-
+        }
+      >
         {/* Datos Grid */}
         <Box
           sx={{
@@ -362,24 +326,9 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             </Typography>
           </Box>
         </Box>
-      </Box>
+      </SectionPanel>
 
-      {/* Card 2: Detalle de Montos */}
-      <Box
-        sx={{
-          backgroundColor: "var(--color-bg-default-primary)",
-          borderRadius: 3,
-          p: 3,
-          mb: 3,
-          boxShadow: "var(--shadow-popover)",
-        }}
-      >
-        <Typography
-          variant="subtitle1"
-          sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 2 }}
-        >
-          Montos del documento
-        </Typography>
+      <SectionPanel title="Montos del documento">
         <Box
           sx={{
             display: "grid",
@@ -460,7 +409,7 @@ const FacturaResumenCard = ({ factura }: FacturaResumenCardProps) => {
             </Typography>
           </Box>
         </Box>
-      </Box>
+      </SectionPanel>
     </>
   );
 };

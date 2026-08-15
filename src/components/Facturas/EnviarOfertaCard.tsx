@@ -9,8 +9,6 @@ import {
 import {
   Send,
   AccountBalance,
-  Comment,
-  Description,
   InfoOutlined,
   Lock,
 } from "@mui/icons-material";
@@ -22,8 +20,8 @@ import { StyledTextField, StyledDatePicker } from "../../pages/register/styles";
 import { useOfertas } from "../../hooks/useOfertas";
 import type { Factura } from "../../types/factura";
 import ConfirmarOfertaModal from "../Modals/ConfirmarOfertaModal";
-import CollapsibleSection from "../CollapsibleSection";
 import ResumenOfertaAside from "./ResumenOfertaAside";
+import SectionPanel from "../SectionPanel";
 import { formatMoney } from "../../utils/ofertaFormatters";
 import {
   createOfertaFormSchema,
@@ -264,34 +262,10 @@ const EnviarOfertaCard = ({
             mb: 3,
           }}
         >
-      <Box
-        sx={{
-          backgroundColor: "var(--color-bg-default-primary)",
-          borderRadius: 3,
-          boxShadow: "var(--shadow-popover)",
-          overflow: "hidden",
-        }}
+      <SectionPanel
+        title="Condiciones de tu oferta"
+        icon={<Send sx={{ color: "primary.main", fontSize: 24 }} />}
       >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            p: 3,
-            borderBottom: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Send sx={{ color: "primary.main", fontSize: 24 }} />
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 600, color: "text.primary" }}
-          >
-            Condiciones de tu oferta
-          </Typography>
-        </Box>
-
-        <Box sx={{ p: 3 }}>
           {alertStatus && (
             <Alert
               severity={alertStatus}
@@ -420,18 +394,18 @@ const EnviarOfertaCard = ({
             )}
           </Box>
 
-          <CollapsibleSection
-            title={
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 600, color: "text.primary" }}
-              >
-                Información adicional de la operación
-              </Typography>
-            }
-            subtitle="Datos operacionales y montos de la oferta"
-            icon={<Description sx={{ color: "primary.main", fontSize: 24 }} />}
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 600, color: "text.primary", mb: 0.5 }}
           >
+            Información adicional de la operación
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ color: "var(--color-fg-default-secondary)", mb: 2 }}
+          >
+            Datos operacionales y montos de la oferta
+          </Typography>
           <Typography variant="subtitle1" sx={sectionTitleSx}>
             Información de la operación
           </Typography>
@@ -558,20 +532,19 @@ const EnviarOfertaCard = ({
               />
             ))}
           </Box>
-          </CollapsibleSection>
 
-          <CollapsibleSection
-            title={
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 600, color: "text.primary" }}
-              >
-                Comentario
-              </Typography>
-            }
-            subtitle="Información adicional sobre tu oferta (opcional)"
-            icon={<Comment sx={{ color: "primary.main", fontSize: 24 }} />}
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 600, color: "text.primary", mb: 0.5, mt: 1 }}
           >
+            Comentario
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ color: "var(--color-fg-default-secondary)", mb: 2 }}
+          >
+            Información adicional sobre tu oferta (opcional)
+          </Typography>
           <StyledTextField
             fullWidth
             name="comentario"
@@ -586,7 +559,6 @@ const EnviarOfertaCard = ({
             error={fieldError("comentario")}
             helperText={fieldHelper("comentario", "Máximo 500 caracteres")}
           />
-          </CollapsibleSection>
 
           <Box
             sx={{
@@ -622,8 +594,7 @@ const EnviarOfertaCard = ({
               </Typography>
             </Box>
           </Box>
-        </Box>
-      </Box>
+      </SectionPanel>
 
           <ResumenOfertaAside
             montoTotal={factura.montoTotal}
