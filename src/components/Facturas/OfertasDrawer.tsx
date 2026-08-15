@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Drawer,
@@ -42,6 +42,7 @@ interface OfertasDrawerProps {
   open: boolean;
   onClose: () => void;
   factura: Factura | null;
+  initialOfertaId?: string | null;
 }
 
 const formatCurrency = (value: string | number) => {
@@ -121,7 +122,7 @@ const getEstadoChip = (estado: string) => {
   );
 };
 
-const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
+const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawerProps) => {
   const { getOfertasByFacturaId, loading } = useOfertas();
   const navigate = useNavigate();
   const [ofertas, setOfertas] = useState<Oferta[]>([]);
@@ -130,6 +131,8 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
   const [rechazarModal, setRechazarModal] = useState<{ open: boolean; oferta: Oferta | null }>({ open: false, oferta: null });
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("ASC");
+  const appliedInitialOfertaIdRef = useRef<string | null>(null);
+  const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -158,12 +161,44 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
   useEffect(() => {
     if (open && factura?.id) {
       fetchOfertas();
-      setExpandedRow(null);
     } else {
       setOfertas([]);
       setExpandedRow(null);
     }
   }, [open, factura?.id, sortBy, sortOrder]);
+
+  useEffect(() => {
+    if (!open) {
+      appliedInitialOfertaIdRef.current = null;
+      return;
+    }
+    if (
+      !initialOfertaId ||
+      appliedInitialOfertaIdRef.current === initialOfertaId
+    ) {
+      return;
+    }
+    const target = ofertas.find((oferta) => oferta.id === initialOfertaId);
+    if (!target) return;
+    appliedInitialOfertaIdRef.current = initialOfertaId;
+    const isNotAvailable = ["expirada", "inactiva"].includes(
+      target.estado?.toLowerCase() || "",
+    );
+    if (!isNotAvailable) {
+      setExpandedRow(initialOfertaId);
+    }
+  }, [open, initialOfertaId, ofertas]);
+
+  useEffect(() => {
+    if (!open || !expandedRow) return;
+    if (appliedInitialOfertaIdRef.current !== expandedRow) return;
+    const row = rowRefs.current[expandedRow];
+    if (!row) return;
+    const frame = requestAnimationFrame(() => {
+      row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [open, expandedRow]);
 
   const activas = ofertas.filter(
     (o) => o.estado?.toLowerCase() === "activa"
@@ -383,6 +418,9 @@ const OfertasDrawer = ({ open, onClose, factura }: OfertasDrawerProps) => {
                     <>
                       <TableRow
                         key={oferta.id}
+                        ref={(el) => {
+                          rowRefs.current[oferta.id] = el;
+                        }}
                         sx={{
                           opacity: isNotAvailable ? 0.5 : 1,
                           "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },

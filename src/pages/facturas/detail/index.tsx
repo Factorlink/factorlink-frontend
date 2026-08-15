@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -38,6 +38,10 @@ const FacturaDetail = () => {
   const { currentRole } = useAuthStore();
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const ofertaIdParam = searchParams.get("ofertaId");
+  const shouldOpenOfertas =
+    searchParams.get("ofertas") === "true" || Boolean(ofertaIdParam);
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
@@ -47,7 +51,7 @@ const FacturaDetail = () => {
     useState(false);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
     useState(false);
-  const [ofertasDrawerOpen, setOfertasDrawerOpen] = useState(false);
+  const [ofertasDrawerOpen, setOfertasDrawerOpen] = useState(shouldOpenOfertas);
 
   const fetchFactura = async () => {
     try {
@@ -66,8 +70,58 @@ const FacturaDetail = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (!factura) return;
+
+    if (factura.estado?.toLowerCase() === "cargada") {
+      setOfertasDrawerOpen(false);
+      if (!searchParams.has("ofertas") && !searchParams.has("ofertaId")) return;
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete("ofertas");
+          next.delete("ofertaId");
+          return next;
+        },
+        { replace: true },
+      );
+      return;
+    }
+
+    if (shouldOpenOfertas) {
+      setOfertasDrawerOpen(true);
+    }
+  }, [factura, shouldOpenOfertas]);
+
   const handleBack = () => {
-    navigate(-1);
+    navigate("/facturas");
+  };
+
+  const handleOpenOfertas = () => {
+    setOfertasDrawerOpen(true);
+    if (searchParams.get("ofertas") === "true") return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("ofertas", "true");
+        return next;
+      },
+      { replace: true },
+    );
+  };
+
+  const handleCloseOfertas = () => {
+    setOfertasDrawerOpen(false);
+    if (!searchParams.has("ofertas") && !searchParams.has("ofertaId")) return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("ofertas");
+        next.delete("ofertaId");
+        return next;
+      },
+      { replace: true },
+    );
   };
 
   const handleEnviarCotizar = () => {
@@ -405,7 +459,7 @@ const FacturaDetail = () => {
                   variant="outlined"
                   fullWidth
                   startIcon={<Visibility />}
-                  onClick={() => setOfertasDrawerOpen(true)}
+                  onClick={handleOpenOfertas}
                   sx={{
                     borderColor: "var(--color-border-accent-primary)",
                     color: "var(--color-fg-accent-primary)",
@@ -537,9 +591,10 @@ const FacturaDetail = () => {
         />
 
         <OfertasDrawer
-          open={ofertasDrawerOpen}
-          onClose={() => setOfertasDrawerOpen(false)}
+          open={ofertasDrawerOpen && !isCargada}
+          onClose={handleCloseOfertas}
           factura={factura}
+          initialOfertaId={ofertaIdParam}
         />
       </Box>
     </Layout>
