@@ -287,7 +287,7 @@ const Users = () => {
       {/* Users Table */}
       <TableContainer
         component={Paper}
-        sx={[tableShellSx, { borderRadius: "var(--radius-l)" }]}
+        sx={tableShellSx}
       >
         <Box sx={tableScrollSx}>
         <Table sx={tableWideSx}>

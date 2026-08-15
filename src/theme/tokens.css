@@ -246,9 +246,9 @@
   --space-4xl: 64px;
   --space-5xl: 72px;
 
-  --radius-s: 8px;
-  --radius-m: 12px;
-  --radius-l: 24px;
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 12px;
   --radius-full: 9999px;
 
   --shadow-nav: 0px 8px 30.4px rgba(0, 0, 0, 0.06), 0px 2px 7px rgba(0, 0, 0, 0.04);
