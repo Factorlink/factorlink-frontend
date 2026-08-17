@@ -8,6 +8,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { StyledTextField } from "../../../pages/register/styles";
 import useAuthStore from "../../../store/authStore";
 import { surface } from "../../../theme";
+import { isXmlUiEnabled } from "../../../config/featureFlags";
 
 interface SiiPersonalSyncProps {
   isLinked: boolean;
@@ -16,12 +17,22 @@ interface SiiPersonalSyncProps {
   onUnlink?: () => void;
 }
 
-const benefits = [
-  "Cesión electrónica de facturas",
-  "Obtención automática de XML/DTE",
-  "Envío directo a cotización en marketplace",
-  "Consulta de estado de cesión en SII",
-];
+const getBenefits = () => {
+  if (isXmlUiEnabled()) {
+    return [
+      "Cesión electrónica de facturas",
+      "Obtención automática de XML/DTE",
+      "Envío directo a cotización en marketplace",
+      "Consulta de estado de cesión en SII",
+    ];
+  }
+  return [
+    "Cesión electrónica de facturas",
+    "Obtención automática de PDF/DTE",
+    "Envío directo a cotización en marketplace",
+    "Consulta de estado de cesión en SII",
+  ];
+};
 
 const SiiPersonalSync = ({
   isLinked,
@@ -31,6 +42,7 @@ const SiiPersonalSync = ({
 }: SiiPersonalSyncProps) => {
   const { currentRole } = useAuthStore();
   const empresa = currentRole?.empresa;
+  const benefits = getBenefits();
 
   return (
     <Box

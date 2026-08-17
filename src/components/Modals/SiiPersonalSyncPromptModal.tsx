@@ -9,6 +9,7 @@ import {
   Box,
 } from "@mui/material";
 import siiLogo from "../../assets/png/sii-logo.png";
+import { isXmlUiEnabled } from "../../config/featureFlags";
 
 interface SiiPersonalSyncPromptModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ const SiiPersonalSyncPromptModal = ({
   onClose,
 }: SiiPersonalSyncPromptModalProps) => {
   const navigate = useNavigate();
+  const showXmlUi = isXmlUiEnabled();
 
   const handleSync = () => {
     onClose();
@@ -64,10 +66,9 @@ const SiiPersonalSyncPromptModal = ({
 
       <DialogContent sx={{ textAlign: "center", px: 4 }}>
         <Typography variant="body1" color="text.secondary">
-          Para obtener automáticamente los documentos XML y PDF desde el SII,
-          necesitas vincular tu cuenta personal del Servicio de Impuestos
-          Internos. Este proceso es rápido y solo necesitas tus credenciales
-          personales del SII.
+          {showXmlUi
+            ? "Para obtener automáticamente los documentos XML y PDF desde el SII, necesitas vincular tu cuenta personal del Servicio de Impuestos Internos. Este proceso es rápido y solo necesitas tus credenciales personales del SII."
+            : "Para obtener automáticamente los documentos PDF desde el SII, necesitas vincular tu cuenta personal del Servicio de Impuestos Internos. Este proceso es rápido y solo necesitas tus credenciales personales del SII."}
         </Typography>
       </DialogContent>
 

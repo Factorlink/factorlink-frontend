@@ -26,6 +26,7 @@ import EnviarOfertaCard from "../../../../components/Facturas/EnviarOfertaCard";
 import DetalleOfertaFactoring from "../../../../components/Ofertas/DetalleOfertaFactoring";
 import HistorialOfertasFactoring from "../../../../components/Ofertas/HistorialOfertasFactoring";
 import DetalleCotizacionCard from "../../../../components/Facturas/DetalleCotizacionCard";
+import FacturaDocumentoPdfSection from "../../../../components/Facturas/FacturaDocumentoPdfSection";
 import { appContentSx } from "../../../../theme/layoutStyles";
 
 interface TabPanelProps {
@@ -310,6 +311,8 @@ const FacturaFactoringDetail = () => {
               montoFinanciar={factura.montoFinanciar}
             />
           )}
+
+          <FacturaDocumentoPdfSection factura={factura} />
 
           {!factura.ofertaFactoring && (
             <Box
