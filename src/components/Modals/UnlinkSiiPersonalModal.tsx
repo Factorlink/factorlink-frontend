@@ -16,6 +16,7 @@ import LinkOffIcon from "@mui/icons-material/LinkOff";
 import { useEmpresa } from "../../hooks/useEmpresa";
 import useAuthStore from "../../store/authStore";
 import type { Role } from "../../types/role";
+import { isXmlUiEnabled } from "../../config/featureFlags";
 
 interface UnlinkSiiPersonalModalProps {
   open: boolean;
@@ -31,6 +32,7 @@ const UnlinkSiiPersonalModal = ({
 
   const { currentRole } = useAuthStore();
   const { unsyncPersonalDataSii, loading } = useEmpresa();
+  const showXmlUi = isXmlUiEnabled();
 
   const handleUnlink = async () => {
     try {
@@ -121,9 +123,9 @@ const UnlinkSiiPersonalModal = ({
               variant="body2"
               sx={{ color: "var(--color-fg-danger-primary)", lineHeight: 1.6 }}
             >
-              Al desvincular tu cuenta personal del SII perderás acceso a las
-              funcionalidades avanzadas como la cesión electrónica de facturas,
-              obtención automática de XML/DTE y consulta de estado de cesión.{" "}
+              {showXmlUi
+                ? "Al desvincular tu cuenta personal del SII perderás acceso a las funcionalidades avanzadas como la cesión electrónica de facturas, obtención automática de XML/DTE y consulta de estado de cesión. "
+                : "Al desvincular tu cuenta personal del SII perderás acceso a las funcionalidades avanzadas como la cesión electrónica de facturas, obtención automática de PDF/DTE y consulta de estado de cesión. "}
               <Typography
                 component="span"
                 variant="body2"

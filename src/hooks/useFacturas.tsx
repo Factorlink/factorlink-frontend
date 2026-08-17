@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../lib/axios";
+import type { Factura } from "../types/factura";
 
 export type GetFacturasParams = {
   page: number;
@@ -296,10 +297,10 @@ export const useFacturas = () => {
     }
   };
 
-  const fetchXMLContent = async (id: string) => {
+  const fetchXMLContent = async (id: string): Promise<Factura> => {
     try {
       setLoading(true);
-      const response = await api.post(`/facturas/${id}/fetch-xml`);
+      const response = await api.post<Factura>(`/facturas/${id}/fetch-xml`);
       return response.data;
     } catch (error) {
       throw error;
