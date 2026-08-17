@@ -15,8 +15,8 @@ export interface Factura {
     empresa: Empresa;
     empresaId: string;
     estado: string;
-    facturaNameFile: string;
-    facturaNameFilePDF: string;
+    facturaNameFile?: string | null;
+    facturaNameFilePDF?: string | null;
     fechaEmision: string;
     fechaRecepcion: string;
     folio: string;
@@ -33,9 +33,10 @@ export interface Factura {
     rutReceptor: string;
     siiId: string;
     tipoDocumento: string;
-    urlFactura: string;
+    urlFactura?: string | null;
+    urlFacturaPdf?: string | null;
     visibilidad: string;
-    xmlContentBase64: string;
+    xmlContentBase64?: string | null;
     visibilidadDetalle: VisibilidadDetalle;
     numeroOfertasRecibidas?: number;
     historyOfertas?: Oferta[];
