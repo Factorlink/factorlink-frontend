@@ -32,6 +32,7 @@ import { appContentSx } from "../../../theme/layoutStyles";
 import FacturaResumenCard from "../../../components/Facturas/FacturaResumenCard";
 import DetalleCotizacionCard from "../../../components/Facturas/DetalleCotizacionCard";
 import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
+import { isXmlUiEnabled } from "../../../config/featureFlags";
 
 const FacturaDetail = () => {
   const { getFacturaById, loading, refreshFactura } = useFacturas();
@@ -292,6 +293,25 @@ const FacturaDetail = () => {
   const isInMarketplace = ["EN_MARKETPLACE", "CON_OFERTAS"].includes(
     factura.estado,
   );
+  const showXmlUi = isXmlUiEnabled();
+
+  const handleDescargarPdf = (base64: string, fileName: string) => {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Layout>
@@ -403,27 +423,15 @@ const FacturaDetail = () => {
           {/* Documentos Asociados */}
           <DocumentosAsociadosCard
             factura={factura}
-            onUploadXmlClick={() => setUploadXmlModalOpen(true)}
             onUploadPdfClick={() => setUploadPdfModalOpen(true)}
-            onDownloadXml={handleDescargarXML}
-            onDownloadPdf={(base64, fileName) => {
-              const byteCharacters = atob(base64);
-              const byteNumbers = new Array(byteCharacters.length);
-              for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-              }
-              const byteArray = new Uint8Array(byteNumbers);
-              const blob = new Blob([byteArray], { type: "application/pdf" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = fileName;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-            }}
+            onDownloadPdf={handleDescargarPdf}
             onFetchSiiSuccess={(data) => setFactura(data)}
+            {...(showXmlUi
+              ? {
+                  onUploadXmlClick: () => setUploadXmlModalOpen(true),
+                  onDownloadXml: handleDescargarXML,
+                }
+              : {})}
           />
 
           {/* Acciones */}
@@ -543,13 +551,14 @@ const FacturaDetail = () => {
           </Box>
         </Box>
 
-        {/* Upload XML Modal */}
-        <UploadXmlModal
-          open={uploadXmlModalOpen}
-          onClose={handleCloseUploadXmlModal}
-          onSuccess={handleUploadXmlSuccess}
-          facturaId={id || ""}
-        />
+        {showXmlUi && (
+          <UploadXmlModal
+            open={uploadXmlModalOpen}
+            onClose={handleCloseUploadXmlModal}
+            onSuccess={handleUploadXmlSuccess}
+            facturaId={id || ""}
+          />
+        )}
 
         {/* Upload PDF Modal */}
         <UploadPdfModal

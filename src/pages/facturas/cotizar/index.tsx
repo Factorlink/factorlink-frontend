@@ -44,8 +44,17 @@ import FactoringsList from "../../../components/Facturas/FactoringsList";
 import UploadPdfModal from "../../../components/Modals/UploadPdfModal";
 import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
 import { appContentSx } from "../../../theme/layoutStyles";
+import { isXmlUiEnabled } from "../../../config/featureFlags";
+import {
+  hasFacturaPdf,
+  hasFacturaXml,
+  shouldBlockForMissingXml,
+} from "../../../utils/facturaDocuments";
 
-const STEPS = ["Resumen Factura", "XML + Condiciones", "Resumen Final"];
+const getCotizarSteps = () =>
+  isXmlUiEnabled()
+    ? ["Resumen Factura", "XML + Condiciones", "Resumen Final"]
+    : ["Resumen Factura", "Documentos + Condiciones", "Resumen Final"];
 
 const truncateToTwo = (num: number): number => {
   return Math.round(num * 100) / 100;
@@ -95,11 +104,10 @@ const CotizarFactura = () => {
       setFactura(data);
 
       // Initialize form values from factura
-      if (data.montoFinanciar && data.montoTotal) {
-        const percentage =
-          (parseFloat(data.urlFactura ? data.montoFinanciar : data.montoTotal) /
-            parseFloat(data.montoTotal)) *
-          100;
+      if (data.montoTotal) {
+        const percentage = data.montoFinanciar
+          ? (parseFloat(data.montoFinanciar) / parseFloat(data.montoTotal)) * 100
+          : 100;
         setMontoFinanciar(truncateToTwo(percentage));
       }
       if (data.plazo) {
@@ -177,16 +185,52 @@ const CotizarFactura = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadPdf = (base64: string, fileName: string) => {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleUploadPdfSuccess = async () => {
+    try {
+      const data = await refreshFactura(id!);
+      setFactura(data);
+    } catch (err) {
+      console.error("Error refreshing factura:", err);
+    }
+  };
+
   // Validations for Step 2
   const validateXmlMatch = () => {
-    if (!factura?.urlFactura) {
+    if (shouldBlockForMissingXml(factura)) {
       return {
         valid: false,
         message: "Debe subir el archivo XML de la factura",
       };
     }
-    // XML validation against SII data (simulated - in real scenario this would compare XML content)
-    return { valid: true, message: "XML validado correctamente" };
+    return { valid: true, message: "" };
+  };
+
+  const validatePdfUploaded = () => {
+    if (!hasFacturaPdf(factura)) {
+      return {
+        valid: false,
+        message: "Debe subir el archivo PDF de la factura",
+      };
+    }
+    return { valid: true, message: "" };
   };
 
   const validateMontoFinanciar = () => {
@@ -211,17 +255,17 @@ const CotizarFactura = () => {
 
   const isStep2Valid = () => {
     const xmlValidation = validateXmlMatch();
+    const pdfValidation = validatePdfUploaded();
     const montoValidation = validateMontoFinanciar();
     const plazoValidation = validatePlazo();
-    const pdfUploaded = factura?.facturaNameFilePDF;
     const visibilidadValid =
       visibilidad === "TODOS" || selectedFactorings.length > 0;
     return (
       xmlValidation.valid &&
+      pdfValidation.valid &&
       montoValidation.valid &&
       plazoValidation.valid &&
-      visibilidadValid &&
-      pdfUploaded
+      visibilidadValid
     );
   };
 
@@ -235,6 +279,12 @@ const CotizarFactura = () => {
     const xmlValidation = validateXmlMatch();
     if (!xmlValidation.valid) {
       setStep2Error(xmlValidation.message);
+      return;
+    }
+
+    const pdfValidation = validatePdfUploaded();
+    if (!pdfValidation.valid) {
+      setStep2Error(pdfValidation.message);
       return;
     }
 
@@ -402,6 +452,8 @@ const CotizarFactura = () => {
   }
 
   const showSolicitudFields = factura.estado?.toLowerCase() !== "cargada";
+  const steps = getCotizarSteps();
+  const showXmlUi = isXmlUiEnabled();
 
   return (
     <Layout>
@@ -448,7 +500,7 @@ const CotizarFactura = () => {
               },
             }}
           >
-            {STEPS.map((label, index) => (
+            {steps.map((label, index) => (
               <Step key={label} completed={index < activeStep}>
                 <StepLabel
                   sx={{
@@ -502,11 +554,15 @@ const CotizarFactura = () => {
             {/* Documentos Asociados */}
             <DocumentosAsociadosCard
               factura={factura}
-              onUploadXmlClick={() => setUploadXmlModalOpen(true)}
               onUploadPdfClick={() => setUploadPdfModalOpen(true)}
-              onDownloadXml={handleDownloadXml}
-              onDownloadPdf={handleDownloadXml}
+              onDownloadPdf={handleDownloadPdf}
               onFetchSiiSuccess={(data) => setFactura(data)}
+              {...(showXmlUi
+                ? {
+                    onUploadXmlClick: () => setUploadXmlModalOpen(true),
+                    onDownloadXml: handleDownloadXml,
+                  }
+                : {})}
             />
 
             {/* Conditions Card */}
@@ -839,7 +895,7 @@ const CotizarFactura = () => {
                 gap: 3,
               }}
             >
-                {/* XML Validated Card */}
+                {showXmlUi && hasFacturaXml(factura) && (
                 <Box
                   sx={{
                     backgroundColor: "var(--color-bg-default-primary)",
@@ -865,6 +921,7 @@ const CotizarFactura = () => {
                     </Box>
                   </Box>
                 </Box>
+                )}
 
                 {/* PDF Validated Card */}
                 <Box
@@ -1062,19 +1119,20 @@ const CotizarFactura = () => {
           </>
         )}
 
-        {/* Upload XML Modal */}
-        <UploadXmlModal
-          open={uploadXmlModalOpen}
-          onClose={() => setUploadXmlModalOpen(false)}
-          onSuccess={handleUploadXmlSuccess}
-          facturaId={id || ""}
-        />
+        {showXmlUi && (
+          <UploadXmlModal
+            open={uploadXmlModalOpen}
+            onClose={() => setUploadXmlModalOpen(false)}
+            onSuccess={handleUploadXmlSuccess}
+            facturaId={id || ""}
+          />
+        )}
 
         {/* Upload PDF Modal */}
         <UploadPdfModal
           open={uploadPdfModalOpen}
           onClose={() => setUploadPdfModalOpen(false)}
-          onSuccess={handleUploadXmlSuccess}
+          onSuccess={handleUploadPdfSuccess}
           facturaId={id || ""}
         />
       </Box>
