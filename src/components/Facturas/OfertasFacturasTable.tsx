@@ -30,6 +30,12 @@ import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import OfertasDrawer from "./OfertasDrawer";
+import FacturasFilters, {
+  isArrayFilterKey,
+  isFilterValueActive,
+  type FacturasFiltersValues,
+} from "./FacturasFilters";
+import { INITIAL_FILTERS } from "../../utils/consts";
 import {
   tableShellSx,
   tableScrollSx,
@@ -74,16 +80,66 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "");
   const [order, setOrder] = useState(searchParams.get("order") || "DESC");
+  const [filters, setFilters] = useState<FacturasFiltersValues>(() => {
+    const newFilters = { ...INITIAL_FILTERS };
+    (Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+      if (isArrayFilterKey(key)) {
+        const values = searchParams.getAll(key);
+        if (values.length > 0) {
+          newFilters[key] = values;
+        }
+        return;
+      }
+      const value = searchParams.get(key);
+      if (value !== null) {
+        newFilters[key] = value;
+      }
+    });
+    return newFilters;
+  });
 
-  const updateSearchParams = (newSortBy: string, newOrder: string, page?: number, limit?: number) => {
+  const [meta, setMeta] = useState<Meta>({
+    lastPage: 1,
+    limit: Number(searchParams.get("limit")) || 10,
+    page: Number(searchParams.get("page")) || 1,
+    total: 0,
+    totalCargada: 0,
+    totalCedida: 0,
+    totalEnMarketplace: 0,
+    totalConOfertas: 0,
+    totalGeneral: 0,
+  });
+
+  const writeSearchParams = (
+    nextFilters: FacturasFiltersValues,
+    nextSortBy: string,
+    nextOrder: string,
+    page?: number,
+    limit?: number,
+  ) => {
     const params = new URLSearchParams();
+    (Object.keys(nextFilters) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+      const value = nextFilters[key];
+      if (!isFilterValueActive(value)) return;
+      if (isArrayFilterKey(key)) {
+        (value as string[]).forEach((item) => {
+          if (item) params.append(key, item);
+        });
+        return;
+      }
+      params.set(key, value as string);
+    });
     const currentPage = page ?? meta.page;
     const currentLimit = limit ?? meta.limit;
     if (currentPage !== 1) params.set("page", String(currentPage));
     if (currentLimit !== 10) params.set("limit", String(currentLimit));
-    if (newSortBy) params.set("sortBy", newSortBy);
-    if (newSortBy && newOrder) params.set("order", newOrder);
+    if (nextSortBy) params.set("sortBy", nextSortBy);
+    if (nextSortBy && nextOrder) params.set("order", nextOrder);
     setSearchParams(params);
+  };
+
+  const updateSearchParams = (newSortBy: string, newOrder: string, page?: number, limit?: number) => {
+    writeSearchParams(filters, newSortBy, newOrder, page, limit);
   };
 
   const handleSort = (field: string) => {
@@ -102,18 +158,6 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
     updateSearchParams(newSortBy, newOrder);
   };
 
-  const [meta, setMeta] = useState<Meta>({
-    lastPage: 1,
-    limit: Number(searchParams.get("limit")) || 10,
-    page: Number(searchParams.get("page")) || 1,
-    total: 0,
-    totalCargada: 0,
-    totalCedida: 0,
-    totalEnMarketplace: 0,
-    totalConOfertas: 0,
-    totalGeneral: 0,
-  });
-
   const fetchData = useCallback(async () => {
     if (!empresaId) return;
     try {
@@ -123,6 +167,12 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
         empresaId,
         sortBy: sortBy || undefined,
         order: sortBy ? order : undefined,
+        folio: filters.folio || undefined,
+        rutReceptor: filters.rutReceptor || undefined,
+        razonSocialReceptor:
+          filters.razonSocialReceptor.length > 0
+            ? filters.razonSocialReceptor
+            : undefined,
       });
       setFacturas(response?.data || []);
       if (response?.meta) {
@@ -132,7 +182,7 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
     } catch {
       setFacturas([]);
     }
-  }, [empresaId, meta.page, meta.limit, sortBy, order]);
+  }, [empresaId, meta.page, meta.limit, sortBy, order, filters]);
 
   useEffect(() => {
     fetchData();
@@ -154,6 +204,20 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
     updateSearchParams(sortBy, order, 1, value);
   };
 
+  const handleApplyFilters = (newFilters: FacturasFiltersValues) => {
+    setFilters(newFilters);
+    setMeta((prev) => ({ ...prev, page: 1 }));
+    writeSearchParams(newFilters, sortBy, order, 1, meta.limit);
+  };
+
+  const handleClearFilters = () => {
+    setFilters(INITIAL_FILTERS);
+    setMeta((prev) => ({ ...prev, page: 1 }));
+    writeSearchParams(INITIAL_FILTERS, sortBy, order, 1, meta.limit);
+  };
+
+  const hasActiveFilters = Object.values(filters).some(isFilterValueActive);
+
   const getOfertasCount = (factura: Factura) => {
     return factura.numeroOfertasRecibidas ?? (factura as any).ofertasCount ?? 0;
   };
@@ -174,6 +238,12 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
 
   return (
     <>
+      <FacturasFilters
+        hideEstado
+        onApplyFilters={handleApplyFilters}
+        onClearFilters={handleClearFilters}
+        loading={loading}
+      />
     <TableContainer component={Paper} sx={tableShellSx}>
       {loading ? (
         <Box
@@ -201,7 +271,9 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
             No hay facturas con ofertas
           </Typography>
           <Typography variant="body2" sx={{ color: "var(--color-fg-default-tertiary)", mt: 1 }}>
-            Las facturas que reciban ofertas aparecerán aquí
+            {hasActiveFilters
+              ? "No se encontraron facturas con los criterios de búsqueda"
+              : "Las facturas que reciban ofertas aparecerán aquí"}
           </Typography>
         </Box>
       ) : (

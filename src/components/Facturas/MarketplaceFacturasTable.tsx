@@ -30,6 +30,12 @@ import type { Factura } from "../../types/factura";
 import RemoveMarketplaceModal from "../Modals/RemoveMarketplaceModal";
 import OfertasDrawer from "./OfertasDrawer";
 import SortableTableHeader from "./SortableTableHeader";
+import FacturasFilters, {
+  isArrayFilterKey,
+  isFilterValueActive,
+  type FacturasFiltersValues,
+} from "./FacturasFilters";
+import { INITIAL_FILTERS } from "../../utils/consts";
 import {
   tableShellSx,
   tableScrollSx,
@@ -76,12 +82,44 @@ const MarketplaceFacturasTable = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "");
   const [order, setOrder] = useState(searchParams.get("order") || "DESC");
+  const [filters, setFilters] = useState<FacturasFiltersValues>(() => {
+    const newFilters = { ...INITIAL_FILTERS };
+    (Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+      if (isArrayFilterKey(key)) {
+        const values = searchParams.getAll(key);
+        if (values.length > 0) {
+          newFilters[key] = values;
+        }
+        return;
+      }
+      const value = searchParams.get(key);
+      if (value !== null) {
+        newFilters[key] = value;
+      }
+    });
+    return newFilters;
+  });
+
+  const writeSearchParams = (nextFilters: FacturasFiltersValues, nextSortBy: string, nextOrder: string) => {
+    const params = new URLSearchParams();
+    (Object.keys(nextFilters) as Array<keyof FacturasFiltersValues>).forEach((key) => {
+      const value = nextFilters[key];
+      if (!isFilterValueActive(value)) return;
+      if (isArrayFilterKey(key)) {
+        (value as string[]).forEach((item) => {
+          if (item) params.append(key, item);
+        });
+        return;
+      }
+      params.set(key, value as string);
+    });
+    if (nextSortBy) params.set("sortBy", nextSortBy);
+    if (nextSortBy && nextOrder) params.set("order", nextOrder);
+    setSearchParams(params);
+  };
 
   const updateSearchParams = (newSortBy: string, newOrder: string) => {
-    const params = new URLSearchParams();
-    if (newSortBy) params.set("sortBy", newSortBy);
-    if (newSortBy && newOrder) params.set("order", newOrder);
-    setSearchParams(params);
+    writeSearchParams(filters, newSortBy, newOrder);
   };
 
   const handleSort = (field: string) => {
@@ -109,17 +147,33 @@ const MarketplaceFacturasTable = ({
         empresaId,
         sortBy: sortBy || undefined,
         order: sortBy ? order : undefined,
+        folio: filters.folio || undefined,
+        rutReceptor: filters.rutReceptor || undefined,
+        razonSocialReceptor:
+          filters.razonSocialReceptor.length > 0
+            ? filters.razonSocialReceptor
+            : undefined,
       });
       setFacturas(response?.data || response || []);
       if (response?.meta) onMetaChange?.(response.meta);
     } catch {
       setFacturas([]);
     }
-  }, [empresaId, sortBy, order]);
+  }, [empresaId, sortBy, order, filters]);
 
   useEffect(() => {
     fetchMarketplace();
   }, [fetchMarketplace]);
+
+  const handleApplyFilters = (newFilters: FacturasFiltersValues) => {
+    setFilters(newFilters);
+    writeSearchParams(newFilters, sortBy, order);
+  };
+
+  const handleClearFilters = () => {
+    setFilters(INITIAL_FILTERS);
+    writeSearchParams(INITIAL_FILTERS, sortBy, order);
+  };
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -152,8 +206,16 @@ const MarketplaceFacturasTable = ({
     onRemoveSuccess?.();
   };
 
+  const hasActiveFilters = Object.values(filters).some(isFilterValueActive);
+
   return (
     <>
+      <FacturasFilters
+        hideEstado
+        onApplyFilters={handleApplyFilters}
+        onClearFilters={handleClearFilters}
+        loading={loading}
+      />
       <TableContainer component={Paper} sx={tableShellSx}>
         {loading ? (
           <Box
@@ -181,7 +243,9 @@ const MarketplaceFacturasTable = ({
               No hay facturas en marketplace
             </Typography>
             <Typography variant="body2" sx={{ color: "var(--color-fg-default-tertiary)", mt: 1 }}>
-              Las facturas enviadas a cotizar aparecerán aquí
+              {hasActiveFilters
+                ? "No se encontraron facturas con los criterios de búsqueda"
+                : "Las facturas enviadas a cotizar aparecerán aquí"}
             </Typography>
           </Box>
         ) : (

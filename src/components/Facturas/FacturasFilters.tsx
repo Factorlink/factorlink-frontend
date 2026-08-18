@@ -92,15 +92,25 @@ interface FacturasFiltersProps {
   onApplyFilters: (filters: FacturasFiltersValues) => void;
   onClearFilters: () => void;
   loading?: boolean;
+  hideEstado?: boolean;
 }
 
 const FacturasFilters = ({
   onApplyFilters,
   onClearFilters,
   loading = false,
+  hideEstado = false,
 }: FacturasFiltersProps) => {
-  const [expanded, setExpanded] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [expanded, setExpanded] = useState(() =>
+    (Object.keys(INITIAL_FILTERS) as Array<keyof FacturasFiltersValues>).some((key) => {
+      if (key === "sortBy" || key === "order") return false;
+      if (hideEstado && key === "estado") return false;
+      if (isArrayFilterKey(key)) return searchParams.getAll(key).length > 0;
+      const value = searchParams.get(key);
+      return value !== null && isFilterValueActive(value);
+    }),
+  );
   const { currentRole } = useAuthStore();
   const { getRazonesSociales } = useFacturas();
 
@@ -180,7 +190,14 @@ const FacturasFilters = ({
   const getEstadoLabel = (value: string) =>
     FACTURAS_STATES.find((estado) => estado.value === value)?.label || value;
 
-  const activeFilterCount = Object.values(formik.values).filter(isFilterValueActive).length;
+  const fieldGridSize = hideEstado
+    ? { xs: 12, sm: 6, md: 4 }
+    : { xs: 12, sm: 6, md: 3 };
+
+  const activeFilterCount = Object.entries(formik.values).filter(([key, value]) => {
+    if (hideEstado && key === "estado") return false;
+    return isFilterValueActive(value);
+  }).length;
   const hasActiveFilters = activeFilterCount > 0;
 
   const razonesHelperText = (() => {
@@ -249,10 +266,10 @@ const FacturasFilters = ({
 
       {/* Collapsible Content */}
       <Collapse in={expanded}>
-        <Box sx={{ p: 2, pt: 0, borderTop: "1px solid var(--color-border-default-primary)" }} component="form" onSubmit={formik.handleSubmit}>
+        <Box sx={{ p: 2, borderTop: "1px solid var(--color-border-default-primary)" }} component="form" onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {/* Folio */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={fieldGridSize}>
               <TextField
                 fullWidth
                 size="small"
@@ -271,7 +288,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* RUT Receptor */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={fieldGridSize}>
               <TextField
                 fullWidth
                 size="small"
@@ -288,7 +305,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Razón Social Receptor */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={fieldGridSize}>
               <Autocomplete
                 multiple
                 size="small"
@@ -395,84 +412,86 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Estado */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Autocomplete
-                multiple
-                size="small"
-                options={FACTURAS_STATES.map((estado) => estado.value)}
-                getOptionLabel={getEstadoLabel}
-                value={formik.values.estado}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue("estado", newValue);
-                }}
-                disableCloseOnSelect
-                sx={autocompleteFilterSx}
-                renderTags={(value, getTagProps) => {
-                  const visible = value.slice(0, 1);
-                  const extra = value.length - visible.length;
+            {!hideEstado && (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Autocomplete
+                  multiple
+                  size="small"
+                  options={FACTURAS_STATES.map((estado) => estado.value)}
+                  getOptionLabel={getEstadoLabel}
+                  value={formik.values.estado}
+                  onChange={(_, newValue) => {
+                    formik.setFieldValue("estado", newValue);
+                  }}
+                  disableCloseOnSelect
+                  sx={autocompleteFilterSx}
+                  renderTags={(value, getTagProps) => {
+                    const visible = value.slice(0, 1);
+                    const extra = value.length - visible.length;
 
-                  return (
-                    <>
-                      {visible.map((option, index) => {
-                        const { key, ...tagProps } = getTagProps({ index });
-                        return (
-                          <Chip
-                            key={key}
-                            label={getEstadoLabel(option)}
-                            size="small"
-                            sx={{ ...chipSx, maxWidth: extra > 0 ? "70%" : "100%" }}
-                            {...tagProps}
-                          />
-                        );
-                      })}
-                      {extra > 0 && (
-                        <Chip label={`+${extra}`} size="small" sx={chipSx} />
-                      )}
-                    </>
-                  );
-                }}
-                renderOption={(props, option, { selected }) => {
-                  const { key, ...optionProps } = props;
-                  return (
-                    <Box
-                      key={key}
-                      component="li"
-                      {...optionProps}
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        backgroundColor: selected
-                          ? "var(--color-bg-accent-secondary)"
-                          : "transparent",
-                        "&:hover": {
+                    return (
+                      <>
+                        {visible.map((option, index) => {
+                          const { key, ...tagProps } = getTagProps({ index });
+                          return (
+                            <Chip
+                              key={key}
+                              label={getEstadoLabel(option)}
+                              size="small"
+                              sx={{ ...chipSx, maxWidth: extra > 0 ? "70%" : "100%" }}
+                              {...tagProps}
+                            />
+                          );
+                        })}
+                        {extra > 0 && (
+                          <Chip label={`+${extra}`} size="small" sx={chipSx} />
+                        )}
+                      </>
+                    );
+                  }}
+                  renderOption={(props, option, { selected }) => {
+                    const { key, ...optionProps } = props;
+                    return (
+                      <Box
+                        key={key}
+                        component="li"
+                        {...optionProps}
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
                           backgroundColor: selected
-                            ? "var(--color-bg-accent-secondary-hover)"
-                            : undefined,
-                        },
+                            ? "var(--color-bg-accent-secondary)"
+                            : "transparent",
+                          "&:hover": {
+                            backgroundColor: selected
+                              ? "var(--color-bg-accent-secondary-hover)"
+                              : undefined,
+                          },
+                        }}
+                      >
+                        <span>{getEstadoLabel(option)}</span>
+                        {selected && <Check fontSize="small" />}
+                      </Box>
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      name="estado"
+                      label="Estado"
+                      error={formik.touched.estado && Boolean(formik.errors.estado)}
+                      helperText={formik.touched.estado && formik.errors.estado}
+                      onBlur={formik.handleBlur}
+                      inputProps={{
+                        ...params.inputProps,
+                        readOnly: true,
                       }}
-                    >
-                      <span>{getEstadoLabel(option)}</span>
-                      {selected && <Check fontSize="small" />}
-                    </Box>
-                  );
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    name="estado"
-                    label="Estado"
-                    error={formik.touched.estado && Boolean(formik.errors.estado)}
-                    helperText={formik.touched.estado && formik.errors.estado}
-                    onBlur={formik.handleBlur}
-                    inputProps={{
-                      ...params.inputProps,
-                      readOnly: true,
-                    }}
-                  />
-                )}
-              />
-            </Grid>
+                    />
+                  )}
+                />
+              </Grid>
+            )}
           </Grid>
 
           {/* Action Buttons */}
