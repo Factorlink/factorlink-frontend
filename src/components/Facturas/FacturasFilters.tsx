@@ -157,8 +157,13 @@ const FacturasFilters = ({
     initialValues: getInitialValues(),
     enableReinitialize: true,
     validationSchema: facturasFiltersSchema,
-    onSubmit: (values) => {
+    onSubmit: (values, { setSubmitting }) => {
+      if (!Object.values(values).some(isFilterValueActive)) {
+        setSubmitting(false);
+        return;
+      }
       onApplyFilters(values);
+      setSubmitting(false);
     },
   });
 
@@ -501,9 +506,9 @@ const FacturasFilters = ({
             </Button>
             <Button
               variant="contained"
+              type="submit"
               startIcon={<Search />}
-              onClick={() => formik.handleSubmit()}
-              disabled={loading || formik.isSubmitting || !formik.isValid}
+              disabled={loading || formik.isSubmitting || !formik.isValid || !hasActiveFilters}
               sx={{
                 backgroundColor: "var(--color-bg-accent-primary)",
                 "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
