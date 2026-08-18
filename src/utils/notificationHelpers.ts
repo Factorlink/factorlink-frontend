@@ -94,7 +94,11 @@ export const getNotificationRoute = (
     }
 
     if (currentRole?.contexto === "factoring") {
-      return `/facturas/${facturaId}/factoring?tab=oferta`;
+      const params = new URLSearchParams({ tab: "historial" });
+      if (notification.entidadId) {
+        params.set("ofertaId", notification.entidadId);
+      }
+      return `/facturas/${facturaId}/factoring?${params.toString()}`;
     }
 
     const params = new URLSearchParams({ ofertas: "true" });
