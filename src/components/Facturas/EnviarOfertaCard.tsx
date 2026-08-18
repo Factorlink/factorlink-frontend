@@ -527,6 +527,7 @@ const EnviarOfertaCard = ({
                     <InputAdornment position="start">$</InputAdornment>
                   ),
                 }}
+                inputProps={{ maxLength: 50 }}
                 error={fieldError(field.name)}
                 helperText={fieldHelper(field.name, "Mayor o igual a 0")}
               />

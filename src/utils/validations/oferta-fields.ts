@@ -79,7 +79,12 @@ export const nonNegativeMoneyValidation = yup
   .typeError("Debe ser un número")
   .required("Este campo es obligatorio")
   .integer("Debe ser un número entero")
-  .min(0, "No puede ser negativo");
+  .min(0, "No puede ser negativo")
+  .test(
+    "max-length",
+    "No puede exceder 50 caracteres",
+    (_value, ctx) => String(ctx.originalValue ?? "").length <= 50,
+  );
 
 export const createOfertaFormSchema = (minFechaExpiracion: Date) =>
   yup.object({
