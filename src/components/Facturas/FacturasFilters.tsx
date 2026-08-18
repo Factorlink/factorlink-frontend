@@ -283,6 +283,7 @@ const FacturasFilters = ({
                 error={formik.touched.folio && Boolean(formik.errors.folio)}
                 helperText={formik.touched.folio && formik.errors.folio}
                 onBlur={formik.handleBlur}
+                inputProps={{ maxLength: 10 }}
               />
             </Grid>
 
@@ -299,6 +300,7 @@ const FacturasFilters = ({
                 error={formik.touched.rutReceptor && Boolean(formik.errors.rutReceptor)}
                 helperText={formik.touched.rutReceptor && formik.errors.rutReceptor}
                 onBlur={formik.handleBlur}
+                inputProps={{ maxLength: 20 }}
               />
             </Grid>
 
