@@ -240,24 +240,6 @@ const FacturasFilters = ({
           <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
             Filtros de búsqueda
           </Typography>
-          {hasActiveFilters && (
-            <Box
-              sx={{
-                backgroundColor: "var(--color-bg-accent-primary)",
-                color: "var(--color-fg-on-accent-primary)",
-                borderRadius: "50%",
-                width: 20,
-                height: 20,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 12,
-                fontWeight: 600,
-              }}
-            >
-              {activeFilterCount}
-            </Box>
-          )}
         </Box>
         <IconButton size="small">
           {expanded ? <ExpandLess /> : <ExpandMore />}
