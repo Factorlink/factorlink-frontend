@@ -54,6 +54,12 @@ const appendParam = (
   values.forEach((v) => search.append(key, v));
 };
 
+const appendListFilters = (search: URLSearchParams, params: GetFacturasParams) => {
+  if (params.rutReceptor) search.set("rutReceptor", params.rutReceptor);
+  appendParam(search, "razonSocialReceptor", params.razonSocialReceptor);
+  if (params.folio) search.set("folio", params.folio);
+};
+
 export const useFacturas = () => {
   const [loading, setLoading] = useState(false);
 
@@ -196,6 +202,7 @@ export const useFacturas = () => {
       search.set("page", String(params.page));
       search.set("limit", String(params.limit));
       search.set("empresaId", params.empresaId || "");
+      appendListFilters(search, params);
       appendParam(search, "estado", params.estado);
       if (params.sortBy) search.set("sortBy", params.sortBy);
       if (params.order) search.set("order", params.order);
@@ -264,6 +271,7 @@ export const useFacturas = () => {
       search.set("page", String(params.page));
       search.set("limit", String(params.limit));
       search.set("empresaId", params.empresaId || "");
+      appendListFilters(search, params);
       appendParam(search, "estado", params.estado);
       if (params.sortBy) search.set("sortBy", params.sortBy);
       if (params.order) search.set("order", params.order);
@@ -284,6 +292,7 @@ export const useFacturas = () => {
       search.set("page", String(params.page));
       search.set("limit", String(params.limit));
       search.set("empresaId", params.empresaId || "");
+      appendListFilters(search, params);
       appendParam(search, "estado", params.estado);
       if (params.sortBy) search.set("sortBy", params.sortBy);
       if (params.order) search.set("order", params.order);

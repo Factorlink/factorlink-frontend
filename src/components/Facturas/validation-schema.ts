@@ -25,7 +25,7 @@ export const facturasFiltersSchema = yup.object({
   rutEmisor: optionalRutValidation,
   rutReceptor: optionalRutValidation,
   razonSocialReceptor: yup.array().of(yup.string()),
-  folio: optionalNumberValidation,
+  folio: optionalNumberValidation.max(10, "El folio no puede exceder 10 dígitos"),
   estado: yup.array().of(yup.string()),
   
   montoTotal: optionalNumberValidation,
