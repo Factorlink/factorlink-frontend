@@ -2,21 +2,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useFormik } from "formik";
 import {
+  Autocomplete,
   Box,
   Typography,
   TextField,
   Button,
   Collapse,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Grid,
   IconButton,
-  FormHelperText,
   Chip,
   CircularProgress,
-  InputAdornment,
 } from "@mui/material";
 import {
   FilterList,
@@ -27,7 +22,6 @@ import {
   Check,
   Refresh,
 } from "@mui/icons-material";
-import type { SelectChangeEvent } from "@mui/material/Select";
 import { FACTURAS_STATES, INITIAL_FILTERS } from "../../utils/consts";
 import { facturasFiltersSchema } from "./validation-schema";
 import { handleRutInputChange, handlePositiveNumberInputChange } from "../../utils/validations/shared-fields";
@@ -82,6 +76,16 @@ const chipSx = {
   backgroundColor: "var(--color-bg-accent-secondary)",
   color: "var(--color-fg-accent-primary)",
   fontWeight: 500,
+};
+
+const autocompleteFilterSx = {
+  "& .MuiAutocomplete-inputRoot": {
+    flexWrap: "nowrap",
+  },
+  "& .MuiAutocomplete-input": {
+    minWidth: 0,
+    width: 0,
+  },
 };
 
 interface FacturasFiltersProps {
@@ -171,27 +175,6 @@ const FacturasFilters = ({
     formik.resetForm({ values: INITIAL_FILTERS });
     setSearchParams(new URLSearchParams());
     onClearFilters();
-  };
-
-  const handleMultiSelectChange = (
-    field: FacturasArrayFilterKey,
-  ) => (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
-    formik.setFieldValue(
-      field,
-      typeof value === "string" ? value.split(",") : value,
-    );
-  };
-
-  const removeArrayValue = (field: FacturasArrayFilterKey, valueToRemove: string) => {
-    formik.setFieldValue(
-      field,
-      formik.values[field].filter((value) => value !== valueToRemove),
-    );
-  };
-
-  const clearArrayField = (field: FacturasArrayFilterKey) => {
-    formik.setFieldValue(field, []);
   };
 
   const getEstadoLabel = (value: string) =>
@@ -306,172 +289,189 @@ const FacturasFilters = ({
 
             {/* Razón Social Receptor */}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <FormControl
-                fullWidth
+              <Autocomplete
+                multiple
                 size="small"
-                error={Boolean(razonesError) || (formik.touched.razonSocialReceptor && Boolean(formik.errors.razonSocialReceptor))}
-              >
-                <InputLabel>Razón Social Receptor</InputLabel>
-                <Select
-                  multiple
-                  name="razonSocialReceptor"
-                  value={formik.values.razonSocialReceptor}
-                  label="Razón Social Receptor"
-                  onChange={handleMultiSelectChange("razonSocialReceptor")}
-                  disabled={loadingRazones || (!razonesError && razonesSociales.length === 0)}
-                  endAdornment={
-                    <InputAdornment position="end" sx={{ mr: 2 }}>
-                      {loadingRazones && <CircularProgress size={16} />}
-                      {razonesError && !loadingRazones && currentRole?.empresaId && (
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            fetchRazonesSociales(currentRole.empresaId!);
-                          }}
-                          aria-label="Reintentar carga de razones sociales"
-                        >
-                          <Refresh fontSize="small" />
-                        </IconButton>
+                options={razonesSociales}
+                value={formik.values.razonSocialReceptor}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue("razonSocialReceptor", newValue);
+                }}
+                disabled={loadingRazones || (!razonesError && razonesSociales.length === 0)}
+                disableCloseOnSelect
+                loading={loadingRazones}
+                noOptionsText={
+                  razonesError
+                    ? "No pudimos cargar las razones sociales."
+                    : "No hay razones sociales disponibles."
+                }
+                sx={autocompleteFilterSx}
+                renderTags={(value, getTagProps) => {
+                  const visible = value.slice(0, 1);
+                  const extra = value.length - visible.length;
+
+                  return (
+                    <>
+                      {visible.map((option, index) => {
+                        const { key, ...tagProps } = getTagProps({ index });
+                        return (
+                          <Chip
+                            key={key}
+                            label={option}
+                            size="small"
+                            sx={{ ...chipSx, maxWidth: extra > 0 ? "70%" : "100%" }}
+                            {...tagProps}
+                          />
+                        );
+                      })}
+                      {extra > 0 && (
+                        <Chip label={`+${extra}`} size="small" sx={chipSx} />
                       )}
-                      {!loadingRazones && formik.values.razonSocialReceptor.length > 0 && (
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            clearArrayField("razonSocialReceptor");
-                          }}
-                          aria-label="Limpiar razones sociales"
-                        >
-                          <Clear fontSize="small" />
-                        </IconButton>
-                      )}
-                    </InputAdornment>
-                  }
-                  renderValue={(selected) => (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                      {selected.map((value) => (
-                        <Chip
-                          key={value}
-                          label={value}
-                          size="small"
-                          sx={chipSx}
-                          onDelete={(e) => {
-                            e.stopPropagation();
-                            removeArrayValue("razonSocialReceptor", value);
-                          }}
-                          onMouseDown={(e) => e.stopPropagation()}
-                        />
-                      ))}
+                    </>
+                  );
+                }}
+                renderOption={(props, option, { selected }) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box
+                      key={key}
+                      component="li"
+                      {...optionProps}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        backgroundColor: selected
+                          ? "var(--color-bg-accent-secondary)"
+                          : "transparent",
+                        "&:hover": {
+                          backgroundColor: selected
+                            ? "var(--color-bg-accent-secondary-hover)"
+                            : undefined,
+                        },
+                      }}
+                    >
+                      <span>{option}</span>
+                      {selected && <Check fontSize="small" />}
                     </Box>
-                  )}
-                >
-                  {razonesSociales.map((razon) => {
-                    const isSelected = formik.values.razonSocialReceptor.includes(razon);
-                    return (
-                      <MenuItem
-                        key={razon}
-                        value={razon}
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          backgroundColor: isSelected
-                            ? "var(--color-bg-accent-secondary)"
-                            : "transparent",
-                          "&:hover": {
-                            backgroundColor: isSelected
-                              ? "var(--color-bg-accent-secondary-hover)"
-                              : undefined,
-                          },
-                        }}
-                      >
-                        <span>{razon}</span>
-                        {isSelected && <Check fontSize="small" />}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-                {razonesHelperText && (
-                  <FormHelperText>{razonesHelperText}</FormHelperText>
+                  );
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    name="razonSocialReceptor"
+                    label="Razón Social Receptor"
+                    error={Boolean(razonesError) || (formik.touched.razonSocialReceptor && Boolean(formik.errors.razonSocialReceptor))}
+                    helperText={razonesHelperText}
+                    onBlur={formik.handleBlur}
+                    inputProps={{
+                      ...params.inputProps,
+                      readOnly: true,
+                    }}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {loadingRazones && <CircularProgress size={16} />}
+                          {razonesError && !loadingRazones && currentRole?.empresaId && (
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                fetchRazonesSociales(currentRole.empresaId!);
+                              }}
+                              aria-label="Reintentar carga de razones sociales"
+                            >
+                              <Refresh fontSize="small" />
+                            </IconButton>
+                          )}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
                 )}
-              </FormControl>
+              />
             </Grid>
 
             {/* Estado */}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <FormControl fullWidth size="small" error={formik.touched.estado && Boolean(formik.errors.estado)}>
-                <InputLabel>Estado</InputLabel>
-                <Select
-                  multiple
-                  name="estado"
-                  value={formik.values.estado}
-                  label="Estado"
-                  onChange={handleMultiSelectChange("estado")}
-                  endAdornment={
-                    formik.values.estado.length > 0 ? (
-                      <InputAdornment position="end" sx={{ mr: 2 }}>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            clearArrayField("estado");
-                          }}
-                          aria-label="Limpiar estados"
-                        >
-                          <Clear fontSize="small" />
-                        </IconButton>
-                      </InputAdornment>
-                    ) : undefined
-                  }
-                  renderValue={(selected) => (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                      {selected.map((value) => (
-                        <Chip
-                          key={value}
-                          label={getEstadoLabel(value)}
-                          size="small"
-                          sx={chipSx}
-                          onDelete={(e) => {
-                            e.stopPropagation();
-                            removeArrayValue("estado", value);
-                          }}
-                          onMouseDown={(e) => e.stopPropagation()}
-                        />
-                      ))}
+              <Autocomplete
+                multiple
+                size="small"
+                options={FACTURAS_STATES.map((estado) => estado.value)}
+                getOptionLabel={getEstadoLabel}
+                value={formik.values.estado}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue("estado", newValue);
+                }}
+                disableCloseOnSelect
+                sx={autocompleteFilterSx}
+                renderTags={(value, getTagProps) => {
+                  const visible = value.slice(0, 1);
+                  const extra = value.length - visible.length;
+
+                  return (
+                    <>
+                      {visible.map((option, index) => {
+                        const { key, ...tagProps } = getTagProps({ index });
+                        return (
+                          <Chip
+                            key={key}
+                            label={getEstadoLabel(option)}
+                            size="small"
+                            sx={{ ...chipSx, maxWidth: extra > 0 ? "70%" : "100%" }}
+                            {...tagProps}
+                          />
+                        );
+                      })}
+                      {extra > 0 && (
+                        <Chip label={`+${extra}`} size="small" sx={chipSx} />
+                      )}
+                    </>
+                  );
+                }}
+                renderOption={(props, option, { selected }) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box
+                      key={key}
+                      component="li"
+                      {...optionProps}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        backgroundColor: selected
+                          ? "var(--color-bg-accent-secondary)"
+                          : "transparent",
+                        "&:hover": {
+                          backgroundColor: selected
+                            ? "var(--color-bg-accent-secondary-hover)"
+                            : undefined,
+                        },
+                      }}
+                    >
+                      <span>{getEstadoLabel(option)}</span>
+                      {selected && <Check fontSize="small" />}
                     </Box>
-                  )}
-                >
-                  {FACTURAS_STATES.map((estado) => {
-                    const isSelected = formik.values.estado.includes(estado.value);
-                    return (
-                      <MenuItem
-                        key={estado.value}
-                        value={estado.value}
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          backgroundColor: isSelected
-                            ? "var(--color-bg-accent-secondary)"
-                            : "transparent",
-                          "&:hover": {
-                            backgroundColor: isSelected
-                              ? "var(--color-bg-accent-secondary-hover)"
-                              : undefined,
-                          },
-                        }}
-                      >
-                        <span>{estado.label}</span>
-                        {isSelected && <Check fontSize="small" />}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-                {formik.touched.estado && formik.errors.estado && (
-                  <FormHelperText>{formik.errors.estado as string}</FormHelperText>
+                  );
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    name="estado"
+                    label="Estado"
+                    error={formik.touched.estado && Boolean(formik.errors.estado)}
+                    helperText={formik.touched.estado && formik.errors.estado}
+                    onBlur={formik.handleBlur}
+                    inputProps={{
+                      ...params.inputProps,
+                      readOnly: true,
+                    }}
+                  />
                 )}
-              </FormControl>
+              />
             </Grid>
           </Grid>
 
