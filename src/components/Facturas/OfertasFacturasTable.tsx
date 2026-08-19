@@ -240,6 +240,7 @@ const OfertasFacturasTable = ({ empresaId, onMetaChange }: OfertasFacturasTableP
     <>
       <FacturasFilters
         hideEstado
+        razonesSocialesTab="con_ofertas"
         onApplyFilters={handleApplyFilters}
         onClearFilters={handleClearFilters}
         loading={loading}

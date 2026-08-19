@@ -659,6 +659,7 @@ const Facturas = () => {
             {/* Filters Section */}
             <FacturasFilters
               key={activeTab}
+              razonesSocialesTab="todos"
               onApplyFilters={handleApplyFilters}
               onClearFilters={handleClearFilters}
               loading={loading}

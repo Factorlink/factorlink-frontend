@@ -212,6 +212,7 @@ const MarketplaceFacturasTable = ({
     <>
       <FacturasFilters
         hideEstado
+        razonesSocialesTab="marketplace"
         onApplyFilters={handleApplyFilters}
         onClearFilters={handleClearFilters}
         loading={loading}

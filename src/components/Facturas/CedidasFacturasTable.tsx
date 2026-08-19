@@ -234,6 +234,7 @@ const CedidasFacturasTable = ({ empresaId, onMetaChange }: CedidasFacturasTableP
     <>
       <FacturasFilters
         hideEstado
+        razonesSocialesTab="cedidas"
         onApplyFilters={handleApplyFilters}
         onClearFilters={handleClearFilters}
         loading={loading}

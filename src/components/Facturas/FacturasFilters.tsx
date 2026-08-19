@@ -25,7 +25,7 @@ import {
 import { FACTURAS_STATES, INITIAL_FILTERS } from "../../utils/consts";
 import { facturasFiltersSchema } from "./validation-schema";
 import { handleRutInputChange, handlePositiveNumberInputChange } from "../../utils/validations/shared-fields";
-import { useFacturas } from "../../hooks/useFacturas";
+import { useFacturas, type RazonesSocialesTab } from "../../hooks/useFacturas";
 import useAuthStore from "../../store/authStore";
 
 // Bloquea teclas no numéricas en campos numéricos (evita +, -, ., e, etc.)
@@ -93,6 +93,7 @@ interface FacturasFiltersProps {
   onClearFilters: () => void;
   loading?: boolean;
   hideEstado?: boolean;
+  razonesSocialesTab: RazonesSocialesTab;
 }
 
 const FacturasFilters = ({
@@ -100,6 +101,7 @@ const FacturasFilters = ({
   onClearFilters,
   loading = false,
   hideEstado = false,
+  razonesSocialesTab,
 }: FacturasFiltersProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [expanded, setExpanded] = useState(() =>
@@ -117,15 +119,15 @@ const FacturasFilters = ({
   const [razonesSociales, setRazonesSociales] = useState<string[]>([]);
   const [loadingRazones, setLoadingRazones] = useState(false);
   const [razonesError, setRazonesError] = useState(false);
-  const lastEmpresaIdRef = useRef<string | undefined>(undefined);
+  const lastFetchKeyRef = useRef<string | undefined>(undefined);
   const getRazonesSocialesRef = useRef(getRazonesSociales);
   getRazonesSocialesRef.current = getRazonesSociales;
 
-  const fetchRazonesSociales = useCallback(async (empresaId: string) => {
+  const fetchRazonesSociales = useCallback(async (empresaId: string, tab: RazonesSocialesTab) => {
     try {
       setLoadingRazones(true);
       setRazonesError(false);
-      const data = await getRazonesSocialesRef.current(empresaId);
+      const data = await getRazonesSocialesRef.current(empresaId, tab);
       setRazonesSociales(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error fetching razones sociales:", err);
@@ -141,13 +143,14 @@ const FacturasFilters = ({
     if (!empresaId) {
       setRazonesSociales([]);
       setRazonesError(false);
-      lastEmpresaIdRef.current = undefined;
+      lastFetchKeyRef.current = undefined;
       return;
     }
-    if (lastEmpresaIdRef.current === empresaId) return;
-    lastEmpresaIdRef.current = empresaId;
-    fetchRazonesSociales(empresaId);
-  }, [currentRole?.empresaId, fetchRazonesSociales]);
+    const fetchKey = `${empresaId}:${razonesSocialesTab}`;
+    if (lastFetchKeyRef.current === fetchKey) return;
+    lastFetchKeyRef.current = fetchKey;
+    fetchRazonesSociales(empresaId, razonesSocialesTab);
+  }, [currentRole?.empresaId, razonesSocialesTab, fetchRazonesSociales]);
 
   const getInitialValues = (): FacturasFiltersValues => {
     const newFilters = { ...INITIAL_FILTERS };
@@ -377,7 +380,7 @@ const FacturasFilters = ({
                               size="small"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                fetchRazonesSociales(currentRole.empresaId!);
+                                fetchRazonesSociales(currentRole.empresaId!, razonesSocialesTab);
                               }}
                               aria-label="Reintentar carga de razones sociales"
                             >
