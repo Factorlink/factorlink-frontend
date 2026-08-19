@@ -327,8 +327,7 @@ const FacturaDetail = () => {
         )}
 
         {/* Card: Visibilidad en Marketplace */}
-        {(factura.visibilidad === "TODOS" ||
-          factura.visibilidad === "SELECCIONADOS") && (
+        {isInMarketplace && (
           <Box
             sx={{
               backgroundColor: "var(--color-bg-default-primary)",
