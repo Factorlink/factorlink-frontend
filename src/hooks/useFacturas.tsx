@@ -43,6 +43,12 @@ type SendToMarketplacePayload = {
   factoringIds: string[];
 };
 
+export type UploadFacturaArchivoPayload = {
+  nombreArchivo: string;
+  archivoBase64: string;
+  mimeType: string;
+};
+
 const appendParam = (
   search: URLSearchParams,
   key: string,
@@ -321,6 +327,21 @@ export const useFacturas = () => {
     }
   };
 
+  const uploadFacturaArchivo = async (
+    facturaId: string,
+    payload: UploadFacturaArchivoPayload,
+  ) => {
+    try {
+      setLoading(true);
+      const response = await api.post(`/facturas/${facturaId}/archivos`, payload);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     getFacturas,
@@ -337,6 +358,7 @@ export const useFacturas = () => {
     getFacturaByIdAndFactoringId,
     getFacturasConOfertasByEmpresaId,
     getFacturasCedidasByEmpresaId,
-    fetchXMLContent
+    fetchXMLContent,
+    uploadFacturaArchivo,
   };
 };
