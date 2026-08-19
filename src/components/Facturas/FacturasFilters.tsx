@@ -193,9 +193,16 @@ const FacturasFilters = ({
   const getEstadoLabel = (value: string) =>
     FACTURAS_STATES.find((estado) => estado.value === value)?.label || value;
 
-  const fieldGridSize = hideEstado
-    ? { xs: 12, sm: 6, md: 4 }
-    : { xs: 12, sm: 6, md: 3 };
+  const fieldSizes = {
+    folio: { xs: 12, sm: 4, md: 3, lg: 2 },
+    rut: hideEstado
+      ? { xs: 12, sm: 8, md: 3, lg: 4 }
+      : { xs: 12, sm: 8, md: 3, lg: 3 },
+    razon: hideEstado
+      ? { xs: 12, sm: 12, md: 6, lg: 6 }
+      : { xs: 12, sm: 8, md: 4, lg: 5 },
+    estado: { xs: 12, sm: 4, md: 2, lg: 2 },
+  };
 
   const activeFilterCount = Object.entries(formik.values).filter(([key, value]) => {
     if (hideEstado && key === "estado") return false;
@@ -254,7 +261,7 @@ const FacturasFilters = ({
         <Box sx={{ p: 2, borderTop: "1px solid var(--color-border-default-primary)" }} component="form" onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {/* Folio */}
-            <Grid size={fieldGridSize}>
+            <Grid size={fieldSizes.folio}>
               <TextField
                 fullWidth
                 size="small"
@@ -273,7 +280,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* RUT Receptor */}
-            <Grid size={fieldGridSize}>
+            <Grid size={fieldSizes.rut}>
               <TextField
                 fullWidth
                 size="small"
@@ -290,7 +297,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Razón Social Receptor */}
-            <Grid size={fieldGridSize}>
+            <Grid size={fieldSizes.razon}>
               <Autocomplete
                 multiple
                 size="small"
@@ -398,7 +405,7 @@ const FacturasFilters = ({
 
             {/* Estado */}
             {!hideEstado && (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid size={fieldSizes.estado}>
                 <Autocomplete
                   multiple
                   size="small"
