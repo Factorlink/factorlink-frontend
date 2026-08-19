@@ -64,7 +64,6 @@ import {
   toolbarRowSx,
   paginationSelectSx,
   pageHeaderSx,
-  statsRowSx,
   appContentSx,
 } from "../../theme/layoutStyles";
 
@@ -452,74 +451,6 @@ const Facturas = () => {
             >
               Sincronizar SII
             </Button>
-          </Box>
-        </Box>
-
-        {/* Stats Cards */}
-        <Box sx={statsRowSx}>
-          <Box
-            sx={{
-              minWidth: 0,
-              backgroundColor: "var(--color-bg-default-primary)",
-              borderRadius: 3,
-              p: 2.5,
-              boxShadow: "var(--shadow-card)",
-            }}
-          >
-            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)", mb: 0.5 }}>
-              Total Facturas
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
-              {meta.totalGeneral}
-            </Typography>
-          </Box>
-          <Box
-            sx={{
-              minWidth: 0,
-              backgroundColor: "var(--color-bg-default-primary)",
-              borderRadius: 3,
-              p: 2.5,
-              boxShadow: "var(--shadow-card)",
-            }}
-          >
-            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)", mb: 0.5 }}>
-              Cargadas
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}>
-              {meta.totalCargada}
-            </Typography>
-          </Box>
-          <Box
-            sx={{
-              minWidth: 0,
-              backgroundColor: "var(--color-bg-default-primary)",
-              borderRadius: 3,
-              p: 2.5,
-              boxShadow: "var(--shadow-card)",
-            }}
-          >
-            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)", mb: 0.5 }}>
-              En Marketplace
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-accent-primary)" }}>
-              {meta.totalEnMarketplace}
-            </Typography>
-          </Box>
-          <Box
-            sx={{
-              minWidth: 0,
-              backgroundColor: "var(--color-bg-default-primary)",
-              borderRadius: 3,
-              p: 2.5,
-              boxShadow: "var(--shadow-card)",
-            }}
-          >
-            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)", mb: 0.5 }}>
-              Cedidas
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--color-fg-success-primary)" }}>
-              {meta.totalCedida}
-            </Typography>
           </Box>
         </Box>
 
