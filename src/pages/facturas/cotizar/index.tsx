@@ -41,7 +41,6 @@ import FacturaResumenCard, {
   formatCurrency,
 } from "../../../components/Facturas/FacturaResumenCard";
 import FactoringsList from "../../../components/Facturas/FactoringsList";
-import UploadPdfModal from "../../../components/Modals/UploadPdfModal";
 import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
 import { appContentSx } from "../../../theme/layoutStyles";
 import { isXmlUiEnabled } from "../../../config/featureFlags";
@@ -80,7 +79,6 @@ const CotizarFactura = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(0);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
-  const [uploadPdfModalOpen, setUploadPdfModalOpen] = useState(false);
 
   // Step 2 Form State
   const [montoFinanciar, setMontoFinanciar] = useState<number>(100);
@@ -201,15 +199,6 @@ const CotizarFactura = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
-
-  const handleUploadPdfSuccess = async () => {
-    try {
-      const data = await refreshFactura(id!);
-      setFactura(data);
-    } catch (err) {
-      console.error("Error refreshing factura:", err);
-    }
   };
 
   // Validations for Step 2
@@ -554,9 +543,7 @@ const CotizarFactura = () => {
             {/* Documentos Asociados */}
             <DocumentosAsociadosCard
               factura={factura}
-              onUploadPdfClick={() => setUploadPdfModalOpen(true)}
               onDownloadPdf={handleDownloadPdf}
-              onFetchSiiSuccess={(data) => setFactura(data)}
               {...(showXmlUi
                 ? {
                     onUploadXmlClick: () => setUploadXmlModalOpen(true),
@@ -1127,14 +1114,6 @@ const CotizarFactura = () => {
             facturaId={id || ""}
           />
         )}
-
-        {/* Upload PDF Modal */}
-        <UploadPdfModal
-          open={uploadPdfModalOpen}
-          onClose={() => setUploadPdfModalOpen(false)}
-          onSuccess={handleUploadPdfSuccess}
-          facturaId={id || ""}
-        />
       </Box>
     </Layout>
   );
