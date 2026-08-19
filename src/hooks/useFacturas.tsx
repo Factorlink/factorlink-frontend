@@ -25,6 +25,8 @@ export type GetFacturasParams = {
   order?: string;
 };
 
+export type RazonesSocialesTab = "todos" | "marketplace" | "con_ofertas" | "cedidas";
+
 type UpdateFacturaPayload = {
   estado?: string;
   facturaNameFile?: string;
@@ -97,10 +99,11 @@ export const useFacturas = () => {
     }
   };
 
-  const getRazonesSociales = async (empresaId: string) => {
+  const getRazonesSociales = async (empresaId: string, tab: RazonesSocialesTab) => {
     try {
       const search = new URLSearchParams();
       search.set("empresaId", empresaId);
+      search.set("tab", tab);
       const response = await api.get(`facturas/razones-sociales?${search.toString()}`);
       return (response.data || []) as string[];
     } catch (error) {

@@ -25,7 +25,7 @@ import {
 import { FACTURAS_STATES, INITIAL_FILTERS } from "../../utils/consts";
 import { facturasFiltersSchema } from "./validation-schema";
 import { handleRutInputChange, handlePositiveNumberInputChange } from "../../utils/validations/shared-fields";
-import { useFacturas } from "../../hooks/useFacturas";
+import { useFacturas, type RazonesSocialesTab } from "../../hooks/useFacturas";
 import useAuthStore from "../../store/authStore";
 
 // Bloquea teclas no numéricas en campos numéricos (evita +, -, ., e, etc.)
@@ -93,6 +93,7 @@ interface FacturasFiltersProps {
   onClearFilters: () => void;
   loading?: boolean;
   hideEstado?: boolean;
+  razonesSocialesTab: RazonesSocialesTab;
 }
 
 const FacturasFilters = ({
@@ -100,6 +101,7 @@ const FacturasFilters = ({
   onClearFilters,
   loading = false,
   hideEstado = false,
+  razonesSocialesTab,
 }: FacturasFiltersProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [expanded, setExpanded] = useState(() =>
@@ -117,15 +119,15 @@ const FacturasFilters = ({
   const [razonesSociales, setRazonesSociales] = useState<string[]>([]);
   const [loadingRazones, setLoadingRazones] = useState(false);
   const [razonesError, setRazonesError] = useState(false);
-  const lastEmpresaIdRef = useRef<string | undefined>(undefined);
+  const lastFetchKeyRef = useRef<string | undefined>(undefined);
   const getRazonesSocialesRef = useRef(getRazonesSociales);
   getRazonesSocialesRef.current = getRazonesSociales;
 
-  const fetchRazonesSociales = useCallback(async (empresaId: string) => {
+  const fetchRazonesSociales = useCallback(async (empresaId: string, tab: RazonesSocialesTab) => {
     try {
       setLoadingRazones(true);
       setRazonesError(false);
-      const data = await getRazonesSocialesRef.current(empresaId);
+      const data = await getRazonesSocialesRef.current(empresaId, tab);
       setRazonesSociales(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error fetching razones sociales:", err);
@@ -141,13 +143,14 @@ const FacturasFilters = ({
     if (!empresaId) {
       setRazonesSociales([]);
       setRazonesError(false);
-      lastEmpresaIdRef.current = undefined;
+      lastFetchKeyRef.current = undefined;
       return;
     }
-    if (lastEmpresaIdRef.current === empresaId) return;
-    lastEmpresaIdRef.current = empresaId;
-    fetchRazonesSociales(empresaId);
-  }, [currentRole?.empresaId, fetchRazonesSociales]);
+    const fetchKey = `${empresaId}:${razonesSocialesTab}`;
+    if (lastFetchKeyRef.current === fetchKey) return;
+    lastFetchKeyRef.current = fetchKey;
+    fetchRazonesSociales(empresaId, razonesSocialesTab);
+  }, [currentRole?.empresaId, razonesSocialesTab, fetchRazonesSociales]);
 
   const getInitialValues = (): FacturasFiltersValues => {
     const newFilters = { ...INITIAL_FILTERS };
@@ -190,9 +193,16 @@ const FacturasFilters = ({
   const getEstadoLabel = (value: string) =>
     FACTURAS_STATES.find((estado) => estado.value === value)?.label || value;
 
-  const fieldGridSize = hideEstado
-    ? { xs: 12, sm: 6, md: 4 }
-    : { xs: 12, sm: 6, md: 3 };
+  const fieldSizes = {
+    folio: { xs: 12, sm: 4, md: 3, lg: 2 },
+    rut: hideEstado
+      ? { xs: 12, sm: 8, md: 3, lg: 4 }
+      : { xs: 12, sm: 8, md: 3, lg: 3 },
+    razon: hideEstado
+      ? { xs: 12, sm: 12, md: 6, lg: 6 }
+      : { xs: 12, sm: 8, md: 4, lg: 5 },
+    estado: { xs: 12, sm: 4, md: 2, lg: 2 },
+  };
 
   const activeFilterCount = Object.entries(formik.values).filter(([key, value]) => {
     if (hideEstado && key === "estado") return false;
@@ -251,7 +261,7 @@ const FacturasFilters = ({
         <Box sx={{ p: 2, borderTop: "1px solid var(--color-border-default-primary)" }} component="form" onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {/* Folio */}
-            <Grid size={fieldGridSize}>
+            <Grid size={fieldSizes.folio}>
               <TextField
                 fullWidth
                 size="small"
@@ -270,7 +280,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* RUT Receptor */}
-            <Grid size={fieldGridSize}>
+            <Grid size={fieldSizes.rut}>
               <TextField
                 fullWidth
                 size="small"
@@ -287,7 +297,7 @@ const FacturasFilters = ({
             </Grid>
 
             {/* Razón Social Receptor */}
-            <Grid size={fieldGridSize}>
+            <Grid size={fieldSizes.razon}>
               <Autocomplete
                 multiple
                 size="small"
@@ -377,7 +387,7 @@ const FacturasFilters = ({
                               size="small"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                fetchRazonesSociales(currentRole.empresaId!);
+                                fetchRazonesSociales(currentRole.empresaId!, razonesSocialesTab);
                               }}
                               aria-label="Reintentar carga de razones sociales"
                             >
@@ -395,7 +405,7 @@ const FacturasFilters = ({
 
             {/* Estado */}
             {!hideEstado && (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid size={fieldSizes.estado}>
                 <Autocomplete
                   multiple
                   size="small"
