@@ -27,6 +27,10 @@ export const handleNonNegativeIntegerInputChange = (
   }
 };
 
+export const TASA_RANGE_MESSAGE = "La tasa debe estar entre 0 y 100";
+export const TASA_COMISION_RANGE_MESSAGE =
+  "La tasa de comisión debe estar entre 0 y 100";
+
 export const tasaValidation = yup
   .mixed()
   .required("La tasa es obligatoria")
@@ -38,7 +42,7 @@ export const tasaValidation = yup
       return !String(value).endsWith(".");
     },
   )
-  .test("is-valid-range", "La tasa debe estar entre 0 y 100", (value) => {
+  .test("is-valid-range", TASA_RANGE_MESSAGE, (value) => {
     if (value === undefined || value === null || value === "") return true;
     const n = Number(value);
     return !isNaN(n) && n >= 0 && n <= 100;
@@ -55,15 +59,11 @@ export const tasaComisionValidation = yup
       return !String(value).endsWith(".");
     },
   )
-  .test(
-    "is-valid-range",
-    "La tasa de comisión debe estar entre 0 y 100",
-    (value) => {
-      if (value === undefined || value === null || value === "") return true;
-      const n = Number(value);
-      return !isNaN(n) && n >= 0 && n <= 100;
-    },
-  );
+  .test("is-valid-range", TASA_COMISION_RANGE_MESSAGE, (value) => {
+    if (value === undefined || value === null || value === "") return true;
+    const n = Number(value);
+    return !isNaN(n) && n >= 0 && n <= 100;
+  });
 
 export const nonNegativeIntegerValidation = yup
   .number()

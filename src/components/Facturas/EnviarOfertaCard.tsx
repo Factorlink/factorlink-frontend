@@ -27,6 +27,8 @@ import {
   createOfertaFormSchema,
   handleDecimalRateInputChange,
   handleNonNegativeIntegerInputChange,
+  TASA_COMISION_RANGE_MESSAGE,
+  TASA_RANGE_MESSAGE,
 } from "../../utils/validations/oferta-fields";
 
 const TIPO_DOCUMENTO_OFERTA = "Factura Electrónica";
@@ -341,7 +343,7 @@ const EnviarOfertaCard = ({
                 )
               }
               error={fieldError("tasa")}
-              helperText={fieldHelper("tasa", "Tasa aplicada a la oferta")}
+              helperText={fieldHelper("tasa", TASA_RANGE_MESSAGE)}
             />
 
             <StyledTextField
@@ -496,7 +498,7 @@ const EnviarOfertaCard = ({
               error={fieldError("tasaComision")}
               helperText={fieldHelper(
                 "tasaComision",
-                "Tasa de comisión aplicada",
+                TASA_COMISION_RANGE_MESSAGE,
               )}
             />
 
