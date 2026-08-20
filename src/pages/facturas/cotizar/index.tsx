@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -34,6 +34,8 @@ import type { Factoring } from "../../../types/factoring";
 import { useFacturas } from "../../../hooks/useFacturas";
 import { useFactoring } from "../../../hooks/useFactoring";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
+import ObtenerFacturaSiiModal from "../../../components/Modals/ObtenerFacturaSiiModal";
+import FacturaEnviadaCotizarModal from "../../../components/Modals/FacturaEnviadaCotizarModal";
 import FacturaResumenCard, {
   formatCurrency,
 } from "../../../components/Facturas/FacturaResumenCard";
@@ -63,7 +65,7 @@ const CotizarFactura = () => {
     sendToMarketplace,
     uploadFacturaArchivo,
     refreshFactura,
-    loading,
+    fetchXMLContent,
   } = useFacturas();
   const { getAllFactorings, loading: loadingFactorings } = useFactoring();
   const { id } = useParams();
@@ -83,27 +85,38 @@ const CotizarFactura = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [adjuntos, setAdjuntos] = useState<FacturaAdjuntoPendiente[]>([]);
+  const [pdfGate, setPdfGate] = useState<"loading" | "error" | "ready">("loading");
+  const [successOpen, setSuccessOpen] = useState(false);
 
-  const fetchFactura = async () => {
-    try {
-      setError(null);
-      const data = await getFacturaById(id!);
-      setFactura(data);
-
-      if (data.montoTotal) {
-        const percentage = data.montoFinanciar
-          ? (parseFloat(data.montoFinanciar) / parseFloat(data.montoTotal)) * 100
-          : 100;
-        setMontoFinanciar(truncateToTwo(percentage));
-      }
-      if (data.plazo) {
-        setPlazo(data.plazo);
-      }
-    } catch (err) {
-      console.error("Error fetching factura:", err);
-      setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
+  const applyFacturaData = (data: Factura) => {
+    setFactura(data);
+    if (data.montoTotal) {
+      const percentage = data.montoFinanciar
+        ? (parseFloat(data.montoFinanciar) / parseFloat(data.montoTotal)) * 100
+        : 100;
+      setMontoFinanciar(truncateToTwo(percentage));
+    }
+    if (data.plazo) {
+      setPlazo(data.plazo);
     }
   };
+
+  const obtainPdfFromSii = useCallback(async () => {
+    if (!id) return;
+    setPdfGate("loading");
+    try {
+      const fetched = await fetchXMLContent(id);
+      if (!hasFacturaPdf(fetched)) {
+        setPdfGate("error");
+        return;
+      }
+      applyFacturaData(fetched);
+      setPdfGate("ready");
+    } catch (err) {
+      console.error("Error fetching PDF from SII:", err);
+      setPdfGate("error");
+    }
+  }, [id]);
 
   const fetchFactorings = async () => {
     try {
@@ -114,12 +127,31 @@ const CotizarFactura = () => {
     }
   };
 
+  const prepareCotizar = useCallback(async () => {
+    if (!id) return;
+    setPdfGate("loading");
+    setError(null);
+    try {
+      const data = await getFacturaById(id);
+      if (hasFacturaPdf(data)) {
+        applyFacturaData(data);
+        setPdfGate("ready");
+        return;
+      }
+      applyFacturaData(data);
+      await obtainPdfFromSii();
+    } catch (err) {
+      console.error("Error fetching factura:", err);
+      setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
+    }
+  }, [id, obtainPdfFromSii]);
+
   useEffect(() => {
     if (id) {
-      fetchFactura();
-      fetchFactorings();
+      void prepareCotizar();
+      void fetchFactorings();
     }
-  }, [id]);
+  }, [id, prepareCotizar]);
 
   const handleBack = () => {
     navigate(-1);
@@ -265,9 +297,7 @@ const CotizarFactura = () => {
         factoringIds: visibilidad === "TODOS" ? [] : selectedFactorings,
       });
 
-      navigate("/facturas", {
-        state: { successMessage: "Factura enviada a cotizar exitosamente" },
-      });
+      setSuccessOpen(true);
     } catch (err) {
       console.error("Error sending factura to marketplace:", err);
       setSubmitError(
@@ -280,31 +310,17 @@ const CotizarFactura = () => {
     }
   };
 
+  const handleCancelPdfGate = () => {
+    navigate(`/facturas/${id}`);
+  };
+
+  const handleGoToFacturas = () => {
+    navigate("/facturas");
+  };
+
   const calculatedMontoFinanciar = factura
     ? Math.round((parseFloat(factura.montoTotal) * montoFinanciar) / 100)
     : 0;
-
-  if (loading && !factura) {
-    return (
-      <Layout>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "60vh",
-            gap: 2,
-          }}
-        >
-          <CircularProgress sx={{ color: "var(--color-fg-accent-primary)" }} />
-          <Typography variant="body1" sx={{ color: "var(--color-fg-default-secondary)" }}>
-            Cargando factura...
-          </Typography>
-        </Box>
-      </Layout>
-    );
-  }
 
   if (error) {
     return (
@@ -349,7 +365,7 @@ const CotizarFactura = () => {
     );
   }
 
-  if (!factura) {
+  if (pdfGate === "ready" && !factura) {
     return (
       <Layout>
         <Box sx={appContentSx}>
@@ -377,6 +393,7 @@ const CotizarFactura = () => {
   }
 
   const showXmlUi = isXmlUiEnabled();
+  const showForm = pdfGate === "ready" && Boolean(factura);
 
   return (
     <Layout>
@@ -407,6 +424,8 @@ const CotizarFactura = () => {
           </Typography>
         </Box>
 
+        {showForm && factura && (
+          <>
         <FacturaResumenCard factura={factura} showSolicitudFields={false} />
 
         <Box sx={{ mb: 3 }}>
@@ -694,6 +713,23 @@ const CotizarFactura = () => {
             )}
           </Button>
         </Box>
+          </>
+        )}
+
+        <ObtenerFacturaSiiModal
+          open={pdfGate === "loading" || pdfGate === "error"}
+          status={pdfGate === "error" ? "error" : "loading"}
+          onRetry={obtainPdfFromSii}
+          onCancel={handleCancelPdfGate}
+        />
+
+        <FacturaEnviadaCotizarModal
+          open={successOpen}
+          folio={factura?.folio ?? ""}
+          montoTotal={factura?.montoTotal ?? "0"}
+          visibilidad={visibilidad}
+          onGoToFacturas={handleGoToFacturas}
+        />
 
         {showXmlUi && (
           <UploadXmlModal
