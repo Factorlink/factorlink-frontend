@@ -27,7 +27,7 @@ const RoleSelection = () => {
   const rolesList: Role[] = user?.roles || [];
 
   return (
-    <Layout hideSuite={true} hideMenu={true}>
+    <Layout hideSuite hideMenu hideNotifications>
       <Box
         sx={{
           flex: 1,

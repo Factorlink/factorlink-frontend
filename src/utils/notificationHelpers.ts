@@ -8,7 +8,23 @@ import {
   Sync,
 } from "@mui/icons-material";
 import type { Role } from "../types/role";
-import type { Notificacion, NotificationTipo } from "../types/notificacion";
+import type {
+  Notificacion,
+  NotificacionContext,
+  NotificationTipo,
+} from "../types/notificacion";
+
+export const getNotificacionContextFromRole = (
+  role: Role | null,
+): NotificacionContext | null => {
+  if (role?.contexto === "empresa" && role.empresaId) {
+    return { empresaId: role.empresaId };
+  }
+  if (role?.contexto === "factoring" && role.factoringId) {
+    return { factoringId: role.factoringId };
+  }
+  return null;
+};
 
 const TIPO_LABELS: Record<NotificationTipo, string> = {
   INVITACION_EMPRESA_RECIBIDA: "Invitación a Empresa",

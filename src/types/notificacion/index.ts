@@ -32,3 +32,8 @@ export interface NotificacionesResponse {
   count: number;
   notifications: Notificacion[];
 }
+
+export type NotificacionContext = {
+  empresaId?: string;
+  factoringId?: string;
+};

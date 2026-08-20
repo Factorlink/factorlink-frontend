@@ -30,7 +30,11 @@ import { useAuth } from "../../hooks/useAuth";
 import { capitalizeFirstLetter } from "../../utils/utils";
 import NotificationBell from "../Notificaciones/NotificationBell";
 
-const Profile = () => {
+const Profile = ({
+  hideNotifications = false,
+}: {
+  hideNotifications?: boolean;
+}) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const open = Boolean(anchorEl);
@@ -114,7 +118,7 @@ const Profile = () => {
           Actualizado hace {minutesSinceUpdate} minutos
         </Typography>
 
-        <NotificationBell />
+        {!hideNotifications && <NotificationBell />}
 
         <Box
           sx={{

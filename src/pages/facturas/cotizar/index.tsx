@@ -29,20 +29,19 @@ import {
   Visibility,
 } from "@mui/icons-material";
 import Layout from "../../../components/Layout";
-import type { Factura } from "../../../types/factura";
+import type { Factura, FacturaArchivo } from "../../../types/factura";
 import type { Factoring } from "../../../types/factoring";
 import { useFacturas } from "../../../hooks/useFacturas";
 import { useFactoring } from "../../../hooks/useFactoring";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
 import ObtenerFacturaSiiModal from "../../../components/Modals/ObtenerFacturaSiiModal";
 import FacturaEnviadaCotizarModal from "../../../components/Modals/FacturaEnviadaCotizarModal";
+import SiiPersonalSyncPromptModal from "../../../components/Modals/SiiPersonalSyncPromptModal";
 import FacturaResumenCard, {
   formatCurrency,
 } from "../../../components/Facturas/FacturaResumenCard";
 import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
-import AdjuntarDocumentosAdicionalesCard, {
-  type FacturaAdjuntoPendiente,
-} from "../../../components/Facturas/AdjuntarDocumentosAdicionalesCard";
+import AdjuntarDocumentosAdicionalesCard from "../../../components/Facturas/AdjuntarDocumentosAdicionalesCard";
 import SectionPanel from "../../../components/SectionPanel";
 import { appContentSx } from "../../../theme/layoutStyles";
 import { isXmlUiEnabled } from "../../../config/featureFlags";
@@ -50,6 +49,7 @@ import {
   hasFacturaPdf,
   shouldBlockForMissingXml,
 } from "../../../utils/facturaDocuments";
+import useAuthStore from "../../../store/authStore";
 
 const truncateToTwo = (num: number): number => {
   return Math.round(num * 100) / 100;
@@ -64,10 +64,12 @@ const CotizarFactura = () => {
     updateFactura,
     sendToMarketplace,
     uploadFacturaArchivo,
+    deleteFacturaArchivo,
     refreshFactura,
     fetchXMLContent,
   } = useFacturas();
   const { getAllFactorings, loading: loadingFactorings } = useFactoring();
+  const { currentRole } = useAuthStore();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -84,12 +86,14 @@ const CotizarFactura = () => {
   const [selectedFactorings, setSelectedFactorings] = useState<string[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [adjuntos, setAdjuntos] = useState<FacturaAdjuntoPendiente[]>([]);
+  const [adjuntos, setAdjuntos] = useState<FacturaArchivo[]>([]);
   const [pdfGate, setPdfGate] = useState<"loading" | "error" | "ready">("loading");
+  const [needsPersonalSii, setNeedsPersonalSii] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
 
   const applyFacturaData = (data: Factura) => {
     setFactura(data);
+    setAdjuntos(data.archivos ?? []);
     if (data.montoTotal) {
       const percentage = data.montoFinanciar
         ? (parseFloat(data.montoFinanciar) / parseFloat(data.montoTotal)) * 100
@@ -130,6 +134,7 @@ const CotizarFactura = () => {
   const prepareCotizar = useCallback(async () => {
     if (!id) return;
     setPdfGate("loading");
+    setNeedsPersonalSii(false);
     setError(null);
     try {
       const data = await getFacturaById(id);
@@ -139,12 +144,16 @@ const CotizarFactura = () => {
         return;
       }
       applyFacturaData(data);
+      if (!Boolean(currentRole?.empresa?.siiRutPersonal)) {
+        setNeedsPersonalSii(true);
+        return;
+      }
       await obtainPdfFromSii();
     } catch (err) {
       console.error("Error fetching factura:", err);
       setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
     }
-  }, [id, obtainPdfFromSii]);
+  }, [id, obtainPdfFromSii, currentRole?.empresa?.siiRutPersonal]);
 
   useEffect(() => {
     if (id) {
@@ -275,14 +284,6 @@ const CotizarFactura = () => {
       setSubmitting(true);
       setSubmitError(null);
 
-      for (const adjunto of adjuntos) {
-        await uploadFacturaArchivo(id!, {
-          nombreArchivo: adjunto.nombreArchivo,
-          archivoBase64: adjunto.archivoBase64,
-          mimeType: adjunto.mimeType,
-        });
-      }
-
       const calculatedMontoFinanciar = Math.trunc(
         (parseFloat(factura.montoTotal) * montoFinanciar) / 100,
       );
@@ -300,11 +301,7 @@ const CotizarFactura = () => {
       setSuccessOpen(true);
     } catch (err) {
       console.error("Error sending factura to marketplace:", err);
-      setSubmitError(
-        adjuntos.length > 0
-          ? "Error al subir documentos o enviar a cotizar. Intente nuevamente."
-          : "Error al enviar a cotizar. Intente nuevamente.",
-      );
+      setSubmitError("Error al enviar a cotizar. Intente nuevamente.");
     } finally {
       setSubmitting(false);
     }
@@ -444,6 +441,21 @@ const CotizarFactura = () => {
         <AdjuntarDocumentosAdicionalesCard
           files={adjuntos}
           onChange={setAdjuntos}
+          facturaId={id || ""}
+          onUpload={async (payload) => {
+            const uploaded = await uploadFacturaArchivo(id!, payload);
+            if (uploaded?.id) return uploaded;
+            const refreshed = await refreshFactura(id!);
+            const match = (refreshed.archivos ?? []).find(
+              (archivo: FacturaArchivo) =>
+                archivo.nombreArchivo === payload.nombreArchivo,
+            );
+            if (!match) {
+              throw new Error("No se pudo confirmar el archivo subido");
+            }
+            return match;
+          }}
+          onDelete={(archivoId) => deleteFacturaArchivo(id!, archivoId)}
           disabled={submitting}
         />
 
@@ -717,10 +729,18 @@ const CotizarFactura = () => {
         )}
 
         <ObtenerFacturaSiiModal
-          open={pdfGate === "loading" || pdfGate === "error"}
+          open={
+            !needsPersonalSii &&
+            (pdfGate === "loading" || pdfGate === "error")
+          }
           status={pdfGate === "error" ? "error" : "loading"}
           onRetry={obtainPdfFromSii}
           onCancel={handleCancelPdfGate}
+        />
+
+        <SiiPersonalSyncPromptModal
+          open={needsPersonalSii}
+          onClose={handleCancelPdfGate}
         />
 
         <FacturaEnviadaCotizarModal

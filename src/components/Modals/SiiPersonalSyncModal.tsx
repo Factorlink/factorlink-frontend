@@ -29,7 +29,6 @@ import type { Role } from "../../types/role";
 interface SiiPersonalSyncFormData {
   siiRutPersonal: string;
   siiPasswordPersonal: string;
-  siiPasswordCertificadoPersonal: string;
 }
 
 interface SiiPersonalSyncModalProps {
@@ -44,10 +43,6 @@ const siiPersonalSyncSchema = yup.object({
     .string()
     .required("La contraseña del SII es obligatoria")
     .min(4, "La contraseña debe tener al menos 4 caracteres"),
-  siiPasswordCertificadoPersonal: yup
-    .string()
-    .required("La contraseña del certificado es obligatoria")
-    .min(4, "La contraseña debe tener al menos 4 caracteres"),
 });
 
 const SiiPersonalSyncModal = ({
@@ -60,7 +55,6 @@ const SiiPersonalSyncModal = ({
   );
   const [alertMessage, setAlertMessage] = useState("");
   const [showPasswordSii, setShowPasswordSii] = useState(false);
-  const [showPasswordCert, setShowPasswordCert] = useState(false);
 
   const { currentRole } = useAuthStore();
   const { syncPersonalDataSii, loading } = useEmpresa();
@@ -71,7 +65,6 @@ const SiiPersonalSyncModal = ({
       const response = await syncPersonalDataSii(empresaId, {
         siiRutPersonal: values.siiRutPersonal.trim(),
         siiPasswordPersonal: values.siiPasswordPersonal,
-        siiPasswordCertificadoPersonal: values.siiPasswordCertificadoPersonal,
       });
 
       useAuthStore.getState().setCurrentRole({
@@ -102,7 +95,6 @@ const SiiPersonalSyncModal = ({
     setAlertStatus(null);
     setAlertMessage("");
     setShowPasswordSii(false);
-    setShowPasswordCert(false);
     formik.resetForm();
     onClose();
   };
@@ -111,7 +103,6 @@ const SiiPersonalSyncModal = ({
     initialValues: {
       siiRutPersonal: "",
       siiPasswordPersonal: "",
-      siiPasswordCertificadoPersonal: "",
     },
     validationSchema: siiPersonalSyncSchema,
     onSubmit: handleSubmit,
@@ -230,40 +221,6 @@ const SiiPersonalSyncModal = ({
                       disabled={loading}
                     >
                       {showPasswordSii ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <StyledTextField
-              fullWidth
-              label="Contraseña del Certificado Digital"
-              placeholder="Ingresa la contraseña de tu certificado"
-              type={showPasswordCert ? "text" : "password"}
-              name="siiPasswordCertificadoPersonal"
-              inputProps={{ maxLength: 128, autoComplete: "current-password" }}
-              value={formik.values.siiPasswordCertificadoPersonal}
-              error={
-                formik.touched.siiPasswordCertificadoPersonal &&
-                Boolean(formik.errors.siiPasswordCertificadoPersonal)
-              }
-              helperText={
-                formik.touched.siiPasswordCertificadoPersonal &&
-                formik.errors.siiPasswordCertificadoPersonal
-              }
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              disabled={loading}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPasswordCert(!showPasswordCert)}
-                      edge="end"
-                      disabled={loading}
-                    >
-                      {showPasswordCert ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),

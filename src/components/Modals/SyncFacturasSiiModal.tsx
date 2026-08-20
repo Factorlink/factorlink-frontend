@@ -79,7 +79,7 @@ const SyncFacturasSiiModal = ({
       await syncFacturasSii(month, year, empresaId);
       setAlertStatus("success");
       setAlertMessage(
-        `Las facturas del período ${MONTHS.find((m) => m.value === month)?.label} ${year} han comenzado a sincronizarse. Dentro de poco se verán reflejadas en la lista.`
+        `Las facturas del período ${MONTHS.find((m) => m.value === month)?.label} ${year} se han sincronizado correctamente.`
       );
       onSuccess?.();
     } catch (error: unknown) {
