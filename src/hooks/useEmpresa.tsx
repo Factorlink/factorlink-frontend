@@ -6,7 +6,6 @@ import type { SiiEmpresa } from "../types/sii";
 interface RequestSyncSii {
   siiRutPersonal: string;
   siiPasswordPersonal: string;
-  siiPasswordCertificadoPersonal: string;
 }
 
 export const useEmpresa = () => {
