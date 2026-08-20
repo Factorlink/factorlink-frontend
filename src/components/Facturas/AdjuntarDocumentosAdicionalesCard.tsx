@@ -7,6 +7,7 @@ import { formatFileSize } from "../../utils/validations/file-fields";
 import SectionPanel from "../SectionPanel";
 
 const MAX_ADJUNTO_SIZE = 10 * 1024 * 1024;
+const MAX_ADJUNTOS = 5;
 const ALLOWED_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 const ALLOWED_EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png"];
 
@@ -73,10 +74,20 @@ const AdjuntarDocumentosAdicionalesCard = ({
     const incoming = Array.from(selected);
     if (incoming.length === 0) return;
 
+    if (files.length >= MAX_ADJUNTOS) {
+      setError(`Máximo ${MAX_ADJUNTOS} documentos adicionales`);
+      return;
+    }
+
     try {
         const next = [...files];
         let lastError: string | null = null;
         for (const file of incoming) {
+          if (next.length >= MAX_ADJUNTOS) {
+            lastError = `Máximo ${MAX_ADJUNTOS} documentos adicionales`;
+            break;
+          }
+
           const validationError = validateAdjunto(file);
           if (validationError) {
             lastError = `${file.name}: ${validationError}`;
@@ -110,7 +121,7 @@ const AdjuntarDocumentosAdicionalesCard = ({
   const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     setIsDragging(false);
-    if (disabled) return;
+    if (disabled || files.length >= MAX_ADJUNTOS) return;
     void addFiles(event.dataTransfer.files);
   };
 
@@ -118,10 +129,13 @@ const AdjuntarDocumentosAdicionalesCard = ({
     onChange(files.filter((file) => file.id !== id));
   };
 
+  const isAtMax = files.length >= MAX_ADJUNTOS;
+  const isUploadDisabled = disabled || isAtMax;
+
   return (
     <SectionPanel
       title="Adjuntar documentos adicionales (opcional)"
-      subtitle="Puedes adjuntar documentos complementarios si lo necesitas."
+      subtitle={`Puedes adjuntar hasta ${MAX_ADJUNTOS} documentos complementarios (${files.length}/${MAX_ADJUNTOS}).`}
       icon={<CloudUploadIcon sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />}
     >
       {error && (
@@ -138,15 +152,15 @@ const AdjuntarDocumentosAdicionalesCard = ({
         onChange={handleFileChange}
         style={{ display: "none" }}
         id="factura-adjuntos-upload"
-        disabled={disabled}
+        disabled={isUploadDisabled}
       />
 
       <Box
         component="label"
-        htmlFor="factura-adjuntos-upload"
+        htmlFor={isUploadDisabled ? undefined : "factura-adjuntos-upload"}
         onDragOver={(event) => {
           event.preventDefault();
-          if (!disabled) setIsDragging(true);
+          if (!isUploadDisabled) setIsDragging(true);
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
@@ -159,12 +173,13 @@ const AdjuntarDocumentosAdicionalesCard = ({
           borderColor: isDragging ? "primary.main" : "divider",
           borderRadius: "var(--radius-m)",
           p: 4,
-          cursor: disabled ? "default" : "pointer",
+          cursor: isUploadDisabled ? "default" : "pointer",
           transition: "all 0.2s ease",
           backgroundColor: isDragging
             ? "var(--color-bg-accent-tertiary-hover)"
             : "background.default",
-          "&:hover": disabled
+          opacity: isAtMax ? 0.6 : 1,
+          "&:hover": isUploadDisabled
             ? undefined
             : {
                 borderColor: "primary.main",
@@ -180,7 +195,9 @@ const AdjuntarDocumentosAdicionalesCard = ({
           </Box>
         </Typography>
         <Typography variant="caption" sx={{ color: "text.secondary" }}>
-          Formatos permitidos: PDF, JPG, PNG (Máx. {formatFileSize(MAX_ADJUNTO_SIZE)} por archivo)
+          {isAtMax
+            ? `Has alcanzado el máximo de ${MAX_ADJUNTOS} documentos.`
+            : `Formatos permitidos: PDF, JPG, PNG (Máx. ${formatFileSize(MAX_ADJUNTO_SIZE)} por archivo)`}
         </Typography>
       </Box>
 
