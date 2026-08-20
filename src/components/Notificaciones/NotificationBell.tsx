@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useState,
   type FC,
   type MouseEvent,
@@ -9,6 +10,7 @@ import { Badge, IconButton, Popover } from "@mui/material";
 import { Notifications } from "@mui/icons-material";
 import useAuthStore from "../../store/authStore";
 import { useNotificaciones } from "../../hooks/useNotificaciones";
+import { getNotificacionContextFromRole } from "../../utils/notificationHelpers";
 import NotificationTray from "./NotificationTray";
 
 const NotificationBell: FC = () => {
@@ -20,17 +22,21 @@ const NotificationBell: FC = () => {
 
   const open = Boolean(anchorEl);
   const userId = user?.id;
+  const context = useMemo(
+    () => getNotificacionContextFromRole(currentRole),
+    [currentRole],
+  );
 
   const refreshUnreadCount = useCallback(async () => {
-    if (!userId || !accessToken) return;
+    if (!userId || !accessToken || !context) return;
 
     try {
-      const data = await getUnread(userId);
+      const data = await getUnread(userId, context);
       setUnreadCount(data.count ?? data.notifications?.length ?? 0);
     } catch {
       // Keep last known count on background refresh failure
     }
-  }, [accessToken, getUnread, userId]);
+  }, [accessToken, context, getUnread, userId]);
 
   useEffect(() => {
     refreshUnreadCount();
@@ -103,9 +109,10 @@ const NotificationBell: FC = () => {
           },
         }}
       >
-        {userId ? (
+        {userId && context ? (
           <NotificationTray
             userId={userId}
+            context={context}
             currentRole={currentRole}
             open={open}
             unreadCount={unreadCount}

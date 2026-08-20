@@ -7,10 +7,12 @@ const Layout = ({
   children,
   hideMenu = false,
   hideSuite = false,
+  hideNotifications = false,
 }: {
   children: React.ReactNode;
   hideMenu?: boolean;
   hideSuite?: boolean;
+  hideNotifications?: boolean;
 }) => {
   return (
     <Box
@@ -33,7 +35,7 @@ const Layout = ({
           overflow: "hidden",
         }}
       >
-        <Header hideSuite={hideSuite} />
+        <Header hideSuite={hideSuite} hideNotifications={hideNotifications} />
         <Box
           sx={{
             flex: 1,

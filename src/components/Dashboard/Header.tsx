@@ -4,7 +4,13 @@ import ThemeToggle from "./ThemeToggle";
 import useAuthStore from "../../store/authStore";
 import { capitalizeString } from "../../utils/utils";
 
-const Header = ({ hideSuite = false }: { hideSuite?: boolean }) => {
+const Header = ({
+  hideSuite = false,
+  hideNotifications = false,
+}: {
+  hideSuite?: boolean;
+  hideNotifications?: boolean;
+}) => {
   const { currentRole } = useAuthStore();
 
   return (
@@ -61,7 +67,7 @@ const Header = ({ hideSuite = false }: { hideSuite?: boolean }) => {
         }}
       >
         <ThemeToggle />
-        <Profile />
+        <Profile hideNotifications={hideNotifications} />
       </Box>
     </Box>
   );

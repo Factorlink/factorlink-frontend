@@ -8,7 +8,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, Box, Tab, Tabs, Typography } from "@mui/material";
-import type { Notificacion } from "../../types/notificacion";
+import type { Notificacion, NotificacionContext } from "../../types/notificacion";
 import type { Role } from "../../types/role";
 import { useNotificaciones } from "../../hooks/useNotificaciones";
 import { useOfertas } from "../../hooks/useOfertas";
@@ -41,6 +41,7 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 
 interface NotificationTrayProps {
   userId: string;
+  context: NotificacionContext;
   currentRole: Role | null;
   open: boolean;
   unreadCount: number;
@@ -50,6 +51,7 @@ interface NotificationTrayProps {
 
 const NotificationTray: FC<NotificationTrayProps> = ({
   userId,
+  context,
   currentRole,
   open,
   unreadCount,
@@ -75,7 +77,7 @@ const NotificationTray: FC<NotificationTrayProps> = ({
     try {
       setLoadingUnread(true);
       setErrorUnread(false);
-      const data = await getUnread(userId);
+      const data = await getUnread(userId, context);
       const sorted = sortUnreadNotifications(data.notifications ?? []);
       setUnread(sorted);
       onUnreadCountChange(data.count ?? sorted.length);
@@ -84,13 +86,13 @@ const NotificationTray: FC<NotificationTrayProps> = ({
     } finally {
       setLoadingUnread(false);
     }
-  }, [getUnread, onUnreadCountChange, userId]);
+  }, [context, getUnread, onUnreadCountChange, userId]);
 
   const fetchRead = useCallback(async () => {
     try {
       setLoadingRead(true);
       setErrorRead(false);
-      const data = await getRead(userId);
+      const data = await getRead(userId, context);
       setRead(sortReadNotifications(data.notifications ?? []));
       setHasLoadedRead(true);
     } catch {
@@ -98,11 +100,12 @@ const NotificationTray: FC<NotificationTrayProps> = ({
     } finally {
       setLoadingRead(false);
     }
-  }, [getRead, userId]);
+  }, [context, getRead, userId]);
 
   useEffect(() => {
     if (!open) return;
     setActionError(null);
+    setHasLoadedRead(false);
     fetchUnread();
   }, [open, fetchUnread]);
 
@@ -126,11 +129,10 @@ const NotificationTray: FC<NotificationTrayProps> = ({
           ? getOfertaById(notification.entidadId).catch(() => null)
           : Promise.resolve(null);
       const readPromise = !notification.leida
-        ? markAsRead(notification.id, userId)
+        ? markAsRead(notification.id, userId, context)
         : Promise.resolve();
 
       const [oferta] = await Promise.all([ofertaPromise, readPromise]);
-
       if (!notification.leida) {
         setUnread((prev) => prev.filter((item) => item.id !== notification.id));
         onUnreadCountChange(Math.max(0, unreadCount - 1));
