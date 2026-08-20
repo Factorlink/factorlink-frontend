@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Box, Typography, IconButton, Alert } from "@mui/material";
+import { Box, Typography, IconButton, Alert, CircularProgress } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -14,14 +14,21 @@ const ALLOWED_EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png"];
 export type FacturaAdjuntoPendiente = {
   id: string;
   nombreArchivo: string;
-  archivoBase64: string;
   mimeType: string;
   size: number;
+};
+
+export type FacturaAdjuntoUploadPayload = {
+  nombreArchivo: string;
+  archivoBase64: string;
+  mimeType: string;
 };
 
 interface AdjuntarDocumentosAdicionalesCardProps {
   files: FacturaAdjuntoPendiente[];
   onChange: (files: FacturaAdjuntoPendiente[]) => void;
+  onUpload: (payload: FacturaAdjuntoUploadPayload) => Promise<void>;
+  facturaId: string;
   disabled?: boolean;
 }
 
@@ -45,17 +52,11 @@ const validateAdjunto = (file: File): string | null => {
   return null;
 };
 
-const readFileAsAdjunto = (file: File): Promise<FacturaAdjuntoPendiente> =>
+const readFileAsBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      resolve({
-        id: `${file.name}-${file.size}-${file.lastModified}-${Math.random().toString(36).slice(2)}`,
-        nombreArchivo: file.name,
-        archivoBase64: toRawBase64(reader.result as string),
-        mimeType: file.type || "application/octet-stream",
-        size: file.size,
-      });
+      resolve(toRawBase64(reader.result as string));
     };
     reader.onerror = () => reject(new Error("Error al leer el archivo"));
     reader.readAsDataURL(file);
@@ -64,48 +65,76 @@ const readFileAsAdjunto = (file: File): Promise<FacturaAdjuntoPendiente> =>
 const AdjuntarDocumentosAdicionalesCard = ({
   files,
   onChange,
+  onUpload,
+  facturaId,
   disabled = false,
 }: AdjuntarDocumentosAdicionalesCardProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadingName, setUploadingName] = useState<string | null>(null);
 
   const addFiles = async (selected: FileList | File[]) => {
     const incoming = Array.from(selected);
-    if (incoming.length === 0) return;
+    if (incoming.length === 0 || !facturaId) return;
 
     if (files.length >= MAX_ADJUNTOS) {
       setError(`Máximo ${MAX_ADJUNTOS} documentos adicionales`);
       return;
     }
 
+    setUploading(true);
+    setError(null);
+
     try {
-        const next = [...files];
-        let lastError: string | null = null;
-        for (const file of incoming) {
-          if (next.length >= MAX_ADJUNTOS) {
-            lastError = `Máximo ${MAX_ADJUNTOS} documentos adicionales`;
-            break;
-          }
+      const next = [...files];
+      let lastError: string | null = null;
 
-          const validationError = validateAdjunto(file);
-          if (validationError) {
-            lastError = `${file.name}: ${validationError}`;
-            continue;
-          }
-
-          const alreadyAdded = next.some(
-            (item) => item.nombreArchivo === file.name && item.size === file.size,
-          );
-          if (alreadyAdded) continue;
-
-          next.push(await readFileAsAdjunto(file));
+      for (const file of incoming) {
+        if (next.length >= MAX_ADJUNTOS) {
+          lastError = `Máximo ${MAX_ADJUNTOS} documentos adicionales`;
+          break;
         }
-        onChange(next);
-        setError(lastError);
+
+        const validationError = validateAdjunto(file);
+        if (validationError) {
+          lastError = `${file.name}: ${validationError}`;
+          continue;
+        }
+
+        const alreadyAdded = next.some(
+          (item) => item.nombreArchivo === file.name && item.size === file.size,
+        );
+        if (alreadyAdded) continue;
+
+        setUploadingName(file.name);
+        try {
+          const archivoBase64 = await readFileAsBase64(file);
+          const mimeType = file.type || "application/octet-stream";
+          await onUpload({
+            nombreArchivo: file.name,
+            archivoBase64,
+            mimeType,
+          });
+          next.push({
+            id: `${file.name}-${file.size}-${file.lastModified}-${Math.random().toString(36).slice(2)}`,
+            nombreArchivo: file.name,
+            mimeType,
+            size: file.size,
+          });
+          onChange([...next]);
+        } catch {
+          lastError = `${file.name}: Error al subir el archivo. Intente nuevamente.`;
+        }
+      }
+
+      setError(lastError);
     } catch {
       setError("Error al leer el archivo");
     } finally {
+      setUploading(false);
+      setUploadingName(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -121,7 +150,7 @@ const AdjuntarDocumentosAdicionalesCard = ({
   const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     setIsDragging(false);
-    if (disabled || files.length >= MAX_ADJUNTOS) return;
+    if (disabled || uploading || files.length >= MAX_ADJUNTOS) return;
     void addFiles(event.dataTransfer.files);
   };
 
@@ -130,7 +159,7 @@ const AdjuntarDocumentosAdicionalesCard = ({
   };
 
   const isAtMax = files.length >= MAX_ADJUNTOS;
-  const isUploadDisabled = disabled || isAtMax;
+  const isUploadDisabled = disabled || isAtMax || uploading;
 
   return (
     <SectionPanel
@@ -187,18 +216,32 @@ const AdjuntarDocumentosAdicionalesCard = ({
               },
         }}
       >
-        <CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary", mb: 1 }} />
-        <Typography variant="body1" sx={{ color: "text.primary", mb: 0.5 }}>
-          Arrastra y suelta archivos aquí o{" "}
-          <Box component="span" sx={{ fontWeight: 700, color: "var(--color-fg-accent-primary)" }}>
-            selecciona
-          </Box>
-        </Typography>
-        <Typography variant="caption" sx={{ color: "text.secondary" }}>
-          {isAtMax
-            ? `Has alcanzado el máximo de ${MAX_ADJUNTOS} documentos.`
-            : `Formatos permitidos: PDF, JPG, PNG (Máx. ${formatFileSize(MAX_ADJUNTO_SIZE)} por archivo)`}
-        </Typography>
+        {uploading ? (
+          <>
+            <CircularProgress size={40} sx={{ mb: 1.5 }} />
+            <Typography variant="body1" sx={{ color: "text.primary", mb: 0.5 }}>
+              Subiendo{uploadingName ? ` ${uploadingName}` : ""}…
+            </Typography>
+          </>
+        ) : (
+          <>
+            <CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary", mb: 1 }} />
+            <Typography variant="body1" sx={{ color: "text.primary", mb: 0.5 }}>
+              Arrastra y suelta archivos aquí o{" "}
+              <Box
+                component="span"
+                sx={{ fontWeight: 700, color: "var(--color-fg-accent-primary)" }}
+              >
+                selecciona
+              </Box>
+            </Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              {isAtMax
+                ? `Has alcanzado el máximo de ${MAX_ADJUNTOS} documentos.`
+                : `Formatos permitidos: PDF, JPG, PNG (Máx. ${formatFileSize(MAX_ADJUNTO_SIZE)} por archivo)`}
+            </Typography>
+          </>
+        )}
       </Box>
 
       {files.length > 0 && (
@@ -252,7 +295,7 @@ const AdjuntarDocumentosAdicionalesCard = ({
               </Box>
               <IconButton
                 onClick={() => handleRemoveFile(file.id)}
-                disabled={disabled}
+                disabled={disabled || uploading}
                 sx={{ color: "error.main" }}
               >
                 <DeleteIcon />

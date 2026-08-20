@@ -284,14 +284,6 @@ const CotizarFactura = () => {
       setSubmitting(true);
       setSubmitError(null);
 
-      for (const adjunto of adjuntos) {
-        await uploadFacturaArchivo(id!, {
-          nombreArchivo: adjunto.nombreArchivo,
-          archivoBase64: adjunto.archivoBase64,
-          mimeType: adjunto.mimeType,
-        });
-      }
-
       const calculatedMontoFinanciar = Math.trunc(
         (parseFloat(factura.montoTotal) * montoFinanciar) / 100,
       );
@@ -309,11 +301,7 @@ const CotizarFactura = () => {
       setSuccessOpen(true);
     } catch (err) {
       console.error("Error sending factura to marketplace:", err);
-      setSubmitError(
-        adjuntos.length > 0
-          ? "Error al subir documentos o enviar a cotizar. Intente nuevamente."
-          : "Error al enviar a cotizar. Intente nuevamente.",
-      );
+      setSubmitError("Error al enviar a cotizar. Intente nuevamente.");
     } finally {
       setSubmitting(false);
     }
@@ -453,6 +441,8 @@ const CotizarFactura = () => {
         <AdjuntarDocumentosAdicionalesCard
           files={adjuntos}
           onChange={setAdjuntos}
+          facturaId={id || ""}
+          onUpload={(payload) => uploadFacturaArchivo(id!, payload)}
           disabled={submitting}
         />
 
