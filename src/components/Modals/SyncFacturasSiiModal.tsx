@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -6,9 +6,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  CircularProgress,
   IconButton,
-  Alert,
   FormControl,
   InputLabel,
   Select,
@@ -19,6 +17,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import SyncIcon from "@mui/icons-material/Sync";
 import { useFacturas } from "../../hooks/useFacturas";
 import siiLogo from "../../assets/png/sii-logo.png";
+import ObtenerFacturaSiiModal from "./ObtenerFacturaSiiModal";
 
 interface SyncFacturasSiiModalProps {
   open: boolean;
@@ -26,6 +25,8 @@ interface SyncFacturasSiiModalProps {
   onSuccess?: () => void;
   empresaId: string;
 }
+
+type SyncPhase = "form" | "loading" | "error";
 
 const MONTHS = [
   { value: "01", label: "Enero" },
@@ -42,6 +43,9 @@ const MONTHS = [
   { value: "12", label: "Diciembre" },
 ];
 
+const DEFAULT_ERROR_SUBTITLE =
+  "Ocurrió un error al sincronizar las facturas con el SII";
+
 const generateYears = () => {
   const currentYear = new Date().getFullYear();
   const years = [];
@@ -57,50 +61,63 @@ const SyncFacturasSiiModal = ({
   onSuccess,
   empresaId,
 }: SyncFacturasSiiModalProps) => {
-  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
-    null
-  );
-  const [alertMessage, setAlertMessage] = useState("");
+  const [phase, setPhase] = useState<SyncPhase>("form");
+  const [errorSubtitle, setErrorSubtitle] = useState(DEFAULT_ERROR_SUBTITLE);
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
   const [touched, setTouched] = useState({ month: false, year: false });
 
-  const { syncFacturasSii, loading } = useFacturas();
+  const { syncFacturasSii } = useFacturas();
   const years = generateYears();
+  const isSyncing = phase === "loading" || phase === "error";
 
-  const handleSync = async () => {
-    setTouched({ month: true, year: true });
+  const resetForm = useCallback(() => {
+    setPhase("form");
+    setErrorSubtitle(DEFAULT_ERROR_SUBTITLE);
+    setMonth("");
+    setYear("");
+    setTouched({ month: false, year: false });
+  }, []);
 
-    if (!month || !year) {
-      return;
+  useEffect(() => {
+    if (!open) {
+      resetForm();
     }
+  }, [open, resetForm]);
 
+  const handleClose = () => {
+    if (phase === "loading") return;
+    onClose();
+  };
+
+  const runSync = useCallback(async () => {
+    if (!month || !year) return;
+
+    setPhase("loading");
     try {
       await syncFacturasSii(month, year, empresaId);
-      setAlertStatus("success");
-      setAlertMessage(
-        `Las facturas del período ${MONTHS.find((m) => m.value === month)?.label} ${year} se han sincronizado correctamente.`
-      );
       onSuccess?.();
+      onClose();
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string } };
       };
-      setAlertStatus("error");
-      setAlertMessage(
-        axiosError?.response?.data?.message ||
-          "Ocurrió un error al sincronizar las facturas con el SII"
+      setErrorSubtitle(
+        axiosError?.response?.data?.message || DEFAULT_ERROR_SUBTITLE
       );
+      setPhase("error");
     }
+  }, [month, year, empresaId, syncFacturasSii, onSuccess, onClose]);
+
+  const handleSync = () => {
+    setTouched({ month: true, year: true });
+    if (!month || !year) return;
+    void runSync();
   };
 
-  const handleClose = () => {
-    setAlertStatus(null);
-    setAlertMessage("");
-    setMonth("");
-    setYear("");
-    setTouched({ month: false, year: false });
-    onClose();
+  const handleProgressCancel = () => {
+    setPhase("form");
+    setErrorSubtitle(DEFAULT_ERROR_SUBTITLE);
   };
 
   const isFormValid = month !== "" && year !== "";
@@ -108,140 +125,116 @@ const SyncFacturasSiiModal = ({
   const showYearError = touched.year && !year;
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: "var(--radius-l)",
-          overflow: "hidden",
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          px: 3,
-          pt: 3,
-          pb: 1,
+    <>
+      <Dialog
+        open={open && phase === "form"}
+        onClose={handleClose}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "var(--radius-l)",
+            overflow: "hidden",
+          },
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Box
-            component="img"
-            src={siiLogo}
-            alt="Logo SII"
-            sx={{
-              width: 48,
-              height: "auto",
-              objectFit: "contain",
-            }}
-          />
-          <Typography variant="h6" fontWeight={600}>
-            Sincronizar Facturas SII
-          </Typography>
-        </Box>
-        <IconButton onClick={handleClose} disabled={loading}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-
-      <DialogContent sx={{ px: 3, pb: 3 }}>
-        {alertStatus && (
-          <Alert severity={alertStatus} sx={{ mb: 3 }}>
-            {alertMessage}
-          </Alert>
-        )}
-
-        <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
-          Selecciona el período para sincronizar las facturas desde el SII.
-        </Typography>
-
-        <Box sx={{ display: "flex", gap: 2, mb: 2, flexDirection: "column" }}>
-          <FormControl
-            fullWidth
-            error={showMonthError}
-            disabled={loading || alertStatus === "success"}
-          >
-            <InputLabel id="month-label">Mes</InputLabel>
-            <Select
-              labelId="month-label"
-              value={month}
-              label="Mes"
-              onChange={(e) => setMonth(e.target.value)}
-              onBlur={() => setTouched((prev) => ({ ...prev, month: true }))}
-              sx={{
-                backgroundColor: "var(--color-bg-default-primary)",
-                borderRadius: "var(--radius-m)",
-              }}
-            >
-              {MONTHS.map((m) => (
-                <MenuItem key={m.value} value={m.value}>
-                  {m.label}
-                </MenuItem>
-              ))}
-            </Select>
-            {showMonthError && (
-              <FormHelperText>El mes es obligatorio</FormHelperText>
-            )}
-          </FormControl>
-
-          <FormControl
-            fullWidth
-            error={showYearError}
-            disabled={loading || alertStatus === "success"}
-          >
-            <InputLabel id="year-label">Año</InputLabel>
-            <Select
-              labelId="year-label"
-              value={year}
-              label="Año"
-              onChange={(e) => setYear(e.target.value)}
-              onBlur={() => setTouched((prev) => ({ ...prev, year: true }))}
-              sx={{
-                backgroundColor: "var(--color-bg-default-primary)",
-                borderRadius: "var(--radius-m)",
-              }}
-            >
-              {years.map((y) => (
-                <MenuItem key={y.value} value={y.value}>
-                  {y.label}
-                </MenuItem>
-              ))}
-            </Select>
-            {showYearError && (
-              <FormHelperText>El año es obligatorio</FormHelperText>
-            )}
-          </FormControl>
-        </Box>
-
-        <Box
-          sx={{ display: "flex", gap: 2, mt: 3, justifyContent: "flex-end" }}
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: 3,
+            pt: 3,
+            pb: 1,
+          }}
         >
-          <Button
-            variant="outlined"
-            onClick={handleClose}
-            disabled={loading}
-          >
-            {alertStatus === "success" ? "Cerrar" : "Cancelar"}
-          </Button>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              component="img"
+              src={siiLogo}
+              alt="Logo SII"
+              sx={{
+                width: 48,
+                height: "auto",
+                objectFit: "contain",
+              }}
+            />
+            <Typography variant="h6" fontWeight={600}>
+              Sincronizar Facturas SII
+            </Typography>
+          </Box>
+          <IconButton onClick={handleClose}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
 
-          {alertStatus !== "success" && (
+        <DialogContent sx={{ px: 3, pb: 3 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
+            Selecciona el período para sincronizar las facturas desde el SII.
+          </Typography>
+
+          <Box sx={{ display: "flex", gap: 2, mb: 2, flexDirection: "column" }}>
+            <FormControl fullWidth error={showMonthError}>
+              <InputLabel id="month-label">Mes</InputLabel>
+              <Select
+                labelId="month-label"
+                value={month}
+                label="Mes"
+                onChange={(e) => setMonth(e.target.value)}
+                onBlur={() => setTouched((prev) => ({ ...prev, month: true }))}
+                sx={{
+                  backgroundColor: "var(--color-bg-default-primary)",
+                  borderRadius: "var(--radius-m)",
+                }}
+              >
+                {MONTHS.map((m) => (
+                  <MenuItem key={m.value} value={m.value}>
+                    {m.label}
+                  </MenuItem>
+                ))}
+              </Select>
+              {showMonthError && (
+                <FormHelperText>El mes es obligatorio</FormHelperText>
+              )}
+            </FormControl>
+
+            <FormControl fullWidth error={showYearError}>
+              <InputLabel id="year-label">Año</InputLabel>
+              <Select
+                labelId="year-label"
+                value={year}
+                label="Año"
+                onChange={(e) => setYear(e.target.value)}
+                onBlur={() => setTouched((prev) => ({ ...prev, year: true }))}
+                sx={{
+                  backgroundColor: "var(--color-bg-default-primary)",
+                  borderRadius: "var(--radius-m)",
+                }}
+              >
+                {years.map((y) => (
+                  <MenuItem key={y.value} value={y.value}>
+                    {y.label}
+                  </MenuItem>
+                ))}
+              </Select>
+              {showYearError && (
+                <FormHelperText>El año es obligatorio</FormHelperText>
+              )}
+            </FormControl>
+          </Box>
+
+          <Box
+            sx={{ display: "flex", gap: 2, mt: 3, justifyContent: "flex-end" }}
+          >
+            <Button variant="outlined" onClick={handleClose}>
+              Cancelar
+            </Button>
+
             <Button
               variant="contained"
               onClick={handleSync}
-              disabled={loading || !isFormValid}
-              startIcon={
-                loading ? (
-                  <CircularProgress size={20} sx={{ color: "white" }} />
-                ) : (
-                  <SyncIcon />
-                )
-              }
+              disabled={!isFormValid}
+              startIcon={<SyncIcon />}
               sx={{
                 backgroundColor: "primary.main",
                 color: "white",
@@ -251,12 +244,23 @@ const SyncFacturasSiiModal = ({
                 },
               }}
             >
-              {loading ? "Sincronizando..." : "Sincronizar"}
+              Sincronizar
             </Button>
-          )}
-        </Box>
-      </DialogContent>
-    </Dialog>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      <ObtenerFacturaSiiModal
+        open={open && isSyncing}
+        status={phase === "error" ? "error" : "loading"}
+        onRetry={runSync}
+        onCancel={handleProgressCancel}
+        loadingTitle="Estamos sincronizando tus facturas desde el SII"
+        loadingSubtitle="Espera un momento, por favor."
+        errorTitle="No pudimos sincronizar las facturas"
+        errorSubtitle={errorSubtitle}
+      />
+    </>
   );
 };
 

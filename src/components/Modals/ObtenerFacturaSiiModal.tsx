@@ -21,13 +21,28 @@ interface ObtenerFacturaSiiModalProps {
   status: "loading" | "error";
   onRetry: () => void;
   onCancel: () => void;
+  loadingTitle?: string;
+  loadingSubtitle?: string;
+  errorTitle?: string;
+  errorSubtitle?: string;
 }
+
+const DEFAULT_LOADING_TITLE =
+  "Estamos cargando los datos de tu factura desde el SII";
+const DEFAULT_LOADING_SUBTITLE = "Espera un momento, por favor.";
+const DEFAULT_ERROR_TITLE = "No pudimos cargar los datos de tu factura";
+const DEFAULT_ERROR_SUBTITLE =
+  "Hubo un problema al obtener la información desde el SII. Vamos a intentar nuevamente.";
 
 const ObtenerFacturaSiiModal = ({
   open,
   status,
   onRetry,
   onCancel,
+  loadingTitle = DEFAULT_LOADING_TITLE,
+  loadingSubtitle = DEFAULT_LOADING_SUBTITLE,
+  errorTitle = DEFAULT_ERROR_TITLE,
+  errorSubtitle = DEFAULT_ERROR_SUBTITLE,
 }: ObtenerFacturaSiiModalProps) => {
   const [secondsLeft, setSecondsLeft] = useState(AUTO_RETRY_SECONDS);
   const isLoading = status === "loading";
@@ -143,14 +158,10 @@ const ObtenerFacturaSiiModal = ({
             mb: 1,
           }}
         >
-          {isLoading
-            ? "Estamos cargando los datos de tu factura desde el SII"
-            : "No pudimos cargar los datos de tu factura"}
+          {isLoading ? loadingTitle : errorTitle}
         </Typography>
         <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-          {isLoading
-            ? "Espera un momento, por favor."
-            : "Hubo un problema al obtener la información desde el SII. Vamos a intentar nuevamente."}
+          {isLoading ? loadingSubtitle : errorSubtitle}
         </Typography>
 
         {isLoading && (
