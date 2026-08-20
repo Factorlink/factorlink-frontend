@@ -1,22 +1,23 @@
 import { useRef, useState } from "react";
-import { Box, Typography, IconButton, Alert, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Typography,
+  IconButton,
+  Alert,
+  CircularProgress,
+  Link,
+} from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { formatFileSize } from "../../utils/validations/file-fields";
 import SectionPanel from "../SectionPanel";
+import type { FacturaArchivo } from "../../types/factura";
 
 const MAX_ADJUNTO_SIZE = 10 * 1024 * 1024;
 const MAX_ADJUNTOS = 5;
 const ALLOWED_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 const ALLOWED_EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png"];
-
-export type FacturaAdjuntoPendiente = {
-  id: string;
-  nombreArchivo: string;
-  mimeType: string;
-  size: number;
-};
 
 export type FacturaAdjuntoUploadPayload = {
   nombreArchivo: string;
@@ -25,11 +26,14 @@ export type FacturaAdjuntoUploadPayload = {
 };
 
 interface AdjuntarDocumentosAdicionalesCardProps {
-  files: FacturaAdjuntoPendiente[];
-  onChange: (files: FacturaAdjuntoPendiente[]) => void;
-  onUpload: (payload: FacturaAdjuntoUploadPayload) => Promise<void>;
+  files: FacturaArchivo[];
+  onChange: (files: FacturaArchivo[]) => void;
+  onUpload: (payload: FacturaAdjuntoUploadPayload) => Promise<FacturaArchivo>;
+  onDelete: (archivoId: string) => Promise<void>;
   facturaId: string;
   disabled?: boolean;
+  variant?: "panel" | "embedded";
+  readOnly?: boolean;
 }
 
 const toRawBase64 = (dataUrl: string) =>
@@ -66,18 +70,27 @@ const AdjuntarDocumentosAdicionalesCard = ({
   files,
   onChange,
   onUpload,
+  onDelete,
   facturaId,
   disabled = false,
+  variant = "panel",
+  readOnly = false,
 }: AdjuntarDocumentosAdicionalesCardProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadingName, setUploadingName] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const inputId =
+    variant === "embedded"
+      ? "factura-adjuntos-upload-embedded"
+      : "factura-adjuntos-upload";
 
   const addFiles = async (selected: FileList | File[]) => {
     const incoming = Array.from(selected);
-    if (incoming.length === 0 || !facturaId) return;
+    if (incoming.length === 0 || !facturaId || readOnly) return;
 
     if (files.length >= MAX_ADJUNTOS) {
       setError(`Máximo ${MAX_ADJUNTOS} documentos adicionales`);
@@ -104,7 +117,7 @@ const AdjuntarDocumentosAdicionalesCard = ({
         }
 
         const alreadyAdded = next.some(
-          (item) => item.nombreArchivo === file.name && item.size === file.size,
+          (item) => item.nombreArchivo === file.name,
         );
         if (alreadyAdded) continue;
 
@@ -112,17 +125,12 @@ const AdjuntarDocumentosAdicionalesCard = ({
         try {
           const archivoBase64 = await readFileAsBase64(file);
           const mimeType = file.type || "application/octet-stream";
-          await onUpload({
+          const uploaded = await onUpload({
             nombreArchivo: file.name,
             archivoBase64,
             mimeType,
           });
-          next.push({
-            id: `${file.name}-${file.size}-${file.lastModified}-${Math.random().toString(36).slice(2)}`,
-            nombreArchivo: file.name,
-            mimeType,
-            size: file.size,
-          });
+          next.push(uploaded);
           onChange([...next]);
         } catch {
           lastError = `${file.name}: Error al subir el archivo. Intente nuevamente.`;
@@ -150,102 +158,128 @@ const AdjuntarDocumentosAdicionalesCard = ({
   const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     setIsDragging(false);
-    if (disabled || uploading || files.length >= MAX_ADJUNTOS) return;
+    if (
+      readOnly ||
+      disabled ||
+      uploading ||
+      deletingId ||
+      files.length >= MAX_ADJUNTOS
+    ) {
+      return;
+    }
     void addFiles(event.dataTransfer.files);
   };
 
-  const handleRemoveFile = (id: string) => {
-    onChange(files.filter((file) => file.id !== id));
+  const handleRemoveFile = async (archivoId: string) => {
+    if (readOnly) return;
+    setError(null);
+    setDeletingId(archivoId);
+    try {
+      await onDelete(archivoId);
+      onChange(files.filter((file) => file.id !== archivoId));
+    } catch {
+      setError("Error al eliminar el archivo. Intente nuevamente.");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const isAtMax = files.length >= MAX_ADJUNTOS;
-  const isUploadDisabled = disabled || isAtMax || uploading;
+  const isBusy = uploading || Boolean(deletingId);
+  const isUploadDisabled = readOnly || disabled || isAtMax || isBusy;
 
-  return (
-    <SectionPanel
-      title="Adjuntar documentos adicionales (opcional)"
-      subtitle={`Puedes adjuntar hasta ${MAX_ADJUNTOS} documentos complementarios (${files.length}/${MAX_ADJUNTOS}).`}
-      icon={<CloudUploadIcon sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />}
-    >
+  const content = (
+    <>
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".pdf,.jpg,.jpeg,.png"
-        multiple
-        onChange={handleFileChange}
-        style={{ display: "none" }}
-        id="factura-adjuntos-upload"
-        disabled={isUploadDisabled}
-      />
+      {!readOnly && (
+        <>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            multiple
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+            id={inputId}
+            disabled={isUploadDisabled}
+          />
 
-      <Box
-        component="label"
-        htmlFor={isUploadDisabled ? undefined : "factura-adjuntos-upload"}
-        onDragOver={(event) => {
-          event.preventDefault();
-          if (!isUploadDisabled) setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "2px dashed",
-          borderColor: isDragging ? "primary.main" : "divider",
-          borderRadius: "var(--radius-m)",
-          p: 4,
-          cursor: isUploadDisabled ? "default" : "pointer",
-          transition: "all 0.2s ease",
-          backgroundColor: isDragging
-            ? "var(--color-bg-accent-tertiary-hover)"
-            : "background.default",
-          opacity: isAtMax ? 0.6 : 1,
-          "&:hover": isUploadDisabled
-            ? undefined
-            : {
-                borderColor: "primary.main",
-                backgroundColor: "var(--color-bg-accent-tertiary-hover)",
-              },
-        }}
-      >
-        {uploading ? (
-          <>
-            <CircularProgress size={40} sx={{ mb: 1.5 }} />
-            <Typography variant="body1" sx={{ color: "text.primary", mb: 0.5 }}>
-              Subiendo{uploadingName ? ` ${uploadingName}` : ""}…
-            </Typography>
-          </>
-        ) : (
-          <>
-            <CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary", mb: 1 }} />
-            <Typography variant="body1" sx={{ color: "text.primary", mb: 0.5 }}>
-              Arrastra y suelta archivos aquí o{" "}
-              <Box
-                component="span"
-                sx={{ fontWeight: 700, color: "var(--color-fg-accent-primary)" }}
-              >
-                selecciona
-              </Box>
-            </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              {isAtMax
-                ? `Has alcanzado el máximo de ${MAX_ADJUNTOS} documentos.`
-                : `Formatos permitidos: PDF, JPG, PNG (Máx. ${formatFileSize(MAX_ADJUNTO_SIZE)} por archivo)`}
-            </Typography>
-          </>
-        )}
-      </Box>
+          <Box
+            component="label"
+            htmlFor={isUploadDisabled ? undefined : inputId}
+            onDragOver={(event) => {
+              event.preventDefault();
+              if (!isUploadDisabled) setIsDragging(true);
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "2px dashed",
+              borderColor: isDragging ? "primary.main" : "divider",
+              borderRadius: "var(--radius-m)",
+              p: 4,
+              cursor: isUploadDisabled ? "default" : "pointer",
+              transition: "all 0.2s ease",
+              backgroundColor: isDragging
+                ? "var(--color-bg-accent-tertiary-hover)"
+                : "background.default",
+              opacity: isAtMax ? 0.6 : 1,
+              "&:hover": isUploadDisabled
+                ? undefined
+                : {
+                    borderColor: "primary.main",
+                    backgroundColor: "var(--color-bg-accent-tertiary-hover)",
+                  },
+            }}
+          >
+            {uploading ? (
+              <>
+                <CircularProgress size={40} sx={{ mb: 1.5 }} />
+                <Typography variant="body1" sx={{ color: "text.primary", mb: 0.5 }}>
+                  Subiendo{uploadingName ? ` ${uploadingName}` : ""}…
+                </Typography>
+              </>
+            ) : (
+              <>
+                <CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary", mb: 1 }} />
+                <Typography variant="body1" sx={{ color: "text.primary", mb: 0.5 }}>
+                  Arrastra y suelta archivos aquí o{" "}
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: 700, color: "var(--color-fg-accent-primary)" }}
+                  >
+                    selecciona
+                  </Box>
+                </Typography>
+                <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                  {isAtMax
+                    ? `Has alcanzado el máximo de ${MAX_ADJUNTOS} documentos.`
+                    : `Formatos permitidos: PDF, JPG, PNG (Máx. ${formatFileSize(MAX_ADJUNTO_SIZE)} por archivo)`}
+                </Typography>
+              </>
+            )}
+          </Box>
+        </>
+      )}
 
       {files.length > 0 && (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1.5,
+            mt: readOnly ? 0 : 2,
+          }}
+        >
           {files.map((file) => (
             <Box
               key={file.id}
@@ -276,34 +310,90 @@ const AdjuntarDocumentosAdicionalesCard = ({
                   <InsertDriveFileIcon sx={{ color: "white" }} />
                 </Box>
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.primary",
-                      fontWeight: 500,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {file.nombreArchivo}
-                  </Typography>
+                  {file.signedUrl ? (
+                    <Link
+                      href={file.signedUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="body2"
+                      sx={{
+                        fontWeight: 500,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        display: "block",
+                      }}
+                    >
+                      {file.nombreArchivo}
+                    </Link>
+                  ) : (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "text.primary",
+                        fontWeight: 500,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {file.nombreArchivo}
+                    </Typography>
+                  )}
                   <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                    {formatFileSize(file.size)}
+                    {file.mimeType}
                   </Typography>
                 </Box>
               </Box>
-              <IconButton
-                onClick={() => handleRemoveFile(file.id)}
-                disabled={disabled || uploading}
-                sx={{ color: "error.main" }}
-              >
-                <DeleteIcon />
-              </IconButton>
+              {!readOnly && (
+                <IconButton
+                  onClick={() => void handleRemoveFile(file.id)}
+                  disabled={disabled || isBusy}
+                  sx={{ color: "error.main" }}
+                >
+                  {deletingId === file.id ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <DeleteIcon />
+                  )}
+                </IconButton>
+              )}
             </Box>
           ))}
         </Box>
       )}
+    </>
+  );
+
+  if (variant === "embedded") {
+    return (
+      <Box>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 0.5 }}
+        >
+          Documentos adicionales
+        </Typography>
+        <Typography
+          variant="caption"
+          sx={{ color: "var(--color-fg-default-secondary)", display: "block", mb: 2 }}
+        >
+          {readOnly
+            ? `${files.length} documento${files.length === 1 ? "" : "s"} adicional${files.length === 1 ? "" : "es"}`
+            : `Hasta ${MAX_ADJUNTOS} documentos complementarios (${files.length}/${MAX_ADJUNTOS})`}
+        </Typography>
+        {content}
+      </Box>
+    );
+  }
+
+  return (
+    <SectionPanel
+      title="Adjuntar documentos adicionales (opcional)"
+      subtitle={`Puedes adjuntar hasta ${MAX_ADJUNTOS} documentos complementarios (${files.length}/${MAX_ADJUNTOS}).`}
+      icon={<CloudUploadIcon sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />}
+    >
+      {content}
     </SectionPanel>
   );
 };

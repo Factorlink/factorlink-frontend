@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../lib/axios";
-import type { Factura } from "../types/factura";
+import type { Factura, FacturaArchivo } from "../types/factura";
 
 export type GetFacturasParams = {
   page: number;
@@ -159,9 +159,9 @@ export const useFacturas = () => {
     }
   };
 
-  const refreshFactura = async (id: string) => {
+  const refreshFactura = async (id: string): Promise<Factura> => {
     try {
-      const response = await api.get(`/facturas/${id}`);
+      const response = await api.get<Factura>(`/facturas/${id}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -330,10 +330,27 @@ export const useFacturas = () => {
   const uploadFacturaArchivo = async (
     facturaId: string,
     payload: UploadFacturaArchivoPayload,
-  ) => {
+  ): Promise<FacturaArchivo> => {
     try {
       setLoading(true);
-      const response = await api.post(`/facturas/${facturaId}/archivos`, payload);
+      const response = await api.post<FacturaArchivo>(
+        `/facturas/${facturaId}/archivos`,
+        payload,
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteFacturaArchivo = async (facturaId: string, archivoId: string) => {
+    try {
+      setLoading(true);
+      const response = await api.delete(
+        `/facturas/${facturaId}/archivos/${archivoId}`,
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -360,5 +377,6 @@ export const useFacturas = () => {
     getFacturasCedidasByEmpresaId,
     fetchXMLContent,
     uploadFacturaArchivo,
+    deleteFacturaArchivo,
   };
 };

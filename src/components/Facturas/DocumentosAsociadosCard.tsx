@@ -1,14 +1,23 @@
 import { Box, Typography, Button, Divider } from "@mui/material";
 import { Description, PictureAsPdf, Cancel, Upload } from "@mui/icons-material";
-import type { Factura } from "../../types/factura";
+import type { Factura, FacturaArchivo } from "../../types/factura";
 import { isXmlUiEnabled } from "../../config/featureFlags";
 import { hasFacturaPdf } from "../../utils/facturaDocuments";
+import AdjuntarDocumentosAdicionalesCard, {
+  type FacturaAdjuntoUploadPayload,
+} from "./AdjuntarDocumentosAdicionalesCard";
 
 interface DocumentosAsociadosCardProps {
   factura: Factura;
   onUploadXmlClick?: () => void;
   onDownloadXml?: (base64: string, fileName: string) => void;
   onDownloadPdf?: (base64: string, fileName: string) => void;
+  adjuntos?: FacturaArchivo[];
+  onAdjuntosChange?: (files: FacturaArchivo[]) => void;
+  onUploadAdjunto?: (
+    payload: FacturaAdjuntoUploadPayload,
+  ) => Promise<FacturaArchivo>;
+  onDeleteAdjunto?: (archivoId: string) => Promise<void>;
 }
 
 const DocumentosAsociadosCard = ({
@@ -16,9 +25,20 @@ const DocumentosAsociadosCard = ({
   onUploadXmlClick,
   onDownloadXml,
   onDownloadPdf,
+  adjuntos,
+  onAdjuntosChange,
+  onUploadAdjunto,
+  onDeleteAdjunto,
 }: DocumentosAsociadosCardProps) => {
   const showXmlUi = isXmlUiEnabled();
   const isCargada = factura.estado?.toLowerCase() === "cargada";
+  const canManageAdjuntos = ["EN_MARKETPLACE", "CON_OFERTAS"].includes(
+    factura.estado,
+  );
+  const adjuntosList = adjuntos ?? [];
+  const showAdjuntos =
+    Boolean(onUploadAdjunto && onDeleteAdjunto && onAdjuntosChange) &&
+    (canManageAdjuntos || adjuntosList.length > 0);
 
   if (!hasFacturaPdf(factura)) {
     return null;
@@ -35,6 +55,14 @@ const DocumentosAsociadosCard = ({
       onDownloadPdf(factura.pdfContentBase64, factura.facturaNameFilePDF || "factura.pdf");
     }
   };
+
+  const subtitle = showAdjuntos
+    ? showXmlUi
+      ? "XML, PDF y documentos adicionales"
+      : "PDF y documentos adicionales"
+    : showXmlUi
+      ? "XML y PDF de la factura"
+      : "PDF de la factura";
 
   return (
     <Box
@@ -63,7 +91,7 @@ const DocumentosAsociadosCard = ({
             Documentos Asociados
           </Typography>
           <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-            {showXmlUi ? "XML y PDF de la factura" : "PDF de la factura"}
+            {subtitle}
           </Typography>
         </Box>
       </Box>
@@ -178,6 +206,21 @@ const DocumentosAsociadosCard = ({
           PDF cargado correctamente
         </Typography>
       </Box>
+
+      {showAdjuntos && onUploadAdjunto && onDeleteAdjunto && onAdjuntosChange && (
+        <>
+          <Divider sx={{ my: 2 }} />
+          <AdjuntarDocumentosAdicionalesCard
+            variant="embedded"
+            readOnly={!canManageAdjuntos}
+            facturaId={factura.id}
+            files={adjuntosList}
+            onChange={onAdjuntosChange}
+            onUpload={onUploadAdjunto}
+            onDelete={onDeleteAdjunto}
+          />
+        </>
+      )}
     </Box>
   );
 };

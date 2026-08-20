@@ -17,7 +17,7 @@ import {
   Visibility,
 } from "@mui/icons-material";
 import Layout from "../../../components/Layout";
-import type { Factura } from "../../../types/factura";
+import type { Factura, FacturaArchivo } from "../../../types/factura";
 import { useFacturas } from "../../../hooks/useFacturas";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
 import DeleteFacturaModal from "../../../components/Modals/DeleteFacturaModal";
@@ -34,7 +34,13 @@ import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsoc
 import { isXmlUiEnabled } from "../../../config/featureFlags";
 
 const FacturaDetail = () => {
-  const { getFacturaById, loading, refreshFactura } = useFacturas();
+  const {
+    getFacturaById,
+    loading,
+    refreshFactura,
+    uploadFacturaArchivo,
+    deleteFacturaArchivo,
+  } = useFacturas();
   const { currentRole } = useAuthStore();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -404,6 +410,26 @@ const FacturaDetail = () => {
           {/* Documentos Asociados */}
           <DocumentosAsociadosCard
             factura={factura}
+            adjuntos={factura.archivos ?? []}
+            onAdjuntosChange={(files) =>
+              setFactura((prev) => (prev ? { ...prev, archivos: files } : prev))
+            }
+            onUploadAdjunto={async (payload) => {
+              const uploaded = await uploadFacturaArchivo(factura.id, payload);
+              if (uploaded?.id) return uploaded;
+              const refreshed = await refreshFactura(factura.id);
+              const match = (refreshed.archivos ?? []).find(
+                (archivo: FacturaArchivo) =>
+                  archivo.nombreArchivo === payload.nombreArchivo,
+              );
+              if (!match) {
+                throw new Error("No se pudo confirmar el archivo subido");
+              }
+              return match;
+            }}
+            onDeleteAdjunto={(archivoId) =>
+              deleteFacturaArchivo(factura.id, archivoId)
+            }
             onDownloadPdf={handleDescargarPdf}
             {...(showXmlUi
               ? {

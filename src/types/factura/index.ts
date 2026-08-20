@@ -2,10 +2,19 @@ import type { Empresa } from "../empresa";
 import type { Factoring } from "../factoring";
 import type { Oferta } from "../oferta";
 
-
-
 interface VisibilidadDetalle {
     factorings: Factoring[];
+}
+
+export interface FacturaArchivo {
+    id: string;
+    facturaId: string;
+    nombreArchivo: string;
+    urlArchivo: string;
+    signedUrl: string;
+    mimeType: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface Factura {
@@ -41,6 +50,7 @@ export interface Factura {
     numeroOfertasRecibidas?: number;
     historyOfertas?: Oferta[];
     factoringIsOfertme?: string;
-    ofertaFactoring?: Oferta
+    ofertaFactoring?: Oferta;
     pdfContentBase64?: string;
+    archivos?: FacturaArchivo[];
 }
