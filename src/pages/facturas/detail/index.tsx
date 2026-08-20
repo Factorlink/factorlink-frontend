@@ -416,6 +416,7 @@ const FacturaDetail = () => {
           {/* Acciones */}
           <Box
             sx={{
+              gridColumn: { md: "2" },
               backgroundColor: "var(--color-bg-default-primary)",
               borderRadius: 3,
               p: 3,

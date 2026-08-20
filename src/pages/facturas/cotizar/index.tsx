@@ -36,6 +36,7 @@ import { useFactoring } from "../../../hooks/useFactoring";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
 import ObtenerFacturaSiiModal from "../../../components/Modals/ObtenerFacturaSiiModal";
 import FacturaEnviadaCotizarModal from "../../../components/Modals/FacturaEnviadaCotizarModal";
+import SiiPersonalSyncPromptModal from "../../../components/Modals/SiiPersonalSyncPromptModal";
 import FacturaResumenCard, {
   formatCurrency,
 } from "../../../components/Facturas/FacturaResumenCard";
@@ -50,6 +51,7 @@ import {
   hasFacturaPdf,
   shouldBlockForMissingXml,
 } from "../../../utils/facturaDocuments";
+import useAuthStore from "../../../store/authStore";
 
 const truncateToTwo = (num: number): number => {
   return Math.round(num * 100) / 100;
@@ -68,6 +70,7 @@ const CotizarFactura = () => {
     fetchXMLContent,
   } = useFacturas();
   const { getAllFactorings, loading: loadingFactorings } = useFactoring();
+  const { currentRole } = useAuthStore();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -86,6 +89,7 @@ const CotizarFactura = () => {
   const [submitting, setSubmitting] = useState(false);
   const [adjuntos, setAdjuntos] = useState<FacturaAdjuntoPendiente[]>([]);
   const [pdfGate, setPdfGate] = useState<"loading" | "error" | "ready">("loading");
+  const [needsPersonalSii, setNeedsPersonalSii] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
 
   const applyFacturaData = (data: Factura) => {
@@ -130,6 +134,7 @@ const CotizarFactura = () => {
   const prepareCotizar = useCallback(async () => {
     if (!id) return;
     setPdfGate("loading");
+    setNeedsPersonalSii(false);
     setError(null);
     try {
       const data = await getFacturaById(id);
@@ -139,12 +144,16 @@ const CotizarFactura = () => {
         return;
       }
       applyFacturaData(data);
+      if (!Boolean(currentRole?.empresa?.siiRutPersonal)) {
+        setNeedsPersonalSii(true);
+        return;
+      }
       await obtainPdfFromSii();
     } catch (err) {
       console.error("Error fetching factura:", err);
       setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
     }
-  }, [id, obtainPdfFromSii]);
+  }, [id, obtainPdfFromSii, currentRole?.empresa?.siiRutPersonal]);
 
   useEffect(() => {
     if (id) {
@@ -717,10 +726,18 @@ const CotizarFactura = () => {
         )}
 
         <ObtenerFacturaSiiModal
-          open={pdfGate === "loading" || pdfGate === "error"}
+          open={
+            !needsPersonalSii &&
+            (pdfGate === "loading" || pdfGate === "error")
+          }
           status={pdfGate === "error" ? "error" : "loading"}
           onRetry={obtainPdfFromSii}
           onCancel={handleCancelPdfGate}
+        />
+
+        <SiiPersonalSyncPromptModal
+          open={needsPersonalSii}
+          onClose={handleCancelPdfGate}
         />
 
         <FacturaEnviadaCotizarModal
