@@ -1,14 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
   Button,
   CircularProgress,
   IconButton,
-  Stepper,
-  Step,
-  StepLabel,
   TextField,
   Slider,
   Alert,
@@ -26,9 +23,9 @@ import {
   Description,
   ArrowBack,
   ErrorOutline,
-  CheckCircle,
   Send,
   Check,
+  RequestQuote,
   Visibility,
 } from "@mui/icons-material";
 import Layout from "../../../components/Layout";
@@ -37,24 +34,22 @@ import type { Factoring } from "../../../types/factoring";
 import { useFacturas } from "../../../hooks/useFacturas";
 import { useFactoring } from "../../../hooks/useFactoring";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
+import ObtenerFacturaSiiModal from "../../../components/Modals/ObtenerFacturaSiiModal";
+import FacturaEnviadaCotizarModal from "../../../components/Modals/FacturaEnviadaCotizarModal";
 import FacturaResumenCard, {
   formatCurrency,
 } from "../../../components/Facturas/FacturaResumenCard";
-import FactoringsList from "../../../components/Facturas/FactoringsList";
-import UploadPdfModal from "../../../components/Modals/UploadPdfModal";
 import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
+import AdjuntarDocumentosAdicionalesCard, {
+  type FacturaAdjuntoPendiente,
+} from "../../../components/Facturas/AdjuntarDocumentosAdicionalesCard";
+import SectionPanel from "../../../components/SectionPanel";
 import { appContentSx } from "../../../theme/layoutStyles";
 import { isXmlUiEnabled } from "../../../config/featureFlags";
 import {
   hasFacturaPdf,
-  hasFacturaXml,
   shouldBlockForMissingXml,
 } from "../../../utils/facturaDocuments";
-
-const getCotizarSteps = () =>
-  isXmlUiEnabled()
-    ? ["Resumen Factura", "XML + Condiciones", "Resumen Final"]
-    : ["Resumen Factura", "Documentos + Condiciones", "Resumen Final"];
 
 const truncateToTwo = (num: number): number => {
   return Math.round(num * 100) / 100;
@@ -68,8 +63,9 @@ const CotizarFactura = () => {
     getFacturaById,
     updateFactura,
     sendToMarketplace,
+    uploadFacturaArchivo,
     refreshFactura,
-    loading,
+    fetchXMLContent,
   } = useFacturas();
   const { getAllFactorings, loading: loadingFactorings } = useFactoring();
   const { id } = useParams();
@@ -78,46 +74,49 @@ const CotizarFactura = () => {
   const [factura, setFactura] = useState<Factura | null>(null);
   const [factorings, setFactorings] = useState<Factoring[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [activeStep, setActiveStep] = useState(0);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
-  const [uploadPdfModalOpen, setUploadPdfModalOpen] = useState(false);
 
-  // Step 2 Form State
   const [montoFinanciar, setMontoFinanciar] = useState<number>(100);
   const [plazo, setPlazo] = useState<number>(1);
-  const [step2Error, setStep2Error] = useState<string | null>(null);
-  const [step2Success, setStep2Success] = useState<string | null>(null);
-  const [savingStep2, setSavingStep2] = useState(false);
-
-  // Step 3 State
   const [visibilidad, setVisibilidad] = useState<"TODOS" | "SELECCIONADOS">(
     "TODOS",
   );
   const [selectedFactorings, setSelectedFactorings] = useState<string[]>([]);
-  const [step3Error, setStep3Error] = useState<string | null>(null);
-  const [sendingToMarketplace, setSendingToMarketplace] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [adjuntos, setAdjuntos] = useState<FacturaAdjuntoPendiente[]>([]);
+  const [pdfGate, setPdfGate] = useState<"loading" | "error" | "ready">("loading");
+  const [successOpen, setSuccessOpen] = useState(false);
 
-  const fetchFactura = async () => {
-    try {
-      setError(null);
-      const data = await getFacturaById(id!);
-      setFactura(data);
-
-      // Initialize form values from factura
-      if (data.montoTotal) {
-        const percentage = data.montoFinanciar
-          ? (parseFloat(data.montoFinanciar) / parseFloat(data.montoTotal)) * 100
-          : 100;
-        setMontoFinanciar(truncateToTwo(percentage));
-      }
-      if (data.plazo) {
-        setPlazo(data.plazo);
-      }
-    } catch (err) {
-      console.error("Error fetching factura:", err);
-      setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
+  const applyFacturaData = (data: Factura) => {
+    setFactura(data);
+    if (data.montoTotal) {
+      const percentage = data.montoFinanciar
+        ? (parseFloat(data.montoFinanciar) / parseFloat(data.montoTotal)) * 100
+        : 100;
+      setMontoFinanciar(truncateToTwo(percentage));
+    }
+    if (data.plazo) {
+      setPlazo(data.plazo);
     }
   };
+
+  const obtainPdfFromSii = useCallback(async () => {
+    if (!id) return;
+    setPdfGate("loading");
+    try {
+      const fetched = await fetchXMLContent(id);
+      if (!hasFacturaPdf(fetched)) {
+        setPdfGate("error");
+        return;
+      }
+      applyFacturaData(fetched);
+      setPdfGate("ready");
+    } catch (err) {
+      console.error("Error fetching PDF from SII:", err);
+      setPdfGate("error");
+    }
+  }, [id]);
 
   const fetchFactorings = async () => {
     try {
@@ -128,34 +127,34 @@ const CotizarFactura = () => {
     }
   };
 
+  const prepareCotizar = useCallback(async () => {
+    if (!id) return;
+    setPdfGate("loading");
+    setError(null);
+    try {
+      const data = await getFacturaById(id);
+      if (hasFacturaPdf(data)) {
+        applyFacturaData(data);
+        setPdfGate("ready");
+        return;
+      }
+      applyFacturaData(data);
+      await obtainPdfFromSii();
+    } catch (err) {
+      console.error("Error fetching factura:", err);
+      setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
+    }
+  }, [id, obtainPdfFromSii]);
+
   useEffect(() => {
     if (id) {
-      fetchFactura();
-      fetchFactorings();
+      void prepareCotizar();
+      void fetchFactorings();
     }
-  }, [id]);
+  }, [id, prepareCotizar]);
 
   const handleBack = () => {
     navigate(-1);
-  };
-
-  const handleNext = () => {
-    if (activeStep === 0) {
-      setActiveStep(1);
-    } else if (activeStep === 1) {
-      // Validate visibility selection before saving
-      if (visibilidad === "SELECCIONADOS" && selectedFactorings.length === 0) {
-        setStep2Error("Debe seleccionar al menos un Factoring");
-        return;
-      }
-      handleSaveStep2();
-    }
-  };
-
-  const handlePrevious = () => {
-    if (activeStep > 0) {
-      setActiveStep(activeStep - 1);
-    }
   };
 
   const handleUploadXmlSuccess = async () => {
@@ -203,16 +202,6 @@ const CotizarFactura = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleUploadPdfSuccess = async () => {
-    try {
-      const data = await refreshFactura(id!);
-      setFactura(data);
-    } catch (err) {
-      console.error("Error refreshing factura:", err);
-    }
-  };
-
-  // Validations for Step 2
   const validateXmlMatch = () => {
     if (shouldBlockForMissingXml(factura)) {
       return {
@@ -253,55 +242,47 @@ const CotizarFactura = () => {
     return { valid: true, message: "" };
   };
 
-  const isStep2Valid = () => {
+  const getValidationError = () => {
     const xmlValidation = validateXmlMatch();
+    if (!xmlValidation.valid) return xmlValidation.message;
+
     const pdfValidation = validatePdfUploaded();
+    if (!pdfValidation.valid) return pdfValidation.message;
+
     const montoValidation = validateMontoFinanciar();
+    if (!montoValidation.valid) return montoValidation.message;
+
     const plazoValidation = validatePlazo();
-    const visibilidadValid =
-      visibilidad === "TODOS" || selectedFactorings.length > 0;
-    return (
-      xmlValidation.valid &&
-      pdfValidation.valid &&
-      montoValidation.valid &&
-      plazoValidation.valid &&
-      visibilidadValid
-    );
+    if (!plazoValidation.valid) return plazoValidation.message;
+
+    if (visibilidad === "SELECCIONADOS" && selectedFactorings.length === 0) {
+      return "Debe seleccionar al menos un Factoring";
+    }
+
+    return null;
   };
 
-  const handleSaveStep2 = async () => {
+  const handleEnviarACotizar = async () => {
     if (!factura) return;
 
-    setStep2Error(null);
-    setStep2Success(null);
-
-    // Validate all
-    const xmlValidation = validateXmlMatch();
-    if (!xmlValidation.valid) {
-      setStep2Error(xmlValidation.message);
-      return;
-    }
-
-    const pdfValidation = validatePdfUploaded();
-    if (!pdfValidation.valid) {
-      setStep2Error(pdfValidation.message);
-      return;
-    }
-
-    const montoValidation = validateMontoFinanciar();
-    if (!montoValidation.valid) {
-      setStep2Error(montoValidation.message);
-      return;
-    }
-
-    const plazoValidation = validatePlazo();
-    if (!plazoValidation.valid) {
-      setStep2Error(plazoValidation.message);
+    const validationError = getValidationError();
+    if (validationError) {
+      setSubmitError(validationError);
       return;
     }
 
     try {
-      setSavingStep2(true);
+      setSubmitting(true);
+      setSubmitError(null);
+
+      for (const adjunto of adjuntos) {
+        await uploadFacturaArchivo(id!, {
+          nombreArchivo: adjunto.nombreArchivo,
+          archivoBase64: adjunto.archivoBase64,
+          mimeType: adjunto.mimeType,
+        });
+      }
+
       const calculatedMontoFinanciar = Math.trunc(
         (parseFloat(factura.montoTotal) * montoFinanciar) / 100,
       );
@@ -311,76 +292,36 @@ const CotizarFactura = () => {
         montoFinanciar: calculatedMontoFinanciar,
       });
 
-      // Refresh factura to get updated values
-      const updatedFactura = await refreshFactura(id!);
-      setFactura(updatedFactura);
-
-      setStep2Success("Condiciones guardadas correctamente");
-      setActiveStep(2);
-    } catch (err) {
-      console.error("Error updating factura:", err);
-      setStep2Error("Error al guardar las condiciones. Intente nuevamente.");
-    } finally {
-      setSavingStep2(false);
-    }
-  };
-
-  const handleSendToMarketplace = async () => {
-    if (!factura) return;
-
-    setStep3Error(null);
-
-    if (visibilidad === "SELECCIONADOS" && selectedFactorings.length === 0) {
-      setStep3Error("Debe seleccionar al menos un Factoring");
-      return;
-    }
-
-    try {
-      setSendingToMarketplace(true);
       await sendToMarketplace(id!, {
         visibilidad,
         factoringIds: visibilidad === "TODOS" ? [] : selectedFactorings,
       });
 
-      navigate("/facturas", {
-        state: { successMessage: "Factura enviada a cotizar exitosamente" },
-      });
+      setSuccessOpen(true);
     } catch (err) {
-      console.error("Error sending to marketplace:", err);
-      setStep3Error("Error al enviar a cotizar. Intente nuevamente.");
+      console.error("Error sending factura to marketplace:", err);
+      setSubmitError(
+        adjuntos.length > 0
+          ? "Error al subir documentos o enviar a cotizar. Intente nuevamente."
+          : "Error al enviar a cotizar. Intente nuevamente.",
+      );
     } finally {
-      setSendingToMarketplace(false);
+      setSubmitting(false);
     }
+  };
+
+  const handleCancelPdfGate = () => {
+    navigate(`/facturas/${id}`);
+  };
+
+  const handleGoToFacturas = () => {
+    navigate("/facturas");
   };
 
   const calculatedMontoFinanciar = factura
     ? Math.round((parseFloat(factura.montoTotal) * montoFinanciar) / 100)
     : 0;
 
-  // Loading state
-  if (loading && !factura) {
-    return (
-      <Layout>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "60vh",
-            gap: 2,
-          }}
-        >
-          <CircularProgress sx={{ color: "var(--color-fg-accent-primary)" }} />
-          <Typography variant="body1" sx={{ color: "var(--color-fg-default-secondary)" }}>
-            Cargando factura...
-          </Typography>
-        </Box>
-      </Layout>
-    );
-  }
-
-  // Error state
   if (error) {
     return (
       <Layout>
@@ -424,7 +365,7 @@ const CotizarFactura = () => {
     );
   }
 
-  if (!factura) {
+  if (pdfGate === "ready" && !factura) {
     return (
       <Layout>
         <Box sx={appContentSx}>
@@ -451,14 +392,12 @@ const CotizarFactura = () => {
     );
   }
 
-  const showSolicitudFields = factura.estado?.toLowerCase() !== "cargada";
-  const steps = getCotizarSteps();
   const showXmlUi = isXmlUiEnabled();
+  const showForm = pdfGate === "ready" && Boolean(factura);
 
   return (
     <Layout>
       <Box sx={appContentSx}>
-        {/* Back Button */}
         <Box sx={{ mb: 2 }}>
           <Button
             startIcon={<ArrowBack />}
@@ -473,651 +412,324 @@ const CotizarFactura = () => {
           </Button>
         </Box>
 
-        {/* Header with Title */}
-        <Box
-          sx={{
-            backgroundColor: "var(--color-bg-default-primary)",
-            borderRadius: 3,
-            p: 3,
-            mb: 3,
-            boxShadow: "var(--shadow-popover)",
-          }}
-        >
+        <Box sx={{ mb: 3 }}>
           <Typography
             variant="h5"
-            sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)", mb: 3 }}
+            sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)", mb: 0.5 }}
           >
-            Cotizar Factura #{factura.folio}
+            Cotizar Factura
           </Typography>
+          <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
+            Completa la información para enviar esta factura a cotizar.
+          </Typography>
+        </Box>
 
-          {/* Stepper */}
-          <Stepper
-            activeStep={activeStep}
-            alternativeLabel
+        {showForm && factura && (
+          <>
+        <FacturaResumenCard factura={factura} showSolicitudFields={false} />
+
+        <Box sx={{ mb: 3 }}>
+          <DocumentosAsociadosCard
+            factura={factura}
+            onDownloadPdf={handleDownloadPdf}
+            {...(showXmlUi
+              ? {
+                  onUploadXmlClick: () => setUploadXmlModalOpen(true),
+                  onDownloadXml: handleDownloadXml,
+                }
+              : {})}
+          />
+        </Box>
+
+        <AdjuntarDocumentosAdicionalesCard
+          files={adjuntos}
+          onChange={setAdjuntos}
+          disabled={submitting}
+        />
+
+        <SectionPanel
+          title="Condiciones de financiamiento"
+          subtitle="Define el monto y el plazo de la solicitud"
+          icon={<RequestQuote sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />}
+        >
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}
+            >
+              Monto a Financiar: {truncateToTwo(montoFinanciar)}%
+            </Typography>
+            <Slider
+              value={montoFinanciar}
+              onChange={(_, value) => setMontoFinanciar(value as number)}
+              min={1}
+              max={100}
+              step={1}
+              valueLabelDisplay="auto"
+              valueLabelFormat={(value) => `${truncateToTwo(value)}%`}
+              sx={{
+                color: "var(--color-fg-accent-primary)",
+                "& .MuiSlider-thumb": {
+                  backgroundColor: "var(--color-bg-accent-primary)",
+                },
+                "& .MuiSlider-track": {
+                  backgroundColor: "var(--color-bg-accent-primary)",
+                },
+              }}
+            />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mt: 1,
+              }}
+            >
+              <Typography variant="caption" sx={{ color: "var(--color-fg-default-tertiary)" }}>
+                Monto Total: {formatCurrency(factura.montoTotal)}
+              </Typography>
+              <Chip
+                label={`A Financiar: ${formatCurrency(calculatedMontoFinanciar)}`}
+                sx={{
+                  backgroundColor: "var(--color-bg-success-secondary)",
+                  color: "var(--color-fg-success-primary)",
+                  fontWeight: 600,
+                }}
+              />
+            </Box>
+          </Box>
+
+          <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}
+            >
+              Plazo (días)
+            </Typography>
+            <TextField
+              value={plazo === 0 ? "" : plazo}
+              onChange={(e) => {
+                const value = e.target.value;
+                const onlyNums = value.replace(/[^0-9]/g, "");
+                if (onlyNums.startsWith("0") || onlyNums.length > 3) {
+                  return;
+                }
+                setPlazo(onlyNums === "" ? 0 : Number(onlyNums));
+              }}
+              fullWidth
+              size="small"
+              error={plazo > 180}
+              helperText={
+                plazo > 180
+                  ? "El plazo máximo es de 180 días"
+                  : `Mínimo ${MIN_PLAZO} día, Máximo ${MAX_PLAZO} días`
+              }
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
+                    borderColor: plazo > 180 ? "var(--color-border-danger-secondary)" : "var(--color-border-accent-primary)",
+                  },
+                },
+              }}
+            />
+          </Box>
+        </SectionPanel>
+
+        <SectionPanel
+          title="Visibilidad en Marketplace"
+          subtitle="¿Quién puede ver esta factura?"
+          icon={<Visibility sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />}
+        >
+          <FormControl component="fieldset">
+            <FormLabel component="legend" sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}>
+              ¿Quién puede ver esta factura?
+            </FormLabel>
+            <RadioGroup
+              value={visibilidad}
+              onChange={(e) =>
+                setVisibilidad(e.target.value as "TODOS" | "SELECCIONADOS")
+              }
+            >
+              <FormControlLabel
+                value="TODOS"
+                control={
+                  <Radio
+                    sx={{
+                      color: "var(--color-fg-default-secondary)",
+                      "&.Mui-checked": { color: "var(--color-fg-accent-primary)" },
+                    }}
+                  />
+                }
+                label="Todos los Factorings"
+              />
+              <FormControlLabel
+                value="SELECCIONADOS"
+                control={
+                  <Radio
+                    sx={{
+                      color: "var(--color-fg-default-secondary)",
+                      "&.Mui-checked": { color: "var(--color-fg-accent-primary)" },
+                    }}
+                  />
+                }
+                label="Solo Factorings seleccionados"
+              />
+            </RadioGroup>
+          </FormControl>
+
+          {visibilidad === "SELECCIONADOS" && (
+            <Box sx={{ maxWidth: 500 }}>
+              <FormControl fullWidth sx={{ mt: 2 }}>
+                <InputLabel>Seleccionar Factorings</InputLabel>
+                <Select
+                  multiple
+                  value={selectedFactorings}
+                  onChange={(e) =>
+                    setSelectedFactorings(e.target.value as string[])
+                  }
+                  label="Seleccionar Factorings"
+                  renderValue={(selected) => (
+                    <Box
+                      sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
+                    >
+                      {selected.map((value) => {
+                        const factoring = factorings.find(
+                          (f) => f.id === value,
+                        );
+                        return (
+                          <Chip
+                            key={value}
+                            label={factoring?.razonSocial || value}
+                            size="small"
+                            sx={{
+                              backgroundColor: "var(--color-bg-accent-secondary)",
+                              color: "var(--color-fg-accent-primary)",
+                              fontWeight: 500,
+                            }}
+                          />
+                        );
+                      })}
+                    </Box>
+                  )}
+                  disabled={loadingFactorings}
+                >
+                  {factorings.map((factoring) => {
+                    const isSelected = selectedFactorings.includes(
+                      factoring.id!,
+                    );
+                    return (
+                      <MenuItem
+                        key={factoring.id}
+                        value={factoring.id}
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          backgroundColor: isSelected
+                            ? "var(--color-bg-accent-secondary)"
+                            : "transparent",
+                          "&:hover": {
+                            backgroundColor: isSelected
+                              ? "var(--color-bg-accent-secondary-hover)"
+                              : undefined,
+                          },
+                        }}
+                      >
+                        <span>
+                          {factoring.razonSocial} - {factoring.rut}
+                        </span>
+                        {isSelected && (
+                          <Check
+                            sx={{ color: "var(--color-fg-accent-primary)", ml: 1, fontSize: 20 }}
+                          />
+                        )}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
+        </SectionPanel>
+
+        {submitError && (
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+            onClose={() => setSubmitError(null)}
+          >
+            {submitError}
+          </Alert>
+        )}
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mt: 1,
+            mb: 3,
+          }}
+        >
+          <Button
+            variant="outlined"
+            onClick={handleBack}
             sx={{
-              "& .MuiStepLabel-root .Mui-active .MuiStepIcon-text": {
-                fill: "var(--color-fg-on-accent-primary)",
+              borderColor: "var(--color-fg-default-secondary)",
+              color: "var(--color-fg-default-secondary)",
+              textTransform: "none",
+              fontWeight: 600,
+              px: 4,
+              py: 1.5,
+              "&:hover": {
+                borderColor: "var(--color-fg-default-primary)",
+                backgroundColor: "var(--color-bg-default-tertiary)",
               },
             }}
           >
-            {steps.map((label, index) => (
-              <Step key={label} completed={index < activeStep}>
-                <StepLabel
-                  sx={{
-                    "& .MuiStepLabel-label": {
-                      fontWeight: index === activeStep ? 600 : 400,
-                      color: index === activeStep ? "var(--color-fg-accent-primary)" : "var(--color-fg-default-secondary)",
-                    },
-                    "& .MuiStepIcon-root": {
-                      color: index <= activeStep ? "var(--color-fg-accent-primary)" : "var(--color-fg-default-tertiary)",
-                      "&.Mui-completed": { color: "var(--color-fg-success-primary)" },
-                      "&.Mui-active": { color: "var(--color-fg-accent-primary)" },
-                    },
-                  }}
-                >
-                  {label}
-                </StepLabel>
-              </Step>
-            ))}
-          </Stepper>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<Send />}
+            onClick={handleEnviarACotizar}
+            disabled={Boolean(getValidationError()) || submitting}
+            sx={{
+              backgroundColor: "var(--color-bg-accent-primary)",
+              "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
+              "&:disabled": {
+                backgroundColor: "var(--color-bg-disabled-primary)",
+              },
+              textTransform: "none",
+              fontWeight: 600,
+              px: 4,
+              py: 1.5,
+              color: "var(--color-fg-on-accent-primary)",
+            }}
+          >
+            {submitting ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Enviar a cotizar"
+            )}
+          </Button>
         </Box>
-
-        {/* Step Content */}
-        {activeStep === 0 && (
-          <>
-            <FacturaResumenCard
-              factura={factura}
-              showSolicitudFields={showSolicitudFields}
-            />
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-              <Button
-                variant="contained"
-                onClick={handleNext}
-                sx={{
-                  backgroundColor: "var(--color-bg-accent-primary)",
-                  "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 4,
-                  py: 1.5,
-                  color: "var(--color-fg-on-accent-primary)",
-                }}
-              >
-                Continuar
-              </Button>
-            </Box>
           </>
         )}
 
-        {activeStep === 1 && (
-          <>
-            {/* Documentos Asociados */}
-            <DocumentosAsociadosCard
-              factura={factura}
-              onUploadPdfClick={() => setUploadPdfModalOpen(true)}
-              onDownloadPdf={handleDownloadPdf}
-              onFetchSiiSuccess={(data) => setFactura(data)}
-              {...(showXmlUi
-                ? {
-                    onUploadXmlClick: () => setUploadXmlModalOpen(true),
-                    onDownloadXml: handleDownloadXml,
-                  }
-                : {})}
-            />
+        <ObtenerFacturaSiiModal
+          open={pdfGate === "loading" || pdfGate === "error"}
+          status={pdfGate === "error" ? "error" : "loading"}
+          onRetry={obtainPdfFromSii}
+          onCancel={handleCancelPdfGate}
+        />
 
-            {/* Conditions Card */}
-            <Box
-              sx={{
-                backgroundColor: "var(--color-bg-default-primary)",
-                borderRadius: 3,
-                p: 3,
-                mt: 3,
-                boxShadow: "var(--shadow-popover)",
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 3 }}
-              >
-                Condiciones de Financiamiento
-              </Typography>
-
-              {step2Error && (
-                <Alert
-                  severity="error"
-                  sx={{ mb: 3 }}
-                  onClose={() => setStep2Error(null)}
-                >
-                  {step2Error}
-                </Alert>
-              )}
-
-              {step2Success && (
-                <Alert
-                  severity="success"
-                  sx={{ mb: 3 }}
-                  onClose={() => setStep2Success(null)}
-                >
-                  {step2Success}
-                </Alert>
-              )}
-
-              {/* Monto a Financiar */}
-              <Box sx={{ mb: 4 }}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}
-                >
-                  Monto a Financiar: {truncateToTwo(montoFinanciar)}%
-                </Typography>
-                <Slider
-                  value={montoFinanciar}
-                  onChange={(_, value) => setMontoFinanciar(value as number)}
-                  min={1}
-                  max={100}
-                  step={1}
-                  valueLabelDisplay="auto"
-                  valueLabelFormat={(value) => `${truncateToTwo(value)}%`}
-                  sx={{
-                    color: "var(--color-fg-accent-primary)",
-                    "& .MuiSlider-thumb": {
-                      backgroundColor: "var(--color-bg-accent-primary)",
-                    },
-                    "& .MuiSlider-track": {
-                      backgroundColor: "var(--color-bg-accent-primary)",
-                    },
-                  }}
-                />
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mt: 1,
-                  }}
-                >
-                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-tertiary)" }}>
-                    Monto Total: {formatCurrency(factura.montoTotal)}
-                  </Typography>
-                  <Chip
-                    label={`A Financiar: ${formatCurrency(calculatedMontoFinanciar)}`}
-                    sx={{
-                      backgroundColor: "var(--color-bg-success-secondary)",
-                      color: "var(--color-fg-success-primary)",
-                      fontWeight: 600,
-                    }}
-                  />
-                </Box>
-              </Box>
-
-              {/* Plazo */}
-              <Box>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}
-                >
-                  Plazo (días)
-                </Typography>
-                <TextField
-                  value={plazo === 0 ? "" : plazo}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Solo permitir dígitos
-                    const onlyNums = value.replace(/[^0-9]/g, "");
-                    // No permitir que empiece con 0 y limitar a 3 caracteres
-                    if (onlyNums.startsWith("0") || onlyNums.length > 3) {
-                      return;
-                    }
-                    setPlazo(onlyNums === "" ? 0 : Number(onlyNums));
-                  }}
-                  fullWidth
-                  size="small"
-                  error={plazo > 180}
-                  helperText={
-                    plazo > 180
-                      ? "El plazo máximo es de 180 días"
-                      : `Mínimo ${MIN_PLAZO} día, Máximo ${MAX_PLAZO} días`
-                  }
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "&.Mui-focused fieldset": {
-                        borderColor: plazo > 180 ? "var(--color-border-danger-secondary)" : "var(--color-border-accent-primary)",
-                      },
-                    },
-                  }}
-                />
-              </Box>
-            </Box>
-
-            {/* Visibility Selection Card */}
-            <Box
-              sx={{
-                backgroundColor: "var(--color-bg-default-primary)",
-                borderRadius: 3,
-                p: 3,
-                mt: 3,
-                boxShadow: "var(--shadow-popover)",
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 2 }}
-              >
-                Visibilidad en Marketplace
-              </Typography>
-
-              <FormControl component="fieldset">
-                <FormLabel component="legend" sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}>
-                  ¿Quién puede ver esta factura?
-                </FormLabel>
-                <RadioGroup
-                  value={visibilidad}
-                  onChange={(e) =>
-                    setVisibilidad(e.target.value as "TODOS" | "SELECCIONADOS")
-                  }
-                >
-                  <FormControlLabel
-                    value="TODOS"
-                    control={
-                      <Radio
-                        sx={{
-                          color: "var(--color-fg-default-secondary)",
-                          "&.Mui-checked": { color: "var(--color-fg-accent-primary)" },
-                        }}
-                      />
-                    }
-                    label="Todos los Factorings"
-                  />
-                  <FormControlLabel
-                    value="SELECCIONADOS"
-                    control={
-                      <Radio
-                        sx={{
-                          color: "var(--color-fg-default-secondary)",
-                          "&.Mui-checked": { color: "var(--color-fg-accent-primary)" },
-                        }}
-                      />
-                    }
-                    label="Solo Factorings seleccionados"
-                  />
-                </RadioGroup>
-              </FormControl>
-
-              {visibilidad === "SELECCIONADOS" && (
-                <Box sx={{ maxWidth: 500 }}>
-                  <FormControl fullWidth sx={{ mt: 2 }}>
-                    <InputLabel>Seleccionar Factorings</InputLabel>
-                    <Select
-                      multiple
-                      value={selectedFactorings}
-                      onChange={(e) =>
-                        setSelectedFactorings(e.target.value as string[])
-                      }
-                      label="Seleccionar Factorings"
-                      renderValue={(selected) => (
-                        <Box
-                          sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
-                        >
-                          {selected.map((value) => {
-                            const factoring = factorings.find(
-                              (f) => f.id === value,
-                            );
-                            return (
-                              <Chip
-                                key={value}
-                                label={factoring?.razonSocial || value}
-                                size="small"
-                                sx={{
-                                  backgroundColor: "var(--color-bg-accent-secondary)",
-                                  color: "var(--color-fg-accent-primary)",
-                                  fontWeight: 500,
-                                }}
-                              />
-                            );
-                          })}
-                        </Box>
-                      )}
-                      disabled={loadingFactorings}
-                    >
-                      {factorings.map((factoring) => {
-                        const isSelected = selectedFactorings.includes(
-                          factoring.id!,
-                        );
-                        return (
-                          <MenuItem
-                            key={factoring.id}
-                            value={factoring.id}
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              backgroundColor: isSelected
-                                ? "var(--color-bg-accent-secondary)"
-                                : "transparent",
-                              "&:hover": {
-                                backgroundColor: isSelected
-                                  ? "var(--color-bg-accent-secondary-hover)"
-                                  : undefined,
-                              },
-                            }}
-                          >
-                            <span>
-                              {factoring.razonSocial} - {factoring.rut}
-                            </span>
-                            {isSelected && (
-                              <Check
-                                sx={{ color: "var(--color-fg-accent-primary)", ml: 1, fontSize: 20 }}
-                              />
-                            )}
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                  </FormControl>
-                </Box>
-              )}
-            </Box>
-
-            {/* Navigation Buttons */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                mt: 3,
-              }}
-            >
-              <Button
-                variant="outlined"
-                onClick={handlePrevious}
-                sx={{
-                  borderColor: "var(--color-fg-default-secondary)",
-                  color: "var(--color-fg-default-secondary)",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 4,
-                  py: 1.5,
-                  "&:hover": {
-                    borderColor: "var(--color-fg-default-primary)",
-                    backgroundColor: "var(--color-bg-default-tertiary)",
-                  },
-                }}
-              >
-                Anterior
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleNext}
-                disabled={!isStep2Valid() || savingStep2}
-                sx={{
-                  backgroundColor: "var(--color-bg-accent-primary)",
-                  "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
-                  "&:disabled": {
-                    backgroundColor: "var(--color-bg-disabled-primary)",
-                  },
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 4,
-                  py: 1.5,
-                  color: "var(--color-fg-on-accent-primary)",
-                }}
-              >
-                {savingStep2 ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "Continuar"
-                )}
-              </Button>
-            </Box>
-          </>
-        )}
-
-        {activeStep === 2 && (
-          <>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                gap: 3,
-              }}
-            >
-              {/* Summary Cards */}
-              <FacturaResumenCard
-                factura={factura}
-                showSolicitudFields={showSolicitudFields}
-              />
-
-            </Box>
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                gap: 3,
-              }}
-            >
-                {showXmlUi && hasFacturaXml(factura) && (
-                <Box
-                  sx={{
-                    backgroundColor: "var(--color-bg-default-primary)",
-                    borderRadius: 3,
-                    p: 3,
-                    mb: 3,
-                    boxShadow: "var(--shadow-popover)",
-                  }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <CheckCircle sx={{ color: "var(--color-fg-success-primary)", fontSize: 32 }} />
-                    <Box>
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
-                      >
-                        XML Validado
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                        {factura.facturaNameFile || "factura.xml"} - Documento
-                        verificado
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
-                )}
-
-                {/* PDF Validated Card */}
-                <Box
-                  sx={{
-                    backgroundColor: "var(--color-bg-default-primary)",
-                    borderRadius: 3,
-                    p: 3,
-                    mb: 3,
-                    boxShadow: "var(--shadow-popover)",
-                  }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <CheckCircle sx={{ color: "var(--color-fg-success-primary)", fontSize: 32 }} />
-                    <Box>
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
-                      >
-                        PDF Validado
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                        {factura.facturaNameFilePDF || "factura.pdf"} -
-                        Documento subido correctamente
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
-
-            {/* Financial Conditions Card */}
-            <Box
-              sx={{
-                backgroundColor: "var(--color-bg-default-primary)",
-                borderRadius: 3,
-                p: 3,
-                mb: 3,
-                boxShadow: "var(--shadow-popover)",
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 2 }}
-              >
-                Condiciones Financieras
-              </Typography>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                  gap: 2,
-                }}
-              >
-                <Box
-                  sx={{
-                    backgroundColor: "var(--color-bg-default-tertiary)",
-                    borderRadius: 2,
-                    p: 2,
-                  }}
-                >
-                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Monto a Financiar
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 700, color: "var(--color-fg-success-primary)" }}
-                  >
-                    {formatCurrency(factura.montoFinanciar)} (
-                    {truncateToTwo(montoFinanciar)}%)
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    backgroundColor: "var(--color-bg-default-tertiary)",
-                    borderRadius: 2,
-                    p: 2,
-                  }}
-                >
-                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Plazo
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
-                  >
-                    {factura.plazo} días
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-
-            {/* Visibility Summary Card */}
-            <Box
-              sx={{
-                backgroundColor: "var(--color-bg-default-primary)",
-                borderRadius: 3,
-                p: 3,
-                mb: 3,
-                boxShadow: "var(--shadow-popover)",
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)", mb: 2 }}
-              >
-                Visibilidad en Marketplace
-              </Typography>
-
-              {step3Error && (
-                <Alert
-                  severity="error"
-                  sx={{ mb: 3 }}
-                  onClose={() => setStep3Error(null)}
-                >
-                  {step3Error}
-                </Alert>
-              )}
-
-              {visibilidad === "TODOS" ? (
-                <Box
-                  sx={{
-                    backgroundColor: "var(--color-bg-success-secondary)",
-                    borderRadius: 2,
-                    p: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                  }}
-                >
-                  <Visibility sx={{ color: "var(--color-fg-success-primary)", fontSize: 20 }} />
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "var(--color-fg-success-primary)", fontWeight: 500 }}
-                  >
-                    Esta factura será visible para todos los factorings
-                    registrados en la plataforma.
-                  </Typography>
-                </Box>
-              ) : (
-                <FactoringsList
-                  factorings={factorings.filter((f) =>
-                    selectedFactorings.includes(f.id!),
-                  )}
-                />
-              )}
-            </Box>
-
-            {/* Navigation Buttons */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                mt: 3,
-              }}
-            >
-              <Button
-                variant="outlined"
-                onClick={handlePrevious}
-                sx={{
-                  borderColor: "var(--color-fg-default-secondary)",
-                  color: "var(--color-fg-default-secondary)",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 4,
-                  py: 1.5,
-                  "&:hover": {
-                    borderColor: "var(--color-fg-default-primary)",
-                    backgroundColor: "var(--color-bg-default-tertiary)",
-                  },
-                }}
-              >
-                Anterior
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<Send />}
-                onClick={handleSendToMarketplace}
-                disabled={sendingToMarketplace}
-                sx={{
-                  backgroundColor: "var(--color-bg-accent-primary)",
-                  "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 4,
-                  py: 1.5,
-                  color: "var(--color-fg-on-accent-primary)",
-                }}
-              >
-                {sendingToMarketplace ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "Enviar a Cotizar"
-                )}
-              </Button>
-            </Box>
-          </>
-        )}
+        <FacturaEnviadaCotizarModal
+          open={successOpen}
+          folio={factura?.folio ?? ""}
+          montoTotal={factura?.montoTotal ?? "0"}
+          visibilidad={visibilidad}
+          onGoToFacturas={handleGoToFacturas}
+        />
 
         {showXmlUi && (
           <UploadXmlModal
@@ -1127,14 +739,6 @@ const CotizarFactura = () => {
             facturaId={id || ""}
           />
         )}
-
-        {/* Upload PDF Modal */}
-        <UploadPdfModal
-          open={uploadPdfModalOpen}
-          onClose={() => setUploadPdfModalOpen(false)}
-          onSuccess={handleUploadPdfSuccess}
-          facturaId={id || ""}
-        />
       </Box>
     </Layout>
   );

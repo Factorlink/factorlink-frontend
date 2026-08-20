@@ -20,7 +20,6 @@ import Layout from "../../../components/Layout";
 import type { Factura } from "../../../types/factura";
 import { useFacturas } from "../../../hooks/useFacturas";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
-import UploadPdfModal from "../../../components/Modals/UploadPdfModal";
 import DeleteFacturaModal from "../../../components/Modals/DeleteFacturaModal";
 import RemoveMarketplaceModal from "../../../components/Modals/RemoveMarketplaceModal";
 import DocumentsRequiredModal from "../../../components/Modals/DocumentsRequiredModal";
@@ -46,7 +45,6 @@ const FacturaDetail = () => {
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
-  const [uploadPdfModalOpen, setUploadPdfModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] =
     useState(false);
@@ -147,22 +145,6 @@ const FacturaDetail = () => {
 
   const handleCloseUploadXmlModal = () => {
     setUploadXmlModalOpen(false);
-  };
-
-  const handleCloseUploadPdfModal = () => {
-    setUploadPdfModalOpen(false);
-  };
-
-  const handleUploadPdfSuccess = async () => {
-    try {
-      const data = await refreshFactura(id!);
-      setFactura(data);
-    } catch (err) {
-      console.error("Error refreshing factura:", err);
-      setError(
-        "No se pudo actualizar la factura. Por favor, intente nuevamente.",
-      );
-    }
   };
 
   const handleUploadXmlSuccess = async () => {
@@ -345,8 +327,7 @@ const FacturaDetail = () => {
         )}
 
         {/* Card: Visibilidad en Marketplace */}
-        {(factura.visibilidad === "TODOS" ||
-          factura.visibilidad === "SELECCIONADOS") && (
+        {isInMarketplace && (
           <Box
             sx={{
               backgroundColor: "var(--color-bg-default-primary)",
@@ -423,9 +404,7 @@ const FacturaDetail = () => {
           {/* Documentos Asociados */}
           <DocumentosAsociadosCard
             factura={factura}
-            onUploadPdfClick={() => setUploadPdfModalOpen(true)}
             onDownloadPdf={handleDescargarPdf}
-            onFetchSiiSuccess={(data) => setFactura(data)}
             {...(showXmlUi
               ? {
                   onUploadXmlClick: () => setUploadXmlModalOpen(true),
@@ -559,14 +538,6 @@ const FacturaDetail = () => {
             facturaId={id || ""}
           />
         )}
-
-        {/* Upload PDF Modal */}
-        <UploadPdfModal
-          open={uploadPdfModalOpen}
-          onClose={handleCloseUploadPdfModal}
-          onSuccess={handleUploadPdfSuccess}
-          facturaId={id || ""}
-        />
 
         {/* Delete Factura Modal */}
         {factura && (

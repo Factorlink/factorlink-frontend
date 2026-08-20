@@ -13,7 +13,6 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
@@ -69,23 +68,21 @@ const mapLoginError = (error: unknown): string => {
   return "Ocurrió un error. Intenta nuevamente";
 };
 
+const getPostAuthPath = (rolesLength: number) =>
+  rolesLength === 1 ? "/dashboard" : "/role-selection";
+
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalStatus, setModalStatus] = useState<"success" | "error">(
-    "success"
-  );
   const [errorMessage, setErrorMessage] = useState("");
   const { login, loading } = useAuth();
   const { accessToken, user } = useAuthStore();
 
-  // Redirigir si el usuario ya está autenticado
   useEffect(() => {
-    if (accessToken && !modalOpen) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [accessToken, navigate]);
+    if (!accessToken || !user) return;
+    navigate(getPostAuthPath(user.roles.length), { replace: true });
+  }, [accessToken, user, navigate]);
 
   const formik = useFormik({
     initialValues: {
@@ -104,13 +101,11 @@ const Login = () => {
           useAuthStore.getState().setCurrentRole(response.user.roles[0]);
         }
 
-        setModalStatus("success");
-        setModalOpen(true);
         useAuthStore.getState().setAccessToken(response.accessToken);
         useAuthStore.getState().setRefreshToken(response.refreshToken);
         useAuthStore.getState().setUser(response.user);
+        navigate(getPostAuthPath(response.user.roles.length), { replace: true });
       } catch (error: unknown) {
-        setModalStatus("error");
         setErrorMessage(mapLoginError(error));
         setModalOpen(true);
       }
@@ -119,13 +114,6 @@ const Login = () => {
 
   const handleCloseModal = () => {
     setModalOpen(false);
-    if (modalStatus === "success") {
-      if (user?.roles.length === 1) {
-        navigate("/dashboard");
-      } else {
-        navigate("/role-selection");
-      }
-    }
   };
 
   return (
@@ -259,41 +247,31 @@ const Login = () => {
               gap: 1,
             }}
           >
-            {modalStatus === "success" ? (
-              <CheckCircleOutlineIcon
-                sx={{ fontSize: 48, color: "var(--color-fg-success-primary)" }}
-              />
-            ) : (
-              <ErrorOutlineIcon
-                sx={{ fontSize: 48, color: "var(--color-fg-danger-primary)" }}
-              />
-            )}
+            <ErrorOutlineIcon
+              sx={{ fontSize: 48, color: "var(--color-fg-danger-primary)" }}
+            />
             <Typography
               variant="h6"
               component="span"
               sx={{ fontFamily: "var(--font-heading)", fontWeight: 500 }}
             >
-              {modalStatus === "success"
-                ? "¡Inicio de sesión exitoso!"
-                : "Error en el inicio de sesión"}
+              Error en el inicio de sesión
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent sx={{ textAlign: "center", py: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            {modalStatus === "success"
-              ? "Has iniciado sesión correctamente."
-              : errorMessage}
+            {errorMessage}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: "center", pt: 1, pb: 2 }}>
           <Button
             variant="contained"
-            color={modalStatus === "success" ? "primary" : "error"}
+            color="error"
             onClick={handleCloseModal}
             sx={{ px: 4 }}
           >
-            {modalStatus === "success" ? "Continuar" : "Cerrar"}
+            Cerrar
           </Button>
         </DialogActions>
       </Dialog>
