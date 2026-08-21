@@ -24,6 +24,7 @@ import {
   Tabs,
   Tab,
   Button,
+  Checkbox,
 } from "@mui/material";
 import {
   Description,
@@ -40,6 +41,7 @@ import OfertasFacturasTable from "../../components/Facturas/OfertasFacturasTable
 import CedidasFacturasTable from "../../components/Facturas/CedidasFacturasTable";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
+import BulkDeleteFacturasModal from "../../components/Modals/BulkDeleteFacturasModal";
 import RemoveMarketplaceModal from "../../components/Modals/RemoveMarketplaceModal";
 import DocumentsRequiredModal from "../../components/Modals/DocumentsRequiredModal";
 import StorefrontIcon from "@mui/icons-material/Storefront";
@@ -140,6 +142,8 @@ const Facturas = () => {
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
 
@@ -178,12 +182,22 @@ const Facturas = () => {
   };
 
   const handleDeleteSuccess = () => {
+    setSelectedIds([]);
     fetchFacturas(filters);
   };
 
   const handleCloseDeleteModal = () => {
     setDeleteModalOpen(false);
     setSelectedFactura(null);
+  };
+
+  const handleBulkDeleteSuccess = () => {
+    setSelectedIds([]);
+    fetchFacturas(filters);
+  };
+
+  const handleCloseBulkDeleteModal = () => {
+    setBulkDeleteModalOpen(false);
   };
 
   const handleRemoveMarketplaceSuccess = () => {
@@ -215,6 +229,39 @@ const Facturas = () => {
   const isCargada = (factura: Factura | null) => {
     if (!factura) return false;
     return factura.estado?.toLowerCase() === "cargada";
+  };
+
+  const selectableFacturas = facturas.filter((factura) => isCargada(factura));
+  const selectedFacturasForBulk = facturas.filter((factura) =>
+    selectedIds.includes(factura.id),
+  );
+  const allSelectableSelected =
+    selectableFacturas.length > 0 &&
+    selectableFacturas.every((factura) => selectedIds.includes(factura.id));
+  const someSelectableSelected =
+    selectableFacturas.some((factura) => selectedIds.includes(factura.id)) &&
+    !allSelectableSelected;
+
+  const handleToggleSelectAll = () => {
+    if (allSelectableSelected) {
+      setSelectedIds((prev) =>
+        prev.filter((id) => !selectableFacturas.some((factura) => factura.id === id)),
+      );
+      return;
+    }
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      selectableFacturas.forEach((factura) => next.add(factura.id));
+      return Array.from(next);
+    });
+  };
+
+  const handleToggleSelectFactura = (facturaId: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(facturaId)
+        ? prev.filter((id) => id !== facturaId)
+        : [...prev, facturaId],
+    );
   };
 
   const fetchFacturas = useCallback(
@@ -277,6 +324,7 @@ const Facturas = () => {
       // Always reset filters and meta when switching tabs
       const resetFilters = { ...INITIAL_FILTERS };
       setFilters(resetFilters);
+      setSelectedIds([]);
       // Reset meta to zeros - the active tab's component will update it via onMetaChange
       setMeta({
         lastPage: 1,
@@ -339,6 +387,7 @@ const Facturas = () => {
   };
 
   const handleApplyFilters = (newFilters: FacturasFiltersValues) => {
+    setSelectedIds([]);
     setFilters(newFilters);
     setMeta((prev) => ({ ...prev, page: 1 }));
     updateSearchParams(newFilters, 1, meta.limit);
@@ -346,6 +395,7 @@ const Facturas = () => {
   };
 
   const handleClearFilters = () => {
+    setSelectedIds([]);
     setFilters(INITIAL_FILTERS);
     setMeta((prev) => ({ ...prev, page: 1 }));
     updateSearchParams(INITIAL_FILTERS, 1, meta.limit);
@@ -375,6 +425,7 @@ const Facturas = () => {
     }
 
     const newFilters = { ...filters, sortBy: newSortBy, order: newOrder };
+    setSelectedIds([]);
     setFilters(newFilters);
     updateSearchParams(newFilters, meta.page, meta.limit);
     fetchFacturas(newFilters);
@@ -384,11 +435,13 @@ const Facturas = () => {
     _event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
+    setSelectedIds([]);
     setMeta((prev) => ({ ...prev, page: value }));
     updateSearchParams(filters, value, meta.limit);
   };
 
   const handleLimitChange = (event: SelectChangeEvent) => {
+    setSelectedIds([]);
     const value = Number(event.target.value);
     setMeta((prev) => ({ ...prev, limit: value, page: 1 }));
     updateSearchParams(filters, 1, value);
@@ -595,6 +648,34 @@ const Facturas = () => {
               onClearFilters={handleClearFilters}
               loading={loading}
             />
+            {selectedIds.length > 0 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  mb: 2,
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  startIcon={<Delete />}
+                  onClick={() => setBulkDeleteModalOpen(true)}
+                  sx={{
+                    borderColor: "var(--color-border-danger-primary)",
+                    color: "var(--color-fg-danger-primary)",
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: "var(--radius-m)",
+                    "&:hover": {
+                      borderColor: "var(--color-border-danger-secondary)",
+                      backgroundColor: "var(--color-bg-danger-secondary)",
+                    },
+                  }}
+                >
+                  Eliminar facturas seleccionadas ({selectedIds.length})
+                </Button>
+              </Box>
+            )}
             {/* Table */}
             <TableContainer component={Paper} sx={tableShellSx}>
               {loading ? (
@@ -637,6 +718,17 @@ const Facturas = () => {
                   <Table sx={tableWideSx}>
                     <TableHead>
                       <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
+                        <TableCell padding="checkbox" sx={{ width: 48 }}>
+                          <Checkbox
+                            indeterminate={someSelectableSelected}
+                            checked={allSelectableSelected}
+                            disabled={selectableFacturas.length === 0}
+                            onChange={handleToggleSelectAll}
+                            inputProps={{
+                              "aria-label": "Seleccionar todas las facturas cargadas",
+                            }}
+                          />
+                        </TableCell>
                         {SORTABLE_COLUMNS.map((column) => (
                           <SortableTableHeader
                             key={column.field}
@@ -655,14 +747,28 @@ const Facturas = () => {
                     <TableBody>
                       {facturas.map((factura) => {
                         const statusConfig = getFacturaStatusConfig(factura.estado);
+                        const canSelect = isCargada(factura);
+                        const isSelected = selectedIds.includes(factura.id);
                         return (
                           <TableRow
                             key={factura.id}
+                            selected={isSelected}
                             sx={{
                               "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
                               "&:last-child td": { borderBottom: 0 },
                             }}
                           >
+                            <TableCell padding="checkbox">
+                              <Checkbox
+                                checked={isSelected}
+                                disabled={!canSelect}
+                                onChange={() => handleToggleSelectFactura(factura.id)}
+                                onClick={(e) => e.stopPropagation()}
+                                inputProps={{
+                                  "aria-label": `Seleccionar factura ${factura.folio}`,
+                                }}
+                              />
+                            </TableCell>
                             <TableCell>
                               <Typography
                                 variant="body2"
@@ -901,6 +1007,18 @@ const Facturas = () => {
             }}
           />
         )}
+
+        <BulkDeleteFacturasModal
+          open={bulkDeleteModalOpen}
+          onClose={handleCloseBulkDeleteModal}
+          onSuccess={handleBulkDeleteSuccess}
+          facturas={selectedFacturasForBulk.map((factura) => ({
+            id: factura.id,
+            folio: factura.folio,
+            razonSocialReceptor: factura.razonSocialReceptor || "N/A",
+            montoTotal: factura.montoTotal,
+          }))}
+        />
 
         {selectedFactura && (
           <RemoveMarketplaceModal

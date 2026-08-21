@@ -180,6 +180,18 @@ export const useFacturas = () => {
     }
   };
 
+  const deleteFacturasBulk = async (ids: string[]) => {
+    try {
+      setLoading(true);
+      const response = await api.delete(`/facturas/bulk`, { data: { ids } });
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const sendToMarketplace = async (id: string, payload: SendToMarketplacePayload) => {
     try {
       setLoading(true);
@@ -368,6 +380,7 @@ export const useFacturas = () => {
     updateFactura,
     refreshFactura,
     deleteFactura,
+    deleteFacturasBulk,
     sendToMarketplace,
     removeFromMarketplace,
     listFromMarketplace,
