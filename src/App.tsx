@@ -150,6 +150,22 @@ function App() {
             }
           />
           <Route
+            path="/marketplace/ofertas"
+            element={
+              <ProtectedRoute>
+                <Marketplace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/cedidas"
+            element={
+              <ProtectedRoute>
+                <Marketplace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/edit"
             element={
               <ProtectedRoute>

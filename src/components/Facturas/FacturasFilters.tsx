@@ -123,34 +123,48 @@ const FacturasFilters = ({
   const getRazonesSocialesRef = useRef(getRazonesSociales);
   getRazonesSocialesRef.current = getRazonesSociales;
 
-  const fetchRazonesSociales = useCallback(async (empresaId: string, tab: RazonesSocialesTab) => {
-    try {
-      setLoadingRazones(true);
-      setRazonesError(false);
-      const data = await getRazonesSocialesRef.current(empresaId, tab);
-      setRazonesSociales(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Error fetching razones sociales:", err);
-      setRazonesSociales([]);
-      setRazonesError(true);
-    } finally {
-      setLoadingRazones(false);
-    }
-  }, []);
+  const fetchRazonesSociales = useCallback(
+    async (params: { empresaId?: string; factoringId?: string; tab: RazonesSocialesTab }) => {
+      try {
+        setLoadingRazones(true);
+        setRazonesError(false);
+        const data = await getRazonesSocialesRef.current(params);
+        setRazonesSociales(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching razones sociales:", err);
+        setRazonesSociales([]);
+        setRazonesError(true);
+      } finally {
+        setLoadingRazones(false);
+      }
+    },
+    [],
+  );
+
+  const razonesContextId = currentRole?.empresaId || currentRole?.factoringId || "";
+  const hasRazonesContext = Boolean(razonesContextId);
 
   useEffect(() => {
-    const empresaId = currentRole?.empresaId;
-    if (!empresaId) {
+    const empresaId = currentRole?.empresaId || undefined;
+    const factoringId = empresaId
+      ? undefined
+      : currentRole?.factoringId || undefined;
+    if (!empresaId && !factoringId) {
       setRazonesSociales([]);
       setRazonesError(false);
       lastFetchKeyRef.current = undefined;
       return;
     }
-    const fetchKey = `${empresaId}:${razonesSocialesTab}`;
+    const fetchKey = `${empresaId || ""}:${factoringId || ""}:${razonesSocialesTab}`;
     if (lastFetchKeyRef.current === fetchKey) return;
     lastFetchKeyRef.current = fetchKey;
-    fetchRazonesSociales(empresaId, razonesSocialesTab);
-  }, [currentRole?.empresaId, razonesSocialesTab, fetchRazonesSociales]);
+    fetchRazonesSociales({ empresaId, factoringId, tab: razonesSocialesTab });
+  }, [
+    currentRole?.empresaId,
+    currentRole?.factoringId,
+    razonesSocialesTab,
+    fetchRazonesSociales,
+  ]);
 
   const getInitialValues = (): FacturasFiltersValues => {
     const newFilters = { ...INITIAL_FILTERS };
@@ -214,7 +228,7 @@ const FacturasFilters = ({
     if (razonesError) {
       return "No pudimos cargar las razones sociales. Intenta nuevamente.";
     }
-    if (!loadingRazones && razonesSociales.length === 0 && currentRole?.empresaId) {
+    if (!loadingRazones && razonesSociales.length === 0 && hasRazonesContext) {
       return "No hay razones sociales disponibles.";
     }
     if (formik.touched.razonSocialReceptor && formik.errors.razonSocialReceptor) {
@@ -382,12 +396,18 @@ const FacturasFilters = ({
                       endAdornment: (
                         <>
                           {loadingRazones && <CircularProgress size={16} />}
-                          {razonesError && !loadingRazones && currentRole?.empresaId && (
+                          {razonesError && !loadingRazones && hasRazonesContext && (
                             <IconButton
                               size="small"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                fetchRazonesSociales(currentRole.empresaId!, razonesSocialesTab);
+                                fetchRazonesSociales({
+                                  empresaId: currentRole?.empresaId || undefined,
+                                  factoringId: currentRole?.empresaId
+                                    ? undefined
+                                    : currentRole?.factoringId || undefined,
+                                  tab: razonesSocialesTab,
+                                });
                               }}
                               aria-label="Reintentar carga de razones sociales"
                             >

@@ -27,6 +27,12 @@ export type GetFacturasParams = {
 
 export type RazonesSocialesTab = "todos" | "marketplace" | "con_ofertas" | "cedidas";
 
+export type GetRazonesSocialesParams = {
+  tab: RazonesSocialesTab;
+  empresaId?: string;
+  factoringId?: string;
+};
+
 type UpdateFacturaPayload = {
   estado?: string;
   facturaNameFile?: string;
@@ -68,6 +74,33 @@ const appendListFilters = (search: URLSearchParams, params: GetFacturasParams) =
   if (params.folio) search.set("folio", params.folio);
 };
 
+const appendFactoringListParams = (
+  search: URLSearchParams,
+  params: GetFacturasParams,
+) => {
+  search.set("page", String(params.page));
+  search.set("limit", String(params.limit));
+  search.set("factoringId", params.factoringId || "");
+
+  if (params.empresaId) search.set("empresaId", params.empresaId);
+  if (params.rutEmisor) search.set("rutEmisor", params.rutEmisor);
+  if (params.rutReceptor) search.set("rutReceptor", params.rutReceptor);
+  appendParam(search, "razonSocialReceptor", params.razonSocialReceptor);
+  if (params.montoTotal) search.set("montoTotal", String(params.montoTotal));
+  if (params.minMontoTotal) search.set("minMontoTotal", String(params.minMontoTotal));
+  if (params.maxMontoTotal) search.set("maxMontoTotal", String(params.maxMontoTotal));
+  if (params.montoNeto) search.set("montoNeto", String(params.montoNeto));
+  if (params.minMontoNeto) search.set("minMontoNeto", String(params.minMontoNeto));
+  if (params.maxMontoNeto) search.set("maxMontoNeto", String(params.maxMontoNeto));
+  if (params.detalleIva) search.set("detalleIva", String(params.detalleIva));
+  if (params.minDetalleIva) search.set("minDetalleIva", String(params.minDetalleIva));
+  if (params.maxDetalleIva) search.set("maxDetalleIva", String(params.maxDetalleIva));
+  if (params.folio) search.set("folio", params.folio);
+  appendParam(search, "estado", params.estado);
+  if (params.sortBy) search.set("sortBy", params.sortBy);
+  if (params.order) search.set("order", params.order);
+};
+
 export const useFacturas = () => {
   const [loading, setLoading] = useState(false);
 
@@ -105,10 +138,15 @@ export const useFacturas = () => {
     }
   };
 
-  const getRazonesSociales = async (empresaId: string, tab: RazonesSocialesTab) => {
+  const getRazonesSociales = async ({
+    empresaId,
+    factoringId,
+    tab,
+  }: GetRazonesSocialesParams) => {
     try {
       const search = new URLSearchParams();
-      search.set("empresaId", empresaId);
+      if (empresaId) search.set("empresaId", empresaId);
+      if (factoringId) search.set("factoringId", factoringId);
       search.set("tab", tab);
       const response = await api.get(`facturas/razones-sociales?${search.toString()}`);
       return (response.data || []) as string[];
@@ -241,30 +279,40 @@ export const useFacturas = () => {
     try {
       setLoading(true);
       const search = new URLSearchParams();
-      search.set("page", String(params.page));
-      search.set("limit", String(params.limit));
-      search.set("factoringId", params.factoringId || "");
-      
-      if (params.empresaId) search.set("empresaId", params.empresaId || "");
-      if (params.rutEmisor) search.set("rutEmisor", params.rutEmisor);
-      if (params.rutReceptor) search.set("rutReceptor", params.rutReceptor);
-      appendParam(search, "razonSocialReceptor", params.razonSocialReceptor);
-      if (params.montoTotal) search.set("montoTotal", String(params.montoTotal));
-      if (params.minMontoTotal) search.set("minMontoTotal", String(params.minMontoTotal));
-      if (params.maxMontoTotal) search.set("maxMontoTotal", String(params.maxMontoTotal));
-      if (params.montoNeto) search.set("montoNeto", String(params.montoNeto));
-      if (params.minMontoNeto) search.set("minMontoNeto", String(params.minMontoNeto));
-      if (params.maxMontoNeto) search.set("maxMontoNeto", String(params.maxMontoNeto));
-      if (params.detalleIva) search.set("detalleIva", String(params.detalleIva));
-      if (params.minDetalleIva) search.set("minDetalleIva", String(params.minDetalleIva));
-      if (params.maxDetalleIva) search.set("maxDetalleIva", String(params.maxDetalleIva));
-      if (params.folio) search.set("folio", params.folio);
-      appendParam(search, "estado", params.estado);
-      if (params.sortBy) search.set("sortBy", params.sortBy);
-      if (params.order) search.set("order", params.order);
-
-
+      appendFactoringListParams(search, params);
       const response = await api.get(`facturas/factoring/list?${search.toString()}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFacturasConOfertasByFactoringId = async (params: GetFacturasParams) => {
+    try {
+      setLoading(true);
+      const search = new URLSearchParams();
+      appendFactoringListParams(search, params);
+      const response = await api.get(
+        `facturas/factoring/con-ofertas?${search.toString()}`,
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFacturasCedidasByFactoringId = async (params: GetFacturasParams) => {
+    try {
+      setLoading(true);
+      const search = new URLSearchParams();
+      appendFactoringListParams(search, params);
+      const response = await api.get(
+        `facturas/factoring/cedidas?${search.toString()}`,
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -385,6 +433,8 @@ export const useFacturas = () => {
     removeFromMarketplace,
     listFromMarketplace,
     getFacturasByFactoringId,
+    getFacturasConOfertasByFactoringId,
+    getFacturasCedidasByFactoringId,
     getFacturaByIdAndFactoringId,
     getFacturasConOfertasByEmpresaId,
     getFacturasCedidasByEmpresaId,

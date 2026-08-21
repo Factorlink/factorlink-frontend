@@ -1,7 +1,7 @@
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { useFacturas } from "../../../../hooks/useFacturas";
 import useAuthStore from "../../../../store/authStore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Factura } from "../../../../types/factura";
 import Layout from "../../../../components/Layout";
 import {
@@ -53,6 +53,13 @@ const getTabParam = (index: number) => {
   return null;
 };
 
+const getMarketplaceBackPath = (from: unknown) => {
+  if (typeof from === "string" && from.startsWith("/marketplace")) {
+    return from;
+  }
+  return "/marketplace";
+};
+
 const getPageHeader = (tab: number, hasOferta: boolean) => {
   if (tab === 1) {
     return hasOferta
@@ -85,22 +92,31 @@ const FacturaFactoringDetail = () => {
   const { currentRole } = useAuthStore();
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabFromUrl = getTabIndex(searchParams.get("tab"));
   const ofertaIdParam = searchParams.get("ofertaId");
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(tabFromUrl);
+  const requestIdRef = useRef(0);
+  const backPath = getMarketplaceBackPath(
+    (location.state as { from?: string } | null)?.from,
+  );
 
   const fetchFactura = async () => {
+    if (!id || !currentRole?.factoringId) return;
+    const requestId = ++requestIdRef.current;
     try {
       setError(null);
       const data = await getFacturaByIdAndFactoringId(
-        id!,
-        currentRole?.factoringId!,
+        id,
+        currentRole.factoringId,
       );
+      if (requestId !== requestIdRef.current) return;
       setFactura(data);
     } catch (err) {
+      if (requestId !== requestIdRef.current) return;
       console.error("Error fetching factura:", err);
       setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
     }
@@ -110,14 +126,14 @@ const FacturaFactoringDetail = () => {
     if (id) {
       fetchFactura();
     }
-  }, [id]);
+  }, [id, currentRole?.factoringId]);
 
   useEffect(() => {
     setActiveTab(tabFromUrl);
   }, [tabFromUrl]);
 
   const handleBack = () => {
-    navigate("/marketplace");
+    navigate(backPath);
   };
 
   const goToTab = (index: number) => {
