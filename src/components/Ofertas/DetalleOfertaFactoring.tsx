@@ -1,15 +1,28 @@
-import { Box, Typography, Chip } from "@mui/material";
+import { useState } from "react";
+import { Box, Button, Typography, Chip } from "@mui/material";
 import {
   Send,
   AccessTime,
   Percent,
   AccountBalance,
   CalendarToday,
+  CheckCircle,
+  Cancel,
+  ChatBubbleOutline,
+  DeleteOutline,
+  InfoOutlined,
 } from "@mui/icons-material";
 import type { Oferta } from "../../types/oferta";
 import { formatMoney } from "../../utils/ofertaFormatters";
+import {
+  isOfertaCondicionada,
+  normalizeOfertaEstado,
+  puedeCancelar,
+  OFERTA_ESTADOS,
+} from "../../utils/ofertaEstados";
 import SectionPanel from "../SectionPanel";
 import OfertaCamposDetalle from "./OfertaCamposDetalle";
+import CancelarOfertaModal from "../Modals/CancelarOfertaModal";
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -48,16 +61,69 @@ const getEstadoConfig = (estado: string) => {
   }
 };
 
+const getEstadoBanner = (oferta: Oferta) => {
+  switch (normalizeOfertaEstado(oferta.estado)) {
+    case OFERTA_ESTADOS.ACEPTADA:
+      return {
+        icon: CheckCircle,
+        text: "La empresa aceptó tu oferta.",
+        color: "var(--color-fg-success-primary)",
+        bg: "var(--color-bg-success-secondary)",
+      };
+    case OFERTA_ESTADOS.RECHAZADA:
+      return {
+        icon: Cancel,
+        text: "La empresa rechazó tu oferta.",
+        color: "var(--color-fg-danger-primary)",
+        bg: "var(--color-bg-danger-secondary)",
+      };
+    case OFERTA_ESTADOS.EXPIRADA:
+      return {
+        icon: AccessTime,
+        text: "Tu oferta expiró sin respuesta de la empresa.",
+        color: "var(--color-fg-warning-primary)",
+        bg: "var(--color-bg-warning-secondary)",
+      };
+    case OFERTA_ESTADOS.INACTIVA:
+      return {
+        icon: AccessTime,
+        text: "Tu oferta ya no está vigente.",
+        color: "var(--color-fg-warning-primary)",
+        bg: "var(--color-bg-warning-secondary)",
+      };
+    default:
+      return isOfertaCondicionada(oferta)
+        ? {
+            icon: ChatBubbleOutline,
+            text: "Tu oferta está condicionada. La empresa podrá responderte con comentarios, pero no aceptarla hasta que envíes la oferta final.",
+            color: "var(--color-fg-accent-primary)",
+            bg: "var(--color-bg-accent-secondary)",
+          }
+        : {
+            icon: AccessTime,
+            text: "Tu oferta está en revisión por la empresa emisora.",
+            color: "var(--color-fg-accent-primary)",
+            bg: "var(--color-bg-accent-secondary)",
+          };
+  }
+};
+
 interface DetalleOfertaFactoringProps {
   oferta: Oferta;
   plazo: number;
+  onOfertaCancelada?: () => void;
 }
 
 const DetalleOfertaFactoring = ({
   oferta,
   plazo,
+  onOfertaCancelada,
 }: DetalleOfertaFactoringProps) => {
+  const [cancelarOpen, setCancelarOpen] = useState(false);
   const estadoConfig = getEstadoConfig(oferta.estado);
+  const banner = getEstadoBanner(oferta);
+  const BannerIcon = banner.icon;
+  const condicionada = isOfertaCondicionada(oferta);
 
   return (
     <SectionPanel
@@ -71,13 +137,13 @@ const DetalleOfertaFactoring = ({
               gap: 1.5,
               p: 2,
               borderRadius: 2,
-              backgroundColor: "var(--color-bg-accent-secondary)",
+              backgroundColor: banner.bg,
               mb: 3,
             }}
           >
-            <AccessTime sx={{ color: "var(--color-fg-accent-primary)", fontSize: 20 }} />
-            <Typography variant="body2" sx={{ color: "var(--color-fg-accent-primary)" }}>
-              Tu oferta está en revisión por la empresa emisora.
+            <BannerIcon sx={{ color: banner.color, fontSize: 20, flexShrink: 0 }} />
+            <Typography variant="body2" sx={{ color: banner.color }}>
+              {banner.text}
             </Typography>
           </Box>
 
@@ -102,17 +168,41 @@ const DetalleOfertaFactoring = ({
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                 Tu oferta
               </Typography>
-              <Chip
-                icon={<AccessTime sx={{ fontSize: 16 }} />}
-                label={estadoConfig.label}
-                size="small"
+              <Box
                 sx={{
-                  backgroundColor: estadoConfig.bg,
-                  color: estadoConfig.color,
-                  fontWeight: 600,
-                  "& .MuiChip-icon": { color: estadoConfig.color },
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: 1,
                 }}
-              />
+              >
+                {condicionada && (
+                  <Chip
+                    icon={<InfoOutlined sx={{ fontSize: 16 }} />}
+                    label="Oferta condicionada"
+                    size="small"
+                    sx={{
+                      backgroundColor: "var(--color-bg-warning-secondary)",
+                      color: "var(--color-fg-warning-primary)",
+                      fontWeight: 600,
+                      "& .MuiChip-icon": {
+                        color: "var(--color-fg-warning-primary)",
+                      },
+                    }}
+                  />
+                )}
+                <Chip
+                  icon={<AccessTime sx={{ fontSize: 16 }} />}
+                  label={estadoConfig.label}
+                  size="small"
+                  sx={{
+                    backgroundColor: estadoConfig.bg,
+                    color: estadoConfig.color,
+                    fontWeight: 600,
+                    "& .MuiChip-icon": { color: estadoConfig.color },
+                  }}
+                />
+              </Box>
             </Box>
 
             <Box
@@ -246,7 +336,48 @@ const DetalleOfertaFactoring = ({
                 </Typography>
               </Box>
             )}
+
+            {puedeCancelar(oferta) && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "flex-end",
+                  gap: 2,
+                  mt: 3,
+                  pt: 2,
+                  borderTop: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  startIcon={<DeleteOutline />}
+                  onClick={() => setCancelarOpen(true)}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: "var(--radius-m)",
+                    color: "var(--color-fg-danger-primary)",
+                    borderColor: "var(--color-border-danger-secondary)",
+                    "&:hover": {
+                      borderColor: "var(--color-fg-danger-primary)",
+                      backgroundColor: "var(--color-bg-danger-secondary)",
+                    },
+                  }}
+                >
+                  Cancelar oferta
+                </Button>
+              </Box>
+            )}
           </Box>
+
+      <CancelarOfertaModal
+        open={cancelarOpen}
+        onClose={() => setCancelarOpen(false)}
+        onSuccess={onOfertaCancelada}
+        oferta={oferta}
+      />
     </SectionPanel>
   );
 };

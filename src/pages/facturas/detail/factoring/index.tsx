@@ -385,6 +385,7 @@ const FacturaFactoringDetail = () => {
             <DetalleOfertaFactoring
               oferta={factura.ofertaFactoring}
               plazo={factura.plazo || 0}
+              onOfertaCancelada={fetchFactura}
             />
           ) : (
             <EnviarOfertaCard
