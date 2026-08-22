@@ -36,6 +36,7 @@ export interface Oferta {
     porcentajeFinanciamiento: string;
     tasa: string;
     factoring?: Factoring;
+    ofertaCondicionada?: boolean;
     tipoDocumento?: string | null;
     fechaOperacion?: string | null;
     numeroDocumentos?: OfertaNumericValue;
@@ -62,6 +63,7 @@ export type CreateOfertaPayload = {
     montoAdelanto: number;
     fechaExpiracion: string;
     comentario: string;
+    ofertaCondicionada: boolean;
 } & OfertaCamposOperacionales;
 
 export type UpdateOfertaPayload = {
@@ -70,4 +72,31 @@ export type UpdateOfertaPayload = {
     montoAdelanto?: number;
     fechaExpiracion?: string;
     comentario?: string;
+    ofertaCondicionada?: boolean;
 } & Partial<OfertaCamposOperacionales>;
+
+export type RespondOfertaPayload = {
+    estado?: "aceptada" | "rechazada";
+    comentarioEmpresa?: string;
+};
+
+/** El backend resuelve el bando del autor; el frontend no lo infiere. */
+export type ComentarioOfertaTipo = "EMPRESA" | "FACTORING";
+
+export interface ComentarioOfertaUsuario {
+    id: string;
+    nombre: string;
+    tipo: ComentarioOfertaTipo;
+}
+
+export interface ComentarioOferta {
+    id: string;
+    comentario: string;
+    createdAt: string;
+    usuario: ComentarioOfertaUsuario;
+}
+
+export interface ComentariosOfertaResponse {
+    ofertaId: string;
+    items: ComentarioOferta[];
+}

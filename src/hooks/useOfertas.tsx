@@ -4,6 +4,13 @@ import {
   buildCreateOfertaPayload,
   type OfertaPayloadInput,
 } from "../utils/ofertaPayload";
+import type {
+  ComentarioOferta,
+  ComentariosOfertaResponse,
+  Oferta,
+  RespondOfertaPayload,
+  UpdateOfertaPayload,
+} from "../types/oferta";
 
 type GetOfertasParams = {
   orderBy?: string;
@@ -19,8 +26,6 @@ export const useOfertas = () => {
       const payload = buildCreateOfertaPayload(data);
       const response = await api.post("/ofertas", payload);
       return response.data;
-    } catch (error) {
-      throw error;
     } finally {
       setLoading(false);
     }
@@ -36,8 +41,6 @@ export const useOfertas = () => {
       
       const response = await api.get(`/ofertas/factura/${facturaId}?${search.toString()}`);
       return response.data;
-    } catch (error) {
-      throw error;
     } finally {
       setLoading(false);
     }
@@ -48,33 +51,91 @@ export const useOfertas = () => {
       setLoading(true);
       const response = await api.get(`/ofertas/${ofertaId}`);
       return response.data;
-    } catch (error) {
-      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const responderOferta = async (ofertaId: string, estado: "aceptada" | "rechazada", comentarioEmpresa: string) => {
+  const updateOferta = async (
+    ofertaId: string,
+    payload: UpdateOfertaPayload
+  ): Promise<Oferta> => {
     try {
       setLoading(true);
-      const response = await api.patch(`/ofertas/${ofertaId}/responder`, {
-        estado,
-        comentarioEmpresa,
-      });
+      const response = await api.patch(`/ofertas/${ofertaId}`, payload);
       return response.data;
-    } catch (error) {
-      throw error;
     } finally {
       setLoading(false);
     }
   };
+
+  const deleteOferta = async (ofertaId: string): Promise<void> => {
+    try {
+      setLoading(true);
+      await api.delete(`/ofertas/${ofertaId}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getComentarios = async (
+    ofertaId: string
+  ): Promise<ComentariosOfertaResponse> => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/ofertas/${ofertaId}/comentarios`);
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** Canal de comentarios del lado Factoring. */
+  const createComentario = async (
+    ofertaId: string,
+    comentario: string
+  ): Promise<ComentarioOferta> => {
+    try {
+      setLoading(true);
+      const response = await api.post(`/ofertas/${ofertaId}/comentarios`, {
+        comentario,
+      });
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const responderOferta = async (
+    ofertaId: string,
+    payload: RespondOfertaPayload
+  ): Promise<Oferta> => {
+    try {
+      setLoading(true);
+      const response = await api.patch(`/ofertas/${ofertaId}/responder`, payload);
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Canal de comentarios del lado Empresa. Omite `estado` a propósito: enviarlo
+   * aceptaría o rechazaría la oferta si dejó de estar condicionada.
+   */
+  const comentarEmpresa = async (ofertaId: string, comentarioEmpresa: string) =>
+    responderOferta(ofertaId, { comentarioEmpresa });
 
   return {
     loading,
     createOferta,
     getOfertasByFacturaId,
     getOfertaById,
+    updateOferta,
+    deleteOferta,
+    getComentarios,
+    createComentario,
     responderOferta,
+    comentarEmpresa,
   };
 };

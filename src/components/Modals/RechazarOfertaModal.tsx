@@ -65,7 +65,10 @@ const RechazarOfertaModal = ({
 
   const handleReject = async () => {
     try {
-      await responderOferta(ofertaData.id, "rechazada", comentario);
+      await responderOferta(ofertaData.id, {
+        estado: "rechazada",
+        comentarioEmpresa: comentario,
+      });
       setAlertStatus("success");
       setAlertMessage("Oferta rechazada correctamente.");
     } catch (error: unknown) {
