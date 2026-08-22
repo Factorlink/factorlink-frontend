@@ -22,6 +22,7 @@ import {
   isInformed,
   type OptionalValue,
 } from "../../utils/ofertaFormatters";
+import { normalizeOfertaEstado, OFERTA_ESTADOS } from "../../utils/ofertaEstados";
 
 interface RechazarOfertaModalProps {
   open: boolean;
@@ -35,6 +36,7 @@ interface RechazarOfertaModalProps {
     porcentajeFinanciamiento: string;
     montoAGirar?: OptionalValue;
     retencion?: OptionalValue;
+    ofertaCondicionada?: boolean;
   };
 }
 
@@ -58,19 +60,30 @@ const RechazarOfertaModal = ({
   onSuccess,
   ofertaData,
 }: RechazarOfertaModalProps) => {
-  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
+  const [alertStatus, setAlertStatus] = useState<
+    "success" | "warning" | "error" | null
+  >(null);
   const [alertMessage, setAlertMessage] = useState("");
   const [comentario, setComentario] = useState("");
   const { responderOferta, loading } = useOfertas();
+  const condicionada = ofertaData.ofertaCondicionada === true;
+  const comentarioRequerido = condicionada && !comentario.trim();
 
   const handleReject = async () => {
     try {
-      await responderOferta(ofertaData.id, {
+      const oferta = await responderOferta(ofertaData.id, {
         estado: "rechazada",
         comentarioEmpresa: comentario,
       });
-      setAlertStatus("success");
-      setAlertMessage("Oferta rechazada correctamente.");
+      if (normalizeOfertaEstado(oferta?.estado) === OFERTA_ESTADOS.RECHAZADA) {
+        setAlertStatus("success");
+        setAlertMessage("Oferta rechazada correctamente.");
+      } else {
+        setAlertStatus("warning");
+        setAlertMessage(
+          "Se registró tu comentario en la conversación, pero la oferta sigue condicionada y no fue rechazada. El factoring debe enviar la oferta final para poder responderla."
+        );
+      }
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string } };
@@ -84,7 +97,7 @@ const RechazarOfertaModal = ({
   };
 
   const handleClose = () => {
-    if (alertStatus === "success") {
+    if (alertStatus === "success" || alertStatus === "warning") {
       onSuccess?.();
     }
     setAlertStatus(null);
@@ -146,7 +159,7 @@ const RechazarOfertaModal = ({
           </Alert>
         )}
 
-        {alertStatus !== "success" && (
+        {alertStatus !== "success" && alertStatus !== "warning" && (
           <Box sx={{ borderRadius: "var(--radius-m)", p: 2, mt: 2 }}>
             <Box
               sx={{
@@ -188,15 +201,21 @@ const RechazarOfertaModal = ({
             </Typography>
 
             <TextField
-              label="Comentario (opcional)"
+              label={condicionada ? "Comentario" : "Comentario (opcional)"}
               multiline
               minRows={3}
               maxRows={5}
               fullWidth
+              required={condicionada}
               value={comentario}
               onChange={(e) => setComentario(e.target.value)}
               disabled={loading}
               placeholder="Escribe un comentario para el factoring..."
+              helperText={
+                condicionada
+                  ? "Las ofertas condicionadas exigen un comentario para responder."
+                  : undefined
+              }
               sx={{ mt: 2 }}
               inputProps={{ maxLength: 500 }}
             />
@@ -217,13 +236,15 @@ const RechazarOfertaModal = ({
             fontWeight: 600,
           }}
         >
-          {alertStatus === "success" ? "Cerrar" : "Cancelar"}
+          {alertStatus === "success" || alertStatus === "warning"
+            ? "Cerrar"
+            : "Cancelar"}
         </Button>
-        {alertStatus !== "success" && (
+        {alertStatus !== "success" && alertStatus !== "warning" && (
           <Button
             variant="contained"
             onClick={handleReject}
-            disabled={loading}
+            disabled={loading || comentarioRequerido}
             sx={{
               flex: 1,
               py: 1.5,

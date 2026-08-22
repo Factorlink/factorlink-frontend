@@ -104,6 +104,7 @@ const ConversacionOferta = ({
       };
       setErrorEnvio(
         axiosError?.response?.data?.message ||
+          (err instanceof Error ? err.message : null) ||
           "No se pudo enviar el comentario.",
       );
     } finally {
@@ -182,7 +183,9 @@ const ConversacionOferta = ({
             variant="body2"
             sx={{ color: "var(--color-fg-default-secondary)" }}
           >
-            Todavía no hay comentarios en esta oferta.
+            {puedeEnviar
+              ? "Todavía no hay comentarios. Escribe el primero para iniciar la conversación."
+              : "Todavía no hay comentarios en esta oferta."}
           </Typography>
         </Box>
       )}

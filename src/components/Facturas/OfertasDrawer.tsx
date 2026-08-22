@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  Alert,
+  Button,
   Drawer,
   Box,
   Typography,
@@ -60,6 +62,7 @@ const OfertasDrawer = ({
   const { getOfertasByFacturaId, comentarEmpresa, loading } = useOfertas();
   const navigate = useNavigate();
   const [ofertas, setOfertas] = useState<Oferta[]>([]);
+  const [errorOfertas, setErrorOfertas] = useState<string | null>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [aceptarModal, setAceptarModal] = useState<{ open: boolean; oferta: Oferta | null }>({ open: false, oferta: null });
   const [rechazarModal, setRechazarModal] = useState<{ open: boolean; oferta: Oferta | null }>({ open: false, oferta: null });
@@ -71,6 +74,7 @@ const OfertasDrawer = ({
   const fetchOfertas = async () => {
     if (!factura?.id) return;
     try {
+      setErrorOfertas(null);
       const params: { orderBy?: string; order?: string } = {};
       if (sortBy) {
         params.orderBy = sortBy;
@@ -78,8 +82,15 @@ const OfertasDrawer = ({
       }
       const data = await getOfertasByFacturaId(factura.id, params);
       setOfertas(Array.isArray(data) ? data : data?.data || []);
-    } catch {
+    } catch (error: unknown) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
       setOfertas([]);
+      setErrorOfertas(
+        axiosError?.response?.data?.message ||
+          "No se pudieron cargar las ofertas de esta factura.",
+      );
     }
   };
 
@@ -342,6 +353,22 @@ const OfertasDrawer = ({
           <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
             <CircularProgress />
           </Box>
+        ) : errorOfertas ? (
+          <Alert
+            severity="error"
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                onClick={fetchOfertas}
+                sx={{ textTransform: "none", fontWeight: 600 }}
+              >
+                Reintentar
+              </Button>
+            }
+          >
+            {errorOfertas}
+          </Alert>
         ) : ofertas.length === 0 ? (
           <Box sx={{ textAlign: "center", py: 6 }}>
             <Typography variant="body1" sx={{ color: "var(--color-fg-default-secondary)" }}>
@@ -412,6 +439,7 @@ const OfertasDrawer = ({
             porcentajeFinanciamiento: rechazarModal.oferta.porcentajeFinanciamiento,
             montoAGirar: rechazarModal.oferta.montoAGirar,
             retencion: rechazarModal.oferta.retencion,
+            ofertaCondicionada: isOfertaCondicionada(rechazarModal.oferta),
           }}
         />
       )}
