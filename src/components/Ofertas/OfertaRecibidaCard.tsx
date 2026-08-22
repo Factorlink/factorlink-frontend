@@ -22,43 +22,9 @@ import {
   formatPercent,
 } from "../../utils/ofertaFormatters";
 import { isOfertaCondicionada } from "../../utils/ofertaEstados";
+import { getOfertaEstadoBadge } from "../../utils/ofertaEstadoBadge";
 import ConversacionOferta from "./ConversacionOferta";
 import OfertaCamposDetalle from "./OfertaCamposDetalle";
-
-const ESTADO_CHIP: Record<string, { label: string; fg: string; bg: string }> = {
-  activa: {
-    label: "Activa",
-    fg: "var(--color-fg-success-primary)",
-    bg: "var(--color-bg-success-secondary)",
-  },
-  aceptada: {
-    label: "Aceptada",
-    fg: "var(--color-fg-success-primary)",
-    bg: "var(--color-bg-success-secondary)",
-  },
-  rechazada: {
-    label: "Rechazada",
-    fg: "var(--color-fg-danger-primary)",
-    bg: "var(--color-bg-danger-secondary)",
-  },
-  expirada: {
-    label: "Expirada",
-    fg: "var(--color-fg-warning-primary)",
-    bg: "var(--color-bg-warning-secondary)",
-  },
-  inactiva: {
-    label: "Inactiva",
-    fg: "var(--color-fg-accent-primary)",
-    bg: "var(--color-bg-accent-secondary)",
-  },
-};
-
-const getEstadoChipConfig = (estado: string) =>
-  ESTADO_CHIP[estado?.toLowerCase() || ""] ?? {
-    label: "Recibida",
-    fg: "var(--color-fg-accent-primary)",
-    bg: "var(--color-bg-accent-secondary)",
-  };
 
 interface OfertaRecibidaCardProps {
   oferta: Oferta;
@@ -87,7 +53,8 @@ const OfertaRecibidaCard = ({
   onEnviarComentario,
   cardRef,
 }: OfertaRecibidaCardProps) => {
-  const estadoChip = getEstadoChipConfig(oferta.estado);
+  const estadoChip = getOfertaEstadoBadge(oferta.estado, "Recibida");
+  const EstadoIcon = estadoChip.icon;
   const condicionada = isOfertaCondicionada(oferta);
 
   const resumen = [
@@ -187,12 +154,14 @@ const OfertaRecibidaCard = ({
               />
             )}
             <Chip
+              icon={<EstadoIcon sx={{ fontSize: 16 }} />}
               label={estadoChip.label}
               size="small"
               sx={{
                 backgroundColor: estadoChip.bg,
-                color: estadoChip.fg,
+                color: estadoChip.color,
                 fontWeight: 600,
+                "& .MuiChip-icon": { color: estadoChip.color },
               }}
             />
           </Box>

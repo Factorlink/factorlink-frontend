@@ -21,6 +21,7 @@ import {
   puedeEnviarOfertaFinal,
   OFERTA_ESTADOS,
 } from "../../utils/ofertaEstados";
+import { getOfertaEstadoBadge } from "../../utils/ofertaEstadoBadge";
 import SectionPanel from "../SectionPanel";
 import OfertaCamposDetalle from "./OfertaCamposDetalle";
 import CancelarOfertaModal from "../Modals/CancelarOfertaModal";
@@ -33,23 +34,6 @@ const formatDateShort = (dateStr: string) => {
     month: "short",
     year: "numeric",
   });
-};
-
-const getEstadoConfig = (estado: string) => {
-  switch (estado?.toLowerCase()) {
-    case "aceptada":
-      return { label: "Aceptada", color: "var(--color-fg-success-primary)", bg: "var(--color-bg-success-secondary)" };
-    case "rechazada":
-      return { label: "Rechazada", color: "var(--color-fg-danger-primary)", bg: "var(--color-bg-danger-secondary)" };
-    case "expirada":
-      return { label: "Expirada", color: "var(--color-fg-warning-primary)", bg: "var(--color-bg-warning-secondary)" };
-    case "activa":
-      return { label: "Activa", color: "var(--color-fg-accent-primary)", bg: "var(--color-bg-accent-secondary)" };
-    case "inactiva":
-      return { label: "Inactiva", color: "var(--color-fg-accent-primary)", bg: "var(--color-bg-accent-secondary)" };
-    default:
-      return { label: estado, color: "var(--color-fg-accent-primary)", bg: "var(--color-bg-accent-secondary)" };
-  }
 };
 
 const getEstadoBanner = (oferta: Oferta) => {
@@ -114,7 +98,8 @@ const DetalleOfertaFactoring = ({
 }: DetalleOfertaFactoringProps) => {
   const [cancelarOpen, setCancelarOpen] = useState(false);
   const [ofertaFinalOpen, setOfertaFinalOpen] = useState(false);
-  const estadoConfig = getEstadoConfig(oferta.estado);
+  const estadoConfig = getOfertaEstadoBadge(oferta.estado);
+  const EstadoIcon = estadoConfig.icon;
   const banner = getEstadoBanner(oferta);
   const BannerIcon = banner.icon;
   const condicionada = isOfertaCondicionada(oferta);
@@ -186,7 +171,7 @@ const DetalleOfertaFactoring = ({
                   />
                 )}
                 <Chip
-                  icon={<AccessTime sx={{ fontSize: 16 }} />}
+                  icon={<EstadoIcon sx={{ fontSize: 16 }} />}
                   label={estadoConfig.label}
                   size="small"
                   sx={{

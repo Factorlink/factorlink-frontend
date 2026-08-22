@@ -16,15 +16,13 @@ import {
   CalendarToday,
   Comment,
   ChatBubbleOutline,
-  Cancel,
-  WarningAmber,
-  CheckCircle,
 } from "@mui/icons-material";
 import type { Oferta } from "../../types/oferta";
 import {
   formatMoney,
   isInformed,
 } from "../../utils/ofertaFormatters";
+import { getOfertaEstadoBadge } from "../../utils/ofertaEstadoBadge";
 import SectionPanel from "../SectionPanel";
 import OfertaCamposDetalle from "./OfertaCamposDetalle";
 
@@ -46,21 +44,6 @@ const formatDateShort = (dateStr: string) => {
     month: "short",
     year: "numeric",
   });
-};
-
-const getEstadoConfig = (estado: string) => {
-  switch (estado?.toLowerCase()) {
-    case "aceptada":
-      return { label: "Aceptada", color: "var(--color-fg-success-primary)", bg: "var(--color-bg-success-secondary)", icon: <CheckCircle sx={{ fontSize: 16 }} /> };
-    case "rechazada":
-      return { label: "Rechazada", color: "var(--color-fg-danger-primary)", bg: "var(--color-bg-danger-secondary)", icon: <Cancel sx={{ fontSize: 16 }} /> };
-    case "expirada":
-      return { label: "Expirada", color: "var(--color-fg-warning-primary)", bg: "var(--color-bg-warning-secondary)", icon: <WarningAmber sx={{ fontSize: 16 }} /> };
-    case "activa":
-      return { label: "Activa", color: "var(--color-fg-accent-primary)", bg: "var(--color-bg-accent-secondary)", icon: <AccessTime sx={{ fontSize: 16 }} /> };
-    default:
-      return { label: estado, color: "var(--color-fg-accent-primary)", bg: "var(--color-bg-accent-secondary)", icon: <AccessTime sx={{ fontSize: 16 }} /> };
-  }
 };
 
 interface HistorialOfertasFactoringProps {
@@ -152,7 +135,8 @@ const HistorialOfertasFactoring = ({
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {ofertas.map((oferta, index) => {
           const isExpanded = expandedId === oferta.id;
-          const estadoConfig = getEstadoConfig(oferta.estado);
+          const estadoConfig = getOfertaEstadoBadge(oferta.estado);
+          const EstadoIcon = estadoConfig.icon;
 
           return (
             <Box
@@ -201,7 +185,7 @@ const HistorialOfertasFactoring = ({
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Chip
-                    icon={estadoConfig.icon}
+                    icon={<EstadoIcon sx={{ fontSize: 16 }} />}
                     label={estadoConfig.label}
                     size="small"
                     sx={{
