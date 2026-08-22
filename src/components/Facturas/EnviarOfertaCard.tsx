@@ -3,6 +3,8 @@ import {
   Box,
   Typography,
   Alert,
+  Checkbox,
+  FormControlLabel,
   InputAdornment,
   Tooltip,
 } from "@mui/material";
@@ -127,6 +129,7 @@ const EnviarOfertaCard = ({
       tasa: 0 as number | string,
       fechaExpiracion: null as Date | null,
       comentario: "",
+      ofertaCondicionada: false,
       tipoDocumento: TIPO_DOCUMENTO_OFERTA,
       fechaOperacion: null as Date | null,
       numeroDocumentos: "",
@@ -174,6 +177,7 @@ const EnviarOfertaCard = ({
         montoAdelanto,
         fechaExpiracion: formik.values.fechaExpiracion!,
         comentario: formik.values.comentario,
+        ofertaCondicionada: formik.values.ofertaCondicionada,
         tipoDocumento: TIPO_DOCUMENTO_OFERTA,
         fechaOperacion: formik.values.fechaOperacion,
         numeroDocumentos: formik.values.numeroDocumentos,
@@ -563,6 +567,48 @@ const EnviarOfertaCard = ({
             helperText={fieldHelper("comentario", "Máximo 500 caracteres")}
           />
 
+          <FormControlLabel
+            control={
+              <Checkbox
+                id="ofertaCondicionada"
+                name="ofertaCondicionada"
+                checked={formik.values.ofertaCondicionada}
+                onChange={formik.handleChange}
+                disabled={loading || alertStatus === "success"}
+                size="small"
+              />
+            }
+            label={
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 600,
+                    color: "var(--color-fg-default-primary)",
+                  }}
+                >
+                  Oferta condicionada
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "var(--color-fg-default-secondary)" }}
+                >
+                  Mi oferta está sujeta a condiciones o antecedentes
+                  adicionales.
+                </Typography>
+              </Box>
+            }
+            sx={{
+              mt: 2,
+              mx: 0,
+              p: 2,
+              alignItems: "flex-start",
+              gap: 1,
+              borderRadius: 2,
+              border: "1px solid var(--color-border-default-primary)",
+            }}
+          />
+
           <Box
             sx={{
               display: "flex",
@@ -645,6 +691,7 @@ const EnviarOfertaCard = ({
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleConfirm}
         loading={loading}
+        ofertaCondicionada={formik.values.ofertaCondicionada}
       />
     </LocalizationProvider>
   );
