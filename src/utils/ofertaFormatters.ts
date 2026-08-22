@@ -85,6 +85,20 @@ export const formatInteger = (value: OptionalValue): string => {
   return String(Math.trunc(n));
 };
 
+/** No usa parseDateOnly porque truncaría la hora de un ISO completo. */
+export const formatDateTime = (value: OptionalValue): string => {
+  if (!isInformed(value)) return EMPTY_DISPLAY;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return EMPTY_DISPLAY;
+  return date.toLocaleDateString("es-CL", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 export const formatDateOnly = (value: OptionalValue): string => {
   const date = parseDateOnly(value);
   if (!date) return EMPTY_DISPLAY;

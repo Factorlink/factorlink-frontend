@@ -13,7 +13,7 @@ import {
   InfoOutlined,
 } from "@mui/icons-material";
 import type { Oferta } from "../../types/oferta";
-import { formatMoney } from "../../utils/ofertaFormatters";
+import { formatDateTime, formatMoney } from "../../utils/ofertaFormatters";
 import {
   isOfertaCondicionada,
   normalizeOfertaEstado,
@@ -23,17 +23,6 @@ import {
 import SectionPanel from "../SectionPanel";
 import OfertaCamposDetalle from "./OfertaCamposDetalle";
 import CancelarOfertaModal from "../Modals/CancelarOfertaModal";
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("es-CL", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const formatDateShort = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -313,7 +302,7 @@ const DetalleOfertaFactoring = ({
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                 <CalendarToday sx={{ fontSize: 16, color: "var(--color-fg-default-tertiary)" }} />
                 <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                  Enviada: {formatDate(oferta.createdAt)}
+                  Enviada: {formatDateTime(oferta.createdAt)}
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>

@@ -24,6 +24,7 @@ import {
 import FacturaResumenCard from "../../../../components/Facturas/FacturaResumenCard";
 import EnviarOfertaCard from "../../../../components/Facturas/EnviarOfertaCard";
 import DetalleOfertaFactoring from "../../../../components/Ofertas/DetalleOfertaFactoring";
+import ConversacionOferta from "../../../../components/Ofertas/ConversacionOferta";
 import HistorialOfertasFactoring from "../../../../components/Ofertas/HistorialOfertasFactoring";
 import DetalleCotizacionCard from "../../../../components/Facturas/DetalleCotizacionCard";
 import FacturaDocumentoPdfSection from "../../../../components/Facturas/FacturaDocumentoPdfSection";
@@ -382,11 +383,18 @@ const FacturaFactoringDetail = () => {
 
         <TabPanel value={activeTab} index={1}>
           {factura.ofertaFactoring ? (
-            <DetalleOfertaFactoring
-              oferta={factura.ofertaFactoring}
-              plazo={factura.plazo || 0}
-              onOfertaCancelada={fetchFactura}
-            />
+            <>
+              <DetalleOfertaFactoring
+                oferta={factura.ofertaFactoring}
+                plazo={factura.plazo || 0}
+                onOfertaCancelada={fetchFactura}
+              />
+              <ConversacionOferta
+                ofertaId={factura.ofertaFactoring.id}
+                ladoActual="FACTORING"
+                ocultarSiVacia={!factura.ofertaFactoring.ofertaCondicionada}
+              />
+            </>
           ) : (
             <EnviarOfertaCard
               factura={factura}
