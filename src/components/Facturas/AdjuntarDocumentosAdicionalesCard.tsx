@@ -27,9 +27,9 @@ export type FacturaAdjuntoUploadPayload = {
 
 interface AdjuntarDocumentosAdicionalesCardProps {
   files: FacturaArchivo[];
-  onChange: (files: FacturaArchivo[]) => void;
-  onUpload: (payload: FacturaAdjuntoUploadPayload) => Promise<FacturaArchivo>;
-  onDelete: (archivoId: string) => Promise<void>;
+  onChange?: (files: FacturaArchivo[]) => void;
+  onUpload?: (payload: FacturaAdjuntoUploadPayload) => Promise<FacturaArchivo>;
+  onDelete?: (archivoId: string) => Promise<void>;
   facturaId: string;
   disabled?: boolean;
   variant?: "panel" | "embedded";
@@ -90,7 +90,9 @@ const AdjuntarDocumentosAdicionalesCard = ({
 
   const addFiles = async (selected: FileList | File[]) => {
     const incoming = Array.from(selected);
-    if (incoming.length === 0 || !facturaId || readOnly) return;
+    if (incoming.length === 0 || !facturaId || readOnly || !onUpload || !onChange) {
+      return;
+    }
 
     if (files.length >= MAX_ADJUNTOS) {
       setError(`Máximo ${MAX_ADJUNTOS} documentos adicionales`);
@@ -171,7 +173,7 @@ const AdjuntarDocumentosAdicionalesCard = ({
   };
 
   const handleRemoveFile = async (archivoId: string) => {
-    if (readOnly) return;
+    if (readOnly || !onDelete || !onChange) return;
     setError(null);
     setDeletingId(archivoId);
     try {

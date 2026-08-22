@@ -28,7 +28,7 @@ import DetalleOfertaFactoring from "../../../../components/Ofertas/DetalleOferta
 import ConversacionOferta from "../../../../components/Ofertas/ConversacionOferta";
 import HistorialOfertasFactoring from "../../../../components/Ofertas/HistorialOfertasFactoring";
 import DetalleCotizacionCard from "../../../../components/Facturas/DetalleCotizacionCard";
-import FacturaDocumentoPdfSection from "../../../../components/Facturas/FacturaDocumentoPdfSection";
+import DocumentosAsociadosCard from "../../../../components/Facturas/DocumentosAsociadosCard";
 import { appContentSx } from "../../../../theme/layoutStyles";
 import {
   isOfertaCondicionada,
@@ -333,7 +333,10 @@ const FacturaFactoringDetail = () => {
             />
           )}
 
-          <FacturaDocumentoPdfSection factura={factura} />
+          <DocumentosAsociadosCard
+            factura={factura}
+            adjuntos={factura.archivos ?? []}
+          />
 
           {!factura.ofertaFactoring && (
             <Box

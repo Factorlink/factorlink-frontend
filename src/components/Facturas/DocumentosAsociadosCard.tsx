@@ -2,7 +2,7 @@ import { Box, Typography, Button, Divider } from "@mui/material";
 import { Description, PictureAsPdf, Cancel, Upload } from "@mui/icons-material";
 import type { Factura, FacturaArchivo } from "../../types/factura";
 import { isXmlUiEnabled } from "../../config/featureFlags";
-import { hasFacturaPdf } from "../../utils/facturaDocuments";
+import { downloadFacturaPdf, hasFacturaPdf } from "../../utils/facturaDocuments";
 import AdjuntarDocumentosAdicionalesCard, {
   type FacturaAdjuntoUploadPayload,
 } from "./AdjuntarDocumentosAdicionalesCard";
@@ -32,13 +32,14 @@ const DocumentosAsociadosCard = ({
 }: DocumentosAsociadosCardProps) => {
   const showXmlUi = isXmlUiEnabled();
   const isCargada = factura.estado?.toLowerCase() === "cargada";
-  const canManageAdjuntos = ["EN_MARKETPLACE", "CON_OFERTAS"].includes(
-    factura.estado,
-  );
   const adjuntosList = adjuntos ?? [];
-  const showAdjuntos =
-    Boolean(onUploadAdjunto && onDeleteAdjunto && onAdjuntosChange) &&
-    (canManageAdjuntos || adjuntosList.length > 0);
+  const hasAdjuntosHandlers = Boolean(
+    onUploadAdjunto && onDeleteAdjunto && onAdjuntosChange,
+  );
+  const canManageAdjuntos =
+    hasAdjuntosHandlers &&
+    ["EN_MARKETPLACE", "CON_OFERTAS"].includes(factura.estado);
+  const showAdjuntos = canManageAdjuntos || adjuntosList.length > 0;
 
   if (!hasFacturaPdf(factura)) {
     return null;
@@ -52,8 +53,13 @@ const DocumentosAsociadosCard = ({
 
   const handleDownloadPdf = () => {
     if (onDownloadPdf && factura.pdfContentBase64) {
-      onDownloadPdf(factura.pdfContentBase64, factura.facturaNameFilePDF || "factura.pdf");
+      onDownloadPdf(
+        factura.pdfContentBase64,
+        factura.facturaNameFilePDF || "factura.pdf",
+      );
+      return;
     }
+    downloadFacturaPdf(factura);
   };
 
   const subtitle = showAdjuntos
@@ -207,7 +213,7 @@ const DocumentosAsociadosCard = ({
         </Typography>
       </Box>
 
-      {showAdjuntos && onUploadAdjunto && onDeleteAdjunto && onAdjuntosChange && (
+      {showAdjuntos && (
         <>
           <Divider sx={{ my: 2 }} />
           <AdjuntarDocumentosAdicionalesCard
