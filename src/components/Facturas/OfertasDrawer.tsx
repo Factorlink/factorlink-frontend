@@ -35,6 +35,7 @@ interface OfertasDrawerProps {
   onClose: () => void;
   factura: Factura | null;
   initialOfertaId?: string | null;
+  onOfertasActualizadas?: () => void;
 }
 
 const SORT_OPTIONS = [
@@ -49,7 +50,13 @@ const SORT_OPTIONS = [
 const ESTADOS_NO_DISPONIBLES = ["expirada", "inactiva"];
 const ESTADOS_RESPONDIDOS = ["aceptada", "rechazada"];
 
-const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawerProps) => {
+const OfertasDrawer = ({
+  open,
+  onClose,
+  factura,
+  initialOfertaId,
+  onOfertasActualizadas,
+}: OfertasDrawerProps) => {
   const { getOfertasByFacturaId, comentarEmpresa, loading } = useOfertas();
   const navigate = useNavigate();
   const [ofertas, setOfertas] = useState<Oferta[]>([]);
@@ -135,7 +142,8 @@ const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawe
   };
 
   const handleRechazarSuccess = () => {
-    window.location.reload();
+    fetchOfertas();
+    onOfertasActualizadas?.();
   };
 
   return (

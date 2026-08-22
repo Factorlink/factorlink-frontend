@@ -605,6 +605,7 @@ const FacturaDetail = () => {
           onClose={handleCloseOfertas}
           factura={factura}
           initialOfertaId={ofertaIdParam}
+          onOfertasActualizadas={fetchFactura}
         />
       </Box>
     </Layout>

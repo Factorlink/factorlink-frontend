@@ -313,28 +313,30 @@ const OfertaRecibidaCard = ({
                 borderTop: "1px solid var(--color-border-default-primary)",
               }}
             >
-              <Button
-                variant="contained"
-                startIcon={<CheckCircle />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAceptar();
-                }}
-                sx={{
-                  backgroundColor: "var(--color-bg-success-primary)",
-                  color: "var(--color-fg-on-accent-primary)",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  borderRadius: 2,
-                  px: 3,
-                  py: 1,
-                  "&:hover": {
-                    backgroundColor: "var(--color-bg-success-primary-hover)",
-                  },
-                }}
-              >
-                Aceptar oferta
-              </Button>
+              {!condicionada && (
+                <Button
+                  variant="contained"
+                  startIcon={<CheckCircle />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAceptar();
+                  }}
+                  sx={{
+                    backgroundColor: "var(--color-bg-success-primary)",
+                    color: "var(--color-fg-on-accent-primary)",
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: 2,
+                    px: 3,
+                    py: 1,
+                    "&:hover": {
+                      backgroundColor: "var(--color-bg-success-primary-hover)",
+                    },
+                  }}
+                >
+                  Aceptar oferta
+                </Button>
+              )}
               <Button
                 variant="outlined"
                 startIcon={<Cancel />}
@@ -358,6 +360,20 @@ const OfertaRecibidaCard = ({
               >
                 Rechazar oferta
               </Button>
+
+              {condicionada && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    alignSelf: "center",
+                    color: "var(--color-fg-default-secondary)",
+                  }}
+                >
+                  Responde en la conversación para negociar las condiciones.
+                  Podrás aceptar la oferta cuando el factoring envíe la oferta
+                  final.
+                </Typography>
+              )}
             </Box>
           )}
         </Box>
