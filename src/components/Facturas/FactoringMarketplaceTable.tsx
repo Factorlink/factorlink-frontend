@@ -325,6 +325,7 @@ const FactoringMarketplaceTable = ({
         onApplyFilters={handleApplyFilters}
         onClearFilters={handleClearFilters}
         loading={loading}
+        hideEstado={true}
       />
 
       <Box

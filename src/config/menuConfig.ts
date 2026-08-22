@@ -63,7 +63,7 @@ export const bottomMenuItems: MenuItem[] = [
     roles: ADMIN_ROLES,
   },
   {
-    text: "Logout",
+    text: "Cerrar sesión",
     icon: Logout,
     path: "/login",
     roles: ALL_ROLES,

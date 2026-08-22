@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   KeyboardArrowDown,
   Logout,
-  Warning,
   Edit,
   SwitchAccount,
   MailOutline,
@@ -18,17 +17,12 @@ import {
   ListItemText,
   Chip,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
 } from "@mui/material";
 import useAuthStore from "../../store/authStore";
 import { useAuth } from "../../hooks/useAuth";
 import { capitalizeFirstLetter } from "../../utils/utils";
 import NotificationBell from "../Notificaciones/NotificationBell";
+import LogoutConfirmDialog from "../Modals/LogoutConfirmDialog";
 
 const Profile = ({
   hideNotifications = false,
@@ -254,48 +248,12 @@ const Profile = ({
         </Menu>
       </Box>
 
-      <Dialog
+      <LogoutConfirmDialog
         open={logoutDialogOpen}
-        onClose={handleLogoutCancel}
-        PaperProps={{
-          sx: {
-            borderRadius: "var(--radius-l)",
-            p: 1,
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            fontFamily: "var(--font-heading)",
-            fontWeight: 500,
-          }}
-        >
-          <Warning sx={{ color: "var(--color-fg-warning-primary)" }} />
-          Confirmar cierre de sesión
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "text.secondary" }}>
-            ¿Estás seguro de que deseas cerrar tu sesión? Tendrás que volver a
-            iniciar sesión para acceder al sistema.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleLogoutCancel} variant="outlined">
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleLogoutConfirm}
-            variant="contained"
-            color="error"
-            disabled={loading}
-          >
-            {loading ? "Cerrando..." : "Cerrar sesión"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        loading={loading}
+        onCancel={handleLogoutCancel}
+        onConfirm={handleLogoutConfirm}
+      />
     </>
   );
 };
