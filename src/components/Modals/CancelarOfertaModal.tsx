@@ -12,78 +12,36 @@ import {
   CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import CancelIcon from "@mui/icons-material/Cancel";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DescriptionIcon from "@mui/icons-material/Description";
-import TextField from "@mui/material/TextField";
 import { useOfertas } from "../../hooks/useOfertas";
-import {
-  formatMoney,
-  formatPercent,
-  isInformed,
-  type OptionalValue,
-} from "../../utils/ofertaFormatters";
-import { normalizeOfertaEstado, OFERTA_ESTADOS } from "../../utils/ofertaEstados";
+import type { Oferta } from "../../types/oferta";
+import { formatMoney, formatPercent } from "../../utils/ofertaFormatters";
 
-interface RechazarOfertaModalProps {
+interface CancelarOfertaModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  ofertaData: {
-    id: string;
-    factoringName: string;
-    montoAdelanto: string;
-    tasa: string;
-    porcentajeFinanciamiento: string;
-    montoAGirar?: OptionalValue;
-    retencion?: OptionalValue;
-    ofertaCondicionada?: boolean;
-  };
+  oferta: Oferta;
 }
 
-const buildResumenLine = (ofertaData: RechazarOfertaModalProps["ofertaData"]) => {
-  const parts = [
-    `Adelanto: ${formatMoney(ofertaData.montoAdelanto)}`,
-    `Tasa: ${formatPercent(ofertaData.tasa)}`,
-  ];
-  if (isInformed(ofertaData.montoAGirar)) {
-    parts.push(`Monto a girar: ${formatMoney(ofertaData.montoAGirar)}`);
-  }
-  if (isInformed(ofertaData.retencion)) {
-    parts.push(`Retención: ${formatMoney(ofertaData.retencion)}`);
-  }
-  return parts.join(" • ");
-};
-
-const RechazarOfertaModal = ({
+const CancelarOfertaModal = ({
   open,
   onClose,
   onSuccess,
-  ofertaData,
-}: RechazarOfertaModalProps) => {
-  const [alertStatus, setAlertStatus] = useState<
-    "success" | "warning" | "error" | null
-  >(null);
+  oferta,
+}: CancelarOfertaModalProps) => {
+  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
+    null
+  );
   const [alertMessage, setAlertMessage] = useState("");
-  const [comentario, setComentario] = useState("");
-  const { responderOferta, loading } = useOfertas();
-  const condicionada = ofertaData.ofertaCondicionada === true;
-  const comentarioRequerido = condicionada && !comentario.trim();
+  const { deleteOferta, loading } = useOfertas();
 
-  const handleReject = async () => {
+  const handleCancelar = async () => {
     try {
-      const oferta = await responderOferta(ofertaData.id, {
-        estado: "rechazada",
-        comentarioEmpresa: comentario,
-      });
-      if (normalizeOfertaEstado(oferta?.estado) === OFERTA_ESTADOS.RECHAZADA) {
-        setAlertStatus("success");
-        setAlertMessage("Oferta rechazada correctamente.");
-      } else {
-        setAlertStatus("warning");
-        setAlertMessage(
-          "Se registró tu comentario en la conversación, pero la oferta sigue condicionada y no fue rechazada. El factoring debe enviar la oferta final para poder responderla."
-        );
-      }
+      await deleteOferta(oferta.id);
+      setAlertStatus("success");
+      setAlertMessage("Oferta cancelada correctamente.");
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string } };
@@ -91,25 +49,24 @@ const RechazarOfertaModal = ({
       setAlertStatus("error");
       setAlertMessage(
         axiosError?.response?.data?.message ||
-          "Ocurrió un error al rechazar la oferta"
+          "Ocurrió un error al cancelar la oferta"
       );
     }
   };
 
   const handleClose = () => {
-    if (alertStatus === "success" || alertStatus === "warning") {
+    if (alertStatus === "success") {
       onSuccess?.();
     }
     setAlertStatus(null);
     setAlertMessage("");
-    setComentario("");
     onClose();
   };
 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={loading ? undefined : handleClose}
       maxWidth="sm"
       fullWidth
       PaperProps={{
@@ -141,10 +98,10 @@ const RechazarOfertaModal = ({
               justifyContent: "center",
             }}
           >
-            <CancelIcon sx={{ color: "white", fontSize: 24 }} />
+            <DeleteOutlineIcon sx={{ color: "white", fontSize: 24 }} />
           </Box>
           <Typography variant="h6" fontWeight={600}>
-            ¿Rechazar oferta?
+            ¿Cancelar oferta?
           </Typography>
         </Box>
         <IconButton onClick={handleClose} disabled={loading}>
@@ -159,7 +116,7 @@ const RechazarOfertaModal = ({
           </Alert>
         )}
 
-        {alertStatus !== "success" && alertStatus !== "warning" && (
+        {alertStatus !== "success" && (
           <Box sx={{ borderRadius: "var(--radius-m)", p: 2, mt: 2 }}>
             <Box
               sx={{
@@ -186,39 +143,29 @@ const RechazarOfertaModal = ({
                 <DescriptionIcon sx={{ color: "primary.main" }} />
               </Box>
               <Box>
-                <Typography variant="body1" sx={{ color: "text.primary", fontWeight: 600 }}>
-                  {ofertaData.factoringName}
+                <Typography
+                  variant="body1"
+                  sx={{ color: "text.primary", fontWeight: 600 }}
+                >
+                  Tu oferta
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {buildResumenLine(ofertaData)}
+                  {`Adelanto: ${formatMoney(oferta.montoAdelanto)} • Tasa: ${formatPercent(oferta.tasa)}`}
                 </Typography>
               </Box>
             </Box>
 
-            <Typography variant="body2" sx={{ color: "var(--color-fg-danger-primary)", lineHeight: 1.6 }}>
-              ¿Estás seguro de que deseas rechazar esta oferta? Esta acción
-              no se puede deshacer y el factoring será notificado.
+            <Typography
+              variant="body2"
+              sx={{
+                color: "var(--color-fg-danger-primary)",
+                lineHeight: 1.6,
+              }}
+            >
+              Esta acción no se puede deshacer. La oferta se eliminará junto con
+              su conversación y la empresa dejará de verla. Si quieres volver a
+              participar, tendrás que enviar una oferta nueva.
             </Typography>
-
-            <TextField
-              label={condicionada ? "Comentario" : "Comentario (opcional)"}
-              multiline
-              minRows={3}
-              maxRows={5}
-              fullWidth
-              required={condicionada}
-              value={comentario}
-              onChange={(e) => setComentario(e.target.value)}
-              disabled={loading}
-              placeholder="Escribe un comentario para el factoring..."
-              helperText={
-                condicionada
-                  ? "Las ofertas condicionadas exigen un comentario para responder."
-                  : undefined
-              }
-              sx={{ mt: 2 }}
-              inputProps={{ maxLength: 500 }}
-            />
           </Box>
         )}
       </DialogContent>
@@ -236,15 +183,13 @@ const RechazarOfertaModal = ({
             fontWeight: 600,
           }}
         >
-          {alertStatus === "success" || alertStatus === "warning"
-            ? "Cerrar"
-            : "Cancelar"}
+          {alertStatus === "success" ? "Cerrar" : "Volver"}
         </Button>
-        {alertStatus !== "success" && alertStatus !== "warning" && (
+        {alertStatus !== "success" && (
           <Button
             variant="contained"
-            onClick={handleReject}
-            disabled={loading || comentarioRequerido}
+            onClick={handleCancelar}
+            disabled={loading}
             sx={{
               flex: 1,
               py: 1.5,
@@ -261,7 +206,7 @@ const RechazarOfertaModal = ({
             {loading ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
-              "Rechazar oferta"
+              "Cancelar oferta"
             )}
           </Button>
         )}
@@ -270,4 +215,4 @@ const RechazarOfertaModal = ({
   );
 };
 
-export default RechazarOfertaModal;
+export default CancelarOfertaModal;

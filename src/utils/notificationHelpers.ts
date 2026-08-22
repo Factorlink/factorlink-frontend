@@ -1,5 +1,6 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import {
+  ChatBubbleOutline,
   CheckCircleOutline,
   Description,
   LocalOffer,
@@ -32,6 +33,9 @@ const TIPO_LABELS: Record<NotificationTipo, string> = {
   INVITACION_FACTORING_RECIBIDA: "Invitación a Factoring",
   INVITACION_FACTORING_RESPONDIDA: "Invitación respondida",
   OFERTA_RECIBIDA: "Oferta recibida",
+  OFERTA_NUEVO_COMENTARIO: "Nuevo comentario",
+  OFERTA_RESPONDIDA: "Oferta respondida",
+  OFERTA_ACTUALIZADA: "Oferta actualizada",
   OFERTA_ACEPTADA: "Oferta aceptada",
   OFERTA_RECHAZADA: "Oferta rechazada",
   OFERTA_EXPIRADA: "Oferta expirada",
@@ -48,8 +52,16 @@ const INVITACION_TIPOS: NotificationTipo[] = [
   "INVITACION_FACTORING_RESPONDIDA",
 ];
 
+/** Notificaciones de la conversación de una oferta condicionada. */
+const OFERTA_CONVERSACION_TIPOS: NotificationTipo[] = [
+  "OFERTA_NUEVO_COMENTARIO",
+  "OFERTA_RESPONDIDA",
+];
+
 const OFERTA_TIPOS: NotificationTipo[] = [
   "OFERTA_RECIBIDA",
+  ...OFERTA_CONVERSACION_TIPOS,
+  "OFERTA_ACTUALIZADA",
   "OFERTA_ACEPTADA",
   "OFERTA_RECHAZADA",
   "OFERTA_EXPIRADA",
@@ -68,6 +80,7 @@ export const getNotificationIcon = (
   tipo: NotificationTipo,
 ): SvgIconComponent => {
   if (INVITACION_TIPOS.includes(tipo)) return MailOutline;
+  if (OFERTA_CONVERSACION_TIPOS.includes(tipo)) return ChatBubbleOutline;
   if (OFERTA_TIPOS.includes(tipo)) return LocalOffer;
   if (tipo === "FACTURAS_SINCRONIZADAS") return Sync;
   if (DOCUMENTO_LEGAL_TIPOS.includes(tipo)) {
@@ -110,6 +123,11 @@ export const getNotificationRoute = (
     }
 
     if (currentRole?.contexto === "factoring") {
+      // La conversación vive en la pestaña "Tu oferta"; el historial no la muestra.
+      if (OFERTA_CONVERSACION_TIPOS.includes(tipo)) {
+        return `/facturas/${facturaId}/factoring?tab=oferta`;
+      }
+
       const params = new URLSearchParams({ tab: "historial" });
       if (notification.entidadId) {
         params.set("ofertaId", notification.entidadId);

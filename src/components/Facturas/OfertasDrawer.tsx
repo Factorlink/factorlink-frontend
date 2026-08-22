@@ -1,151 +1,80 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  Alert,
+  Button,
   Drawer,
   Box,
   Typography,
   IconButton,
   Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  MenuItem,
   Paper,
+  TextField,
+  Tooltip,
   CircularProgress,
-  Collapse,
-  Button,
 } from "@mui/material";
 import {
   Close,
   Storefront,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-  CheckCircle,
-  Cancel,
-  Comment,
+  ArrowDownward,
+  ArrowUpward,
 } from "@mui/icons-material";
 import { useOfertas } from "../../hooks/useOfertas";
 import type { Factura } from "../../types/factura";
 import type { Oferta } from "../../types/oferta";
 import AceptarOfertaModal from "../Modals/AceptarOfertaModal";
 import RechazarOfertaModal from "../Modals/RechazarOfertaModal";
-import OfertaCamposDetalle from "../Ofertas/OfertaCamposDetalle";
-import SortableTableHeader from "./SortableTableHeader";
+import OfertaRecibidaCard from "../Ofertas/OfertaRecibidaCard";
+import { formatMoney } from "../../utils/ofertaFormatters";
 import {
-  tableShellSx,
-  tableWideSx,
-} from "../../theme/layoutStyles";
+  isOfertaCondicionada,
+  puedeComentar as puedeComentarOferta,
+} from "../../utils/ofertaEstados";
 
 interface OfertasDrawerProps {
   open: boolean;
   onClose: () => void;
   factura: Factura | null;
   initialOfertaId?: string | null;
+  onOfertasActualizadas?: () => void;
 }
 
-const formatCurrency = (value: string | number) => {
-  const numValue = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(numValue)) return "$0";
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    minimumFractionDigits: 0,
-  }).format(numValue);
-};
+const SORT_OPTIONS = [
+  { value: "", label: "Sin orden" },
+  { value: "porcentajeFinanciamiento", label: "% Financiamiento" },
+  { value: "tasa", label: "Tasa" },
+  { value: "montoAdelanto", label: "Monto adelanto" },
+  { value: "fechaExpiracion", label: "Fecha expiración" },
+  { value: "estado", label: "Estado" },
+] as const;
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("es-CL", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-};
+const ESTADOS_NO_DISPONIBLES = ["expirada", "inactiva"];
+const ESTADOS_RESPONDIDOS = ["aceptada", "rechazada"];
 
-const getEstadoChip = (estado: string) => {
-  const normalized = estado?.toLowerCase() || "";
-  if (normalized === "activa") {
-    return (
-      <Chip
-        label="Activa"
-        size="small"
-        sx={{ backgroundColor: "var(--color-bg-success-secondary)", color: "var(--color-fg-success-primary)", fontWeight: 500 }}
-      />
-    );
-  }
-  if (normalized === "aceptada") {
-    return (
-      <Chip
-        label="Aceptada"
-        size="small"
-        sx={{ backgroundColor: "var(--color-bg-success-secondary)", color: "var(--color-fg-success-primary)", fontWeight: 500 }}
-      />
-    );
-  }
-  if (normalized === "rechazada") {
-    return (
-      <Chip
-        label="Rechazada"
-        size="small"
-        sx={{ backgroundColor: "var(--color-bg-danger-secondary)", color: "var(--color-fg-danger-primary)", fontWeight: 500 }}
-      />
-    );
-  }
-  if (normalized === "expirada") {
-    return (
-      <Chip
-        icon={<span style={{ fontSize: 14 }}>⚠</span>}
-        label="Expirada"
-        size="small"
-        sx={{ backgroundColor: "var(--color-bg-warning-secondary)", color: "var(--color-fg-warning-primary)", fontWeight: 500 }}
-      />
-    );
-  }
-  if (normalized === "inactiva") {
-    return (
-      <Chip
-        label="Inactiva"
-        size="small"
-        sx={{ backgroundColor: "var(--color-bg-accent-secondary)", color: "var(--color-fg-accent-primary)", fontWeight: 500 }}
-      />
-    );
-  }
-  return (
-    <Chip
-      label="Recibida"
-      size="small"
-      sx={{ backgroundColor: "var(--color-bg-accent-secondary)", color: "var(--color-fg-accent-primary)", fontWeight: 500 }}
-    />
-  );
-};
-
-const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawerProps) => {
-  const { getOfertasByFacturaId, loading } = useOfertas();
+const OfertasDrawer = ({
+  open,
+  onClose,
+  factura,
+  initialOfertaId,
+  onOfertasActualizadas,
+}: OfertasDrawerProps) => {
+  const { getOfertasByFacturaId, comentarEmpresa, loading } = useOfertas();
   const navigate = useNavigate();
   const [ofertas, setOfertas] = useState<Oferta[]>([]);
+  const [errorOfertas, setErrorOfertas] = useState<string | null>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [aceptarModal, setAceptarModal] = useState<{ open: boolean; oferta: Oferta | null }>({ open: false, oferta: null });
   const [rechazarModal, setRechazarModal] = useState<{ open: boolean; oferta: Oferta | null }>({ open: false, oferta: null });
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("ASC");
   const appliedInitialOfertaIdRef = useRef<string | null>(null);
-  const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
-
-  const handleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
-    } else {
-      setSortBy(field);
-      setSortOrder("ASC");
-    }
-  };
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const fetchOfertas = async () => {
     if (!factura?.id) return;
     try {
+      setErrorOfertas(null);
       const params: { orderBy?: string; order?: string } = {};
       if (sortBy) {
         params.orderBy = sortBy;
@@ -153,8 +82,15 @@ const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawe
       }
       const data = await getOfertasByFacturaId(factura.id, params);
       setOfertas(Array.isArray(data) ? data : data?.data || []);
-    } catch {
+    } catch (error: unknown) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
       setOfertas([]);
+      setErrorOfertas(
+        axiosError?.response?.data?.message ||
+          "No se pudieron cargar las ofertas de esta factura.",
+      );
     }
   };
 
@@ -181,7 +117,7 @@ const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawe
     const target = ofertas.find((oferta) => oferta.id === initialOfertaId);
     if (!target) return;
     appliedInitialOfertaIdRef.current = initialOfertaId;
-    const isNotAvailable = ["expirada", "inactiva"].includes(
+    const isNotAvailable = ESTADOS_NO_DISPONIBLES.includes(
       target.estado?.toLowerCase() || "",
     );
     if (!isNotAvailable) {
@@ -192,10 +128,10 @@ const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawe
   useEffect(() => {
     if (!open || !expandedRow) return;
     if (appliedInitialOfertaIdRef.current !== expandedRow) return;
-    const row = rowRefs.current[expandedRow];
-    if (!row) return;
+    const card = cardRefs.current[expandedRow];
+    if (!card) return;
     const frame = requestAnimationFrame(() => {
-      row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      card.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
     return () => cancelAnimationFrame(frame);
   }, [open, expandedRow]);
@@ -217,7 +153,8 @@ const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawe
   };
 
   const handleRechazarSuccess = () => {
-    window.location.reload();
+    fetchOfertas();
+    onOfertasActualizadas?.();
   };
 
   return (
@@ -319,7 +256,7 @@ const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawe
                   variant="body2"
                   sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
                 >
-                  {formatCurrency(factura.montoTotal)}
+                  {formatMoney(factura.montoTotal)}
                 </Typography>
               </Box>
               <Box>
@@ -330,7 +267,7 @@ const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawe
                   variant="body2"
                   sx={{ fontWeight: 700, color: "var(--color-fg-success-primary)" }}
                 >
-                  {formatCurrency(factura.montoFinanciar)}
+                  {formatMoney(factura.montoFinanciar)}
                 </Typography>
               </Box>
               <Box>
@@ -354,25 +291,84 @@ const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawe
         )}
 
         {/* Ofertas disponibles */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2, flexShrink: 0 }}>
-          <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
-          >
-            Ofertas disponibles
-          </Typography>
-          <Chip
-            label={`${activas} activas`}
-            size="small"
-            variant="outlined"
-            sx={{ fontWeight: 500 }}
-          />
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1.5,
+            mb: 2,
+            flexShrink: 0,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
+            >
+              Ofertas disponibles
+            </Typography>
+            <Chip
+              label={`${activas} activas`}
+              size="small"
+              variant="outlined"
+              sx={{ fontWeight: 500 }}
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <TextField
+              select
+              size="small"
+              label="Ordenar por"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              sx={{ minWidth: 190 }}
+            >
+              {SORT_OPTIONS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
+            <Tooltip
+              title={sortOrder === "ASC" ? "Ascendente" : "Descendente"}
+              arrow
+            >
+              <IconButton
+                onClick={() =>
+                  setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"))
+                }
+                disabled={!sortBy}
+                size="small"
+              >
+                {sortOrder === "ASC" ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
 
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
             <CircularProgress />
           </Box>
+        ) : errorOfertas ? (
+          <Alert
+            severity="error"
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                onClick={fetchOfertas}
+                sx={{ textTransform: "none", fontWeight: 600 }}
+              >
+                Reintentar
+              </Button>
+            }
+          >
+            {errorOfertas}
+          </Alert>
         ) : ofertas.length === 0 ? (
           <Box sx={{ textAlign: "center", py: 6 }}>
             <Typography variant="body1" sx={{ color: "var(--color-fg-default-secondary)" }}>
@@ -380,209 +376,36 @@ const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawe
             </Typography>
           </Box>
         ) : (
-          <TableContainer
-            component={Paper}
-            sx={{
-              ...tableShellSx,
-              flex: 1,
-              minHeight: 0,
-              overflow: "auto",
-            }}
-          >
-            <Table sx={tableWideSx}>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}>
-                  <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)", width: 48 }} />
-                  <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
-                    Factoring
-                  </TableCell>
-                  <SortableTableHeader field="porcentajeFinanciamiento" label="% Financiamiento" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
-                  <SortableTableHeader field="tasa" label="Tasa" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
-                  <SortableTableHeader field="montoAdelanto" label="Monto Adelanto" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
-                  <TableCell sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}>
-                    Plazo
-                  </TableCell>
-                  <SortableTableHeader field="fechaExpiracion" label="Fecha Expiración" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
-                  <SortableTableHeader field="estado" label="Estado" currentSortBy={sortBy} currentOrder={sortOrder} onSort={handleSort} />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {ofertas.map((oferta) => {
-                  const isNotAvailable = ["expirada", "inactiva"].includes(oferta.estado?.toLowerCase() || "");
-                  const isExpanded = expandedRow === oferta.id;
-                  const isRespondida =
-                    oferta.estado?.toLowerCase() === "aceptada" ||
-                    oferta.estado?.toLowerCase() === "rechazada";
+          <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", pr: 0.5 }}>
+            {ofertas.map((oferta) => {
+              const estado = oferta.estado?.toLowerCase() || "";
+              const disponible = !ESTADOS_NO_DISPONIBLES.includes(estado);
+              const respondida = ESTADOS_RESPONDIDOS.includes(estado);
 
-                  return (
-                    <>
-                      <TableRow
-                        key={oferta.id}
-                        ref={(el) => {
-                          rowRefs.current[oferta.id] = el;
-                        }}
-                        sx={{
-                          opacity: isNotAvailable ? 0.5 : 1,
-                          "&:hover": { backgroundColor: "var(--color-bg-default-tertiary)" },
-                          cursor: isNotAvailable ? "default" : "pointer",
-                          "& > td": { borderBottom: isExpanded ? 0 : undefined },
-                        }}
-                        onClick={() => !isNotAvailable && handleToggleRow(oferta.id)}
-                      >
-                        <TableCell sx={{ width: 48, px: 1 }}>
-                          {!isNotAvailable && (
-                            <IconButton size="small">
-                              {isExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                            </IconButton>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Box>
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
-                            >
-                              {oferta.factoring?.razonSocial || "N/A"}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                              {oferta.factoring?.rut || ""}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "var(--color-fg-success-primary)", fontWeight: 600 }}
-                          >
-                            {parseFloat(
-                              oferta.porcentajeFinanciamiento || "0",
-                            ).toFixed(2)}
-                            %
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "var(--color-fg-default-primary)", fontWeight: 500 }}
-                          >
-                            {parseFloat(oferta.tasa || "0").toFixed(2)}%
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "var(--color-fg-success-primary)", fontWeight: 600 }}
-                          >
-                            {formatCurrency(oferta.montoAdelanto)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={`${factura?.plazo || 0} días`}
-                            size="small"
-                            sx={{
-                              backgroundColor: "var(--color-bg-default-tertiary)",
-                              color: "var(--color-fg-default-primary)",
-                              fontWeight: 500,
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: isNotAvailable ? "var(--color-fg-danger-primary)" : "var(--color-fg-default-secondary)" }}
-                          >
-                            {formatDate(oferta.fechaExpiracion)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>{getEstadoChip(oferta.estado)}</TableCell>
-                      </TableRow>
-
-                      {/* Expandable row */}
-                      <TableRow key={`${oferta.id}-expand`}>
-                        <TableCell colSpan={8} sx={{ py: 0, px: 0 }}>
-                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                            <Box
-                              sx={{
-                                p: 2.5,
-                                pl: 7,
-                                backgroundColor: "var(--color-bg-default-tertiary)",
-                                borderBottom: "1px solid var(--color-border-default-primary)",
-                              }}
-                            >
-                              {/* Comentario */}
-                              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, mb: 2 }}>
-                                <Comment sx={{ fontSize: 18, color: "var(--color-fg-default-secondary)", mt: 0.3 }} />
-                                <Box>
-                                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)", fontWeight: 600 }}>
-                                    Comentario del factoring
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ color: "var(--color-fg-default-primary)", mt: 0.5 }}>
-                                    {oferta.comentario || "Sin comentario"}
-                                  </Typography>
-                                </Box>
-                              </Box>
-
-                              <OfertaCamposDetalle oferta={oferta} />
-
-                              {/* Action buttons */}
-                              {!isRespondida && !isNotAvailable && !aceptadas && (
-                                <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-                                  <Button
-                                    variant="contained"
-                                    startIcon={<CheckCircle />}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setAceptarModal({ open: true, oferta });
-                                    }}
-                                    sx={{
-                                      backgroundColor: "var(--color-bg-success-primary)",
-                                      color: "var(--color-fg-on-accent-primary)",
-                                      textTransform: "none",
-                                      fontWeight: 600,
-                                      borderRadius: 2,
-                                      px: 3,
-                                      py: 1,
-                                      "&:hover": { backgroundColor: "var(--color-bg-success-primary-hover)" },
-                                    }}
-                                  >
-                                    Aceptar oferta
-                                  </Button>
-                                  <Button
-                                    variant="outlined"
-                                    startIcon={<Cancel />}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setRechazarModal({ open: true, oferta });
-                                    }}
-                                    sx={{
-                                      borderColor: "var(--color-fg-danger-primary)",
-                                      color: "var(--color-fg-danger-primary)",
-                                      textTransform: "none",
-                                      fontWeight: 600,
-                                      borderRadius: 2,
-                                      px: 3,
-                                      py: 1,
-                                      "&:hover": {
-                                        borderColor: "var(--color-border-danger-secondary)",
-                                        backgroundColor: "var(--color-bg-danger-secondary)",
-                                      },
-                                    }}
-                                  >
-                                    Rechazar oferta
-                                  </Button>
-                                </Box>
-                              )}
-                            </Box>
-                          </Collapse>
-                        </TableCell>
-                      </TableRow>
-                    </>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              return (
+                <OfertaRecibidaCard
+                  key={oferta.id}
+                  oferta={oferta}
+                  plazo={factura?.plazo || 0}
+                  expandida={expandedRow === oferta.id}
+                  disponible={disponible}
+                  mostrarAcciones={disponible && !respondida && !aceptadas}
+                  puedeComentar={
+                    puedeComentarOferta(oferta) && isOfertaCondicionada(oferta)
+                  }
+                  onToggle={() => handleToggleRow(oferta.id)}
+                  onAceptar={() => setAceptarModal({ open: true, oferta })}
+                  onRechazar={() => setRechazarModal({ open: true, oferta })}
+                  onEnviarComentario={async (texto) => {
+                    await comentarEmpresa(oferta.id, texto);
+                  }}
+                  cardRef={(el) => {
+                    cardRefs.current[oferta.id] = el;
+                  }}
+                />
+              );
+            })}
+          </Box>
         )}
       </Drawer>
 
@@ -616,6 +439,7 @@ const OfertasDrawer = ({ open, onClose, factura, initialOfertaId }: OfertasDrawe
             porcentajeFinanciamiento: rechazarModal.oferta.porcentajeFinanciamiento,
             montoAGirar: rechazarModal.oferta.montoAGirar,
             retencion: rechazarModal.oferta.retencion,
+            ofertaCondicionada: isOfertaCondicionada(rechazarModal.oferta),
           }}
         />
       )}

@@ -104,6 +104,7 @@ export const createOfertaFormSchema = (minFechaExpiracion: Date) =>
       .string()
       .trim()
       .max(500, "El comentario no puede exceder 500 caracteres"),
+    ofertaCondicionada: yup.boolean(),
     tipoDocumento: yup
       .string()
       .trim()

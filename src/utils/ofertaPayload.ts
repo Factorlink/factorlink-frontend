@@ -9,6 +9,7 @@ export type OfertaPayloadInput = {
   montoAdelanto: string | number;
   fechaExpiracion: string | Date;
   comentario?: string | null;
+  ofertaCondicionada?: boolean;
   tipoDocumento: string | null;
   fechaOperacion: string | Date | null;
   numeroDocumentos: string | number | null;
@@ -103,6 +104,7 @@ export const buildCreateOfertaPayload = (
     montoAdelanto: toRequiredNumber(input.montoAdelanto, "montoAdelanto"),
     fechaExpiracion: toIsoDateTime(input.fechaExpiracion),
     comentario: input.comentario?.trim() ?? "",
+    ofertaCondicionada: Boolean(input.ofertaCondicionada),
     tipoDocumento: toRequiredString(input.tipoDocumento, "tipoDocumento"),
     fechaOperacion: toRequiredDateOnly(input.fechaOperacion, "fechaOperacion"),
     ...numericFields,

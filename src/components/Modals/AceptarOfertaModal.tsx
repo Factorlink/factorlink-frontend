@@ -65,7 +65,10 @@ const AceptarOfertaModal = ({
 
   const handleAccept = async () => {
     try {
-      await responderOferta(ofertaData.id, "aceptada", comentario);
+      await responderOferta(ofertaData.id, {
+        estado: "aceptada",
+        comentarioEmpresa: comentario,
+      });
       setAlertStatus("success");
       setAlertMessage("Oferta aceptada correctamente.");
     } catch (error: unknown) {

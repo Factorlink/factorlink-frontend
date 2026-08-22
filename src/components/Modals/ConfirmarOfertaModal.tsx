@@ -15,6 +15,7 @@ interface ConfirmarOfertaModalProps {
   onClose: () => void;
   onConfirm: () => void;
   loading: boolean;
+  ofertaCondicionada?: boolean;
 }
 
 const ConfirmarOfertaModal = ({
@@ -22,6 +23,7 @@ const ConfirmarOfertaModal = ({
   onClose,
   onConfirm,
   loading,
+  ofertaCondicionada = false,
 }: ConfirmarOfertaModalProps) => {
   return (
     <Dialog
@@ -61,7 +63,9 @@ const ConfirmarOfertaModal = ({
             variant="body2"
             sx={{ color: "var(--color-fg-warning-primary)", fontWeight: 500 }}
           >
-            Una vez enviada, no podrás modificar ni reenviar esta oferta.
+            {ofertaCondicionada
+              ? "Enviarás una oferta condicionada: la empresa no podrá aceptarla hasta que envíes la oferta final."
+              : "Una vez enviada, no podrás modificar ni reenviar esta oferta."}
           </Typography>
         </Box>
       </DialogContent>

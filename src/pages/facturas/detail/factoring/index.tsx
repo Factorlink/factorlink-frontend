@@ -1,5 +1,6 @@
 import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { useFacturas } from "../../../../hooks/useFacturas";
+import { useOfertas } from "../../../../hooks/useOfertas";
 import useAuthStore from "../../../../store/authStore";
 import { useEffect, useRef, useState } from "react";
 import type { Factura } from "../../../../types/factura";
@@ -24,10 +25,15 @@ import {
 import FacturaResumenCard from "../../../../components/Facturas/FacturaResumenCard";
 import EnviarOfertaCard from "../../../../components/Facturas/EnviarOfertaCard";
 import DetalleOfertaFactoring from "../../../../components/Ofertas/DetalleOfertaFactoring";
+import ConversacionOferta from "../../../../components/Ofertas/ConversacionOferta";
 import HistorialOfertasFactoring from "../../../../components/Ofertas/HistorialOfertasFactoring";
 import DetalleCotizacionCard from "../../../../components/Facturas/DetalleCotizacionCard";
 import FacturaDocumentoPdfSection from "../../../../components/Facturas/FacturaDocumentoPdfSection";
 import { appContentSx } from "../../../../theme/layoutStyles";
+import {
+  isOfertaCondicionada,
+  puedeComentar,
+} from "../../../../utils/ofertaEstados";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -89,6 +95,7 @@ const getPageHeader = (tab: number, hasOferta: boolean) => {
 
 const FacturaFactoringDetail = () => {
   const { getFacturaByIdAndFactoringId, loading } = useFacturas();
+  const { createComentario } = useOfertas();
   const { currentRole } = useAuthStore();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -249,10 +256,8 @@ const FacturaFactoringDetail = () => {
     );
   }
 
-  const { title, subtitle } = getPageHeader(
-    activeTab,
-    Boolean(factura.ofertaFactoring),
-  );
+  const ofertaFactoring = factura.ofertaFactoring;
+  const { title, subtitle } = getPageHeader(activeTab, Boolean(ofertaFactoring));
 
   return (
     <Layout>
@@ -381,11 +386,27 @@ const FacturaFactoringDetail = () => {
         </TabPanel>
 
         <TabPanel value={activeTab} index={1}>
-          {factura.ofertaFactoring ? (
-            <DetalleOfertaFactoring
-              oferta={factura.ofertaFactoring}
-              plazo={factura.plazo || 0}
-            />
+          {ofertaFactoring ? (
+            <>
+              <DetalleOfertaFactoring
+                oferta={ofertaFactoring}
+                plazo={factura.plazo || 0}
+                onOfertaCancelada={fetchFactura}
+                onOfertaFinalEnviada={fetchFactura}
+              />
+              <ConversacionOferta
+                ofertaId={ofertaFactoring.id}
+                ladoActual="FACTORING"
+                ocultarSiVacia={!isOfertaCondicionada(ofertaFactoring)}
+                puedeComentar={
+                  puedeComentar(ofertaFactoring) &&
+                  isOfertaCondicionada(ofertaFactoring)
+                }
+                onEnviarComentario={(texto) =>
+                  createComentario(ofertaFactoring.id, texto)
+                }
+              />
+            </>
           ) : (
             <EnviarOfertaCard
               factura={factura}
