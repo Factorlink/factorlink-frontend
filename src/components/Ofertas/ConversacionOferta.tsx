@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, Box, Button, CircularProgress, Typography } from "@mui/material";
-import { ChatBubbleOutline } from "@mui/icons-material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { ChatBubbleOutline, Send } from "@mui/icons-material";
 import type {
   ComentarioOferta,
   ComentarioOfertaTipo,
@@ -19,22 +26,37 @@ interface ConversacionOfertaProps {
   ladoActual: ComentarioOfertaTipo;
   /** Evita mostrar un panel vacío en ofertas que nunca tuvieron conversación. */
   ocultarSiVacia?: boolean;
+  puedeComentar?: boolean;
+  /**
+   * Cada lado usa un endpoint distinto. Si resuelve con el comentario creado se
+   * agrega a la lista; si resuelve vacío se recargan los comentarios.
+   */
+  onEnviarComentario?: (texto: string) => Promise<ComentarioOferta | void>;
+  placeholderComentario?: string;
+  textoBotonEnviar?: string;
 }
 
 const ConversacionOferta = ({
   ofertaId,
   ladoActual,
   ocultarSiVacia = false,
+  puedeComentar = false,
+  onEnviarComentario,
+  placeholderComentario = "Escribe un comentario...",
+  textoBotonEnviar = "Enviar comentario",
 }: ConversacionOfertaProps) => {
   const { getComentarios } = useOfertas();
   const [comentarios, setComentarios] = useState<ComentarioOferta[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nuevoComentario, setNuevoComentario] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [errorEnvio, setErrorEnvio] = useState<string | null>(null);
   const requestIdRef = useRef(0);
 
-  const fetchComentarios = async () => {
+  const fetchComentarios = async (mostrarCargando = true) => {
     const requestId = ++requestIdRef.current;
-    setCargando(true);
+    if (mostrarCargando) setCargando(true);
     setError(null);
     try {
       const data = await getComentarios(ofertaId);
@@ -50,7 +72,9 @@ const ConversacionOferta = ({
           "No se pudieron cargar los comentarios.",
       );
     } finally {
-      if (requestId === requestIdRef.current) setCargando(false);
+      if (requestId === requestIdRef.current && mostrarCargando) {
+        setCargando(false);
+      }
     }
   };
 
@@ -58,7 +82,42 @@ const ConversacionOferta = ({
     fetchComentarios();
   }, [ofertaId]);
 
-  if (ocultarSiVacia && !cargando && !error && comentarios.length === 0) {
+  const puedeEnviar = puedeComentar && Boolean(onEnviarComentario);
+
+  const handleEnviar = async () => {
+    const texto = nuevoComentario.trim();
+    if (!texto || !onEnviarComentario) return;
+
+    setEnviando(true);
+    setErrorEnvio(null);
+    try {
+      const creado = await onEnviarComentario(texto);
+      setNuevoComentario("");
+      if (creado?.id) {
+        setComentarios((prev) => [...prev, creado]);
+      } else {
+        await fetchComentarios(false);
+      }
+    } catch (err: unknown) {
+      const axiosError = err as {
+        response?: { data?: { message?: string } };
+      };
+      setErrorEnvio(
+        axiosError?.response?.data?.message ||
+          "No se pudo enviar el comentario.",
+      );
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  if (
+    ocultarSiVacia &&
+    !puedeEnviar &&
+    !cargando &&
+    !error &&
+    comentarios.length === 0
+  ) {
     return null;
   }
 
@@ -95,7 +154,7 @@ const ConversacionOferta = ({
             <Button
               color="inherit"
               size="small"
-              onClick={fetchComentarios}
+              onClick={() => fetchComentarios()}
               sx={{ textTransform: "none", fontWeight: 600 }}
             >
               Reintentar
@@ -201,6 +260,70 @@ const ConversacionOferta = ({
               </Box>
             );
           })}
+        </Box>
+      )}
+
+      {puedeEnviar && !cargando && (
+        <Box
+          sx={{
+            mt: 3,
+            pt: 3,
+            borderTop: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          {errorEnvio && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {errorEnvio}
+            </Alert>
+          )}
+
+          <TextField
+            fullWidth
+            multiline
+            minRows={2}
+            maxRows={5}
+            placeholder={placeholderComentario}
+            value={nuevoComentario}
+            onChange={(e) => setNuevoComentario(e.target.value)}
+            disabled={enviando}
+            inputProps={{ maxLength: 500 }}
+          />
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+              mt: 1.5,
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{ color: "var(--color-fg-default-tertiary)" }}
+            >
+              {nuevoComentario.length}/500
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={enviando ? undefined : <Send />}
+              onClick={handleEnviar}
+              disabled={enviando || !nuevoComentario.trim()}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: "var(--radius-m)",
+                color: "var(--color-fg-on-accent-primary)",
+              }}
+            >
+              {enviando ? (
+                <CircularProgress size={22} color="inherit" />
+              ) : (
+                textoBotonEnviar
+              )}
+            </Button>
+          </Box>
         </Box>
       )}
     </SectionPanel>

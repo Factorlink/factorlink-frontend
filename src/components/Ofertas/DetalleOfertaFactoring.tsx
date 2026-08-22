@@ -18,11 +18,13 @@ import {
   isOfertaCondicionada,
   normalizeOfertaEstado,
   puedeCancelar,
+  puedeEnviarOfertaFinal,
   OFERTA_ESTADOS,
 } from "../../utils/ofertaEstados";
 import SectionPanel from "../SectionPanel";
 import OfertaCamposDetalle from "./OfertaCamposDetalle";
 import CancelarOfertaModal from "../Modals/CancelarOfertaModal";
+import EnviarOfertaFinalModal from "../Modals/EnviarOfertaFinalModal";
 
 const formatDateShort = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -101,14 +103,17 @@ interface DetalleOfertaFactoringProps {
   oferta: Oferta;
   plazo: number;
   onOfertaCancelada?: () => void;
+  onOfertaFinalEnviada?: () => void;
 }
 
 const DetalleOfertaFactoring = ({
   oferta,
   plazo,
   onOfertaCancelada,
+  onOfertaFinalEnviada,
 }: DetalleOfertaFactoringProps) => {
   const [cancelarOpen, setCancelarOpen] = useState(false);
+  const [ofertaFinalOpen, setOfertaFinalOpen] = useState(false);
   const estadoConfig = getEstadoConfig(oferta.estado);
   const banner = getEstadoBanner(oferta);
   const BannerIcon = banner.icon;
@@ -357,6 +362,22 @@ const DetalleOfertaFactoring = ({
                 >
                   Cancelar oferta
                 </Button>
+
+                {puedeEnviarOfertaFinal(oferta) && (
+                  <Button
+                    variant="contained"
+                    startIcon={<Send />}
+                    onClick={() => setOfertaFinalOpen(true)}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      borderRadius: "var(--radius-m)",
+                      color: "var(--color-fg-on-accent-primary)",
+                    }}
+                  >
+                    Enviar oferta final
+                  </Button>
+                )}
               </Box>
             )}
           </Box>
@@ -365,6 +386,13 @@ const DetalleOfertaFactoring = ({
         open={cancelarOpen}
         onClose={() => setCancelarOpen(false)}
         onSuccess={onOfertaCancelada}
+        oferta={oferta}
+      />
+
+      <EnviarOfertaFinalModal
+        open={ofertaFinalOpen}
+        onClose={() => setOfertaFinalOpen(false)}
+        onSuccess={onOfertaFinalEnviada}
         oferta={oferta}
       />
     </SectionPanel>
