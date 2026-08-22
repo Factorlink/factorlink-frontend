@@ -303,19 +303,6 @@ const DetalleOfertaFactoring = ({
               </Box>
             </Box>
 
-            {oferta.comentario && (
-              <Box
-                sx={{ pt: 2, borderTop: "1px solid", borderColor: "divider" }}
-              >
-                <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                  Comentario:
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5 }}>
-                  {oferta.comentario}
-                </Typography>
-              </Box>
-            )}
-
             {puedeCancelar(oferta) && (
               <Box
                 sx={{

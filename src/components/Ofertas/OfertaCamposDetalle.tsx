@@ -111,15 +111,25 @@ const Section = ({
   title,
   fields,
   oferta,
+  withTopBorder = true,
 }: {
   title: string;
   fields: FieldDef[];
   oferta: Oferta;
+  withTopBorder?: boolean;
 }) => {
   if (!hasAnyInformed(oferta, fields)) return null;
 
   return (
-    <Box sx={{ pt: 2, borderTop: "1px solid", borderColor: "divider" }}>
+    <Box
+      sx={{
+        pt: 2,
+        ...(withTopBorder && {
+          borderTop: "1px solid",
+          borderColor: "divider",
+        }),
+      }}
+    >
       <Typography
         variant="subtitle2"
         sx={{ fontWeight: 600, color: "text.primary", mb: 2 }}
@@ -152,6 +162,7 @@ const OfertaCamposDetalle = ({ oferta }: OfertaCamposDetalleProps) => {
         title="Información de la operación"
         fields={OPERACION_FIELDS}
         oferta={oferta}
+        withTopBorder={false}
       />
       <Section
         title="Montos y condiciones"

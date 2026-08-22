@@ -10,7 +10,6 @@ import {
 import {
   Cancel,
   CheckCircle,
-  Comment,
   InfoOutlined,
   KeyboardArrowDown,
   KeyboardArrowUp,
@@ -212,51 +211,13 @@ const OfertaRecibidaCard = ({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) minmax(0, 1fr)" },
+              gridTemplateColumns: "1fr",
               gap: 3,
               alignItems: "start",
             }}
           >
             <Box>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 700,
-                  color: "var(--color-fg-default-primary)",
-                  mb: 2,
-                }}
-              >
-                Información de la oferta
-              </Typography>
-
-              <Box
-                sx={{ display: "flex", alignItems: "flex-start", gap: 1, mb: 2 }}
-              >
-                <Comment
-                  sx={{
-                    fontSize: 18,
-                    color: "var(--color-fg-default-secondary)",
-                    mt: 0.3,
-                  }}
-                />
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "var(--color-fg-default-secondary)",
-                      fontWeight: 600,
-                    }}
-                  >
-                    Comentario del factoring
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "var(--color-fg-default-primary)", mt: 0.5 }}
-                  >
-                    {oferta.comentario || "Sin comentario"}
-                  </Typography>
-                </Box>
-              </Box>
+              
 
               <OfertaCamposDetalle oferta={oferta} />
             </Box>
