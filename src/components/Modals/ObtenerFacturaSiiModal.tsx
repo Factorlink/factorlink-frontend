@@ -14,7 +14,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
-const AUTO_RETRY_SECONDS = 5;
+const MAX_SII_FETCH_ATTEMPTS = 3;
 
 interface ObtenerFacturaSiiModalProps {
   open: boolean;
@@ -32,7 +32,7 @@ const DEFAULT_LOADING_TITLE =
 const DEFAULT_LOADING_SUBTITLE = "Espera un momento, por favor.";
 const DEFAULT_ERROR_TITLE = "No pudimos cargar los datos de tu factura";
 const DEFAULT_ERROR_SUBTITLE =
-  "Hubo un problema al obtener la información desde el SII. Vamos a intentar nuevamente.";
+  "Hubo un problema al obtener la información desde el SII. Puedes intentarlo nuevamente.";
 
 const ObtenerFacturaSiiModal = ({
   open,
@@ -44,28 +44,21 @@ const ObtenerFacturaSiiModal = ({
   errorTitle = DEFAULT_ERROR_TITLE,
   errorSubtitle = DEFAULT_ERROR_SUBTITLE,
 }: ObtenerFacturaSiiModalProps) => {
-  const [secondsLeft, setSecondsLeft] = useState(AUTO_RETRY_SECONDS);
+  const [attempts, setAttempts] = useState(0);
   const isLoading = status === "loading";
+  const attemptsExhausted = attempts >= MAX_SII_FETCH_ATTEMPTS;
 
   useEffect(() => {
-    if (!open || status !== "error") {
-      setSecondsLeft(AUTO_RETRY_SECONDS);
-      return;
+    if (!open) {
+      setAttempts(0);
     }
+  }, [open]);
 
-    setSecondsLeft(AUTO_RETRY_SECONDS);
-    const interval = window.setInterval(() => {
-      setSecondsLeft((current) => Math.max(0, current - 1));
-    }, 1000);
-    const timeout = window.setTimeout(() => {
-      onRetry();
-    }, AUTO_RETRY_SECONDS * 1000);
-
-    return () => {
-      window.clearInterval(interval);
-      window.clearTimeout(timeout);
-    };
-  }, [open, status, onRetry]);
+  const handleRetry = () => {
+    if (attemptsExhausted) return;
+    setAttempts((current) => current + 1);
+    onRetry();
+  };
 
   return (
     <Dialog
@@ -161,7 +154,11 @@ const ObtenerFacturaSiiModal = ({
           {isLoading ? loadingTitle : errorTitle}
         </Typography>
         <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-          {isLoading ? loadingSubtitle : errorSubtitle}
+          {isLoading
+            ? loadingSubtitle
+            : attemptsExhausted
+              ? "Máximo de intentos alcanzado. No fue posible obtener los datos desde el SII."
+              : errorSubtitle}
         </Typography>
 
         {isLoading && (
@@ -200,13 +197,21 @@ const ObtenerFacturaSiiModal = ({
             <Button
               variant="contained"
               startIcon={<RefreshIcon />}
-              onClick={onRetry}
+              onClick={handleRetry}
+              disabled={attemptsExhausted}
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
                 px: 3,
                 backgroundColor: "var(--color-bg-accent-primary)",
-                "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
+                "&:hover": {
+                  backgroundColor: "var(--color-bg-accent-primary-hover)",
+                },
+                "&:disabled": {
+                  backgroundColor: "var(--color-bg-disabled-primary)",
+                  color: "var(--color-fg-on-accent-primary)",
+                  opacity: 0.7,
+                },
                 color: "var(--color-fg-on-accent-primary)",
               }}
             >
@@ -226,12 +231,22 @@ const ObtenerFacturaSiiModal = ({
               Cancelar
             </Button>
           </DialogActions>
-          <Typography
-            variant="caption"
-            sx={{ color: "var(--color-fg-default-secondary)", pb: 3 }}
-          >
-            Intentaremos automáticamente en {secondsLeft} segundos...
-          </Typography>
+          {!attemptsExhausted && attempts > 0 && (
+            <Typography
+              variant="caption"
+              sx={{ color: "var(--color-fg-default-secondary)", pb: 3 }}
+            >
+              Intento {attempts} de {MAX_SII_FETCH_ATTEMPTS}
+            </Typography>
+          )}
+          {attemptsExhausted && (
+            <Typography
+              variant="caption"
+              sx={{ color: "var(--color-fg-danger-primary)", pb: 3, fontWeight: 600 }}
+            >
+              Máximo de intentos alcanzado
+            </Typography>
+          )}
         </>
       )}
     </Dialog>

@@ -148,12 +148,12 @@ const CotizarFactura = () => {
         setNeedsPersonalSii(true);
         return;
       }
-      await obtainPdfFromSii();
+      setPdfGate("error");
     } catch (err) {
       console.error("Error fetching factura:", err);
       setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
     }
-  }, [id, obtainPdfFromSii, currentRole?.empresa?.siiRutPersonal]);
+  }, [id, currentRole?.empresa?.siiRutPersonal]);
 
   useEffect(() => {
     if (id) {
@@ -736,6 +736,8 @@ const CotizarFactura = () => {
           status={pdfGate === "error" ? "error" : "loading"}
           onRetry={obtainPdfFromSii}
           onCancel={handleCancelPdfGate}
+          errorTitle="No encontramos el PDF de esta factura"
+          errorSubtitle="Pulsa Reintentar para obtener el documento desde el SII. Puedes intentarlo hasta 3 veces."
         />
 
         <SiiPersonalSyncPromptModal
