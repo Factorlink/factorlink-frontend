@@ -93,9 +93,7 @@ const FactoringCedidasTable = ({
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const requestIdRef = useRef(0);
-  const [sortBy, setSortBy] = useState(
-    searchParams.get("sortBy") || "createdAt",
-  );
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "");
   const [order, setOrder] = useState(searchParams.get("order") || "DESC");
   const [filters, setFilters] = useState<FacturasFiltersValues>(() => {
     const newFilters = { ...INITIAL_FILTERS };
