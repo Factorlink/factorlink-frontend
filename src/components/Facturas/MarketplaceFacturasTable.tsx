@@ -365,12 +365,14 @@ const MarketplaceFacturasTable = ({
           },
         }}
       >
-        <MenuItem onClick={handleVerOfertas}>
-          <ListItemIcon>
-            <Visibility sx={{ color: "var(--color-fg-default-secondary)" }} />
-          </ListItemIcon>
-          <ListItemText primary="Ver ofertas" />
-        </MenuItem>
+        {(selectedFactura?.numeroOfertasRecibidas ?? 0) > 0 && (
+          <MenuItem onClick={handleVerOfertas}>
+            <ListItemIcon>
+              <Visibility sx={{ color: "var(--color-fg-default-secondary)" }} />
+            </ListItemIcon>
+            <ListItemText primary="Ver ofertas" />
+          </MenuItem>
+        )}
         <MenuItem onClick={handleOpenRemoveModal}>
           <ListItemIcon>
             <Delete sx={{ color: "var(--color-fg-danger-primary)" }} />
