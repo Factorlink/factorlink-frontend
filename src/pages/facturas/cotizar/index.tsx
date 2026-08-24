@@ -87,7 +87,10 @@ const CotizarFactura = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [adjuntos, setAdjuntos] = useState<FacturaArchivo[]>([]);
-  const [pdfGate, setPdfGate] = useState<"loading" | "error" | "ready">("loading");
+  const [loadingFactura, setLoadingFactura] = useState(true);
+  const [pdfGate, setPdfGate] = useState<
+    "idle" | "loading" | "error" | "ready"
+  >("idle");
   const [needsPersonalSii, setNeedsPersonalSii] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
 
@@ -133,7 +136,8 @@ const CotizarFactura = () => {
 
   const prepareCotizar = useCallback(async () => {
     if (!id) return;
-    setPdfGate("loading");
+    setLoadingFactura(true);
+    setPdfGate("idle");
     setNeedsPersonalSii(false);
     setError(null);
     try {
@@ -152,6 +156,8 @@ const CotizarFactura = () => {
     } catch (err) {
       console.error("Error fetching factura:", err);
       setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
+    } finally {
+      setLoadingFactura(false);
     }
   }, [id, currentRole?.empresa?.siiRutPersonal]);
 
@@ -356,6 +362,28 @@ const CotizarFactura = () => {
             >
               Reintentar
             </Button>
+          </Box>
+        </Box>
+      </Layout>
+    );
+  }
+
+  if (loadingFactura) {
+    return (
+      <Layout>
+        <Box sx={appContentSx}>
+          <IconButton onClick={handleBack} sx={{ mb: 2 }}>
+            <ArrowBack />
+          </IconButton>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "50vh",
+            }}
+          >
+            <CircularProgress />
           </Box>
         </Box>
       </Layout>
@@ -731,6 +759,7 @@ const CotizarFactura = () => {
         <ObtenerFacturaSiiModal
           open={
             !needsPersonalSii &&
+            Boolean(factura) &&
             (pdfGate === "loading" || pdfGate === "error")
           }
           status={pdfGate === "error" ? "error" : "loading"}
