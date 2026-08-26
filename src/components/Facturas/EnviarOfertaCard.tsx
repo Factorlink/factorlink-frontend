@@ -72,18 +72,21 @@ const INTEGER_FIELDS = [
   },
 ] as const;
 
-const MONEY_FIELDS = [
-  { name: "montoDocumentos", label: "Monto de documentos", required: false },
-  { name: "diferenciaPrecio", label: "Diferencia de precio", required: true },
-  { name: "montoComision", label: "Monto de comisión", required: true },
-  { name: "retencion", label: "Retención", required: false },
-  { name: "notaria", label: "Notaría", required: false },
-  { name: "gastosCobrados", label: "Gastos cobrados", required: true },
-  { name: "iva", label: "IVA", required: true },
-  { name: "recuperacionGastos", label: "Recuperación de gastos", required: false },
-  { name: "recaudacion", label: "Recaudación", required: false },
-  { name: "excedentes", label: "Excedentes", required: false },
-  { name: "montoAGirar", label: "Monto a girar", required: false },
+const REQUIRED_MONEY_FIELDS = [
+  { name: "diferenciaPrecio", label: "Diferencia de precio" },
+  { name: "montoComision", label: "Monto de comisión" },
+  { name: "gastosCobrados", label: "Gastos cobrados" },
+  { name: "iva", label: "IVA" },
+] as const;
+
+const OPTIONAL_MONEY_FIELDS = [
+  { name: "montoDocumentos", label: "Monto de documentos" },
+  { name: "retencion", label: "Retención" },
+  { name: "notaria", label: "Notaría" },
+  { name: "recuperacionGastos", label: "Recuperación de gastos" },
+  { name: "recaudacion", label: "Recaudación" },
+  { name: "excedentes", label: "Excedentes" },
+  { name: "montoAGirar", label: "Monto a girar" },
 ] as const;
 
 interface EnviarOfertaCardProps {
@@ -413,6 +416,110 @@ const EnviarOfertaCard = ({
             Datos operacionales y montos de la oferta
           </Typography>
           <Typography variant="subtitle1" sx={sectionTitleSx}>
+            Montos y condiciones
+          </Typography>
+          <Box sx={{ ...gridSx, mb: 1 }}>
+            {REQUIRED_MONEY_FIELDS.map((field) => (
+              <StyledTextField
+                key={field.name}
+                fullWidth
+                name={field.name}
+                label={field.label}
+                type="string"
+                inputMode="numeric"
+                required
+                value={formik.values[field.name]}
+                onChange={(e) =>
+                  handleNonNegativeIntegerInputChange(
+                    e as React.ChangeEvent<HTMLInputElement>,
+                    formik.setFieldValue,
+                  )
+                }
+                onBlur={formik.handleBlur}
+                onKeyDown={(e) =>
+                  blockNonNumericKeys(
+                    e as React.KeyboardEvent<HTMLInputElement>,
+                    false,
+                  )
+                }
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ),
+                }}
+                inputProps={{ maxLength: 50 }}
+                error={fieldError(field.name)}
+                helperText={fieldHelper(field.name, "Mayor o igual a 0")}
+              />
+            ))}
+
+            <StyledTextField
+              fullWidth
+              name="tasaComision"
+              label="Tasa de comisión (%)"
+              type="string"
+              inputProps={{ min: 0, max: 100, step: 0.01 }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">%</InputAdornment>
+                ),
+              }}
+              value={formik.values.tasaComision}
+              onChange={(e) =>
+                handleDecimalRateInputChange(
+                  e as React.ChangeEvent<HTMLInputElement>,
+                  formik.setFieldValue,
+                )
+              }
+              onBlur={formik.handleBlur}
+              onKeyDown={(e) =>
+                blockNonNumericKeys(
+                  e as React.KeyboardEvent<HTMLInputElement>,
+                  true,
+                )
+              }
+              error={fieldError("tasaComision")}
+              helperText={fieldHelper(
+                "tasaComision",
+                TASA_COMISION_RANGE_MESSAGE,
+              )}
+            />
+
+            {OPTIONAL_MONEY_FIELDS.map((field) => (
+              <StyledTextField
+                key={field.name}
+                fullWidth
+                name={field.name}
+                label={field.label}
+                type="string"
+                inputMode="numeric"
+                value={formik.values[field.name]}
+                onChange={(e) =>
+                  handleNonNegativeIntegerInputChange(
+                    e as React.ChangeEvent<HTMLInputElement>,
+                    formik.setFieldValue,
+                  )
+                }
+                onBlur={formik.handleBlur}
+                onKeyDown={(e) =>
+                  blockNonNumericKeys(
+                    e as React.KeyboardEvent<HTMLInputElement>,
+                    false,
+                  )
+                }
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ),
+                }}
+                inputProps={{ maxLength: 50 }}
+                error={fieldError(field.name)}
+                helperText={fieldHelper(field.name, "Mayor o igual a 0")}
+              />
+            ))}
+          </Box>
+
+          <Typography variant="subtitle1" sx={sectionTitleSx}>
             Información de la operación
           </Typography>
           <Box sx={{ ...gridSx, mb: 1 }}>
@@ -466,77 +573,6 @@ const EnviarOfertaCard = ({
                 }
                 error={fieldError(field.name)}
                 helperText={fieldHelper(field.name, field.helper)}
-              />
-            ))}
-          </Box>
-
-          <Typography variant="subtitle1" sx={sectionTitleSx}>
-            Montos y condiciones
-          </Typography>
-          <Box sx={{ ...gridSx, mb: 1 }}>
-            <StyledTextField
-              fullWidth
-              name="tasaComision"
-              label="Tasa de comisión (%)"
-              type="string"
-              inputProps={{ min: 0, max: 100, step: 0.01 }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">%</InputAdornment>
-                ),
-              }}
-              value={formik.values.tasaComision}
-              onChange={(e) =>
-                handleDecimalRateInputChange(
-                  e as React.ChangeEvent<HTMLInputElement>,
-                  formik.setFieldValue,
-                )
-              }
-              onBlur={formik.handleBlur}
-              onKeyDown={(e) =>
-                blockNonNumericKeys(
-                  e as React.KeyboardEvent<HTMLInputElement>,
-                  true,
-                )
-              }
-              error={fieldError("tasaComision")}
-              helperText={fieldHelper(
-                "tasaComision",
-                TASA_COMISION_RANGE_MESSAGE,
-              )}
-            />
-
-            {MONEY_FIELDS.map((field) => (
-              <StyledTextField
-                key={field.name}
-                fullWidth
-                name={field.name}
-                label={field.label}
-                type="string"
-                inputMode="numeric"
-                required={field.required}
-                value={formik.values[field.name]}
-                onChange={(e) =>
-                  handleNonNegativeIntegerInputChange(
-                    e as React.ChangeEvent<HTMLInputElement>,
-                    formik.setFieldValue,
-                  )
-                }
-                onBlur={formik.handleBlur}
-                onKeyDown={(e) =>
-                  blockNonNumericKeys(
-                    e as React.KeyboardEvent<HTMLInputElement>,
-                    false,
-                  )
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
-                  ),
-                }}
-                inputProps={{ maxLength: 50 }}
-                error={fieldError(field.name)}
-                helperText={fieldHelper(field.name, "Mayor o igual a 0")}
               />
             ))}
           </Box>

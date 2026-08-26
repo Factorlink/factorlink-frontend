@@ -39,14 +39,14 @@ const OPERACION_FIELDS: FieldDef[] = [
 ];
 
 const MONTOS_FIELDS: FieldDef[] = [
-  { key: "montoDocumentos", label: "Monto de documentos", format: formatMoney },
-  { key: "tasaComision", label: "Tasa de comisión", format: formatPercent },
   { key: "diferenciaPrecio", label: "Diferencia de precio", format: formatMoney },
   { key: "montoComision", label: "Monto de comisión", format: formatMoney },
-  { key: "retencion", label: "Retención", format: formatMoney },
-  { key: "notaria", label: "Notaría", format: formatMoney },
   { key: "gastosCobrados", label: "Gastos cobrados", format: formatMoney },
   { key: "iva", label: "IVA", format: formatMoney },
+  { key: "tasaComision", label: "Tasa de comisión", format: formatPercent },
+  { key: "montoDocumentos", label: "Monto de documentos", format: formatMoney },
+  { key: "retencion", label: "Retención", format: formatMoney },
+  { key: "notaria", label: "Notaría", format: formatMoney },
   {
     key: "recuperacionGastos",
     label: "Recuperación de gastos",
@@ -159,15 +159,16 @@ const OfertaCamposDetalle = ({ oferta }: OfertaCamposDetalleProps) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 3 }}>
       <Section
-        title="Información de la operación"
-        fields={OPERACION_FIELDS}
+        title="Montos y condiciones"
+        fields={MONTOS_FIELDS}
         oferta={oferta}
         withTopBorder={false}
       />
       <Section
-        title="Montos y condiciones"
-        fields={MONTOS_FIELDS}
+        title="Información de la operación"
+        fields={OPERACION_FIELDS}
         oferta={oferta}
+        withTopBorder={showMontos}
       />
     </Box>
   );
