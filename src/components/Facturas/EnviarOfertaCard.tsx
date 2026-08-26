@@ -73,17 +73,17 @@ const INTEGER_FIELDS = [
 ] as const;
 
 const MONEY_FIELDS = [
-  { name: "montoDocumentos", label: "Monto de documentos" },
-  { name: "diferenciaPrecio", label: "Diferencia de precio" },
-  { name: "montoComision", label: "Monto de comisión" },
-  { name: "retencion", label: "Retención" },
-  { name: "notaria", label: "Notaría" },
-  { name: "gastosCobrados", label: "Gastos cobrados" },
-  { name: "iva", label: "IVA" },
-  { name: "recuperacionGastos", label: "Recuperación de gastos" },
-  { name: "recaudacion", label: "Recaudación" },
-  { name: "excedentes", label: "Excedentes" },
-  { name: "montoAGirar", label: "Monto a girar" },
+  { name: "montoDocumentos", label: "Monto de documentos", required: false },
+  { name: "diferenciaPrecio", label: "Diferencia de precio", required: true },
+  { name: "montoComision", label: "Monto de comisión", required: true },
+  { name: "retencion", label: "Retención", required: false },
+  { name: "notaria", label: "Notaría", required: false },
+  { name: "gastosCobrados", label: "Gastos cobrados", required: true },
+  { name: "iva", label: "IVA", required: true },
+  { name: "recuperacionGastos", label: "Recuperación de gastos", required: false },
+  { name: "recaudacion", label: "Recaudación", required: false },
+  { name: "excedentes", label: "Excedentes", required: false },
+  { name: "montoAGirar", label: "Monto a girar", required: false },
 ] as const;
 
 interface EnviarOfertaCardProps {
@@ -514,6 +514,7 @@ const EnviarOfertaCard = ({
                 label={field.label}
                 type="string"
                 inputMode="numeric"
+                required={field.required}
                 value={formik.values[field.name]}
                 onChange={(e) =>
                   handleNonNegativeIntegerInputChange(
@@ -657,8 +658,7 @@ const EnviarOfertaCard = ({
               alertStatus === "success" ||
               !formik.isValid ||
               !formik.dirty ||
-              !formik.values.fechaExpiracion ||
-              !formik.values.fechaOperacion
+              !formik.values.fechaExpiracion
             }
             onCancel={onCancel}
           />

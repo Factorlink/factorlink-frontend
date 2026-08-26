@@ -50,33 +50,25 @@ const toRequiredString = (
   return trimmed;
 };
 
-const toRequiredDateOnly = (
-  value: string | Date | null | undefined,
-  field: string,
-): string => {
-  const date = toDateOnlyString(value);
-  if (!date) {
-    throw new Error(`El campo ${field} es obligatorio y debe ser una fecha válida`);
-  }
-  return date;
-};
-
 const toIsoDateTime = (value: string | Date): string => {
   if (value instanceof Date) return value.toISOString();
   return value;
 };
 
 const REQUIRED_NUMERIC_KEYS = [
+  "diferenciaPrecio",
+  "montoComision",
+  "gastosCobrados",
+  "iva",
+] as const;
+
+const OPTIONAL_NUMERIC_KEYS = [
   "numeroDocumentos",
   "plazoPromedioPago",
   "montoDocumentos",
   "tasaComision",
-  "diferenciaPrecio",
-  "montoComision",
   "retencion",
   "notaria",
-  "gastosCobrados",
-  "iva",
   "recuperacionGastos",
   "recaudacion",
   "excedentes",
@@ -86,12 +78,24 @@ const REQUIRED_NUMERIC_KEYS = [
 export const buildCreateOfertaPayload = (
   input: OfertaPayloadInput,
 ): CreateOfertaPayload => {
-  const numericFields = Object.fromEntries(
+  const requiredNumeric = Object.fromEntries(
     REQUIRED_NUMERIC_KEYS.map((key) => [
       key,
       toRequiredNumber(input[key], key),
     ]),
   ) as Pick<CreateOfertaPayload, (typeof REQUIRED_NUMERIC_KEYS)[number]>;
+
+  const optionalNumeric: Partial<
+    Pick<CreateOfertaPayload, (typeof OPTIONAL_NUMERIC_KEYS)[number]>
+  > = {};
+  for (const key of OPTIONAL_NUMERIC_KEYS) {
+    const n = toFiniteNumber(input[key]);
+    if (n !== undefined) {
+      optionalNumeric[key] = n;
+    }
+  }
+
+  const fechaOperacion = toDateOnlyString(input.fechaOperacion);
 
   return {
     facturaId: input.facturaId,
@@ -106,7 +110,8 @@ export const buildCreateOfertaPayload = (
     comentario: input.comentario?.trim() ?? "",
     ofertaCondicionada: Boolean(input.ofertaCondicionada),
     tipoDocumento: toRequiredString(input.tipoDocumento, "tipoDocumento"),
-    fechaOperacion: toRequiredDateOnly(input.fechaOperacion, "fechaOperacion"),
-    ...numericFields,
+    ...(fechaOperacion ? { fechaOperacion } : {}),
+    ...requiredNumeric,
+    ...optionalNumeric,
   };
 };

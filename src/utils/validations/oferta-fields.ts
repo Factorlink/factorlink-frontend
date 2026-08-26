@@ -65,6 +65,23 @@ export const tasaComisionValidation = yup
     return !isNaN(n) && n >= 0 && n <= 100;
   });
 
+export const optionalTasaComisionValidation = yup
+  .mixed()
+  .notRequired()
+  .test(
+    "no-trailing-dot",
+    "Ingresa un número decimal válido (ej: 0, 1.5, 10.25)",
+    (value) => {
+      if (value === undefined || value === null || value === "") return true;
+      return !String(value).endsWith(".");
+    },
+  )
+  .test("is-valid-range", TASA_COMISION_RANGE_MESSAGE, (value) => {
+    if (value === undefined || value === null || value === "") return true;
+    const n = Number(value);
+    return !isNaN(n) && n >= 0 && n <= 100;
+  });
+
 export const nonNegativeIntegerValidation = yup
   .number()
   .transform(emptyToUndefined)
@@ -72,6 +89,14 @@ export const nonNegativeIntegerValidation = yup
   .required("Este campo es obligatorio")
   .integer("Debe ser un número entero")
   .min(0, "No puede ser negativo");
+
+export const optionalNonNegativeIntegerValidation = yup
+  .number()
+  .transform(emptyToUndefined)
+  .typeError("Debe ser un número entero")
+  .integer("Debe ser un número entero")
+  .min(0, "No puede ser negativo")
+  .notRequired();
 
 export const nonNegativeMoneyValidation = yup
   .number()
@@ -85,6 +110,19 @@ export const nonNegativeMoneyValidation = yup
     "No puede exceder 50 caracteres",
     (_value, ctx) => String(ctx.originalValue ?? "").length <= 50,
   );
+
+export const optionalNonNegativeMoneyValidation = yup
+  .number()
+  .transform(emptyToUndefined)
+  .typeError("Debe ser un número")
+  .integer("Debe ser un número entero")
+  .min(0, "No puede ser negativo")
+  .test(
+    "max-length",
+    "No puede exceder 50 caracteres",
+    (_value, ctx) => String(ctx.originalValue ?? "").length <= 50,
+  )
+  .notRequired();
 
 export const createOfertaFormSchema = (minFechaExpiracion: Date) =>
   yup.object({
@@ -113,20 +151,20 @@ export const createOfertaFormSchema = (minFechaExpiracion: Date) =>
     fechaOperacion: yup
       .date()
       .typeError("Ingresa una fecha válida")
-      .required("La fecha de operación es obligatoria")
-      .nullable(),
-    numeroDocumentos: nonNegativeIntegerValidation,
-    plazoPromedioPago: nonNegativeIntegerValidation,
-    montoDocumentos: nonNegativeMoneyValidation,
-    tasaComision: tasaComisionValidation,
+      .nullable()
+      .notRequired(),
+    numeroDocumentos: optionalNonNegativeIntegerValidation,
+    plazoPromedioPago: optionalNonNegativeIntegerValidation,
+    montoDocumentos: optionalNonNegativeMoneyValidation,
+    tasaComision: optionalTasaComisionValidation,
     diferenciaPrecio: nonNegativeMoneyValidation,
     montoComision: nonNegativeMoneyValidation,
-    retencion: nonNegativeMoneyValidation,
-    notaria: nonNegativeMoneyValidation,
+    retencion: optionalNonNegativeMoneyValidation,
+    notaria: optionalNonNegativeMoneyValidation,
     gastosCobrados: nonNegativeMoneyValidation,
     iva: nonNegativeMoneyValidation,
-    recuperacionGastos: nonNegativeMoneyValidation,
-    recaudacion: nonNegativeMoneyValidation,
-    excedentes: nonNegativeMoneyValidation,
-    montoAGirar: nonNegativeMoneyValidation,
+    recuperacionGastos: optionalNonNegativeMoneyValidation,
+    recaudacion: optionalNonNegativeMoneyValidation,
+    excedentes: optionalNonNegativeMoneyValidation,
+    montoAGirar: optionalNonNegativeMoneyValidation,
   });

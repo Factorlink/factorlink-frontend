@@ -3,24 +3,24 @@ import type { Factoring } from "../factoring";
 /** API histórica manda strings; la nueva puede mandar number o null. */
 export type OfertaNumericValue = string | number | null;
 
-/** Campos operacionales y financieros. Required en create; parciales en PATCH. */
+/** Campos operacionales y financieros. En create solo 4 montos + tipoDocumento son required. */
 export type OfertaCamposOperacionales = {
     tipoDocumento: string;
-    fechaOperacion: string;
-    numeroDocumentos: number;
-    plazoPromedioPago: number;
-    montoDocumentos: number;
-    tasaComision: number;
     diferenciaPrecio: number;
     montoComision: number;
-    retencion: number;
-    notaria: number;
     gastosCobrados: number;
     iva: number;
-    recuperacionGastos: number;
-    recaudacion: number;
-    excedentes: number;
-    montoAGirar: number;
+    fechaOperacion?: string;
+    numeroDocumentos?: number;
+    plazoPromedioPago?: number;
+    montoDocumentos?: number;
+    tasaComision?: number;
+    retencion?: number;
+    notaria?: number;
+    recuperacionGastos?: number;
+    recaudacion?: number;
+    excedentes?: number;
+    montoAGirar?: number;
 };
 
 export interface Oferta {
