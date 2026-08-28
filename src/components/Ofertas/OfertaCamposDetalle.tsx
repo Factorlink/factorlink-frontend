@@ -1,11 +1,13 @@
 import { Box, Typography } from "@mui/material";
 import type { Oferta } from "../../types/oferta";
+import { calcAnticipoBruto } from "../../utils/ofertaCalculations";
 import {
   formatDateOnly,
   formatInteger,
   formatMoney,
   formatPercent,
   isInformed,
+  toFiniteNumber,
   type OptionalValue,
 } from "../../utils/ofertaFormatters";
 
@@ -39,12 +41,12 @@ const OPERACION_FIELDS: FieldDef[] = [
 ];
 
 const MONTOS_FIELDS: FieldDef[] = [
-  { key: "diferenciaPrecio", label: "Diferencia de precio", format: formatMoney },
+  { key: "montoDocumentos", label: "Monto de documentos", format: formatMoney },
   { key: "montoComision", label: "Monto de comisión", format: formatMoney },
   { key: "gastosCobrados", label: "Gastos cobrados", format: formatMoney },
+  { key: "diferenciaPrecio", label: "Diferencia de precio", format: formatMoney },
   { key: "iva", label: "IVA", format: formatMoney },
   { key: "tasaComision", label: "Tasa de comisión", format: formatPercent },
-  { key: "montoDocumentos", label: "Monto de documentos", format: formatMoney },
   { key: "retencion", label: "Retención", format: formatMoney },
   { key: "notaria", label: "Notaría", format: formatMoney },
   {
@@ -150,20 +152,87 @@ const Section = ({
   );
 };
 
+const getAnticipoBruto = (oferta: Oferta): number | null => {
+  const montoDocumentos = toFiniteNumber(oferta.montoDocumentos);
+  const porcentajeFinanciamiento = toFiniteNumber(oferta.porcentajeFinanciamiento);
+  if (montoDocumentos === undefined || porcentajeFinanciamiento === undefined) {
+    return null;
+  }
+  return calcAnticipoBruto(montoDocumentos, porcentajeFinanciamiento);
+};
+
+const MontosSection = ({
+  oferta,
+  withTopBorder = true,
+}: {
+  oferta: Oferta;
+  withTopBorder?: boolean;
+}) => {
+  const anticipoBruto = getAnticipoBruto(oferta);
+  const showMontos = hasAnyInformed(oferta, MONTOS_FIELDS) || anticipoBruto !== null;
+
+  if (!showMontos) return null;
+
+  const fieldsBeforeAnticipo = MONTOS_FIELDS.filter(
+    (field) => field.key === "montoDocumentos",
+  );
+  const fieldsAfterAnticipo = MONTOS_FIELDS.filter(
+    (field) => field.key !== "montoDocumentos",
+  );
+
+  return (
+    <Box
+      sx={{
+        pt: 2,
+        ...(withTopBorder && {
+          borderTop: "1px solid",
+          borderColor: "divider",
+        }),
+      }}
+    >
+      <Typography
+        variant="subtitle2"
+        sx={{ fontWeight: 600, color: "text.primary", mb: 2 }}
+      >
+        Montos y condiciones
+      </Typography>
+      <Box sx={gridSx}>
+        {fieldsBeforeAnticipo.map((field) => (
+          <FieldCell
+            key={field.key}
+            label={field.label}
+            value={field.format(oferta[field.key] as OptionalValue)}
+          />
+        ))}
+        {anticipoBruto !== null && (
+          <FieldCell
+            label="Anticipo bruto"
+            value={formatMoney(anticipoBruto)}
+          />
+        )}
+        {fieldsAfterAnticipo.map((field) => (
+          <FieldCell
+            key={field.key}
+            label={field.label}
+            value={field.format(oferta[field.key] as OptionalValue)}
+            emphasize={field.emphasize}
+          />
+        ))}
+      </Box>
+    </Box>
+  );
+};
+
 const OfertaCamposDetalle = ({ oferta }: OfertaCamposDetalleProps) => {
   const showOperacion = hasAnyInformed(oferta, OPERACION_FIELDS);
-  const showMontos = hasAnyInformed(oferta, MONTOS_FIELDS);
+  const showMontos =
+    hasAnyInformed(oferta, MONTOS_FIELDS) || getAnticipoBruto(oferta) !== null;
 
   if (!showOperacion && !showMontos) return null;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 3 }}>
-      <Section
-        title="Montos y condiciones"
-        fields={MONTOS_FIELDS}
-        oferta={oferta}
-        withTopBorder={false}
-      />
+      <MontosSection oferta={oferta} withTopBorder={false} />
       <Section
         title="Información de la operación"
         fields={OPERACION_FIELDS}

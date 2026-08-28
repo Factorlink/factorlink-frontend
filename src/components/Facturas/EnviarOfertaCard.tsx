@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Box,
   Typography,
@@ -25,6 +25,7 @@ import ConfirmarOfertaModal from "../Modals/ConfirmarOfertaModal";
 import ResumenOfertaAside from "./ResumenOfertaAside";
 import SectionPanel from "../SectionPanel";
 import { formatMoney } from "../../utils/ofertaFormatters";
+import { computeOfertaMontos } from "../../utils/ofertaCalculations";
 import {
   createOfertaFormSchema,
   handleDecimalRateInputChange,
@@ -34,6 +35,15 @@ import {
 } from "../../utils/validations/oferta-fields";
 
 const TIPO_DOCUMENTO_OFERTA = "Factura Electrónica";
+const DEFAULT_MONTO_DOCUMENTOS = "65574653";
+const DEFAULT_NUMERO_DOCUMENTOS = "2";
+
+const COMPUTED_MONEY_FIELDS = [
+  { key: "anticipoBruto", label: "Anticipo bruto" },
+  { key: "diferenciaPrecio", label: "Diferencia de precio" },
+  { key: "iva", label: "IVA" },
+  { key: "montoAGirar", label: "Monto a girar", emphasize: true },
+] as const;
 
 const today = new Date();
 const tomorrow = new Date(today);
@@ -65,28 +75,19 @@ const INTEGER_FIELDS = [
     label: "Número de documentos",
     helper: "Cantidad de documentos de la operación",
   },
-  {
-    name: "plazoPromedioPago",
-    label: "Plazo promedio de pago (días)",
-    helper: "Promedio de días de pago",
-  },
 ] as const;
 
 const REQUIRED_MONEY_FIELDS = [
-  { name: "diferenciaPrecio", label: "Diferencia de precio" },
   { name: "montoComision", label: "Monto de comisión" },
   { name: "gastosCobrados", label: "Gastos cobrados" },
-  { name: "iva", label: "IVA" },
 ] as const;
 
 const OPTIONAL_MONEY_FIELDS = [
-  { name: "montoDocumentos", label: "Monto de documentos" },
   { name: "retencion", label: "Retención" },
   { name: "notaria", label: "Notaría" },
   { name: "recuperacionGastos", label: "Recuperación de gastos" },
   { name: "recaudacion", label: "Recaudación" },
   { name: "excedentes", label: "Excedentes" },
-  { name: "montoAGirar", label: "Monto a girar" },
 ] as const;
 
 interface EnviarOfertaCardProps {
@@ -135,20 +136,17 @@ const EnviarOfertaCard = ({
       ofertaCondicionada: false,
       tipoDocumento: TIPO_DOCUMENTO_OFERTA,
       fechaOperacion: null as Date | null,
-      numeroDocumentos: "",
+      numeroDocumentos: DEFAULT_NUMERO_DOCUMENTOS,
       plazoPromedioPago: "",
-      montoDocumentos: "",
+      montoDocumentos: DEFAULT_MONTO_DOCUMENTOS,
       tasaComision: "" as number | string,
-      diferenciaPrecio: "",
       montoComision: "",
       retencion: "",
       notaria: "",
       gastosCobrados: "",
-      iva: "",
       recuperacionGastos: "",
       recaudacion: "",
       excedentes: "",
-      montoAGirar: "",
     },
     validationSchema: createOfertaFormSchema(today),
     onSubmit: () => {
@@ -159,6 +157,26 @@ const EnviarOfertaCard = ({
   const montoAdelanto = Math.round(
     (montoFinanciar * (Number(formik.values.porcentajeFinanciamiento) || 0)) /
       100,
+  );
+
+  const montosCalculados = useMemo(
+    () =>
+      computeOfertaMontos({
+        montoDocumentos: formik.values.montoDocumentos,
+        porcentajeFinanciamiento: formik.values.porcentajeFinanciamiento,
+        tasa: formik.values.tasa,
+        plazoPromedioPago: formik.values.plazoPromedioPago,
+        montoComision: formik.values.montoComision,
+        gastosCobrados: formik.values.gastosCobrados,
+      }),
+    [
+      formik.values.montoDocumentos,
+      formik.values.porcentajeFinanciamiento,
+      formik.values.tasa,
+      formik.values.plazoPromedioPago,
+      formik.values.montoComision,
+      formik.values.gastosCobrados,
+    ],
   );
 
   const fieldError = (name: keyof typeof formik.values) =>
@@ -187,16 +205,16 @@ const EnviarOfertaCard = ({
         plazoPromedioPago: formik.values.plazoPromedioPago,
         montoDocumentos: formik.values.montoDocumentos,
         tasaComision: formik.values.tasaComision,
-        diferenciaPrecio: formik.values.diferenciaPrecio,
+        diferenciaPrecio: montosCalculados.diferenciaPrecio,
         montoComision: formik.values.montoComision,
         retencion: formik.values.retencion,
         notaria: formik.values.notaria,
         gastosCobrados: formik.values.gastosCobrados,
-        iva: formik.values.iva,
+        iva: montosCalculados.iva,
         recuperacionGastos: formik.values.recuperacionGastos,
         recaudacion: formik.values.recaudacion,
         excedentes: formik.values.excedentes,
-        montoAGirar: formik.values.montoAGirar,
+        montoAGirar: montosCalculados.montoAGirar,
       });
       setConfirmOpen(false);
       setAlertStatus("success");
@@ -401,6 +419,34 @@ const EnviarOfertaCard = ({
               "Fecha límite para que la empresa acepte",
               tomorrow,
             )}
+
+            <StyledTextField
+              fullWidth
+              name="plazoPromedioPago"
+              label="Plazo promedio de pago (días)"
+              type="string"
+              inputMode="numeric"
+              required
+              value={formik.values.plazoPromedioPago}
+              onChange={(e) =>
+                handleNonNegativeIntegerInputChange(
+                  e as React.ChangeEvent<HTMLInputElement>,
+                  formik.setFieldValue,
+                )
+              }
+              onBlur={formik.handleBlur}
+              onKeyDown={(e) =>
+                blockNonNumericKeys(
+                  e as React.KeyboardEvent<HTMLInputElement>,
+                  false,
+                )
+              }
+              error={fieldError("plazoPromedioPago")}
+              helperText={fieldHelper(
+                "plazoPromedioPago",
+                "Necesario para calcular la diferencia de precio",
+              )}
+            />
           </Box>
 
           <Typography
@@ -419,6 +465,37 @@ const EnviarOfertaCard = ({
             Montos y condiciones
           </Typography>
           <Box sx={{ ...gridSx, mb: 1 }}>
+            <StyledTextField
+              fullWidth
+              name="montoDocumentos"
+              label="Monto de documentos"
+              type="string"
+              inputMode="numeric"
+              required
+              value={formik.values.montoDocumentos}
+              onChange={(e) =>
+                handleNonNegativeIntegerInputChange(
+                  e as React.ChangeEvent<HTMLInputElement>,
+                  formik.setFieldValue,
+                )
+              }
+              onBlur={formik.handleBlur}
+              onKeyDown={(e) =>
+                blockNonNumericKeys(
+                  e as React.KeyboardEvent<HTMLInputElement>,
+                  false,
+                )
+              }
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">$</InputAdornment>
+                ),
+              }}
+              inputProps={{ maxLength: 50 }}
+              error={fieldError("montoDocumentos")}
+              helperText={fieldHelper("montoDocumentos", "Mayor o igual a 0")}
+            />
+
             {REQUIRED_MONEY_FIELDS.map((field) => (
               <StyledTextField
                 key={field.name}
@@ -452,6 +529,36 @@ const EnviarOfertaCard = ({
                 helperText={fieldHelper(field.name, "Mayor o igual a 0")}
               />
             ))}
+
+            {COMPUTED_MONEY_FIELDS.map((field) => {
+              const emphasize = "emphasize" in field && field.emphasize;
+              return (
+              <StyledTextField
+                key={field.key}
+                fullWidth
+                label={field.label}
+                value={formatMoney(montosCalculados[field.key])}
+                InputProps={{
+                  readOnly: true,
+                  startAdornment: (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ),
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    cursor: "not-allowed",
+                    "& input": {
+                      cursor: "not-allowed",
+                      ...(emphasize
+                        ? { color: "primary.main", fontWeight: 600 }
+                        : {}),
+                    },
+                  },
+                }}
+                helperText="Calculado automáticamente"
+              />
+            );
+            })}
 
             <StyledTextField
               fullWidth

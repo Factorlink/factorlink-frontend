@@ -56,23 +56,23 @@ const toIsoDateTime = (value: string | Date): string => {
 };
 
 const REQUIRED_NUMERIC_KEYS = [
+  "montoDocumentos",
+  "plazoPromedioPago",
   "diferenciaPrecio",
   "montoComision",
   "gastosCobrados",
   "iva",
+  "montoAGirar",
 ] as const;
 
 const OPTIONAL_NUMERIC_KEYS = [
   "numeroDocumentos",
-  "plazoPromedioPago",
-  "montoDocumentos",
   "tasaComision",
   "retencion",
   "notaria",
   "recuperacionGastos",
   "recaudacion",
   "excedentes",
-  "montoAGirar",
 ] as const;
 
 export const buildCreateOfertaPayload = (
