@@ -152,14 +152,14 @@ const CotizarFactura = () => {
         setNeedsPersonalSii(true);
         return;
       }
-      setPdfGate("error");
+      void obtainPdfFromSii();
     } catch (err) {
       console.error("Error fetching factura:", err);
       setError("No se pudo cargar la factura. Por favor, intente nuevamente.");
     } finally {
       setLoadingFactura(false);
     }
-  }, [id, currentRole?.empresa?.siiRutPersonal]);
+  }, [id, currentRole?.empresa?.siiRutPersonal, obtainPdfFromSii]);
 
   useEffect(() => {
     if (id) {
