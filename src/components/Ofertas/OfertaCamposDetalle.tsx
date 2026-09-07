@@ -1,13 +1,11 @@
 import { Box, Typography } from "@mui/material";
 import type { Oferta } from "../../types/oferta";
-import { calcAnticipoBruto } from "../../utils/ofertaCalculations";
 import {
   formatDateOnly,
   formatInteger,
   formatMoney,
   formatPercent,
   isInformed,
-  toFiniteNumber,
   type OptionalValue,
 } from "../../utils/ofertaFormatters";
 
@@ -18,44 +16,51 @@ type FieldDef = {
   emphasize?: boolean;
 };
 
-const OPERACION_FIELDS: FieldDef[] = [
+const CONDICIONES_FIELDS: FieldDef[] = [
   {
-    key: "tipoDocumento",
-    label: "Tipo de documento",
-    format: (v) => (isInformed(v) ? String(v) : "—"),
-  },
-  { key: "fechaOperacion", label: "Fecha de operación", format: formatDateOnly },
-  {
-    key: "numeroDocumentos",
-    label: "Número de documentos",
-    format: formatInteger,
-  },
-  {
-    key: "plazoPromedioPago",
-    label: "Plazo promedio de pago",
+    key: "diasFinanciamiento",
+    label: "Días de financiamiento",
     format: (v) => {
       const n = formatInteger(v);
       return n === "—" ? n : `${n} días`;
     },
   },
+  {
+    key: "fechaCotizacion",
+    label: "Fecha de cotización",
+    format: formatDateOnly,
+  },
+  { key: "tasa30Dias", label: "Tasa 30 días", format: formatPercent },
+  {
+    key: "tasaDiariaMora",
+    label: "Tasa diaria de mora",
+    format: formatPercent,
+  },
+  {
+    key: "cobroPorDiaMora",
+    label: "Cobro por día de mora",
+    format: formatMoney,
+  },
 ];
 
 const MONTOS_FIELDS: FieldDef[] = [
-  { key: "montoDocumentos", label: "Monto de documentos", format: formatMoney },
-  { key: "montoComision", label: "Monto de comisión", format: formatMoney },
-  { key: "gastosCobrados", label: "Gastos cobrados", format: formatMoney },
-  { key: "diferenciaPrecio", label: "Diferencia de precio", format: formatMoney },
-  { key: "iva", label: "IVA", format: formatMoney },
-  { key: "tasaComision", label: "Tasa de comisión", format: formatPercent },
+  { key: "montoAFinanciar", label: "Monto a financiar", format: formatMoney },
   { key: "retencion", label: "Retención", format: formatMoney },
-  { key: "notaria", label: "Notaría", format: formatMoney },
   {
-    key: "recuperacionGastos",
-    label: "Recuperación de gastos",
+    key: "costoFinanciamiento",
+    label: "Costo de financiamiento",
     format: formatMoney,
   },
-  { key: "recaudacion", label: "Recaudación", format: formatMoney },
-  { key: "excedentes", label: "Excedentes", format: formatMoney },
+  { key: "precioCompra", label: "Precio de compra", format: formatMoney },
+  { key: "saldoPendiente", label: "Saldo pendiente", format: formatMoney },
+  { key: "montoComision", label: "Monto de comisión", format: formatMoney },
+  { key: "ivaComision", label: "IVA comisión", format: formatMoney },
+  {
+    key: "gastosAdministrativos",
+    label: "Gastos administrativos",
+    format: formatMoney,
+  },
+  { key: "firmaDigital", label: "Firma digital", format: formatMoney },
   {
     key: "montoAGirar",
     label: "Monto a girar",
@@ -152,90 +157,23 @@ const Section = ({
   );
 };
 
-const getAnticipoBruto = (oferta: Oferta): number | null => {
-  const montoDocumentos = toFiniteNumber(oferta.montoDocumentos);
-  const porcentajeFinanciamiento = toFiniteNumber(oferta.porcentajeFinanciamiento);
-  if (montoDocumentos === undefined || porcentajeFinanciamiento === undefined) {
-    return null;
-  }
-  return calcAnticipoBruto(montoDocumentos, porcentajeFinanciamiento);
-};
-
-const MontosSection = ({
-  oferta,
-  withTopBorder = true,
-}: {
-  oferta: Oferta;
-  withTopBorder?: boolean;
-}) => {
-  const anticipoBruto = getAnticipoBruto(oferta);
-  const showMontos = hasAnyInformed(oferta, MONTOS_FIELDS) || anticipoBruto !== null;
-
-  if (!showMontos) return null;
-
-  const fieldsBeforeAnticipo = MONTOS_FIELDS.filter(
-    (field) => field.key === "montoDocumentos",
-  );
-  const fieldsAfterAnticipo = MONTOS_FIELDS.filter(
-    (field) => field.key !== "montoDocumentos",
-  );
-
-  return (
-    <Box
-      sx={{
-        pt: 2,
-        ...(withTopBorder && {
-          borderTop: "1px solid",
-          borderColor: "divider",
-        }),
-      }}
-    >
-      <Typography
-        variant="subtitle2"
-        sx={{ fontWeight: 600, color: "text.primary", mb: 2 }}
-      >
-        Montos y condiciones
-      </Typography>
-      <Box sx={gridSx}>
-        {fieldsBeforeAnticipo.map((field) => (
-          <FieldCell
-            key={field.key}
-            label={field.label}
-            value={field.format(oferta[field.key] as OptionalValue)}
-          />
-        ))}
-        {anticipoBruto !== null && (
-          <FieldCell
-            label="Anticipo bruto"
-            value={formatMoney(anticipoBruto)}
-          />
-        )}
-        {fieldsAfterAnticipo.map((field) => (
-          <FieldCell
-            key={field.key}
-            label={field.label}
-            value={field.format(oferta[field.key] as OptionalValue)}
-            emphasize={field.emphasize}
-          />
-        ))}
-      </Box>
-    </Box>
-  );
-};
-
 const OfertaCamposDetalle = ({ oferta }: OfertaCamposDetalleProps) => {
-  const showOperacion = hasAnyInformed(oferta, OPERACION_FIELDS);
-  const showMontos =
-    hasAnyInformed(oferta, MONTOS_FIELDS) || getAnticipoBruto(oferta) !== null;
+  const showMontos = hasAnyInformed(oferta, MONTOS_FIELDS);
+  const showCondiciones = hasAnyInformed(oferta, CONDICIONES_FIELDS);
 
-  if (!showOperacion && !showMontos) return null;
+  if (!showMontos && !showCondiciones) return null;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 3 }}>
-      <MontosSection oferta={oferta} withTopBorder={false} />
       <Section
-        title="Información de la operación"
-        fields={OPERACION_FIELDS}
+        title="Montos y condiciones"
+        fields={MONTOS_FIELDS}
+        oferta={oferta}
+        withTopBorder={false}
+      />
+      <Section
+        title="Condiciones adicionales"
+        fields={CONDICIONES_FIELDS}
         oferta={oferta}
         withTopBorder={showMontos}
       />

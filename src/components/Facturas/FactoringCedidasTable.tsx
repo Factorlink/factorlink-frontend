@@ -425,10 +425,10 @@ const FactoringCedidasTable = ({
                     );
                     const oferta = factura.ofertaFactoring;
                     const cesionFecha =
-                      oferta?.fechaOperacion || factura.createdAt;
+                      oferta?.fechaCotizacion || factura.createdAt;
                     const cesionMonto =
                       oferta?.montoAGirar ??
-                      oferta?.montoAdelanto ??
+                      oferta?.montoAFinanciar ??
                       factura.montoFinanciar;
 
                     return (
@@ -543,8 +543,8 @@ const FactoringCedidasTable = ({
                               sx={{ color: "var(--color-fg-default-secondary)" }}
                             >
                               {formatDate(cesionFecha)}
-                              {oferta?.tasa != null && oferta.tasa !== ""
-                                ? ` · ${oferta.tasa}%`
+                              {oferta?.tasa30Dias != null && oferta.tasa30Dias !== ""
+                                ? ` · ${oferta.tasa30Dias}%`
                                 : ""}
                             </Typography>
                           </Box>

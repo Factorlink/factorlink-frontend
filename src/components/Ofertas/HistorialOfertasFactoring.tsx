@@ -20,6 +20,7 @@ import {
 import type { Oferta } from "../../types/oferta";
 import {
   formatMoney,
+  formatPercent,
   isInformed,
 } from "../../utils/ofertaFormatters";
 import { getOfertaEstadoBadge } from "../../utils/ofertaEstadoBadge";
@@ -177,7 +178,8 @@ const HistorialOfertasFactoring = ({
                     {formatDateShort(oferta.createdAt)}
                   </Typography>
                   <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Tasa {oferta.tasa}% · {formatMoney(oferta.montoAdelanto)}
+                    Tasa {formatPercent(oferta.tasa30Dias)} ·{" "}
+                    {formatMoney(oferta.montoAFinanciar)}
                     {isInformed(oferta.montoAGirar)
                       ? ` · Monto a girar ${formatMoney(oferta.montoAGirar)}`
                       : ""}
@@ -233,11 +235,11 @@ const HistorialOfertasFactoring = ({
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
                         <Percent sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
                         <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                          Tasa
+                          Tasa 30 días
                         </Typography>
                       </Box>
                       <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                        {oferta.tasa}%
+                        {formatPercent(oferta.tasa30Dias)}
                       </Typography>
                     </Box>
 
@@ -245,11 +247,11 @@ const HistorialOfertasFactoring = ({
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
                         <AccountBalance sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
                         <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                          Monto adelanto
+                          Monto a financiar
                         </Typography>
                       </Box>
                       <Typography variant="h6" sx={{ fontWeight: 700, color: "primary.main" }}>
-                        {formatMoney(oferta.montoAdelanto)}
+                        {formatMoney(oferta.montoAFinanciar)}
                       </Typography>
                     </Box>
 
@@ -257,11 +259,11 @@ const HistorialOfertasFactoring = ({
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
                         <AccessTime sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
                         <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                          Plazo
+                          Días financiamiento
                         </Typography>
                       </Box>
                       <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                        {plazo} días
+                        {oferta.diasFinanciamiento ?? plazo} días
                       </Typography>
                     </Box>
                   </Box>

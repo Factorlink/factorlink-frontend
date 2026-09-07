@@ -4,28 +4,25 @@ import { toDateOnlyString, toFiniteNumber } from "./ofertaFormatters";
 export type OfertaPayloadInput = {
   facturaId: string;
   factoringId: string;
+  diasFinanciamiento: string | number;
   porcentajeFinanciamiento: string | number;
-  tasa: string | number;
-  montoAdelanto: string | number;
+  fechaCotizacion: string | Date;
+  montoAFinanciar: string | number;
+  tasa30Dias: string | number;
+  retencion: string | number;
+  costoFinanciamiento: string | number;
+  precioCompra: string | number;
+  saldoPendiente: string | number;
+  montoComision: string | number;
+  ivaComision: string | number;
+  gastosAdministrativos: string | number;
+  firmaDigital: string | number;
+  montoAGirar: string | number;
+  tasaDiariaMora: string | number;
+  cobroPorDiaMora: string | number;
   fechaExpiracion: string | Date;
   comentario?: string | null;
   ofertaCondicionada?: boolean;
-  tipoDocumento: string | null;
-  fechaOperacion: string | Date | null;
-  numeroDocumentos: string | number | null;
-  plazoPromedioPago: string | number | null;
-  montoDocumentos: string | number | null;
-  tasaComision: string | number | null;
-  diferenciaPrecio: string | number | null;
-  montoComision: string | number | null;
-  retencion: string | number | null;
-  notaria: string | number | null;
-  gastosCobrados: string | number | null;
-  iva: string | number | null;
-  recuperacionGastos: string | number | null;
-  recaudacion: string | number | null;
-  excedentes: string | number | null;
-  montoAGirar: string | number | null;
 };
 
 const toRequiredNumber = (
@@ -39,40 +36,33 @@ const toRequiredNumber = (
   return n;
 };
 
-const toRequiredString = (
-  value: string | null | undefined,
+const toRequiredDateOnly = (
+  value: string | Date | null | undefined,
   field: string,
 ): string => {
-  const trimmed = value?.trim() ?? "";
-  if (!trimmed) {
-    throw new Error(`El campo ${field} es obligatorio`);
+  const dateOnly = toDateOnlyString(value);
+  if (!dateOnly) {
+    throw new Error(`El campo ${field} es obligatorio y debe ser una fecha`);
   }
-  return trimmed;
-};
-
-const toIsoDateTime = (value: string | Date): string => {
-  if (value instanceof Date) return value.toISOString();
-  return value;
+  return dateOnly;
 };
 
 const REQUIRED_NUMERIC_KEYS = [
-  "montoDocumentos",
-  "plazoPromedioPago",
-  "diferenciaPrecio",
-  "montoComision",
-  "gastosCobrados",
-  "iva",
-  "montoAGirar",
-] as const;
-
-const OPTIONAL_NUMERIC_KEYS = [
-  "numeroDocumentos",
-  "tasaComision",
+  "diasFinanciamiento",
+  "porcentajeFinanciamiento",
+  "montoAFinanciar",
+  "tasa30Dias",
   "retencion",
-  "notaria",
-  "recuperacionGastos",
-  "recaudacion",
-  "excedentes",
+  "costoFinanciamiento",
+  "precioCompra",
+  "saldoPendiente",
+  "montoComision",
+  "ivaComision",
+  "gastosAdministrativos",
+  "firmaDigital",
+  "montoAGirar",
+  "tasaDiariaMora",
+  "cobroPorDiaMora",
 ] as const;
 
 export const buildCreateOfertaPayload = (
@@ -85,33 +75,16 @@ export const buildCreateOfertaPayload = (
     ]),
   ) as Pick<CreateOfertaPayload, (typeof REQUIRED_NUMERIC_KEYS)[number]>;
 
-  const optionalNumeric: Partial<
-    Pick<CreateOfertaPayload, (typeof OPTIONAL_NUMERIC_KEYS)[number]>
-  > = {};
-  for (const key of OPTIONAL_NUMERIC_KEYS) {
-    const n = toFiniteNumber(input[key]);
-    if (n !== undefined) {
-      optionalNumeric[key] = n;
-    }
-  }
-
-  const fechaOperacion = toDateOnlyString(input.fechaOperacion);
-
   return {
     facturaId: input.facturaId,
     factoringId: input.factoringId,
-    porcentajeFinanciamiento: toRequiredNumber(
-      input.porcentajeFinanciamiento,
-      "porcentajeFinanciamiento",
+    fechaCotizacion: toRequiredDateOnly(input.fechaCotizacion, "fechaCotizacion"),
+    fechaExpiracion: toRequiredDateOnly(
+      input.fechaExpiracion,
+      "fechaExpiracion",
     ),
-    tasa: toRequiredNumber(input.tasa, "tasa"),
-    montoAdelanto: toRequiredNumber(input.montoAdelanto, "montoAdelanto"),
-    fechaExpiracion: toIsoDateTime(input.fechaExpiracion),
     comentario: input.comentario?.trim() ?? "",
     ofertaCondicionada: Boolean(input.ofertaCondicionada),
-    tipoDocumento: toRequiredString(input.tipoDocumento, "tipoDocumento"),
-    ...(fechaOperacion ? { fechaOperacion } : {}),
     ...requiredNumeric,
-    ...optionalNumeric,
   };
 };

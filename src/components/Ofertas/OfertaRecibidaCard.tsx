@@ -63,18 +63,18 @@ const OfertaRecibidaCard = ({
       color: "var(--color-fg-success-primary)",
     },
     {
-      label: "Tasa",
-      value: formatPercent(oferta.tasa),
+      label: "Tasa 30 días",
+      value: formatPercent(oferta.tasa30Dias),
       color: "var(--color-fg-default-primary)",
     },
     {
-      label: "Monto adelanto",
-      value: formatMoney(oferta.montoAdelanto),
+      label: "Monto a financiar",
+      value: formatMoney(oferta.montoAFinanciar),
       color: "var(--color-fg-success-primary)",
     },
     {
-      label: "Plazo",
-      value: `${plazo} días`,
+      label: "Días financiamiento",
+      value: `${oferta.diasFinanciamiento ?? plazo} días`,
       color: "var(--color-fg-default-primary)",
     },
     {

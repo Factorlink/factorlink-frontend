@@ -28,8 +28,8 @@ export const handleNonNegativeIntegerInputChange = (
 };
 
 export const TASA_RANGE_MESSAGE = "La tasa debe estar entre 0 y 100";
-export const TASA_COMISION_RANGE_MESSAGE =
-  "La tasa de comisión debe estar entre 0 y 100";
+export const TASA_DIARIA_MORA_RANGE_MESSAGE =
+  "La tasa diaria de mora debe estar entre 0 y 100";
 
 export const tasaValidation = yup
   .mixed()
@@ -48,35 +48,18 @@ export const tasaValidation = yup
     return !isNaN(n) && n >= 0 && n <= 100;
   });
 
-export const tasaComisionValidation = yup
+export const tasaDiariaMoraValidation = yup
   .mixed()
-  .required("La tasa de comisión es obligatoria")
+  .required("La tasa diaria de mora es obligatoria")
   .test(
     "no-trailing-dot",
-    "Ingresa un número decimal válido (ej: 0, 1.5, 10.25)",
+    "Ingresa un número decimal válido (ej: 0, 0.05, 1.5)",
     (value) => {
       if (value === undefined || value === null || value === "") return true;
       return !String(value).endsWith(".");
     },
   )
-  .test("is-valid-range", TASA_COMISION_RANGE_MESSAGE, (value) => {
-    if (value === undefined || value === null || value === "") return true;
-    const n = Number(value);
-    return !isNaN(n) && n >= 0 && n <= 100;
-  });
-
-export const optionalTasaComisionValidation = yup
-  .mixed()
-  .notRequired()
-  .test(
-    "no-trailing-dot",
-    "Ingresa un número decimal válido (ej: 0, 1.5, 10.25)",
-    (value) => {
-      if (value === undefined || value === null || value === "") return true;
-      return !String(value).endsWith(".");
-    },
-  )
-  .test("is-valid-range", TASA_COMISION_RANGE_MESSAGE, (value) => {
+  .test("is-valid-range", TASA_DIARIA_MORA_RANGE_MESSAGE, (value) => {
     if (value === undefined || value === null || value === "") return true;
     const n = Number(value);
     return !isNaN(n) && n >= 0 && n <= 100;
@@ -90,13 +73,13 @@ export const nonNegativeIntegerValidation = yup
   .integer("Debe ser un número entero")
   .min(0, "No puede ser negativo");
 
-export const optionalNonNegativeIntegerValidation = yup
+export const positiveIntegerValidation = yup
   .number()
   .transform(emptyToUndefined)
   .typeError("Debe ser un número entero")
+  .required("Este campo es obligatorio")
   .integer("Debe ser un número entero")
-  .min(0, "No puede ser negativo")
-  .notRequired();
+  .min(1, "Debe ser al menos 1");
 
 export const nonNegativeMoneyValidation = yup
   .number()
@@ -111,19 +94,6 @@ export const nonNegativeMoneyValidation = yup
     (_value, ctx) => String(ctx.originalValue ?? "").length <= 50,
   );
 
-export const optionalNonNegativeMoneyValidation = yup
-  .number()
-  .transform(emptyToUndefined)
-  .typeError("Debe ser un número")
-  .integer("Debe ser un número entero")
-  .min(0, "No puede ser negativo")
-  .test(
-    "max-length",
-    "No puede exceder 50 caracteres",
-    (_value, ctx) => String(ctx.originalValue ?? "").length <= 50,
-  )
-  .notRequired();
-
 export const createOfertaFormSchema = (minFechaExpiracion: Date) =>
   yup.object({
     porcentajeFinanciamiento: yup
@@ -131,7 +101,18 @@ export const createOfertaFormSchema = (minFechaExpiracion: Date) =>
       .required("El porcentaje de financiamiento es obligatorio")
       .min(1, "Debe ser al menos 1%")
       .max(100, "No puede superar el 100%"),
-    tasa: tasaValidation,
+    fechaCotizacion: yup
+      .date()
+      .typeError("Ingresa una fecha válida")
+      .required("La fecha de cotización es obligatoria")
+      .nullable(),
+    tasa30Dias: tasaValidation,
+    saldoPendiente: nonNegativeMoneyValidation,
+    montoComision: nonNegativeMoneyValidation,
+    gastosAdministrativos: nonNegativeMoneyValidation,
+    firmaDigital: nonNegativeMoneyValidation,
+    tasaDiariaMora: tasaDiariaMoraValidation,
+    cobroPorDiaMora: nonNegativeMoneyValidation,
     fechaExpiracion: yup
       .date()
       .typeError("Ingresa una fecha válida")
@@ -143,25 +124,4 @@ export const createOfertaFormSchema = (minFechaExpiracion: Date) =>
       .trim()
       .max(500, "El comentario no puede exceder 500 caracteres"),
     ofertaCondicionada: yup.boolean(),
-    tipoDocumento: yup
-      .string()
-      .trim()
-      .required("El tipo de documento es obligatorio")
-      .max(100, "El tipo de documento no puede exceder 100 caracteres"),
-    fechaOperacion: yup
-      .date()
-      .typeError("Ingresa una fecha válida")
-      .nullable()
-      .notRequired(),
-    numeroDocumentos: optionalNonNegativeIntegerValidation,
-    plazoPromedioPago: nonNegativeIntegerValidation,
-    montoDocumentos: nonNegativeMoneyValidation,
-    tasaComision: optionalTasaComisionValidation,
-    montoComision: nonNegativeMoneyValidation,
-    retencion: optionalNonNegativeMoneyValidation,
-    notaria: optionalNonNegativeMoneyValidation,
-    gastosCobrados: nonNegativeMoneyValidation,
-    recuperacionGastos: optionalNonNegativeMoneyValidation,
-    recaudacion: optionalNonNegativeMoneyValidation,
-    excedentes: optionalNonNegativeMoneyValidation,
   });

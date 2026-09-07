@@ -13,7 +13,11 @@ import {
   InfoOutlined,
 } from "@mui/icons-material";
 import type { Oferta } from "../../types/oferta";
-import { formatDateTime, formatMoney } from "../../utils/ofertaFormatters";
+import {
+  formatDateTime,
+  formatMoney,
+  formatPercent,
+} from "../../utils/ofertaFormatters";
 import {
   isOfertaCondicionada,
   normalizeOfertaEstado,
@@ -226,11 +230,11 @@ const DetalleOfertaFactoring = ({
                 >
                   <Percent sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
                   <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Tasa
+                    Tasa 30 días
                   </Typography>
                 </Box>
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  {oferta.tasa}%
+                  {formatPercent(oferta.tasa30Dias)}
                 </Typography>
               </Box>
 
@@ -245,14 +249,14 @@ const DetalleOfertaFactoring = ({
                 >
                   <AccountBalance sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
                   <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Monto adelanto
+                    Monto a financiar
                   </Typography>
                 </Box>
                 <Typography
                   variant="h6"
                   sx={{ fontWeight: 700, color: "primary.main" }}
                 >
-                  {formatMoney(oferta.montoAdelanto)}
+                  {formatMoney(oferta.montoAFinanciar)}
                 </Typography>
               </Box>
 
@@ -267,11 +271,11 @@ const DetalleOfertaFactoring = ({
                 >
                   <AccessTime sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
                   <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Plazo
+                    Días financiamiento
                   </Typography>
                 </Box>
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  {plazo} días
+                  {oferta.diasFinanciamiento ?? plazo} días
                 </Typography>
               </Box>
             </Box>

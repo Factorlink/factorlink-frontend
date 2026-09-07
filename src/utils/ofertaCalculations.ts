@@ -1,81 +1,112 @@
 import { toFiniteNumber } from "./ofertaFormatters";
 
 export type OfertaMontosInput = {
-  montoDocumentos: string | number | null | undefined;
+  montoTotal: string | number | null | undefined;
   porcentajeFinanciamiento: string | number | null | undefined;
-  tasa: string | number | null | undefined;
-  plazoPromedioPago: string | number | null | undefined;
+  diasFinanciamiento: string | number | null | undefined;
+  tasa30Dias: string | number | null | undefined;
+  saldoPendiente: string | number | null | undefined;
   montoComision: string | number | null | undefined;
-  gastosCobrados: string | number | null | undefined;
+  gastosAdministrativos: string | number | null | undefined;
+  firmaDigital: string | number | null | undefined;
 };
 
 export type OfertaMontosCalculados = {
-  anticipoBruto: number;
-  diferenciaPrecio: number;
-  iva: number;
+  ivaComision: number;
+  montoAFinanciar: number;
+  retencion: number;
+  costoFinanciamiento: number;
+  precioCompra: number;
   montoAGirar: number;
 };
 
 const toNum = (value: string | number | null | undefined): number =>
   toFiniteNumber(value) ?? 0;
 
-export const calcAnticipoBruto = (
-  montoDocumentos: number,
+export const calcIvaComision = (montoComision: number): number =>
+  Math.round(montoComision * 1.19 - montoComision);
+
+export const calcMontoAFinanciar = (
+  montoTotal: number,
   porcentajeFinanciamiento: number,
-): number =>
-  Math.round((montoDocumentos / 100) * porcentajeFinanciamiento);
+): number => Math.round(montoTotal * (porcentajeFinanciamiento / 100));
 
-export const calcDiferenciaPrecio = (
-  tasa: number,
-  plazoPromedioPago: number,
-  montoDocumentos: number,
-): number =>
-  Math.round((tasa / 30 * plazoPromedioPago) * (montoDocumentos / 100));
+export const calcRetencion = (
+  montoTotal: number,
+  montoAFinanciar: number,
+): number => Math.round(montoTotal - montoAFinanciar);
 
-export const calcIva = (
-  montoComision: number,
-  gastosCobrados: number,
-): number => {
-  const base = montoComision + gastosCobrados;
-  return Math.round(base * 1.19 - base);
-};
+/** tasa30Dias en puntos porcentuales (ej. 1.4); se aplica /100 como en el modelo previo. */
+export const calcCostoFinanciamiento = (
+  diasFinanciamiento: number,
+  tasa30Dias: number,
+  montoAFinanciar: number,
+): number =>
+  Math.round(
+    ((diasFinanciamiento / 30) * tasa30Dias) * (montoAFinanciar / 100),
+  );
+
+export const calcPrecioCompra = (
+  montoAFinanciar: number,
+  costoFinanciamiento: number,
+): number => Math.round(montoAFinanciar - costoFinanciamiento);
 
 export const calcMontoAGirar = (
-  anticipoBruto: number,
-  diferenciaPrecio: number,
+  precioCompra: number,
+  saldoPendiente: number,
   montoComision: number,
-  gastosCobrados: number,
-  iva: number,
+  ivaComision: number,
+  gastosAdministrativos: number,
+  firmaDigital: number,
 ): number =>
-  anticipoBruto - diferenciaPrecio - montoComision - gastosCobrados - iva;
+  Math.round(
+    precioCompra -
+      saldoPendiente -
+      montoComision -
+      ivaComision -
+      gastosAdministrativos -
+      firmaDigital,
+  );
 
 export const computeOfertaMontos = (
   input: OfertaMontosInput,
 ): OfertaMontosCalculados => {
-  const montoDocumentos = toNum(input.montoDocumentos);
+  const montoTotal = toNum(input.montoTotal);
   const porcentajeFinanciamiento = toNum(input.porcentajeFinanciamiento);
-  const tasa = toNum(input.tasa);
-  const plazoPromedioPago = toNum(input.plazoPromedioPago);
+  const diasFinanciamiento = toNum(input.diasFinanciamiento);
+  const tasa30Dias = toNum(input.tasa30Dias);
+  const saldoPendiente = toNum(input.saldoPendiente);
   const montoComision = toNum(input.montoComision);
-  const gastosCobrados = toNum(input.gastosCobrados);
+  const gastosAdministrativos = toNum(input.gastosAdministrativos);
+  const firmaDigital = toNum(input.firmaDigital);
 
-  const anticipoBruto = calcAnticipoBruto(
-    montoDocumentos,
+  const ivaComision = calcIvaComision(montoComision);
+  const montoAFinanciar = calcMontoAFinanciar(
+    montoTotal,
     porcentajeFinanciamiento,
   );
-  const diferenciaPrecio = calcDiferenciaPrecio(
-    tasa,
-    plazoPromedioPago,
-    montoDocumentos,
+  const retencion = calcRetencion(montoTotal, montoAFinanciar);
+  const costoFinanciamiento = calcCostoFinanciamiento(
+    diasFinanciamiento,
+    tasa30Dias,
+    montoAFinanciar,
   );
-  const iva = calcIva(montoComision, gastosCobrados);
+  const precioCompra = calcPrecioCompra(montoAFinanciar, costoFinanciamiento);
   const montoAGirar = calcMontoAGirar(
-    anticipoBruto,
-    diferenciaPrecio,
+    precioCompra,
+    saldoPendiente,
     montoComision,
-    gastosCobrados,
-    iva,
+    ivaComision,
+    gastosAdministrativos,
+    firmaDigital,
   );
 
-  return { anticipoBruto, diferenciaPrecio, iva, montoAGirar };
+  return {
+    ivaComision,
+    montoAFinanciar,
+    retencion,
+    costoFinanciamiento,
+    precioCompra,
+    montoAGirar,
+  };
 };

@@ -43,8 +43,8 @@ interface OfertasDrawerProps {
 const SORT_OPTIONS = [
   { value: "", label: "Sin orden" },
   { value: "porcentajeFinanciamiento", label: "% Financiamiento" },
-  { value: "tasa", label: "Tasa" },
-  { value: "montoAdelanto", label: "Monto adelanto" },
+  { value: "tasa30Dias", label: "Tasa 30 días" },
+  { value: "montoAFinanciar", label: "Monto a financiar" },
   { value: "fechaExpiracion", label: "Fecha expiración" },
   { value: "estado", label: "Estado" },
 ] as const;
@@ -418,8 +418,8 @@ const OfertasDrawer = ({
           ofertaData={{
             id: aceptarModal.oferta.id,
             factoringName: aceptarModal.oferta.factoring?.razonSocial || "N/A",
-            montoAdelanto: aceptarModal.oferta.montoAdelanto,
-            tasa: aceptarModal.oferta.tasa,
+            montoAFinanciar: aceptarModal.oferta.montoAFinanciar,
+            tasa30Dias: aceptarModal.oferta.tasa30Dias,
             porcentajeFinanciamiento: aceptarModal.oferta.porcentajeFinanciamiento,
             montoAGirar: aceptarModal.oferta.montoAGirar,
             retencion: aceptarModal.oferta.retencion,
@@ -434,8 +434,8 @@ const OfertasDrawer = ({
           ofertaData={{
             id: rechazarModal.oferta.id,
             factoringName: rechazarModal.oferta.factoring?.razonSocial || "N/A",
-            montoAdelanto: rechazarModal.oferta.montoAdelanto,
-            tasa: rechazarModal.oferta.tasa,
+            montoAFinanciar: rechazarModal.oferta.montoAFinanciar,
+            tasa30Dias: rechazarModal.oferta.tasa30Dias,
             porcentajeFinanciamiento: rechazarModal.oferta.porcentajeFinanciamiento,
             montoAGirar: rechazarModal.oferta.montoAGirar,
             retencion: rechazarModal.oferta.retencion,

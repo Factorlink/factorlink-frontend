@@ -30,8 +30,8 @@ interface AceptarOfertaModalProps {
   ofertaData: {
     id: string;
     factoringName: string;
-    montoAdelanto: string;
-    tasa: string;
+    montoAFinanciar: OptionalValue;
+    tasa30Dias: OptionalValue;
     porcentajeFinanciamiento: string;
     montoAGirar?: OptionalValue;
     retencion?: OptionalValue;
@@ -40,8 +40,8 @@ interface AceptarOfertaModalProps {
 
 const buildResumenLine = (ofertaData: AceptarOfertaModalProps["ofertaData"]) => {
   const parts = [
-    `Adelanto: ${formatMoney(ofertaData.montoAdelanto)}`,
-    `Tasa: ${formatPercent(ofertaData.tasa)}`,
+    `Monto a financiar: ${formatMoney(ofertaData.montoAFinanciar)}`,
+    `Tasa 30 días: ${formatPercent(ofertaData.tasa30Dias)}`,
   ];
   if (isInformed(ofertaData.montoAGirar)) {
     parts.push(`Monto a girar: ${formatMoney(ofertaData.montoAGirar)}`);

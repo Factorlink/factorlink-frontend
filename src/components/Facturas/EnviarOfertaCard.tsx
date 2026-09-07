@@ -8,12 +8,7 @@ import {
   InputAdornment,
   Tooltip,
 } from "@mui/material";
-import {
-  Send,
-  AccountBalance,
-  InfoOutlined,
-  Lock,
-} from "@mui/icons-material";
+import { Send, InfoOutlined, Lock } from "@mui/icons-material";
 import { useFormik } from "formik";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -30,19 +25,24 @@ import {
   createOfertaFormSchema,
   handleDecimalRateInputChange,
   handleNonNegativeIntegerInputChange,
-  TASA_COMISION_RANGE_MESSAGE,
+  TASA_DIARIA_MORA_RANGE_MESSAGE,
   TASA_RANGE_MESSAGE,
 } from "../../utils/validations/oferta-fields";
 
-const TIPO_DOCUMENTO_OFERTA = "Factura Electrónica";
-const DEFAULT_MONTO_DOCUMENTOS = "65574653";
-const DEFAULT_NUMERO_DOCUMENTOS = "2";
-
 const COMPUTED_MONEY_FIELDS = [
-  { key: "anticipoBruto", label: "Anticipo bruto" },
-  { key: "diferenciaPrecio", label: "Diferencia de precio" },
-  { key: "iva", label: "IVA" },
+  { key: "ivaComision", label: "IVA comisión" },
+  { key: "montoAFinanciar", label: "Monto a financiar" },
+  { key: "retencion", label: "Retención" },
+  { key: "costoFinanciamiento", label: "Costo de financiamiento" },
+  { key: "precioCompra", label: "Precio de compra" },
   { key: "montoAGirar", label: "Monto a girar", emphasize: true },
+] as const;
+
+const REQUIRED_MONEY_FIELDS = [
+  { name: "saldoPendiente", label: "Saldo pendiente" },
+  { name: "montoComision", label: "Monto de comisión" },
+  { name: "gastosAdministrativos", label: "Gastos administrativos" },
+  { name: "firmaDigital", label: "Firma digital" },
 ] as const;
 
 const today = new Date();
@@ -68,27 +68,6 @@ const blockNonNumericKeys = (
     e.preventDefault();
   }
 };
-
-const INTEGER_FIELDS = [
-  {
-    name: "numeroDocumentos",
-    label: "Número de documentos",
-    helper: "Cantidad de documentos de la operación",
-  },
-] as const;
-
-const REQUIRED_MONEY_FIELDS = [
-  { name: "montoComision", label: "Monto de comisión" },
-  { name: "gastosCobrados", label: "Gastos cobrados" },
-] as const;
-
-const OPTIONAL_MONEY_FIELDS = [
-  { name: "retencion", label: "Retención" },
-  { name: "notaria", label: "Notaría" },
-  { name: "recuperacionGastos", label: "Recuperación de gastos" },
-  { name: "recaudacion", label: "Recaudación" },
-  { name: "excedentes", label: "Excedentes" },
-] as const;
 
 interface EnviarOfertaCardProps {
   factura: Factura;
@@ -118,64 +97,57 @@ const EnviarOfertaCard = ({
   const { createOferta, loading } = useOfertas();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [openPicker, setOpenPicker] = useState<
-    "fechaExpiracion" | "fechaOperacion" | null
+    "fechaExpiracion" | "fechaCotizacion" | null
   >(null);
   const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
     null,
   );
   const [alertMessage, setAlertMessage] = useState("");
 
-  const montoFinanciar = parseFloat(factura.montoFinanciar) || 0;
+  const diasFinanciamiento = factura.plazo || 0;
 
   const formik = useFormik({
     initialValues: {
       porcentajeFinanciamiento: 100 as number | string,
-      tasa: 0 as number | string,
+      fechaCotizacion: today as Date | null,
+      tasa30Dias: 0 as number | string,
+      saldoPendiente: "0",
+      montoComision: "",
+      gastosAdministrativos: "",
+      firmaDigital: "0",
+      tasaDiariaMora: 0 as number | string,
+      cobroPorDiaMora: "0",
       fechaExpiracion: null as Date | null,
       comentario: "",
       ofertaCondicionada: false,
-      tipoDocumento: TIPO_DOCUMENTO_OFERTA,
-      fechaOperacion: null as Date | null,
-      numeroDocumentos: DEFAULT_NUMERO_DOCUMENTOS,
-      plazoPromedioPago: "",
-      montoDocumentos: DEFAULT_MONTO_DOCUMENTOS,
-      tasaComision: "" as number | string,
-      montoComision: "",
-      retencion: "",
-      notaria: "",
-      gastosCobrados: "",
-      recuperacionGastos: "",
-      recaudacion: "",
-      excedentes: "",
     },
-    validationSchema: createOfertaFormSchema(today),
+    validationSchema: createOfertaFormSchema(tomorrow),
     onSubmit: () => {
       setConfirmOpen(true);
     },
   });
 
-  const montoAdelanto = Math.round(
-    (montoFinanciar * (Number(formik.values.porcentajeFinanciamiento) || 0)) /
-      100,
-  );
-
   const montosCalculados = useMemo(
     () =>
       computeOfertaMontos({
-        montoDocumentos: formik.values.montoDocumentos,
+        montoTotal: factura.montoTotal,
         porcentajeFinanciamiento: formik.values.porcentajeFinanciamiento,
-        tasa: formik.values.tasa,
-        plazoPromedioPago: formik.values.plazoPromedioPago,
+        diasFinanciamiento,
+        tasa30Dias: formik.values.tasa30Dias,
+        saldoPendiente: formik.values.saldoPendiente,
         montoComision: formik.values.montoComision,
-        gastosCobrados: formik.values.gastosCobrados,
+        gastosAdministrativos: formik.values.gastosAdministrativos,
+        firmaDigital: formik.values.firmaDigital,
       }),
     [
-      formik.values.montoDocumentos,
+      factura.montoTotal,
       formik.values.porcentajeFinanciamiento,
-      formik.values.tasa,
-      formik.values.plazoPromedioPago,
+      diasFinanciamiento,
+      formik.values.tasa30Dias,
+      formik.values.saldoPendiente,
       formik.values.montoComision,
-      formik.values.gastosCobrados,
+      formik.values.gastosAdministrativos,
+      formik.values.firmaDigital,
     ],
   );
 
@@ -193,28 +165,25 @@ const EnviarOfertaCard = ({
       await createOferta({
         facturaId: factura.id,
         factoringId,
+        diasFinanciamiento,
         porcentajeFinanciamiento: formik.values.porcentajeFinanciamiento,
-        tasa: formik.values.tasa,
-        montoAdelanto,
+        fechaCotizacion: formik.values.fechaCotizacion!,
+        montoAFinanciar: montosCalculados.montoAFinanciar,
+        tasa30Dias: formik.values.tasa30Dias,
+        retencion: montosCalculados.retencion,
+        costoFinanciamiento: montosCalculados.costoFinanciamiento,
+        precioCompra: montosCalculados.precioCompra,
+        saldoPendiente: formik.values.saldoPendiente,
+        montoComision: formik.values.montoComision,
+        ivaComision: montosCalculados.ivaComision,
+        gastosAdministrativos: formik.values.gastosAdministrativos,
+        firmaDigital: formik.values.firmaDigital,
+        montoAGirar: montosCalculados.montoAGirar,
+        tasaDiariaMora: formik.values.tasaDiariaMora,
+        cobroPorDiaMora: formik.values.cobroPorDiaMora,
         fechaExpiracion: formik.values.fechaExpiracion!,
         comentario: formik.values.comentario,
         ofertaCondicionada: formik.values.ofertaCondicionada,
-        tipoDocumento: TIPO_DOCUMENTO_OFERTA,
-        fechaOperacion: formik.values.fechaOperacion,
-        numeroDocumentos: formik.values.numeroDocumentos,
-        plazoPromedioPago: formik.values.plazoPromedioPago,
-        montoDocumentos: formik.values.montoDocumentos,
-        tasaComision: formik.values.tasaComision,
-        diferenciaPrecio: montosCalculados.diferenciaPrecio,
-        montoComision: formik.values.montoComision,
-        retencion: formik.values.retencion,
-        notaria: formik.values.notaria,
-        gastosCobrados: formik.values.gastosCobrados,
-        iva: montosCalculados.iva,
-        recuperacionGastos: formik.values.recuperacionGastos,
-        recaudacion: formik.values.recaudacion,
-        excedentes: formik.values.excedentes,
-        montoAGirar: montosCalculados.montoAGirar,
       });
       setConfirmOpen(false);
       setAlertStatus("success");
@@ -234,10 +203,11 @@ const EnviarOfertaCard = ({
   };
 
   const renderDatePicker = (
-    name: "fechaExpiracion" | "fechaOperacion",
+    name: "fechaExpiracion" | "fechaCotizacion",
     label: string,
     fallbackHelper: string,
     minDate?: Date,
+    required = false,
   ) => (
     <StyledDatePicker
       label={label}
@@ -260,6 +230,7 @@ const EnviarOfertaCard = ({
         openPickerButton: { tabIndex: -1 },
         textField: {
           fullWidth: true,
+          required,
           onClick: () => setOpenPicker(name),
           onKeyDown: (e) => e.preventDefault(),
           onBlur: () => formik.setFieldTouched(name, true, false),
@@ -289,223 +260,188 @@ const EnviarOfertaCard = ({
             mb: 3,
           }}
         >
-      <SectionPanel
-        title="Condiciones de tu oferta"
-        icon={<Send sx={{ color: "primary.main", fontSize: 24 }} />}
-      >
-          {alertStatus && (
-            <Alert
-              severity={alertStatus}
-              sx={{ mb: 3 }}
-              onClose={() => {
-                setAlertStatus(null);
-                setAlertMessage("");
-              }}
-            >
-              {alertMessage}
-            </Alert>
-          )}
-
-          <Typography variant="subtitle1" sx={sectionTitleSx}>
-            Condiciones de financiamiento
-          </Typography>
-          <Box sx={{ ...gridSx, mb: 1 }}>
-            <StyledTextField
-              fullWidth
-              name="porcentajeFinanciamiento"
-              label="Porcentaje de financiamiento (%)"
-              type="string"
-              inputProps={{ min: 1, max: 100, step: 1 }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">%</InputAdornment>
-                ),
-              }}
-              value={formik.values.porcentajeFinanciamiento}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (val.length > 3) return;
-                if (/^0+$/.test(val)) return;
-                formik.handleChange(e);
-              }}
-              onBlur={formik.handleBlur}
-              onKeyDown={(e) =>
-                blockNonNumericKeys(
-                  e as React.KeyboardEvent<HTMLInputElement>,
-                  false,
-                )
-              }
-              error={fieldError("porcentajeFinanciamiento")}
-              helperText={fieldHelper(
-                "porcentajeFinanciamiento",
-                "Entre 1% y 100%",
-              )}
-            />
-
-            <StyledTextField
-              fullWidth
-              name="tasa"
-              label="Tasa (%)"
-              type="string"
-              inputProps={{ min: 0, max: 100, step: 0.01 }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">%</InputAdornment>
-                ),
-              }}
-              value={formik.values.tasa}
-              onChange={(e) =>
-                handleDecimalRateInputChange(
-                  e as React.ChangeEvent<HTMLInputElement>,
-                  formik.setFieldValue,
-                )
-              }
-              onBlur={formik.handleBlur}
-              onKeyDown={(e) =>
-                blockNonNumericKeys(
-                  e as React.KeyboardEvent<HTMLInputElement>,
-                  true,
-                )
-              }
-              error={fieldError("tasa")}
-              helperText={fieldHelper("tasa", TASA_RANGE_MESSAGE)}
-            />
-
-            <StyledTextField
-              fullWidth
-              label="Monto adelanto"
-              value={formatMoney(montoAdelanto)}
-              InputProps={{
-                readOnly: true,
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <AccountBalance
-                      sx={{ color: "primary.main", fontSize: 20 }}
-                    />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root input": {
-                  color: "primary.main",
-                  fontWeight: 600,
-                },
-              }}
-              helperText={`Calculado automáticamente (${formik.values.porcentajeFinanciamiento || 0}% de ${formatMoney(montoFinanciar)})`}
-            />
-
-            <Tooltip
-              title="Este campo no puede ser editado. El plazo es definido por la empresa emisora."
-              arrow
-            >
-              <StyledTextField
-                fullWidth
-                label="Plazo (días)"
-                value={factura.plazo || 0}
-                InputProps={{ readOnly: true }}
-                helperText={`Plazo solicitado: ${factura.plazo || 0} días`}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    cursor: "not-allowed",
-                    "& input": { cursor: "not-allowed" },
-                  },
+          <SectionPanel
+            title="Condiciones de tu oferta"
+            icon={<Send sx={{ color: "primary.main", fontSize: 24 }} />}
+          >
+            {alertStatus && (
+              <Alert
+                severity={alertStatus}
+                sx={{ mb: 3 }}
+                onClose={() => {
+                  setAlertStatus(null);
+                  setAlertMessage("");
                 }}
-              />
-            </Tooltip>
-
-            {renderDatePicker(
-              "fechaExpiracion",
-              "Fecha de expiración",
-              "Fecha límite para que la empresa acepte",
-              tomorrow,
+              >
+                {alertMessage}
+              </Alert>
             )}
 
-            <StyledTextField
-              fullWidth
-              name="plazoPromedioPago"
-              label="Plazo promedio de pago (días)"
-              type="string"
-              inputMode="numeric"
-              required
-              value={formik.values.plazoPromedioPago}
-              onChange={(e) =>
-                handleNonNegativeIntegerInputChange(
-                  e as React.ChangeEvent<HTMLInputElement>,
-                  formik.setFieldValue,
-                )
-              }
-              onBlur={formik.handleBlur}
-              onKeyDown={(e) =>
-                blockNonNumericKeys(
-                  e as React.KeyboardEvent<HTMLInputElement>,
-                  false,
-                )
-              }
-              error={fieldError("plazoPromedioPago")}
-              helperText={fieldHelper(
-                "plazoPromedioPago",
-                "Necesario para calcular la diferencia de precio",
-              )}
-            />
-          </Box>
+            <Typography variant="subtitle1" sx={sectionTitleSx}>
+              Condiciones de financiamiento
+            </Typography>
+            <Box sx={{ ...gridSx, mb: 1 }}>
+              <Tooltip
+                title="Este campo no puede ser editado. El plazo es definido por la empresa emisora."
+                arrow
+              >
+                <StyledTextField
+                  fullWidth
+                  label="Días de financiamiento"
+                  value={diasFinanciamiento}
+                  InputProps={{ readOnly: true }}
+                  helperText={`Plazo solicitado: ${diasFinanciamiento} días`}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      cursor: "not-allowed",
+                      "& input": { cursor: "not-allowed" },
+                    },
+                  }}
+                />
+              </Tooltip>
 
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 600, color: "text.primary", mb: 0.5 }}
-          >
-            Información adicional de la operación
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: "var(--color-fg-default-secondary)", mb: 2 }}
-          >
-            Datos operacionales y montos de la oferta
-          </Typography>
-          <Typography variant="subtitle1" sx={sectionTitleSx}>
-            Montos y condiciones
-          </Typography>
-          <Box sx={{ ...gridSx, mb: 1 }}>
-            <StyledTextField
-              fullWidth
-              name="montoDocumentos"
-              label="Monto de documentos"
-              type="string"
-              inputMode="numeric"
-              required
-              value={formik.values.montoDocumentos}
-              onChange={(e) =>
-                handleNonNegativeIntegerInputChange(
-                  e as React.ChangeEvent<HTMLInputElement>,
-                  formik.setFieldValue,
-                )
-              }
-              onBlur={formik.handleBlur}
-              onKeyDown={(e) =>
-                blockNonNumericKeys(
-                  e as React.KeyboardEvent<HTMLInputElement>,
-                  false,
-                )
-              }
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">$</InputAdornment>
-                ),
-              }}
-              inputProps={{ maxLength: 50 }}
-              error={fieldError("montoDocumentos")}
-              helperText={fieldHelper("montoDocumentos", "Mayor o igual a 0")}
-            />
-
-            {REQUIRED_MONEY_FIELDS.map((field) => (
               <StyledTextField
-                key={field.name}
                 fullWidth
-                name={field.name}
-                label={field.label}
+                name="porcentajeFinanciamiento"
+                label="Porcentaje de financiamiento (%)"
+                type="string"
+                inputProps={{ min: 1, max: 100, step: 1 }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">%</InputAdornment>
+                  ),
+                }}
+                value={formik.values.porcentajeFinanciamiento}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val.length > 3) return;
+                  if (/^0+$/.test(val)) return;
+                  formik.handleChange(e);
+                }}
+                onBlur={formik.handleBlur}
+                onKeyDown={(e) =>
+                  blockNonNumericKeys(
+                    e as React.KeyboardEvent<HTMLInputElement>,
+                    false,
+                  )
+                }
+                error={fieldError("porcentajeFinanciamiento")}
+                helperText={fieldHelper(
+                  "porcentajeFinanciamiento",
+                  "Entre 1% y 100%",
+                )}
+              />
+
+              {renderDatePicker(
+                "fechaCotizacion",
+                "Fecha de cotización",
+                "Fecha de la cotización",
+              )}
+
+              <StyledTextField
+                fullWidth
+                name="tasa30Dias"
+                label="Tasa 30 días (%)"
+                type="string"
+                inputProps={{ min: 0, max: 100, step: 0.01 }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">%</InputAdornment>
+                  ),
+                }}
+                value={formik.values.tasa30Dias}
+                onChange={(e) =>
+                  handleDecimalRateInputChange(
+                    e as React.ChangeEvent<HTMLInputElement>,
+                    formik.setFieldValue,
+                  )
+                }
+                onBlur={formik.handleBlur}
+                onKeyDown={(e) =>
+                  blockNonNumericKeys(
+                    e as React.KeyboardEvent<HTMLInputElement>,
+                    true,
+                  )
+                }
+                error={fieldError("tasa30Dias")}
+                helperText={fieldHelper("tasa30Dias", TASA_RANGE_MESSAGE)}
+              />
+
+              {REQUIRED_MONEY_FIELDS.map((field) => (
+                <StyledTextField
+                  key={field.name}
+                  fullWidth
+                  name={field.name}
+                  label={field.label}
+                  type="string"
+                  inputMode="numeric"
+                  required
+                  value={formik.values[field.name]}
+                  onChange={(e) =>
+                    handleNonNegativeIntegerInputChange(
+                      e as React.ChangeEvent<HTMLInputElement>,
+                      formik.setFieldValue,
+                    )
+                  }
+                  onBlur={formik.handleBlur}
+                  onKeyDown={(e) =>
+                    blockNonNumericKeys(
+                      e as React.KeyboardEvent<HTMLInputElement>,
+                      false,
+                    )
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">$</InputAdornment>
+                    ),
+                  }}
+                  inputProps={{ maxLength: 50 }}
+                  error={fieldError(field.name)}
+                  helperText={fieldHelper(field.name, "Mayor o igual a 0")}
+                />
+              ))}
+
+              <StyledTextField
+                fullWidth
+                name="tasaDiariaMora"
+                label="Tasa diaria de mora (%)"
+                type="string"
+                required
+                inputProps={{ min: 0, max: 100, step: 0.01 }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">%</InputAdornment>
+                  ),
+                }}
+                value={formik.values.tasaDiariaMora}
+                onChange={(e) =>
+                  handleDecimalRateInputChange(
+                    e as React.ChangeEvent<HTMLInputElement>,
+                    formik.setFieldValue,
+                  )
+                }
+                onBlur={formik.handleBlur}
+                onKeyDown={(e) =>
+                  blockNonNumericKeys(
+                    e as React.KeyboardEvent<HTMLInputElement>,
+                    true,
+                  )
+                }
+                error={fieldError("tasaDiariaMora")}
+                helperText={fieldHelper(
+                  "tasaDiariaMora",
+                  TASA_DIARIA_MORA_RANGE_MESSAGE,
+                )}
+              />
+
+              <StyledTextField
+                fullWidth
+                name="cobroPorDiaMora"
+                label="Cobro por día de mora"
                 type="string"
                 inputMode="numeric"
                 required
-                value={formik.values[field.name]}
+                value={formik.values.cobroPorDiaMora}
                 onChange={(e) =>
                   handleNonNegativeIntegerInputChange(
                     e as React.ChangeEvent<HTMLInputElement>,
@@ -525,204 +461,141 @@ const EnviarOfertaCard = ({
                   ),
                 }}
                 inputProps={{ maxLength: 50 }}
-                error={fieldError(field.name)}
-                helperText={fieldHelper(field.name, "Mayor o igual a 0")}
+                error={fieldError("cobroPorDiaMora")}
+                helperText={fieldHelper("cobroPorDiaMora", "Mayor o igual a 0")}
               />
-            ))}
 
-            {COMPUTED_MONEY_FIELDS.map((field) => {
-              const emphasize = "emphasize" in field && field.emphasize;
-              return (
-              <StyledTextField
-                key={field.key}
-                fullWidth
-                label={field.label}
-                value={formatMoney(montosCalculados[field.key])}
-                InputProps={{
-                  readOnly: true,
-                  startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    cursor: "not-allowed",
-                    "& input": {
-                      cursor: "not-allowed",
-                      ...(emphasize
-                        ? { color: "primary.main", fontWeight: 600 }
-                        : {}),
-                    },
-                  },
-                }}
-                helperText="Calculado automáticamente"
-              />
-            );
-            })}
+              {renderDatePicker(
+                "fechaExpiracion",
+                "Fecha de expiración",
+                "Fecha límite para que la empresa acepte",
+                tomorrow,
+                true,
+              )}
+            </Box>
 
+            <Typography variant="subtitle1" sx={sectionTitleSx}>
+              Montos calculados
+            </Typography>
+            <Box sx={{ ...gridSx, mb: 1 }}>
+              {COMPUTED_MONEY_FIELDS.map((field) => {
+                const emphasize = "emphasize" in field && field.emphasize;
+                return (
+                  <StyledTextField
+                    key={field.key}
+                    fullWidth
+                    label={field.label}
+                    value={formatMoney(montosCalculados[field.key])}
+                    InputProps={{
+                      readOnly: true,
+                      startAdornment: (
+                        <InputAdornment position="start">$</InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        cursor: "not-allowed",
+                        "& input": {
+                          cursor: "not-allowed",
+                          ...(emphasize
+                            ? { color: "primary.main", fontWeight: 600 }
+                            : {}),
+                        },
+                      },
+                    }}
+                    helperText="Calculado automáticamente"
+                  />
+                );
+              })}
+            </Box>
+
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 600, color: "text.primary", mb: 0.5, mt: 1 }}
+            >
+              Comentario
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: "var(--color-fg-default-secondary)", mb: 2 }}
+            >
+              Información adicional sobre tu oferta (opcional)
+            </Typography>
             <StyledTextField
               fullWidth
-              name="tasaComision"
-              label="Tasa de comisión (%)"
-              type="string"
-              inputProps={{ min: 0, max: 100, step: 0.01 }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">%</InputAdornment>
-                ),
-              }}
-              value={formik.values.tasaComision}
-              onChange={(e) =>
-                handleDecimalRateInputChange(
-                  e as React.ChangeEvent<HTMLInputElement>,
-                  formik.setFieldValue,
-                )
-              }
+              name="comentario"
+              label="Comentario"
+              placeholder="Añade información adicional sobre tu oferta..."
+              multiline
+              rows={3}
+              inputProps={{ maxLength: 500 }}
+              value={formik.values.comentario}
+              onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              onKeyDown={(e) =>
-                blockNonNumericKeys(
-                  e as React.KeyboardEvent<HTMLInputElement>,
-                  true,
-                )
-              }
-              error={fieldError("tasaComision")}
-              helperText={fieldHelper(
-                "tasaComision",
-                TASA_COMISION_RANGE_MESSAGE,
-              )}
+              error={fieldError("comentario")}
+              helperText={fieldHelper("comentario", "Máximo 500 caracteres")}
             />
 
-            {OPTIONAL_MONEY_FIELDS.map((field) => (
-              <StyledTextField
-                key={field.name}
-                fullWidth
-                name={field.name}
-                label={field.label}
-                type="string"
-                inputMode="numeric"
-                value={formik.values[field.name]}
-                onChange={(e) =>
-                  handleNonNegativeIntegerInputChange(
-                    e as React.ChangeEvent<HTMLInputElement>,
-                    formik.setFieldValue,
-                  )
-                }
-                onBlur={formik.handleBlur}
-                onKeyDown={(e) =>
-                  blockNonNumericKeys(
-                    e as React.KeyboardEvent<HTMLInputElement>,
-                    false,
-                  )
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
-                  ),
-                }}
-                inputProps={{ maxLength: 50 }}
-                error={fieldError(field.name)}
-                helperText={fieldHelper(field.name, "Mayor o igual a 0")}
-              />
-            ))}
-          </Box>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id="ofertaCondicionada"
+                  name="ofertaCondicionada"
+                  checked={formik.values.ofertaCondicionada}
+                  onChange={formik.handleChange}
+                  disabled={loading || alertStatus === "success"}
+                  size="small"
+                />
+              }
+              label={
+                <Box>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 600,
+                      color: "var(--color-fg-default-primary)",
+                    }}
+                  >
+                    Oferta condicionada
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "var(--color-fg-default-secondary)" }}
+                  >
+                    Mi oferta está sujeta a condiciones o antecedentes
+                    adicionales.
+                  </Typography>
+                </Box>
+              }
+              sx={{
+                mt: 2,
+                mx: 0,
+                p: 2,
+                alignItems: "flex-start",
+                gap: 1,
+                borderRadius: 2,
+                border: "1px solid var(--color-border-default-primary)",
+              }}
+            />
 
-          <Typography variant="subtitle1" sx={sectionTitleSx}>
-            Información de la operación
-          </Typography>
-          <Box sx={{ ...gridSx, mb: 1 }}>
-            <Tooltip
-              title="Este campo no puede ser editado. El tipo de documento es Factura Electrónica."
-              arrow
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 1.5,
+                mt: 1,
+                p: 2,
+                borderRadius: 2,
+                backgroundColor: "var(--color-bg-accent-secondary)",
+              }}
             >
-              <StyledTextField
-                fullWidth
-                name="tipoDocumento"
-                label="Tipo de documento"
-                value={TIPO_DOCUMENTO_OFERTA}
-                InputProps={{ readOnly: true }}
-                helperText="Valor fijo de la operación"
+              <InfoOutlined
                 sx={{
-                  "& .MuiOutlinedInput-root": {
-                    cursor: "not-allowed",
-                    "& input": { cursor: "not-allowed" },
-                  },
+                  color: "var(--color-fg-accent-primary)",
+                  mt: 0.25,
+                  flexShrink: 0,
                 }}
               />
-            </Tooltip>
-
-            {renderDatePicker(
-              "fechaOperacion",
-              "Fecha de operación",
-              "Fecha de la operación",
-            )}
-
-            {INTEGER_FIELDS.map((field) => (
-              <StyledTextField
-                key={field.name}
-                fullWidth
-                name={field.name}
-                label={field.label}
-                type="string"
-                inputMode="numeric"
-                value={formik.values[field.name]}
-                onChange={(e) =>
-                  handleNonNegativeIntegerInputChange(
-                    e as React.ChangeEvent<HTMLInputElement>,
-                    formik.setFieldValue,
-                  )
-                }
-                onBlur={formik.handleBlur}
-                onKeyDown={(e) =>
-                  blockNonNumericKeys(
-                    e as React.KeyboardEvent<HTMLInputElement>,
-                    false,
-                  )
-                }
-                error={fieldError(field.name)}
-                helperText={fieldHelper(field.name, field.helper)}
-              />
-            ))}
-          </Box>
-
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 600, color: "text.primary", mb: 0.5, mt: 1 }}
-          >
-            Comentario
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: "var(--color-fg-default-secondary)", mb: 2 }}
-          >
-            Información adicional sobre tu oferta (opcional)
-          </Typography>
-          <StyledTextField
-            fullWidth
-            name="comentario"
-            label="Comentario"
-            placeholder="Añade información adicional sobre tu oferta..."
-            multiline
-            rows={3}
-            inputProps={{ maxLength: 500 }}
-            value={formik.values.comentario}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={fieldError("comentario")}
-            helperText={fieldHelper("comentario", "Máximo 500 caracteres")}
-          />
-
-          <FormControlLabel
-            control={
-              <Checkbox
-                id="ofertaCondicionada"
-                name="ofertaCondicionada"
-                checked={formik.values.ofertaCondicionada}
-                onChange={formik.handleChange}
-                disabled={loading || alertStatus === "success"}
-                size="small"
-              />
-            }
-            label={
               <Box>
                 <Typography
                   variant="subtitle2"
@@ -731,77 +604,33 @@ const EnviarOfertaCard = ({
                     color: "var(--color-fg-default-primary)",
                   }}
                 >
-                  Oferta condicionada
+                  Importante
                 </Typography>
                 <Typography
                   variant="body2"
                   sx={{ color: "var(--color-fg-default-secondary)" }}
                 >
-                  Mi oferta está sujeta a condiciones o antecedentes
-                  adicionales.
+                  La empresa revisará tu oferta antes de aceptarla. Podrás
+                  seguir el estado desde el Marketplace.
                 </Typography>
               </Box>
-            }
-            sx={{
-              mt: 2,
-              mx: 0,
-              p: 2,
-              alignItems: "flex-start",
-              gap: 1,
-              borderRadius: 2,
-              border: "1px solid var(--color-border-default-primary)",
-            }}
-          />
-
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 1.5,
-              mt: 1,
-              p: 2,
-              borderRadius: 2,
-              backgroundColor: "var(--color-bg-accent-secondary)",
-            }}
-          >
-            <InfoOutlined
-              sx={{
-                color: "var(--color-fg-accent-primary)",
-                mt: 0.25,
-                flexShrink: 0,
-              }}
-            />
-            <Box>
-              <Typography
-                variant="subtitle2"
-                sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}
-              >
-                Importante
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{ color: "var(--color-fg-default-secondary)" }}
-              >
-                La empresa revisará tu oferta antes de aceptarla. Podrás seguir
-                el estado desde el Marketplace.
-              </Typography>
             </Box>
-          </Box>
-      </SectionPanel>
+          </SectionPanel>
 
           <ResumenOfertaAside
             montoTotal={factura.montoTotal}
             porcentajeFinanciamiento={formik.values.porcentajeFinanciamiento}
-            montoFinanciar={montoFinanciar}
-            montoAdelanto={montoAdelanto}
-            tasa={formik.values.tasa}
-            plazo={factura.plazo || 0}
+            montoAFinanciar={montosCalculados.montoAFinanciar}
+            montoAGirar={montosCalculados.montoAGirar}
+            tasa30Dias={formik.values.tasa30Dias}
+            diasFinanciamiento={diasFinanciamiento}
             fechaExpiracion={formik.values.fechaExpiracion}
             submitDisabled={
               alertStatus === "success" ||
               !formik.isValid ||
               !formik.dirty ||
-              !formik.values.fechaExpiracion
+              !formik.values.fechaExpiracion ||
+              !formik.values.fechaCotizacion
             }
             onCancel={onCancel}
           />

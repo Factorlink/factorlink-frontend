@@ -123,9 +123,9 @@ const EnviarOfertaFinalModal = ({
               sx={{ color: "var(--color-fg-default-secondary)", mb: 2 }}
             >
               Al enviar la oferta final, la Empresa podrá aceptarla o
-              rechazarla. Las condiciones vigentes son un adelanto de{" "}
-              {formatMoney(oferta.montoAdelanto)} con una tasa de{" "}
-              {formatPercent(oferta.tasa)}.
+              rechazarla. Las condiciones vigentes son un monto a financiar de{" "}
+              {formatMoney(oferta.montoAFinanciar)} con una tasa de{" "}
+              {formatPercent(oferta.tasa30Dias)}.
             </Typography>
 
             <Box

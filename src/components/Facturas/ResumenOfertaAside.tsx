@@ -9,10 +9,10 @@ import {
 interface ResumenOfertaAsideProps {
   montoTotal: string | number;
   porcentajeFinanciamiento: string | number;
-  montoFinanciar: string | number;
-  montoAdelanto: number;
-  tasa: string | number;
-  plazo: number;
+  montoAFinanciar: number;
+  montoAGirar: number;
+  tasa30Dias: string | number;
+  diasFinanciamiento: string | number;
   fechaExpiracion: Date | null;
   submitDisabled: boolean;
   onCancel?: () => void;
@@ -39,14 +39,15 @@ const valueSx = {
 const ResumenOfertaAside = ({
   montoTotal,
   porcentajeFinanciamiento,
-  montoFinanciar,
-  montoAdelanto,
-  tasa,
-  plazo,
+  montoAFinanciar,
+  montoAGirar,
+  tasa30Dias,
+  diasFinanciamiento,
   fechaExpiracion,
   submitDisabled,
   onCancel,
 }: ResumenOfertaAsideProps) => {
+  const dias = Number(diasFinanciamiento) || 0;
   const rows = [
     { label: "Monto total de la factura", value: formatMoney(montoTotal) },
     {
@@ -55,14 +56,14 @@ const ResumenOfertaAside = ({
     },
     {
       label: "Monto a financiar",
-      value: formatMoney(montoFinanciar),
+      value: formatMoney(montoAFinanciar),
       emphasize: true,
     },
-    { label: "Monto adelanto", value: formatMoney(montoAdelanto) },
-    { label: "Tasa aplicada", value: formatPercent(tasa) },
+    { label: "Monto a girar", value: formatMoney(montoAGirar) },
+    { label: "Tasa 30 días", value: formatPercent(tasa30Dias) },
     {
-      label: "Plazo de la oferta",
-      value: `${plazo || 0} ${plazo === 1 ? "día" : "días"}`,
+      label: "Días de financiamiento",
+      value: `${dias} ${dias === 1 ? "día" : "días"}`,
     },
     { label: "Fecha de expiración", value: formatDateOnly(fechaExpiracion) },
   ];
@@ -126,7 +127,7 @@ const ResumenOfertaAside = ({
             variant="body2"
             sx={{ color: "var(--color-fg-default-secondary)" }}
           >
-            Monto a financiar {formatMoney(montoFinanciar)}
+            Monto a girar {formatMoney(montoAGirar)}
           </Typography>
         </Box>
       </Box>

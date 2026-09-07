@@ -150,7 +150,7 @@ const CancelarOfertaModal = ({
                   Tu oferta
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {`Adelanto: ${formatMoney(oferta.montoAdelanto)} • Tasa: ${formatPercent(oferta.tasa)}`}
+                  {`Monto a financiar: ${formatMoney(oferta.montoAFinanciar)} • Tasa 30 días: ${formatPercent(oferta.tasa30Dias)}`}
                 </Typography>
               </Box>
             </Box>

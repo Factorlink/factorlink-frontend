@@ -3,24 +3,23 @@ import type { Factoring } from "../factoring";
 /** API histórica manda strings; la nueva puede mandar number o null. */
 export type OfertaNumericValue = string | number | null;
 
-/** Campos operacionales y financieros. En create, montos clave + montoDocumentos/plazoPromedioPago son required. */
-export type OfertaCamposOperacionales = {
-    tipoDocumento: string;
-    montoDocumentos: number;
-    plazoPromedioPago: number;
-    diferenciaPrecio: number;
+/** Campos financieros del nuevo contrato de oferta. */
+export type OfertaCamposFinancieros = {
+    diasFinanciamiento: number;
+    fechaCotizacion: string;
+    montoAFinanciar: number;
+    tasa30Dias: number;
+    retencion: number;
+    costoFinanciamiento: number;
+    precioCompra: number;
+    saldoPendiente: number;
     montoComision: number;
-    gastosCobrados: number;
-    iva: number;
-    fechaOperacion?: string;
-    numeroDocumentos?: number;
-    tasaComision?: number;
-    retencion?: number;
-    notaria?: number;
-    recuperacionGastos?: number;
-    recaudacion?: number;
-    excedentes?: number;
-    montoAGirar?: number;
+    ivaComision: number;
+    gastosAdministrativos: number;
+    firmaDigital: number;
+    montoAGirar: number;
+    tasaDiariaMora: number;
+    cobroPorDiaMora: number;
 };
 
 export interface Oferta {
@@ -32,48 +31,41 @@ export interface Oferta {
     factoringId: string;
     facturaId: string;
     fechaExpiracion: string;
-    montoAdelanto: string;
     porcentajeFinanciamiento: string;
-    tasa: string;
     factoring?: Factoring;
     ofertaCondicionada?: boolean;
-    tipoDocumento?: string | null;
-    fechaOperacion?: string | null;
-    numeroDocumentos?: OfertaNumericValue;
-    plazoPromedioPago?: OfertaNumericValue;
-    montoDocumentos?: OfertaNumericValue;
-    tasaComision?: OfertaNumericValue;
-    diferenciaPrecio?: OfertaNumericValue;
-    montoComision?: OfertaNumericValue;
+    diasFinanciamiento?: OfertaNumericValue;
+    fechaCotizacion?: string | null;
+    montoAFinanciar?: OfertaNumericValue;
+    tasa30Dias?: OfertaNumericValue;
     retencion?: OfertaNumericValue;
-    notaria?: OfertaNumericValue;
-    gastosCobrados?: OfertaNumericValue;
-    iva?: OfertaNumericValue;
-    recuperacionGastos?: OfertaNumericValue;
-    recaudacion?: OfertaNumericValue;
-    excedentes?: OfertaNumericValue;
+    costoFinanciamiento?: OfertaNumericValue;
+    precioCompra?: OfertaNumericValue;
+    saldoPendiente?: OfertaNumericValue;
+    montoComision?: OfertaNumericValue;
+    ivaComision?: OfertaNumericValue;
+    gastosAdministrativos?: OfertaNumericValue;
+    firmaDigital?: OfertaNumericValue;
     montoAGirar?: OfertaNumericValue;
+    tasaDiariaMora?: OfertaNumericValue;
+    cobroPorDiaMora?: OfertaNumericValue;
 }
 
 export type CreateOfertaPayload = {
     facturaId: string;
     factoringId: string;
     porcentajeFinanciamiento: number;
-    tasa: number;
-    montoAdelanto: number;
     fechaExpiracion: string;
     comentario: string;
     ofertaCondicionada: boolean;
-} & OfertaCamposOperacionales;
+} & OfertaCamposFinancieros;
 
 export type UpdateOfertaPayload = {
     porcentajeFinanciamiento?: number;
-    tasa?: number;
-    montoAdelanto?: number;
     fechaExpiracion?: string;
     comentario?: string;
     ofertaCondicionada?: boolean;
-} & Partial<OfertaCamposOperacionales>;
+} & Partial<OfertaCamposFinancieros>;
 
 export type RespondOfertaPayload = {
     estado?: "aceptada" | "rechazada";
