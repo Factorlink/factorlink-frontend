@@ -25,6 +25,7 @@ import {
   Tab,
   Button,
   Checkbox,
+  Tooltip,
 } from "@mui/material";
 import {
   Description,
@@ -172,6 +173,12 @@ const Facturas = () => {
     return factura.estado === "EN_MARKETPLACE" || factura.estado === "CON_OFERTAS";
   };
 
+  const openRemoveMarketplace = (factura: Factura) => {
+    setSelectedFactura(factura);
+    setRemoveMarketplaceModalOpen(true);
+    setAnchorEl(null);
+  };
+
   const handleEliminar = () => {
     if (isInMarketplace(selectedFactura)) {
       setRemoveMarketplaceModalOpen(true);
@@ -209,13 +216,17 @@ const Facturas = () => {
     setSelectedFactura(null);
   };
 
+  const goToCotizar = (factura: Factura) => {
+    if (currentRole && currentRole.nivel >= 3) {
+      navigate(`/facturas/${factura.id}/cotizar`);
+    } else {
+      setDocumentsRequiredModalOpen(true);
+    }
+  };
+
   const handleEnviarCotizar = () => {
     if (selectedFactura) {
-      if (currentRole && currentRole.nivel >= 3) {
-        navigate(`/facturas/${selectedFactura.id}/cotizar`);
-      } else {
-        setDocumentsRequiredModalOpen(true);
-      }
+      goToCotizar(selectedFactura);
     }
     handleMenuClose();
   };
@@ -841,13 +852,37 @@ const Facturas = () => {
                               />
                             </TableCell>
                             <TableCell>
-                              <IconButton
-                                size="small"
-                                onClick={(e) => handleMenuOpen(e, factura)}
-                                sx={{ color: "var(--color-fg-default-secondary)" }}
-                              >
-                                <MoreVert />
-                              </IconButton>
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                {canEnviarCotizar(factura) && (
+                                  <Tooltip title="Enviar a cotizar">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => goToCotizar(factura)}
+                                      sx={{ color: "var(--color-fg-accent-primary)" }}
+                                    >
+                                      <Send />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                                {isInMarketplace(factura) && (
+                                  <Tooltip title="Quitar del marketplace">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => openRemoveMarketplace(factura)}
+                                      sx={{ color: "var(--color-fg-danger-primary)" }}
+                                    >
+                                      <StorefrontIcon />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => handleMenuOpen(e, factura)}
+                                  sx={{ color: "var(--color-fg-default-secondary)" }}
+                                >
+                                  <MoreVert />
+                                </IconButton>
+                              </Box>
                             </TableCell>
                           </TableRow>
                         );
@@ -936,7 +971,11 @@ const Facturas = () => {
           </MenuItem>
           {
             isInMarketplace(selectedFactura) && (
-              <MenuItem onClick={handleEliminar}>
+              <MenuItem
+                onClick={() =>
+                  selectedFactura && openRemoveMarketplace(selectedFactura)
+                }
+              >
                 <ListItemIcon>
                   <StorefrontIcon sx={{ color: "var(--color-fg-danger-primary)" }} />
                 </ListItemIcon>
