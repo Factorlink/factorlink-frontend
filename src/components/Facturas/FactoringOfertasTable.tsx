@@ -18,12 +18,10 @@ import {
   Select,
   MenuItem,
   IconButton,
-  Menu,
-  ListItemIcon,
-  ListItemText,
+  Tooltip,
   Button,
 } from "@mui/material";
-import { Visibility, MoreVert, Refresh } from "@mui/icons-material";
+import { Visibility, Refresh } from "@mui/icons-material";
 import SortableTableHeader from "./SortableTableHeader";
 import { useFacturas } from "../../hooks/useFacturas";
 import type { Factura } from "../../types/factura";
@@ -127,8 +125,6 @@ const FactoringOfertasTable = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [error, setError] = useState(false);
-  const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const requestIdRef = useRef(0);
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "");
   const [order, setOrder] = useState(searchParams.get("order") || "DESC");
@@ -297,26 +293,10 @@ const FactoringOfertasTable = ({
     writeSearchParams(INITIAL_FILTERS, sortBy, order, 1, meta.limit);
   };
 
-  const handleMenuOpen = (
-    event: React.MouseEvent<HTMLElement>,
-    factura: Factura,
-  ) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedFactura(factura);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedFactura(null);
-  };
-
-  const handleVerFactura = () => {
-    if (selectedFactura) {
-      navigate(`/facturas/${selectedFactura.id}/factoring`, {
-        state: { from: `${location.pathname}${location.search}` },
-      });
-    }
-    handleMenuClose();
+  const handleVerFactura = (factura: Factura) => {
+    navigate(`/facturas/${factura.id}/factoring`, {
+      state: { from: `${location.pathname}${location.search}` },
+    });
   };
 
   const hasActiveFilters = Object.values(filters).some(isFilterValueActive);
@@ -551,13 +531,15 @@ const FactoringOfertasTable = ({
                           />
                         </TableCell>
                         <TableCell>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleMenuOpen(e, factura)}
-                            sx={{ color: "var(--color-fg-default-secondary)" }}
-                          >
-                            <MoreVert />
-                          </IconButton>
+                          <Tooltip title="Ver factura">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleVerFactura(factura)}
+                              sx={{ color: "var(--color-fg-default-secondary)" }}
+                            >
+                              <Visibility />
+                            </IconButton>
+                          </Tooltip>
                         </TableCell>
                       </TableRow>
                     );
@@ -607,28 +589,6 @@ const FactoringOfertasTable = ({
           </>
         )}
       </TableContainer>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        PaperProps={{
-          sx: {
-            borderRadius: 2,
-            boxShadow: "var(--shadow-popover)",
-            minWidth: 180,
-          },
-        }}
-      >
-        <MenuItem onClick={handleVerFactura}>
-          <ListItemIcon>
-            <Visibility sx={{ color: "var(--color-fg-default-secondary)" }} />
-          </ListItemIcon>
-          <ListItemText primary="Ver factura" />
-        </MenuItem>
-      </Menu>
     </>
   );
 };
