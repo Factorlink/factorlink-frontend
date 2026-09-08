@@ -128,6 +128,14 @@ function App() {
             }
           />
           <Route
+            path="/facturas/grupos"
+            element={
+              <ProtectedRoute>
+                <Facturas />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/facturas/grupos/:id"
             element={
               <ProtectedRoute>

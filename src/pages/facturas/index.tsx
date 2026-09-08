@@ -37,10 +37,12 @@ import {
   Delete,
   Send,
   CreateNewFolder,
+  Groups,
 } from "@mui/icons-material";
 import MarketplaceFacturasTable from "../../components/Facturas/MarketplaceFacturasTable";
 import OfertasFacturasTable from "../../components/Facturas/OfertasFacturasTable";
 import CedidasFacturasTable from "../../components/Facturas/CedidasFacturasTable";
+import FacturaGruposTable from "../../components/Facturas/FacturaGruposTable";
 import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
 import BulkDeleteFacturasModal from "../../components/Modals/BulkDeleteFacturasModal";
@@ -91,7 +93,13 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const TAB_ROUTES = ["/facturas", "/facturas/marketplace", "/facturas/ofertas", "/facturas/cedidas"];
+const TAB_ROUTES = [
+  "/facturas",
+  "/facturas/marketplace",
+  "/facturas/ofertas",
+  "/facturas/cedidas",
+  "/facturas/grupos",
+];
 const MIN_GRUPO = 2;
 const MAX_GRUPO = 5;
 
@@ -688,6 +696,29 @@ const Facturas = () => {
                 </Box>
               }
             />
+            <Tab
+              icon={<Groups sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  Grupos
+                  {activeTab === 4 && meta.total > 0 && (
+                    <Chip
+                      label={meta.total}
+                      size="small"
+                      sx={{
+                        height: 22,
+                        minWidth: 22,
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        backgroundColor: "var(--color-bg-accent-primary)",
+                        color: "var(--color-fg-on-accent-primary)",
+                      }}
+                    />
+                  )}
+                </Box>
+              }
+            />
           </Tabs>
         </Box>
 
@@ -1046,8 +1077,13 @@ const Facturas = () => {
             empresaId={currentRole?.empresaId || ""}
             onMetaChange={handleChildMetaChange}
           />
-        ) : (
+        ) : activeTab === 3 ? (
           <CedidasFacturasTable
+            empresaId={currentRole?.empresaId || ""}
+            onMetaChange={handleChildMetaChange}
+          />
+        ) : (
+          <FacturaGruposTable
             empresaId={currentRole?.empresaId || ""}
             onMetaChange={handleChildMetaChange}
           />

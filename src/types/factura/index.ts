@@ -36,6 +36,7 @@ export interface FacturaGrupo {
     plazo?: number;
     visibilidad?: FacturaGrupoVisibilidad | string;
     empresaId?: string;
+    createdAt?: string;
 }
 
 export interface Factura {
