@@ -236,6 +236,13 @@ export const theme = createTheme({
         },
       },
     },
+    MuiFormLabel: {
+      styleOverrides: {
+        asterisk: {
+          color: "var(--color-fg-danger-primary)",
+        },
+      },
+    },
     MuiInputLabel: {
       styleOverrides: {
         root: {
