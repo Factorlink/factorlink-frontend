@@ -15,7 +15,6 @@ import {
   Select,
   MenuItem,
   FormHelperText,
-  InputAdornment,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -27,7 +26,12 @@ import * as Yup from "yup";
 import useAuthStore from "../../store/authStore";
 import { useLegalDocuments } from "../../hooks/useLegalDocuments";
 import { EMPRESA_DOCUMENTOS, FACTORING_DOCUMENTOS } from "../../utils/consts";
-import { validateFile, formatFileSize, MAX_FILE_SIZE } from "../../utils/validations/file-fields";
+import {
+  validateFile,
+  validateFileExtension,
+  formatFileSize,
+  MAX_FILE_SIZE,
+} from "../../utils/validations/file-fields";
 
 interface UploadDocumentModalProps {
   open: boolean;
@@ -61,7 +65,19 @@ const UploadDocumentModal = ({
     archivoBase64: Yup.string().required("Debe seleccionar un archivo"),
     nombreArchivo: Yup.string().when("tipo", {
       is: "otros_documentos_legales",
-      then: (schema) => schema.required("El nombre del documento es requerido"),
+      then: (schema) =>
+        schema
+          .required("El nombre del documento es requerido")
+          .test(
+            "valid-extension",
+            "Extensión no permitida",
+            function (value) {
+              if (!value) return true;
+              const result = validateFileExtension(value);
+              if (result.valid) return true;
+              return this.createError({ message: result.error });
+            },
+          ),
       otherwise: (schema) => schema.notRequired(),
     }),
   });
@@ -88,10 +104,7 @@ const UploadDocumentModal = ({
     reader.onload = () => {
       const base64String = reader.result as string;
       formik.setFieldValue("archivoBase64", base64String, true);
-      // Quitar la extensión del nombre del archivo para que no se duplique con el adornment .pdf
-      // Y limitar a 26 caracteres (30 - 4 de ".pdf")
-      const nameWithoutExtension = file.name.replace(/\.[^/.]+$/, "").slice(0, 26);
-      formik.setFieldValue("nombreArchivo", nameWithoutExtension, true);
+      formik.setFieldValue("nombreArchivo", file.name.slice(0, 30), true);
     };
     reader.onerror = () => {
       setAlertStatus("error");
@@ -111,12 +124,6 @@ const UploadDocumentModal = ({
   const handleSubmit = async (values: UploadFormData) => {
     try {
       const isOtrosDocumentos = values.tipo === "otros_documentos_legales";
-      // Asegurar que el nombre del archivo siempre termine en .pdf
-      const finalNombreArchivo = isOtrosDocumentos && values.nombreArchivo
-        ? (values.nombreArchivo.toLowerCase().endsWith(".pdf") 
-            ? values.nombreArchivo 
-            : `${values.nombreArchivo}.pdf`)
-        : values.nombreArchivo;
 
       const payload = isEmpresa
         ? {
@@ -124,7 +131,7 @@ const UploadDocumentModal = ({
             tipo: values.tipo,
             archivoBase64: values.archivoBase64,
             ...(isOtrosDocumentos && values.nombreArchivo
-              ? { nombreArchivo: finalNombreArchivo }
+              ? { nombreArchivo: values.nombreArchivo }
               : {}),
           }
         : {
@@ -132,7 +139,7 @@ const UploadDocumentModal = ({
             tipo: values.tipo,
             archivoBase64: values.archivoBase64,
             ...(isOtrosDocumentos && values.nombreArchivo
-              ? { nombreArchivo: finalNombreArchivo }
+              ? { nombreArchivo: values.nombreArchivo }
               : {}),
           };
 
@@ -294,28 +301,15 @@ const UploadDocumentModal = ({
                 error={formik.touched.nombreArchivo && Boolean(formik.errors.nombreArchivo)}
                 helperText={
                   (formik.touched.nombreArchivo && formik.errors.nombreArchivo) ||
-                  `${formik.values.nombreArchivo.length + 4}/30 caracteres`
+                  `${formik.values.nombreArchivo.length}/30 caracteres`
                 }
                 value={formik.values.nombreArchivo}
                 onChange={(e) => {
-                  const val = e.target.value;
-                  // Limitar a 26 caracteres (30 - 4 de ".pdf")
-                  if (val.length > 26) return;
-
-                  // Si el usuario escribe .pdf, lo quitamos para no duplicar con el adornment
-                  if (val.toLowerCase().endsWith(".pdf")) {
-                    formik.setFieldValue("nombreArchivo", val.slice(0, -4));
-                  } else {
-                    formik.handleChange(e);
-                  }
+                  if (e.target.value.length > 30) return;
+                  formik.handleChange(e);
                 }}
                 onBlur={formik.handleBlur}
                 disabled={loading}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">.pdf</InputAdornment>
-                  ),
-                }}
                 sx={{
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
@@ -477,10 +471,12 @@ const UploadDocumentModal = ({
             variant="contained"
             onClick={() => formik.handleSubmit()}
             disabled={
-              loading || 
-              !formik.values.tipo || 
-              !formik.values.archivoBase64 || 
-              (formik.values.tipo === "otros_documentos_legales" && !formik.values.nombreArchivo)
+              loading ||
+              !formik.values.tipo ||
+              !formik.values.archivoBase64 ||
+              (formik.values.tipo === "otros_documentos_legales" &&
+                (!formik.values.nombreArchivo ||
+                  !validateFileExtension(formik.values.nombreArchivo).valid))
             }
             sx={{
               flex: 1,
