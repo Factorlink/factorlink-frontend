@@ -96,6 +96,7 @@ export const nonNegativeMoneyValidation = yup
 
 export const createOfertaFormSchema = (minFechaExpiracion: Date) =>
   yup.object({
+    diasFinanciamiento: positiveIntegerValidation,
     porcentajeFinanciamiento: yup
       .number()
       .required("El porcentaje de financiamiento es obligatorio")

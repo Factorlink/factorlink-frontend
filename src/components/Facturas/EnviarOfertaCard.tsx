@@ -6,7 +6,6 @@ import {
   Checkbox,
   FormControlLabel,
   InputAdornment,
-  Tooltip,
 } from "@mui/material";
 import { Send, InfoOutlined, Lock } from "@mui/icons-material";
 import { useFormik } from "formik";
@@ -104,10 +103,9 @@ const EnviarOfertaCard = ({
   );
   const [alertMessage, setAlertMessage] = useState("");
 
-  const diasFinanciamiento = factura.plazo || 0;
-
   const formik = useFormik({
     initialValues: {
+      diasFinanciamiento: (factura.plazo || "") as number | string,
       porcentajeFinanciamiento: 100 as number | string,
       fechaCotizacion: today as Date | null,
       tasa30Dias: 0 as number | string,
@@ -132,7 +130,7 @@ const EnviarOfertaCard = ({
       computeOfertaMontos({
         montoTotal: factura.montoTotal,
         porcentajeFinanciamiento: formik.values.porcentajeFinanciamiento,
-        diasFinanciamiento,
+        diasFinanciamiento: formik.values.diasFinanciamiento,
         tasa30Dias: formik.values.tasa30Dias,
         saldoPendiente: formik.values.saldoPendiente,
         montoComision: formik.values.montoComision,
@@ -142,7 +140,7 @@ const EnviarOfertaCard = ({
     [
       factura.montoTotal,
       formik.values.porcentajeFinanciamiento,
-      diasFinanciamiento,
+      formik.values.diasFinanciamiento,
       formik.values.tasa30Dias,
       formik.values.saldoPendiente,
       formik.values.montoComision,
@@ -165,7 +163,7 @@ const EnviarOfertaCard = ({
       await createOferta({
         facturaId: factura.id,
         factoringId,
-        diasFinanciamiento,
+        diasFinanciamiento: formik.values.diasFinanciamiento,
         porcentajeFinanciamiento: formik.values.porcentajeFinanciamiento,
         fechaCotizacion: formik.values.fechaCotizacion!,
         montoAFinanciar: montosCalculados.montoAFinanciar,
@@ -281,24 +279,33 @@ const EnviarOfertaCard = ({
               Condiciones de financiamiento
             </Typography>
             <Box sx={{ ...gridSx, mb: 1 }}>
-              <Tooltip
-                title="Este campo no puede ser editado. El plazo es definido por la empresa emisora."
-                arrow
-              >
-                <StyledTextField
-                  fullWidth
-                  label="Días de financiamiento"
-                  value={diasFinanciamiento}
-                  InputProps={{ readOnly: true }}
-                  helperText={`Plazo solicitado: ${diasFinanciamiento} días`}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      cursor: "not-allowed",
-                      "& input": { cursor: "not-allowed" },
-                    },
-                  }}
-                />
-              </Tooltip>
+              <StyledTextField
+                fullWidth
+                name="diasFinanciamiento"
+                label="Días de financiamiento"
+                type="string"
+                inputMode="numeric"
+                required
+                value={formik.values.diasFinanciamiento}
+                onChange={(e) =>
+                  handleNonNegativeIntegerInputChange(
+                    e as React.ChangeEvent<HTMLInputElement>,
+                    formik.setFieldValue,
+                  )
+                }
+                onBlur={formik.handleBlur}
+                onKeyDown={(e) =>
+                  blockNonNumericKeys(
+                    e as React.KeyboardEvent<HTMLInputElement>,
+                    false,
+                  )
+                }
+                error={fieldError("diasFinanciamiento")}
+                helperText={fieldHelper(
+                  "diasFinanciamiento",
+                  `Mínimo 1 día. Plazo solicitado: ${factura.plazo || 0} días`,
+                )}
+              />
 
               <StyledTextField
                 fullWidth
@@ -623,7 +630,7 @@ const EnviarOfertaCard = ({
             montoAFinanciar={montosCalculados.montoAFinanciar}
             montoAGirar={montosCalculados.montoAGirar}
             tasa30Dias={formik.values.tasa30Dias}
-            diasFinanciamiento={diasFinanciamiento}
+            diasFinanciamiento={formik.values.diasFinanciamiento}
             fechaExpiracion={formik.values.fechaExpiracion}
             submitDisabled={
               alertStatus === "success" ||
