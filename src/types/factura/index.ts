@@ -17,6 +17,27 @@ export interface FacturaArchivo {
     updatedAt: string;
 }
 
+export type FacturaGrupoVisibilidad = "TODOS" | "SELECCIONADOS";
+
+export interface CreateFacturaGrupoPayload {
+    empresaId: string;
+    nombre: string;
+    porcentajeFinanciamiento: number;
+    plazo: number;
+    visibilidad: FacturaGrupoVisibilidad;
+    factoringIds: string[];
+    facturaIds: string[];
+}
+
+export interface FacturaGrupo {
+    id: string;
+    nombre?: string;
+    porcentajeFinanciamiento?: number;
+    plazo?: number;
+    visibilidad?: FacturaGrupoVisibilidad | string;
+    empresaId?: string;
+}
+
 export interface Factura {
     createdAt: string;
     descuentoGlobal: string;
@@ -24,6 +45,8 @@ export interface Factura {
     empresa: Empresa;
     empresaId: string;
     estado: string;
+    facturaGrupoId?: string | null;
+    facturaGrupo?: FacturaGrupo | null;
     facturaNameFile?: string | null;
     facturaNameFilePDF?: string | null;
     fechaEmision: string;

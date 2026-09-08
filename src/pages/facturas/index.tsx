@@ -36,6 +36,7 @@ import {
   Visibility,
   Delete,
   Send,
+  CreateNewFolder,
 } from "@mui/icons-material";
 import MarketplaceFacturasTable from "../../components/Facturas/MarketplaceFacturasTable";
 import OfertasFacturasTable from "../../components/Facturas/OfertasFacturasTable";
@@ -91,6 +92,8 @@ const formatDate = (dateString: string) => {
 };
 
 const TAB_ROUTES = ["/facturas", "/facturas/marketplace", "/facturas/ofertas", "/facturas/cedidas"];
+const MIN_GRUPO = 2;
+const MAX_GRUPO = 5;
 
 const getTabFromPath = (pathname: string) => {
   const idx = TAB_ROUTES.indexOf(pathname);
@@ -145,6 +148,9 @@ const Facturas = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedMontos, setSelectedMontos] = useState<Record<string, number>>(
+    {},
+  );
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
 
@@ -188,8 +194,18 @@ const Facturas = () => {
     setAnchorEl(null);
   };
 
-  const handleDeleteSuccess = () => {
+  const clearSelection = () => {
     setSelectedIds([]);
+    setSelectedMontos({});
+  };
+
+  const toMonto = (value: string | number) => {
+    const n = typeof value === "string" ? parseFloat(value) : value;
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const handleDeleteSuccess = () => {
+    clearSelection();
     fetchFacturas(filters);
   };
 
@@ -199,7 +215,7 @@ const Facturas = () => {
   };
 
   const handleBulkDeleteSuccess = () => {
-    setSelectedIds([]);
+    clearSelection();
     fetchFacturas(filters);
   };
 
@@ -242,7 +258,12 @@ const Facturas = () => {
     return factura.estado?.toLowerCase() === "cargada";
   };
 
-  const selectableFacturas = facturas.filter((factura) => isCargada(factura));
+  const canSelectForGrupo = (factura: Factura | null) =>
+    Boolean(factura) && isCargada(factura) && !factura?.facturaGrupoId;
+
+  const selectableFacturas = facturas.filter((factura) =>
+    canSelectForGrupo(factura),
+  );
   const selectedFacturasForBulk = facturas.filter((factura) =>
     selectedIds.includes(factura.id),
   );
@@ -258,6 +279,13 @@ const Facturas = () => {
       setSelectedIds((prev) =>
         prev.filter((id) => !selectableFacturas.some((factura) => factura.id === id)),
       );
+      setSelectedMontos((prev) => {
+        const next = { ...prev };
+        selectableFacturas.forEach((factura) => {
+          delete next[factura.id];
+        });
+        return next;
+      });
       return;
     }
     setSelectedIds((prev) => {
@@ -265,14 +293,31 @@ const Facturas = () => {
       selectableFacturas.forEach((factura) => next.add(factura.id));
       return Array.from(next);
     });
+    setSelectedMontos((prev) => {
+      const next = { ...prev };
+      selectableFacturas.forEach((factura) => {
+        next[factura.id] = toMonto(factura.montoTotal);
+      });
+      return next;
+    });
   };
 
-  const handleToggleSelectFactura = (facturaId: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(facturaId)
-        ? prev.filter((id) => id !== facturaId)
-        : [...prev, facturaId],
-    );
+  const handleToggleSelectFactura = (factura: Factura) => {
+    if (selectedIds.includes(factura.id)) {
+      setSelectedIds((prev) => prev.filter((id) => id !== factura.id));
+      setSelectedMontos((prev) => {
+        const next = { ...prev };
+        delete next[factura.id];
+        return next;
+      });
+      return;
+    }
+
+    setSelectedIds((prev) => [...prev, factura.id]);
+    setSelectedMontos((prev) => ({
+      ...prev,
+      [factura.id]: toMonto(factura.montoTotal),
+    }));
   };
 
   const fetchFacturas = useCallback(
@@ -335,7 +380,7 @@ const Facturas = () => {
       // Always reset filters and meta when switching tabs
       const resetFilters = { ...INITIAL_FILTERS };
       setFilters(resetFilters);
-      setSelectedIds([]);
+      clearSelection();
       // Reset meta to zeros - the active tab's component will update it via onMetaChange
       setMeta({
         lastPage: 1,
@@ -398,7 +443,7 @@ const Facturas = () => {
   };
 
   const handleApplyFilters = (newFilters: FacturasFiltersValues) => {
-    setSelectedIds([]);
+    clearSelection();
     setFilters(newFilters);
     setMeta((prev) => ({ ...prev, page: 1 }));
     updateSearchParams(newFilters, 1, meta.limit);
@@ -406,7 +451,7 @@ const Facturas = () => {
   };
 
   const handleClearFilters = () => {
-    setSelectedIds([]);
+    clearSelection();
     setFilters(INITIAL_FILTERS);
     setMeta((prev) => ({ ...prev, page: 1 }));
     updateSearchParams(INITIAL_FILTERS, 1, meta.limit);
@@ -436,7 +481,7 @@ const Facturas = () => {
     }
 
     const newFilters = { ...filters, sortBy: newSortBy, order: newOrder };
-    setSelectedIds([]);
+    clearSelection();
     setFilters(newFilters);
     updateSearchParams(newFilters, meta.page, meta.limit);
     fetchFacturas(newFilters);
@@ -446,13 +491,11 @@ const Facturas = () => {
     _event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
-    setSelectedIds([]);
     setMeta((prev) => ({ ...prev, page: value }));
     updateSearchParams(filters, value, meta.limit);
   };
 
   const handleLimitChange = (event: SelectChangeEvent) => {
-    setSelectedIds([]);
     const value = Number(event.target.value);
     setMeta((prev) => ({ ...prev, limit: value, page: 1 }));
     updateSearchParams(filters, 1, value);
@@ -663,28 +706,90 @@ const Facturas = () => {
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "flex-end",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 2,
                   mb: 2,
+                  px: 2,
+                  py: 1.5,
+                  borderRadius: "var(--radius-m)",
+                  backgroundColor: "var(--color-bg-accent-secondary)",
                 }}
               >
-                <Button
-                  variant="outlined"
-                  startIcon={<Delete />}
-                  onClick={() => setBulkDeleteModalOpen(true)}
+                <Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 700,
+                      color: "var(--color-fg-accent-primary)",
+                    }}
+                  >
+                    {selectedIds.length}{" "}
+                    {selectedIds.length === 1
+                      ? "factura seleccionada"
+                      : "facturas seleccionadas"}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "var(--color-fg-default-primary)" }}
+                  >
+                    Monto total:{" "}
+                    {formatCurrency(
+                      selectedIds.reduce(
+                        (sum, id) => sum + (selectedMontos[id] ?? 0),
+                        0,
+                      ),
+                    )}
+                  </Typography>
+                </Box>
+                <Box
                   sx={{
-                    borderColor: "var(--color-border-danger-primary)",
-                    color: "var(--color-fg-danger-primary)",
-                    textTransform: "none",
-                    fontWeight: 600,
-                    borderRadius: "var(--radius-m)",
-                    "&:hover": {
-                      borderColor: "var(--color-border-danger-secondary)",
-                      backgroundColor: "var(--color-bg-danger-secondary)",
-                    },
+                    display: "flex",
+                    alignItems: "flex-end",
+                    gap: 1,
+                    flexWrap: "wrap",
                   }}
                 >
-                  Eliminar facturas seleccionadas ({selectedIds.length})
-                </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<Delete />}
+                    onClick={() => setBulkDeleteModalOpen(true)}
+                    sx={{
+                      borderColor: "var(--color-border-danger-primary)",
+                      color: "var(--color-fg-danger-primary)",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      borderRadius: "var(--radius-m)",
+                      "&:hover": {
+                        borderColor: "var(--color-border-danger-secondary)",
+                        backgroundColor: "var(--color-bg-danger-secondary)",
+                      },
+                    }}
+                  >
+                    Eliminar facturas seleccionadas ({selectedIds.length})
+                  </Button>
+                  {selectedIds.length >= MIN_GRUPO &&
+                    selectedIds.length <= MAX_GRUPO && (
+                      <Button
+                        variant="contained"
+                        startIcon={<CreateNewFolder />}
+                        onClick={() =>
+                          navigate("/facturas/grupos/nuevo", {
+                            state: { facturaIds: selectedIds },
+                          })
+                        }
+                        sx={{
+                          textTransform: "none",
+                          fontWeight: 600,
+                          borderRadius: "var(--radius-m)",
+                          color: "var(--color-fg-on-accent-primary)",
+                        }}
+                      >
+                        Crear grupo de cotización
+                      </Button>
+                    )}
+                </Box>
               </Box>
             )}
             {/* Table */}
@@ -758,7 +863,7 @@ const Facturas = () => {
                     <TableBody>
                       {facturas.map((factura) => {
                         const statusConfig = getFacturaStatusConfig(factura.estado);
-                        const canSelect = isCargada(factura);
+                        const canSelect = canSelectForGrupo(factura);
                         const isSelected = selectedIds.includes(factura.id);
                         return (
                           <TableRow
@@ -773,7 +878,7 @@ const Facturas = () => {
                               <Checkbox
                                 checked={isSelected}
                                 disabled={!canSelect}
-                                onChange={() => handleToggleSelectFactura(factura.id)}
+                                onChange={() => handleToggleSelectFactura(factura)}
                                 onClick={(e) => e.stopPropagation()}
                                 inputProps={{
                                   "aria-label": `Seleccionar factura ${factura.folio}`,
