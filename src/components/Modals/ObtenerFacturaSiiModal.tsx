@@ -25,6 +25,7 @@ interface ObtenerFacturaSiiModalProps {
   loadingSubtitle?: string;
   errorTitle?: string;
   errorSubtitle?: string;
+  showDismissAfterMs?: number;
 }
 
 const DEFAULT_LOADING_TITLE =
@@ -43,8 +44,10 @@ const ObtenerFacturaSiiModal = ({
   loadingSubtitle = DEFAULT_LOADING_SUBTITLE,
   errorTitle = DEFAULT_ERROR_TITLE,
   errorSubtitle = DEFAULT_ERROR_SUBTITLE,
+  showDismissAfterMs,
 }: ObtenerFacturaSiiModalProps) => {
   const [attempts, setAttempts] = useState(0);
+  const [canDismiss, setCanDismiss] = useState(false);
   const isLoading = status === "loading";
   const attemptsExhausted = attempts >= MAX_SII_FETCH_ATTEMPTS;
 
@@ -53,6 +56,16 @@ const ObtenerFacturaSiiModal = ({
       setAttempts(0);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !isLoading || showDismissAfterMs == null) {
+      setCanDismiss(false);
+      return;
+    }
+    setCanDismiss(false);
+    const timer = window.setTimeout(() => setCanDismiss(true), showDismissAfterMs);
+    return () => window.clearTimeout(timer);
+  }, [open, isLoading, showDismissAfterMs]);
 
   const handleRetry = () => {
     if (attemptsExhausted) return;
@@ -190,6 +203,32 @@ const ObtenerFacturaSiiModal = ({
           </Box>
         )}
       </DialogContent>
+
+      {isLoading && canDismiss && (
+        <>
+          <DialogActions sx={{ justifyContent: "center", px: 4, pb: 1 }}>
+            <Button
+              variant="outlined"
+              onClick={onCancel}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                px: 3,
+                borderColor: "var(--color-border-default-primary)",
+                color: "var(--color-fg-default-primary)",
+              }}
+            >
+              Cancelar
+            </Button>
+          </DialogActions>
+          <Typography
+            variant="caption"
+            sx={{ color: "var(--color-fg-default-secondary)", px: 4, pb: 3 }}
+          >
+            La búsqueda del PDF seguirá en segundo plano.
+          </Typography>
+        </>
+      )}
 
       {!isLoading && (
         <>

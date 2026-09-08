@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Box,
   Typography,
@@ -93,6 +93,14 @@ const CotizarFactura = () => {
   >("idle");
   const [needsPersonalSii, setNeedsPersonalSii] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const applyFacturaData = (data: Factura) => {
     setFactura(data);
@@ -113,6 +121,7 @@ const CotizarFactura = () => {
     setPdfGate("loading");
     try {
       const fetched = await fetchXMLContent(id);
+      if (!isMountedRef.current) return;
       if (!hasFacturaPdf(fetched)) {
         setPdfGate("error");
         return;
@@ -121,6 +130,7 @@ const CotizarFactura = () => {
       setPdfGate("ready");
     } catch (err) {
       console.error("Error fetching PDF from SII:", err);
+      if (!isMountedRef.current) return;
       setPdfGate("error");
     }
   }, [id]);
@@ -767,6 +777,7 @@ const CotizarFactura = () => {
           onCancel={handleCancelPdfGate}
           errorTitle="No encontramos el PDF de esta factura"
           errorSubtitle="Pulsa Reintentar para obtener el documento desde el SII. Puedes intentarlo hasta 3 veces."
+          showDismissAfterMs={30000}
         />
 
         <SiiPersonalSyncPromptModal
