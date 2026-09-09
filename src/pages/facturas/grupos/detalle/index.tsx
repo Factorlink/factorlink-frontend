@@ -26,13 +26,16 @@ import {
   Delete,
   Description,
   ErrorOutline,
+  Send,
   Storefront,
   Visibility,
 } from "@mui/icons-material";
 import Layout from "../../../../components/Layout";
 import SectionPanel from "../../../../components/SectionPanel";
+import DocumentsRequiredModal from "../../../../components/Modals/DocumentsRequiredModal";
 import { formatCurrency } from "../../../../components/Facturas/FacturaResumenCard";
 import { useFacturaGrupos } from "../../../../hooks/useFacturaGrupos";
+import useAuthStore from "../../../../store/authStore";
 import type { Factura, FacturaGrupo } from "../../../../types/factura";
 import { getFacturaStatusConfig } from "../../../../theme";
 import {
@@ -72,11 +75,13 @@ const headerCellSx = {
 const FacturaGrupoDetalle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentRole } = useAuthStore();
   const {
     getFacturaGrupoById,
     getFacturaGrupoFacturas,
     deleteFacturaGrupo,
     removeFacturaGrupoFromMarketplace,
+    sendFacturaGrupoToMarketplace,
   } = useFacturaGrupos();
 
   const [grupo, setGrupo] = useState<FacturaGrupo | null>(null);
@@ -89,6 +94,11 @@ const FacturaGrupoDetalle = () => {
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
+  const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
+    useState(false);
 
   const goToGrupos = (replace = false) => {
     navigate("/facturas/grupos", { replace });
@@ -159,6 +169,33 @@ const FacturaGrupoDetalle = () => {
     }
   };
 
+  const openSendConfirm = () => {
+    if (!currentRole || currentRole.nivel < 3) {
+      setDocumentsRequiredModalOpen(true);
+      return;
+    }
+    setSendError(null);
+    setSendConfirmOpen(true);
+  };
+
+  const handleSendToMarketplace = async () => {
+    if (!id) return;
+    try {
+      setSending(true);
+      setSendError(null);
+      await sendFacturaGrupoToMarketplace(id);
+      setSendConfirmOpen(false);
+      await loadDetalle();
+    } catch (err) {
+      console.error("Error sending factura grupo to marketplace:", err);
+      setSendError(
+        "No se pudo enviar el grupo al marketplace. Intente nuevamente.",
+      );
+    } finally {
+      setSending(false);
+    }
+  };
+
   const montoTotal =
     facturas.length > 0
       ? facturas.reduce((sum, f) => {
@@ -170,6 +207,7 @@ const FacturaGrupoDetalle = () => {
   const statusConfig = getFacturaStatusConfig(grupo?.estado || "");
   const grupoEstado = normalizeGrupoEstado(grupo?.estado);
   const canDelete = grupoEstado === "CARGADA";
+  const canSendToMarketplace = grupoEstado === "CARGADA";
   const canRemoveFromMarketplace = grupoEstado === "EN_MARKETPLACE";
 
   if (loadingPage) {
@@ -303,6 +341,16 @@ const FacturaGrupoDetalle = () => {
             onClose={() => setRemoveError(null)}
           >
             {removeError}
+          </Alert>
+        )}
+
+        {sendError && !sendConfirmOpen && (
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+            onClose={() => setSendError(null)}
+          >
+            {sendError}
           </Alert>
         )}
 
@@ -595,25 +643,55 @@ const FacturaGrupoDetalle = () => {
               Quitar grupo del Marketplace
             </Button>
           )}
-          {canDelete && (
-            <Button
-              variant="outlined"
-              startIcon={<Delete />}
-              onClick={() => setConfirmOpen(true)}
-              disabled={deleting}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                color: "var(--color-fg-danger-primary)",
-                borderColor: "var(--color-border-danger-secondary)",
-                "&:hover": {
-                  borderColor: "var(--color-border-danger-secondary)",
-                  backgroundColor: "var(--color-bg-danger-secondary)",
-                },
-              }}
-            >
-              Eliminar grupo
-            </Button>
+          {(canDelete || canSendToMarketplace) && (
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+              {canDelete && (
+                <Button
+                  variant="outlined"
+                  startIcon={<Delete />}
+                  onClick={() => setConfirmOpen(true)}
+                  disabled={deleting || sending}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    color: "var(--color-fg-danger-primary)",
+                    borderColor: "var(--color-border-danger-secondary)",
+                    "&:hover": {
+                      borderColor: "var(--color-border-danger-secondary)",
+                      backgroundColor: "var(--color-bg-danger-secondary)",
+                    },
+                  }}
+                >
+                  Eliminar grupo
+                </Button>
+              )}
+              {canSendToMarketplace && (
+                <Button
+                  variant="contained"
+                  startIcon={sending ? undefined : <Send />}
+                  onClick={openSendConfirm}
+                  disabled={sending || deleting}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    color: "var(--color-fg-on-accent-primary)",
+                    backgroundColor: "var(--color-bg-accent-primary)",
+                    "&:hover": {
+                      backgroundColor: "var(--color-bg-accent-primary-hover)",
+                    },
+                    "&:disabled": {
+                      backgroundColor: "var(--color-bg-disabled-primary)",
+                    },
+                  }}
+                >
+                  {sending ? (
+                    <CircularProgress size={22} color="inherit" />
+                  ) : (
+                    "Enviar a Marketplace"
+                  )}
+                </Button>
+              )}
+            </Box>
           )}
         </Box>
       </Box>
@@ -729,6 +807,71 @@ const FacturaGrupoDetalle = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog
+        open={sendConfirmOpen}
+        onClose={() => !sending && setSendConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "var(--radius-l)" },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          ¿Enviar a marketplace?
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 1.5 }}>
+            El grupo quedará visible en el marketplace según su configuración de
+            visibilidad para que los factoring puedan enviar ofertas.
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {grupo.nombre || "Grupo"} · {facturas.length} factura
+            {facturas.length === 1 ? "" : "s"}
+          </Typography>
+          {sendError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {sendError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button
+            onClick={() => setSendConfirmOpen(false)}
+            disabled={sending}
+            sx={{ textTransform: "none", fontWeight: 600 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              void handleSendToMarketplace();
+            }}
+            disabled={sending}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              color: "var(--color-fg-on-accent-primary)",
+              backgroundColor: "var(--color-bg-accent-primary)",
+              "&:hover": {
+                backgroundColor: "var(--color-bg-accent-primary-hover)",
+              },
+            }}
+          >
+            {sending ? (
+              <CircularProgress size={22} color="inherit" />
+            ) : (
+              "Enviar a Marketplace"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <DocumentsRequiredModal
+        open={documentsRequiredModalOpen}
+        onClose={() => setDocumentsRequiredModalOpen(false)}
+      />
     </Layout>
   );
 };
