@@ -25,7 +25,7 @@ export interface CreateFacturaGrupoPayload {
     porcentajeFinanciamiento: number;
     plazo: number;
     visibilidad: FacturaGrupoVisibilidad;
-    factoringIds: string[];
+    factoringIds?: string[];
     facturaIds: string[];
 }
 

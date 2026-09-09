@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Alert,
@@ -10,6 +10,7 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
+  IconButton,
   InputAdornment,
   InputLabel,
   MenuItem,
@@ -25,6 +26,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import {
@@ -98,7 +100,7 @@ const NuevoGrupoCotizacion = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentRole } = useAuthStore();
-  const { getFacturas, getFacturaById } = useFacturas();
+  const { getFacturas, getFacturaById, fetchXMLContent } = useFacturas();
   const { getAllFactorings, loading: loadingFactorings } = useFactoring();
   const { createFacturaGrupo } = useFacturaGrupos();
 
@@ -138,6 +140,13 @@ const NuevoGrupoCotizacion = () => {
   const [selectedMontos, setSelectedMontos] = useState<Record<string, number>>(
     {},
   );
+  const [selectedPdfOk, setSelectedPdfOk] = useState<Record<string, boolean>>(
+    {},
+  );
+  const [pdfFetchingIds, setPdfFetchingIds] = useState<Record<string, boolean>>(
+    {},
+  );
+  const pdfFetchInFlightRef = useRef<Set<string>>(new Set());
   const [maxSnackbarOpen, setMaxSnackbarOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -214,7 +223,54 @@ const NuevoGrupoCotizacion = () => {
       });
       return changed ? next : prev;
     });
+    setSelectedPdfOk((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      facturas.forEach((factura) => {
+        if (!selectedIds.includes(factura.id)) return;
+        if (pdfFetchInFlightRef.current.has(factura.id)) return;
+        const ok = hasFacturaPdf(factura);
+        if (next[factura.id] !== ok) {
+          next[factura.id] = ok;
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
   }, [facturas, selectedIds]);
+
+  const ensurePdfForFactura = useCallback(async (factura: Factura) => {
+    if (hasFacturaPdf(factura)) {
+      setSelectedPdfOk((prev) => ({ ...prev, [factura.id]: true }));
+      return;
+    }
+    if (pdfFetchInFlightRef.current.has(factura.id)) return;
+
+    pdfFetchInFlightRef.current.add(factura.id);
+    setPdfFetchingIds((prev) => ({ ...prev, [factura.id]: true }));
+    setSelectedPdfOk((prev) => ({ ...prev, [factura.id]: false }));
+
+    try {
+      const fetched = await fetchXMLContent(factura.id);
+      const ok = hasFacturaPdf(fetched);
+      setFacturas((prev) =>
+        prev.map((row) => (row.id === factura.id ? { ...row, ...fetched } : row)),
+      );
+      setSelectedPdfOk((prev) => ({ ...prev, [factura.id]: ok }));
+    } catch (err) {
+      console.error("Error fetching PDF for factura:", factura.id, err);
+      setSelectedPdfOk((prev) => ({ ...prev, [factura.id]: false }));
+    } finally {
+      pdfFetchInFlightRef.current.delete(factura.id);
+      setPdfFetchingIds((prev) => {
+        const next = { ...prev };
+        delete next[factura.id];
+        return next;
+      });
+    }
+    // fetchXMLContent is recreated every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (initialIds.length === 0) return;
@@ -226,11 +282,14 @@ const NuevoGrupoCotizacion = () => {
       );
       if (cancelled) return;
       const montos: Record<string, number> = {};
+      const pdfOk: Record<string, boolean> = {};
       const validIds: string[] = [];
+      const needFetch: Factura[] = [];
       results.forEach((factura, index) => {
         const id = ids[index];
         if (!factura) {
           validIds.push(id);
+          pdfOk[id] = false;
           return;
         }
         if (
@@ -241,9 +300,16 @@ const NuevoGrupoCotizacion = () => {
         }
         validIds.push(id);
         montos[id] = toMonto(factura.montoTotal);
+        const ok = hasFacturaPdf(factura);
+        pdfOk[id] = ok;
+        if (!ok) needFetch.push(factura);
       });
       setSelectedIds(validIds);
       setSelectedMontos((prev) => ({ ...montos, ...prev }));
+      setSelectedPdfOk((prev) => ({ ...pdfOk, ...prev }));
+      needFetch.forEach((factura) => {
+        void ensurePdfForFactura(factura);
+      });
     };
     void hydrate();
     return () => {
@@ -252,6 +318,25 @@ const NuevoGrupoCotizacion = () => {
     // Hydrate preselected ids once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const clearSelectionForIds = (ids: string[]) => {
+    const idSet = new Set(ids);
+    setSelectedIds((prev) => prev.filter((id) => !idSet.has(id)));
+    setSelectedMontos((prev) => {
+      const next = { ...prev };
+      ids.forEach((id) => {
+        delete next[id];
+      });
+      return next;
+    });
+    setSelectedPdfOk((prev) => {
+      const next = { ...prev };
+      ids.forEach((id) => {
+        delete next[id];
+      });
+      return next;
+    });
+  };
 
   const canSelectForGrupo = (factura: Factura) =>
     factura.estado?.toLowerCase() === "cargada" && !factura.facturaGrupoId;
@@ -267,12 +352,7 @@ const NuevoGrupoCotizacion = () => {
   const handleToggleSelectFactura = (factura: Factura) => {
     if (!canSelectForGrupo(factura)) return;
     if (selectedIds.includes(factura.id)) {
-      setSelectedIds((prev) => prev.filter((id) => id !== factura.id));
-      setSelectedMontos((prev) => {
-        const next = { ...prev };
-        delete next[factura.id];
-        return next;
-      });
+      clearSelectionForIds([factura.id]);
       return;
     }
     if (selectedIds.length >= MAX_GRUPO) {
@@ -284,20 +364,16 @@ const NuevoGrupoCotizacion = () => {
       ...prev,
       [factura.id]: toMonto(factura.montoTotal),
     }));
+    setSelectedPdfOk((prev) => ({
+      ...prev,
+      [factura.id]: hasFacturaPdf(factura),
+    }));
+    void ensurePdfForFactura(factura);
   };
 
   const handleToggleSelectAll = () => {
     if (allSelectableSelected) {
-      setSelectedIds((prev) =>
-        prev.filter((id) => !selectableFacturas.some((factura) => factura.id === id)),
-      );
-      setSelectedMontos((prev) => {
-        const next = { ...prev };
-        selectableFacturas.forEach((factura) => {
-          delete next[factura.id];
-        });
-        return next;
-      });
+      clearSelectionForIds(selectableFacturas.map((factura) => factura.id));
       return;
     }
     const remaining = MAX_GRUPO - selectedIds.length;
@@ -323,6 +399,16 @@ const NuevoGrupoCotizacion = () => {
       });
       return next;
     });
+    setSelectedPdfOk((prev) => {
+      const next = { ...prev };
+      toAdd.forEach((factura) => {
+        next[factura.id] = hasFacturaPdf(factura);
+      });
+      return next;
+    });
+    toAdd.forEach((factura) => {
+      void ensurePdfForFactura(factura);
+    });
   };
 
   const montoTotalSeleccionado = selectedIds.reduce(
@@ -338,6 +424,12 @@ const NuevoGrupoCotizacion = () => {
     if (!trimmedNombre) return "El nombre del grupo es obligatorio";
     if (selectedIds.length < MIN_GRUPO || selectedIds.length > MAX_GRUPO) {
       return `Debes seleccionar entre ${MIN_GRUPO} y ${MAX_GRUPO} facturas`;
+    }
+    if (selectedIds.some((id) => pdfFetchingIds[id])) {
+      return "Esperá a que se obtengan los PDFs de las facturas seleccionadas";
+    }
+    if (selectedIds.some((id) => selectedPdfOk[id] !== true)) {
+      return "Todas las facturas seleccionadas deben tener PDF";
     }
     if (porcentajeFinanciamiento < 1 || porcentajeFinanciamiento > 100) {
       return "El porcentaje a financiar debe estar entre 1% y 100%";
@@ -366,14 +458,26 @@ const NuevoGrupoCotizacion = () => {
     try {
       setSubmitting(true);
       setSubmitError(null);
+      const allFactoringsSelected =
+        visibilidad === "SELECCIONADOS" &&
+        factorings.length > 0 &&
+        factorings.every((factoring) =>
+          selectedFactorings.includes(factoring.id!),
+        );
+      const payloadVisibilidad =
+        visibilidad === "TODOS" || allFactoringsSelected
+          ? "TODOS"
+          : "SELECCIONADOS";
       const created = await createFacturaGrupo({
         empresaId: currentRole.empresaId,
         nombre: nombre.trim(),
         porcentajeFinanciamiento,
         plazo,
-        visibilidad,
-        factoringIds: visibilidad === "TODOS" ? [] : selectedFactorings,
+        visibilidad: payloadVisibilidad,
         facturaIds: selectedIds,
+        ...(payloadVisibilidad === "SELECCIONADOS"
+          ? { factoringIds: selectedFactorings }
+          : {}),
       });
       if (!created?.id) {
         setSubmitError("El grupo se creó pero no se recibió el identificador.");
@@ -549,7 +653,10 @@ const NuevoGrupoCotizacion = () => {
                         {facturas.map((factura) => {
                           const canSelect = canSelectForGrupo(factura);
                           const isSelected = selectedIds.includes(factura.id);
-                          const hasPdf = hasFacturaPdf(factura);
+                          const isFetchingPdf = Boolean(pdfFetchingIds[factura.id]);
+                          const hasPdf = isSelected
+                            ? selectedPdfOk[factura.id] === true
+                            : hasFacturaPdf(factura);
                           return (
                             <TableRow key={factura.id} selected={isSelected}>
                               <TableCell padding="checkbox">
@@ -601,7 +708,29 @@ const NuevoGrupoCotizacion = () => {
                                 </Typography>
                               </TableCell>
                               <TableCell>
-                                {hasPdf ? (
+                                {isFetchingPdf ? (
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                    }}
+                                  >
+                                    <CircularProgress
+                                      size={16}
+                                      sx={{ color: "var(--color-fg-accent-primary)" }}
+                                    />
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        color: "var(--color-fg-accent-primary)",
+                                        fontWeight: 500,
+                                      }}
+                                    >
+                                      Obteniendo...
+                                    </Typography>
+                                  </Box>
+                                ) : hasPdf ? (
                                   <Chip
                                     icon={<CheckCircle />}
                                     label="Obtenido"
@@ -616,28 +745,46 @@ const NuevoGrupoCotizacion = () => {
                                     }}
                                   />
                                 ) : (
-                                  <Typography
-                                    variant="body2"
-                                    sx={{ color: "var(--color-fg-default-tertiary)" }}
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 0.75,
+                                    }}
                                   >
-                                    No disponible
-                                  </Typography>
+                                    <Description
+                                      sx={{
+                                        fontSize: 18,
+                                        color: "var(--color-fg-default-tertiary)",
+                                      }}
+                                    />
+                                    <Typography
+                                      variant="body2"
+                                      sx={{ color: "var(--color-fg-default-tertiary)" }}
+                                    >
+                                      No disponible
+                                    </Typography>
+                                  </Box>
                                 )}
                               </TableCell>
                               <TableCell>
-                                <Button
-                                  size="small"
-                                  onClick={() =>
-                                    window.open(
-                                      `/facturas/${factura.id}`,
-                                      "_blank",
-                                      "noopener,noreferrer",
-                                    )
-                                  }
-                                  sx={{ textTransform: "none", fontWeight: 600 }}
-                                >
-                                  Ver detalle
-                                </Button>
+                                <Tooltip title="Ver detalle">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() =>
+                                      window.open(
+                                        `/facturas/${factura.id}`,
+                                        "_blank",
+                                        "noopener,noreferrer",
+                                      )
+                                    }
+                                    sx={{
+                                      color: "var(--color-fg-default-secondary)",
+                                    }}
+                                  >
+                                    <Visibility />
+                                  </IconButton>
+                                </Tooltip>
                               </TableCell>
                             </TableRow>
                           );
