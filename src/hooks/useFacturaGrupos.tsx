@@ -92,6 +92,18 @@ export const useFacturaGrupos = () => {
     }
   };
 
+  const removeFacturaGrupoFromMarketplace = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await api.post(
+        `/factura-grupos/${id}/remove-from-marketplace`,
+      );
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const deleteFacturaGrupo = async (id: string) => {
     try {
       setLoading(true);
@@ -109,6 +121,7 @@ export const useFacturaGrupos = () => {
     getFacturaGrupoById,
     getFacturaGrupoFacturas,
     sendFacturaGrupoToMarketplace,
+    removeFacturaGrupoFromMarketplace,
     deleteFacturaGrupo,
   };
 };

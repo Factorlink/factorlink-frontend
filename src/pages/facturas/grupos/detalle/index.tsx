@@ -26,6 +26,7 @@ import {
   Delete,
   Description,
   ErrorOutline,
+  Storefront,
   Visibility,
 } from "@mui/icons-material";
 import Layout from "../../../../components/Layout";
@@ -44,6 +45,9 @@ import {
   tableShellSx,
   tableWideSx,
 } from "../../../../theme/layoutStyles";
+
+const normalizeGrupoEstado = (estado?: string) =>
+  (estado || "").trim().toUpperCase();
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return "N/A";
@@ -72,6 +76,7 @@ const FacturaGrupoDetalle = () => {
     getFacturaGrupoById,
     getFacturaGrupoFacturas,
     deleteFacturaGrupo,
+    removeFacturaGrupoFromMarketplace,
   } = useFacturaGrupos();
 
   const [grupo, setGrupo] = useState<FacturaGrupo | null>(null);
@@ -81,6 +86,9 @@ const FacturaGrupoDetalle = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   const goToGrupos = (replace = false) => {
     navigate("/facturas/grupos", { replace });
@@ -133,6 +141,24 @@ const FacturaGrupoDetalle = () => {
     }
   };
 
+  const handleRemoveFromMarketplace = async () => {
+    if (!id) return;
+    try {
+      setRemoving(true);
+      setRemoveError(null);
+      await removeFacturaGrupoFromMarketplace(id);
+      setRemoveConfirmOpen(false);
+      await loadDetalle();
+    } catch (err) {
+      console.error("Error removing factura grupo from marketplace:", err);
+      setRemoveError(
+        "No se pudo quitar el grupo del marketplace. Intente nuevamente.",
+      );
+    } finally {
+      setRemoving(false);
+    }
+  };
+
   const montoTotal =
     facturas.length > 0
       ? facturas.reduce((sum, f) => {
@@ -142,6 +168,9 @@ const FacturaGrupoDetalle = () => {
       : getFacturaGrupoMontoTotal(grupo);
   const montoFinanciar = getFacturaGrupoMontoFinanciar(grupo);
   const statusConfig = getFacturaStatusConfig(grupo?.estado || "");
+  const grupoEstado = normalizeGrupoEstado(grupo?.estado);
+  const canDelete = grupoEstado === "CARGADA";
+  const canRemoveFromMarketplace = grupoEstado === "EN_MARKETPLACE";
 
   if (loadingPage) {
     return (
@@ -264,6 +293,16 @@ const FacturaGrupoDetalle = () => {
             onClose={() => setDeleteError(null)}
           >
             {deleteError}
+          </Alert>
+        )}
+
+        {removeError && (
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+            onClose={() => setRemoveError(null)}
+          >
+            {removeError}
           </Alert>
         )}
 
@@ -533,24 +572,49 @@ const FacturaGrupoDetalle = () => {
           >
             Volver
           </Button>
-          <Button
-            variant="outlined"
-            startIcon={<Delete />}
-            onClick={() => setConfirmOpen(true)}
-            disabled={deleting}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              color: "var(--color-fg-danger-primary)",
-              borderColor: "var(--color-border-danger-secondary)",
-              "&:hover": {
+          {canRemoveFromMarketplace && (
+            <Button
+              variant="outlined"
+              startIcon={<Storefront />}
+              onClick={() => {
+                setRemoveError(null);
+                setRemoveConfirmOpen(true);
+              }}
+              disabled={removing}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                color: "var(--color-fg-danger-primary)",
                 borderColor: "var(--color-border-danger-secondary)",
-                backgroundColor: "var(--color-bg-danger-secondary)",
-              },
-            }}
-          >
-            Eliminar grupo
-          </Button>
+                "&:hover": {
+                  borderColor: "var(--color-border-danger-secondary)",
+                  backgroundColor: "var(--color-bg-danger-secondary)",
+                },
+              }}
+            >
+              Quitar grupo del Marketplace
+            </Button>
+          )}
+          {canDelete && (
+            <Button
+              variant="outlined"
+              startIcon={<Delete />}
+              onClick={() => setConfirmOpen(true)}
+              disabled={deleting}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                color: "var(--color-fg-danger-primary)",
+                borderColor: "var(--color-border-danger-secondary)",
+                "&:hover": {
+                  borderColor: "var(--color-border-danger-secondary)",
+                  backgroundColor: "var(--color-bg-danger-secondary)",
+                },
+              }}
+            >
+              Eliminar grupo
+            </Button>
+          )}
         </Box>
       </Box>
 
@@ -583,7 +647,9 @@ const FacturaGrupoDetalle = () => {
           </Button>
           <Button
             variant="contained"
-            onClick={handleDelete}
+            onClick={() => {
+              void handleDelete();
+            }}
             disabled={deleting}
             sx={{
               textTransform: "none",
@@ -599,6 +665,66 @@ const FacturaGrupoDetalle = () => {
               <CircularProgress size={22} color="inherit" />
             ) : (
               "Eliminar"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={removeConfirmOpen}
+        onClose={() => !removing && setRemoveConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "var(--radius-l)" },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          ¿Quitar del marketplace?
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 1.5 }}>
+            El grupo será retirado del marketplace y dejará de estar visible
+            para los factoring. Podrás volver a enviarlo a cotizar más adelante.
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {grupo.nombre || "Grupo"} · {facturas.length} factura
+            {facturas.length === 1 ? "" : "s"}
+          </Typography>
+          {removeError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {removeError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button
+            onClick={() => setRemoveConfirmOpen(false)}
+            disabled={removing}
+            sx={{ textTransform: "none", fontWeight: 600 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              void handleRemoveFromMarketplace();
+            }}
+            disabled={removing}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              color: "var(--color-fg-on-accent-primary)",
+              backgroundColor: "var(--color-bg-danger-primary)",
+              "&:hover": {
+                backgroundColor: "var(--color-bg-danger-primary-hover)",
+              },
+            }}
+          >
+            {removing ? (
+              <CircularProgress size={22} color="inherit" />
+            ) : (
+              "Quitar del marketplace"
             )}
           </Button>
         </DialogActions>

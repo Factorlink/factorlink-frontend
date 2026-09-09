@@ -2,11 +2,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Alert,
+  Backdrop,
   Box,
   Button,
   Checkbox,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -34,6 +39,7 @@ import {
   Check,
   CheckCircle,
   Description,
+  ErrorOutline,
   InfoOutlined,
   RequestQuote,
   Search,
@@ -43,6 +49,9 @@ import {
 import Layout from "../../../../components/Layout";
 import SectionPanel from "../../../../components/SectionPanel";
 import DocumentsRequiredModal from "../../../../components/Modals/DocumentsRequiredModal";
+import GrupoEnviadoCotizarModal, {
+  type GrupoEnviadoCotizarSummary,
+} from "../../../../components/Modals/GrupoEnviadoCotizarModal";
 import { formatCurrency } from "../../../../components/Facturas/FacturaResumenCard";
 import { useFacturas } from "../../../../hooks/useFacturas";
 import { useFactoring } from "../../../../hooks/useFactoring";
@@ -59,6 +68,8 @@ import {
   tableWideSx,
   toolbarRowSx,
 } from "../../../../theme/layoutStyles";
+
+type SubmitPhase = "idle" | "creating" | "sending" | "success" | "sendError";
 
 type NuevoGrupoLocationState = {
   facturaIds?: string[];
@@ -102,7 +113,8 @@ const NuevoGrupoCotizacion = () => {
   const { currentRole } = useAuthStore();
   const { getFacturas, getFacturaById, fetchXMLContent } = useFacturas();
   const { getAllFactorings, loading: loadingFactorings } = useFactoring();
-  const { createFacturaGrupo } = useFacturaGrupos();
+  const { createFacturaGrupo, sendFacturaGrupoToMarketplace } =
+    useFacturaGrupos();
 
   const initialIds = (
     (location.state as NuevoGrupoLocationState | null)?.facturaIds ?? []
@@ -149,9 +161,15 @@ const NuevoGrupoCotizacion = () => {
   const pdfFetchInFlightRef = useRef<Set<string>>(new Set());
   const [maxSnackbarOpen, setMaxSnackbarOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [submitPhase, setSubmitPhase] = useState<SubmitPhase>("idle");
+  const [createdGrupoId, setCreatedGrupoId] = useState<string | null>(null);
+  const [successSummary, setSuccessSummary] =
+    useState<GrupoEnviadoCotizarSummary | null>(null);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
     useState(false);
+
+  const isBusy =
+    submitPhase === "creating" || submitPhase === "sending";
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -443,11 +461,29 @@ const NuevoGrupoCotizacion = () => {
     return null;
   };
 
+  const sendCreatedGrupo = async (grupoId: string) => {
+    setSubmitPhase("sending");
+    try {
+      await sendFacturaGrupoToMarketplace(grupoId);
+      setSubmitPhase("success");
+    } catch (err) {
+      console.error("Error sending factura grupo to marketplace:", err);
+      setSubmitPhase("sendError");
+    }
+  };
+
   const handleEnviarACotizar = async () => {
     if (!currentRole || currentRole.nivel < 3) {
       setDocumentsRequiredModalOpen(true);
       return;
     }
+    if (isBusy || submitPhase === "success") return;
+
+    if (createdGrupoId) {
+      await sendCreatedGrupo(createdGrupoId);
+      return;
+    }
+
     const validationError = getValidationError();
     if (validationError) {
       setSubmitError(validationError);
@@ -455,8 +491,18 @@ const NuevoGrupoCotizacion = () => {
     }
     if (!currentRole.empresaId) return;
 
+    const trimmedNombre = nombre.trim();
+    const summary: GrupoEnviadoCotizarSummary = {
+      nombre: trimmedNombre,
+      cantidadFacturas: selectedIds.length,
+      montoTotal: montoTotalSeleccionado,
+      porcentajeFinanciamiento,
+      montoAFinanciar,
+      plazo,
+    };
+
     try {
-      setSubmitting(true);
+      setSubmitPhase("creating");
       setSubmitError(null);
       const allFactoringsSelected =
         visibilidad === "SELECCIONADOS" &&
@@ -470,7 +516,7 @@ const NuevoGrupoCotizacion = () => {
           : "SELECCIONADOS";
       const created = await createFacturaGrupo({
         empresaId: currentRole.empresaId,
-        nombre: nombre.trim(),
+        nombre: trimmedNombre,
         porcentajeFinanciamiento,
         plazo,
         visibilidad: payloadVisibilidad,
@@ -481,18 +527,35 @@ const NuevoGrupoCotizacion = () => {
       });
       if (!created?.id) {
         setSubmitError("El grupo se creó pero no se recibió el identificador.");
+        setSubmitPhase("idle");
         return;
       }
-      navigate(`/facturas/grupos/${created.id}`, { replace: true });
+      setCreatedGrupoId(created.id);
+      setSuccessSummary(summary);
+      await sendCreatedGrupo(created.id);
     } catch (err) {
       console.error("Error creating factura grupo:", err);
-      setSubmitError("Error al enviar a cotizar. Intente nuevamente.");
-    } finally {
-      setSubmitting(false);
+      setSubmitError("Error al crear el grupo. Intente nuevamente.");
+      setSubmitPhase("idle");
     }
   };
 
-  const handleBack = () => navigate("/facturas");
+  const handleRetrySend = () => {
+    if (!createdGrupoId || isBusy) return;
+    void sendCreatedGrupo(createdGrupoId);
+  };
+
+  const handleGoToFacturas = () => navigate("/facturas", { replace: true });
+
+  const handleVerGrupo = () => {
+    if (!createdGrupoId) return;
+    navigate(`/facturas/grupos/${createdGrupoId}`, { replace: true });
+  };
+
+  const handleBack = () => {
+    if (isBusy) return;
+    navigate("/facturas");
+  };
 
   const from = meta.total === 0 ? 0 : (meta.page - 1) * meta.limit + 1;
   const to = Math.min(meta.page * meta.limit, meta.total);
@@ -1139,6 +1202,7 @@ const NuevoGrupoCotizacion = () => {
           <Button
             variant="outlined"
             onClick={handleBack}
+            disabled={isBusy}
             sx={{
               borderColor: "var(--color-fg-default-secondary)",
               color: "var(--color-fg-default-secondary)",
@@ -1156,9 +1220,16 @@ const NuevoGrupoCotizacion = () => {
           </Button>
           <Button
             variant="contained"
-            startIcon={submitting ? undefined : <Send />}
-            onClick={handleEnviarACotizar}
-            disabled={Boolean(getValidationError()) || submitting}
+            startIcon={isBusy ? undefined : <Send />}
+            onClick={() => {
+              void handleEnviarACotizar();
+            }}
+            disabled={
+              Boolean(getValidationError()) ||
+              isBusy ||
+              submitPhase === "success" ||
+              Boolean(createdGrupoId)
+            }
             sx={{
               backgroundColor: "var(--color-bg-accent-primary)",
               "&:hover": {
@@ -1174,7 +1245,7 @@ const NuevoGrupoCotizacion = () => {
               color: "var(--color-fg-on-accent-primary)",
             }}
           >
-            {submitting ? (
+            {isBusy ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
               "Enviar a cotizar"
@@ -1182,6 +1253,107 @@ const NuevoGrupoCotizacion = () => {
           </Button>
         </Box>
       </Box>
+
+      <Backdrop
+        open={isBusy}
+        sx={{
+          zIndex: (theme) => theme.zIndex.modal + 1,
+          color: "var(--color-fg-on-accent-primary)",
+          backgroundColor: "rgba(15, 23, 42, 0.55)",
+          backdropFilter: "blur(6px)",
+          flexDirection: "column",
+          gap: 2,
+          px: 3,
+        }}
+      >
+        <CircularProgress color="inherit" />
+        <Typography
+          variant="body1"
+          sx={{
+            maxWidth: 420,
+            textAlign: "center",
+            fontWeight: 600,
+            color: "var(--color-fg-on-accent-primary)",
+          }}
+        >
+          {submitPhase === "creating"
+            ? "Creando el grupo de cotización…"
+            : "Estamos preparando y enviando las facturas del grupo al marketplace. Espera unos momentos."}
+        </Typography>
+      </Backdrop>
+
+      {successSummary && (
+        <GrupoEnviadoCotizarModal
+          open={submitPhase === "success"}
+          summary={successSummary}
+          onGoToFacturas={handleGoToFacturas}
+          onVerGrupo={handleVerGrupo}
+        />
+      )}
+
+      <Dialog
+        open={submitPhase === "sendError"}
+        onClose={(_, reason) => {
+          if (reason === "backdropClick" || isBusy) return;
+        }}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backgroundColor: "rgba(15, 23, 42, 0.45)",
+              backdropFilter: "blur(8px)",
+            },
+          },
+        }}
+        PaperProps={{
+          sx: {
+            borderRadius: "var(--radius-l)",
+            maxWidth: 440,
+            width: "100%",
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, pr: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <ErrorOutline sx={{ color: "var(--color-fg-danger-primary)" }} />
+            No se pudo enviar el grupo
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography
+            variant="body2"
+            sx={{ color: "var(--color-fg-default-secondary)" }}
+          >
+            El grupo fue creado, pero no pudo enviarse al marketplace. Puedes
+            reintentar el envío o ir al detalle del grupo.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={handleVerGrupo}
+            disabled={isBusy || !createdGrupoId}
+            sx={{ textTransform: "none", fontWeight: 600 }}
+          >
+            Ir al detalle
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleRetrySend}
+            disabled={isBusy || !createdGrupoId}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              backgroundColor: "var(--color-bg-accent-primary)",
+              "&:hover": {
+                backgroundColor: "var(--color-bg-accent-primary-hover)",
+              },
+              color: "var(--color-fg-on-accent-primary)",
+            }}
+          >
+            Reintentar envío
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={maxSnackbarOpen}
