@@ -33,6 +33,7 @@ import {
 import Layout from "../../../../components/Layout";
 import SectionPanel from "../../../../components/SectionPanel";
 import DocumentsRequiredModal from "../../../../components/Modals/DocumentsRequiredModal";
+import FacturaDetalleDrawer from "../../../../components/Facturas/FacturaDetalleDrawer";
 import { formatCurrency } from "../../../../components/Facturas/FacturaResumenCard";
 import { useFacturaGrupos } from "../../../../hooks/useFacturaGrupos";
 import useAuthStore from "../../../../store/authStore";
@@ -99,6 +100,8 @@ const FacturaGrupoDetalle = () => {
   const [sendError, setSendError] = useState<string | null>(null);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
     useState(false);
+  const [detalleFacturaId, setDetalleFacturaId] = useState<string | null>(null);
+  const [detalleOpen, setDetalleOpen] = useState(false);
 
   const goToGrupos = (replace = false) => {
     navigate("/facturas/grupos", { replace });
@@ -578,9 +581,10 @@ const FacturaGrupoDetalle = () => {
                             <Tooltip title="Ver detalle">
                               <IconButton
                                 size="small"
-                                onClick={() =>
-                                  navigate(`/facturas/${factura.id}`)
-                                }
+                                onClick={() => {
+                                  setDetalleFacturaId(factura.id);
+                                  setDetalleOpen(true);
+                                }}
                                 sx={{
                                   color: "var(--color-fg-default-secondary)",
                                 }}
@@ -871,6 +875,23 @@ const FacturaGrupoDetalle = () => {
       <DocumentsRequiredModal
         open={documentsRequiredModalOpen}
         onClose={() => setDocumentsRequiredModalOpen(false)}
+      />
+
+      <FacturaDetalleDrawer
+        open={detalleOpen}
+        onClose={() => {
+          setDetalleOpen(false);
+          setDetalleFacturaId(null);
+        }}
+        facturaId={detalleFacturaId}
+        onDeleted={() => {
+          setDetalleOpen(false);
+          setDetalleFacturaId(null);
+          void loadDetalle();
+        }}
+        onFacturaUpdated={() => {
+          void loadDetalle();
+        }}
       />
     </Layout>
   );

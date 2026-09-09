@@ -7,41 +7,15 @@ import {
   CircularProgress,
   IconButton,
 } from "@mui/material";
-import {
-  Description,
-  Send,
-  Delete,
-  Settings,
-  ErrorOutline,
-  ArrowBack,
-  Visibility,
-} from "@mui/icons-material";
+import { Description, ErrorOutline, ArrowBack } from "@mui/icons-material";
 import Layout from "../../../components/Layout";
-import type { Factura, FacturaArchivo } from "../../../types/factura";
+import type { Factura } from "../../../types/factura";
 import { useFacturas } from "../../../hooks/useFacturas";
-import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
-import DeleteFacturaModal from "../../../components/Modals/DeleteFacturaModal";
-import RemoveMarketplaceModal from "../../../components/Modals/RemoveMarketplaceModal";
-import DocumentsRequiredModal from "../../../components/Modals/DocumentsRequiredModal";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import useAuthStore from "../../../store/authStore";
-import FactoringsList from "../../../components/Facturas/FactoringsList";
-import OfertasDrawer from "../../../components/Facturas/OfertasDrawer";
+import FacturaDetallePanel from "../../../components/Facturas/FacturaDetallePanel";
 import { appContentSx } from "../../../theme/layoutStyles";
-import FacturaResumenCard from "../../../components/Facturas/FacturaResumenCard";
-import DetalleCotizacionCard from "../../../components/Facturas/DetalleCotizacionCard";
-import DocumentosAsociadosCard from "../../../components/Facturas/DocumentosAsociadosCard";
-import { isXmlUiEnabled } from "../../../config/featureFlags";
 
 const FacturaDetail = () => {
-  const {
-    getFacturaById,
-    loading,
-    refreshFactura,
-    uploadFacturaArchivo,
-    deleteFacturaArchivo,
-  } = useFacturas();
-  const { currentRole } = useAuthStore();
+  const { getFacturaById, loading } = useFacturas();
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -50,13 +24,6 @@ const FacturaDetail = () => {
     searchParams.get("ofertas") === "true" || Boolean(ofertaIdParam);
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] =
-    useState(false);
-  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
-    useState(false);
-  const [ofertasDrawerOpen, setOfertasDrawerOpen] = useState(shouldOpenOfertas);
 
   const fetchFactura = async () => {
     try {
@@ -71,15 +38,15 @@ const FacturaDetail = () => {
 
   useEffect(() => {
     if (id) {
-      fetchFactura();
+      void fetchFactura();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
     if (!factura) return;
 
     if (factura.estado?.toLowerCase() === "cargada") {
-      setOfertasDrawerOpen(false);
       if (!searchParams.has("ofertas") && !searchParams.has("ofertaId")) return;
       setSearchParams(
         (prev) => {
@@ -90,33 +57,26 @@ const FacturaDetail = () => {
         },
         { replace: true },
       );
-      return;
     }
-
-    if (shouldOpenOfertas) {
-      setOfertasDrawerOpen(true);
-    }
-  }, [factura, shouldOpenOfertas]);
+  }, [factura, searchParams, setSearchParams]);
 
   const handleBack = () => {
     navigate("/facturas");
   };
 
-  const handleOpenOfertas = () => {
-    setOfertasDrawerOpen(true);
-    if (searchParams.get("ofertas") === "true") return;
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.set("ofertas", "true");
-        return next;
-      },
-      { replace: true },
-    );
-  };
-
-  const handleCloseOfertas = () => {
-    setOfertasDrawerOpen(false);
+  const handleOfertasOpenChange = (open: boolean) => {
+    if (open) {
+      if (searchParams.get("ofertas") === "true") return;
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set("ofertas", "true");
+          return next;
+        },
+        { replace: true },
+      );
+      return;
+    }
     if (!searchParams.has("ofertas") && !searchParams.has("ofertaId")) return;
     setSearchParams(
       (prev) => {
@@ -129,62 +89,7 @@ const FacturaDetail = () => {
     );
   };
 
-  const handleEnviarCotizar = () => {
-    if (currentRole && currentRole.nivel >= 3) {
-      navigate(`/facturas/${id}/cotizar`);
-    } else {
-      setDocumentsRequiredModalOpen(true);
-    }
-  };
-
-  const handleEliminar = () => {
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteSuccess = () => {
-    navigate("/facturas");
-  };
-
-  const handleCloseDeleteModal = () => {
-    setDeleteModalOpen(false);
-  };
-
-  const handleCloseUploadXmlModal = () => {
-    setUploadXmlModalOpen(false);
-  };
-
-  const handleUploadXmlSuccess = async () => {
-    try {
-      const data = await refreshFactura(id!);
-      setFactura(data);
-    } catch (err) {
-      console.error("Error refreshing factura:", err);
-      setError(
-        "No se pudo actualizar la factura. Por favor, intente nuevamente.",
-      );
-    }
-  };
-
-  const handleDescargarXML = (base64: string, fileName: string) => {
-    const byteCharacters = atob(base64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: "application/xml" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  // Loading state
-  if (loading) {
+  if (loading && !factura) {
     return (
       <Layout>
         <Box
@@ -198,7 +103,10 @@ const FacturaDetail = () => {
           }}
         >
           <CircularProgress sx={{ color: "var(--color-fg-accent-primary)" }} />
-          <Typography variant="body1" sx={{ color: "var(--color-fg-default-secondary)" }}>
+          <Typography
+            variant="body1"
+            sx={{ color: "var(--color-fg-default-secondary)" }}
+          >
             Cargando factura...
           </Typography>
         </Box>
@@ -206,7 +114,6 @@ const FacturaDetail = () => {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <Layout>
@@ -224,20 +131,36 @@ const FacturaDetail = () => {
               gap: 2,
             }}
           >
-            <ErrorOutline sx={{ fontSize: 64, color: "var(--color-fg-danger-primary)" }} />
-            <Typography variant="h6" sx={{ color: "var(--color-fg-default-primary)", fontWeight: 500, fontFamily: "var(--font-heading)" }}>
+            <ErrorOutline
+              sx={{ fontSize: 64, color: "var(--color-fg-danger-primary)" }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                color: "var(--color-fg-default-primary)",
+                fontWeight: 500,
+                fontFamily: "var(--font-heading)",
+              }}
+            >
               Error al cargar la factura
             </Typography>
-            <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
+            <Typography
+              variant="body2"
+              sx={{ color: "var(--color-fg-default-secondary)" }}
+            >
               {error}
             </Typography>
             <Button
               variant="contained"
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                void fetchFactura();
+              }}
               sx={{
                 mt: 2,
                 backgroundColor: "var(--color-bg-accent-primary)",
-                "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
+                "&:hover": {
+                  backgroundColor: "var(--color-bg-accent-primary-hover)",
+                },
                 textTransform: "none",
                 color: "var(--color-fg-on-accent-primary)",
               }}
@@ -267,8 +190,13 @@ const FacturaDetail = () => {
               gap: 2,
             }}
           >
-            <Description sx={{ fontSize: 64, color: "var(--color-fg-default-tertiary)" }} />
-            <Typography variant="h6" sx={{ color: "var(--color-fg-default-secondary)" }}>
+            <Description
+              sx={{ fontSize: 64, color: "var(--color-fg-default-tertiary)" }}
+            />
+            <Typography
+              variant="h6"
+              sx={{ color: "var(--color-fg-default-secondary)" }}
+            >
               Factura no encontrada
             </Typography>
           </Box>
@@ -277,34 +205,9 @@ const FacturaDetail = () => {
     );
   }
 
-  const isCargada = factura.estado?.toLowerCase() === "cargada";
-  const isInMarketplace = ["EN_MARKETPLACE", "CON_OFERTAS"].includes(
-    factura.estado,
-  );
-  const showXmlUi = isXmlUiEnabled();
-
-  const handleDescargarPdf = (base64: string, fileName: string) => {
-    const byteCharacters = atob(base64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <Layout>
       <Box sx={appContentSx}>
-        {/* Back Button */}
         <Box sx={{ mb: 2 }}>
           <Button
             startIcon={<ArrowBack />}
@@ -319,293 +222,14 @@ const FacturaDetail = () => {
           </Button>
         </Box>
 
-        <FacturaResumenCard
+        <FacturaDetallePanel
           factura={factura}
-          showSolicitudFields={!isCargada}
-        />
-
-        {factura.estado !== "CARGADA" && (
-          <DetalleCotizacionCard
-            plazo={factura.plazo}
-            porcentajeFinanciamiento={factura.porcentajeFinanciamiento || "0"}
-            montoFinanciar={factura.montoFinanciar}
-          />
-        )}
-
-        {/* Card: Visibilidad en Marketplace */}
-        {isInMarketplace && (
-          <Box
-            sx={{
-              backgroundColor: "var(--color-bg-default-primary)",
-              borderRadius: 3,
-              p: 3,
-              mb: 3,
-              boxShadow: "var(--shadow-popover)",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-              <Box
-                sx={{
-                  backgroundColor: "var(--color-bg-default-tertiary)",
-                  borderRadius: 2,
-                  p: 1.5,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Visibility sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
-              </Box>
-              <Box>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 500, fontFamily: "var(--font-heading)", color: "var(--color-fg-default-primary)" }}
-                >
-                  Visibilidad en Marketplace
-                </Typography>
-                <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                  Factorings que pueden ver esta factura
-                </Typography>
-              </Box>
-            </Box>
-
-            {factura.visibilidad === "TODOS" ? (
-              <Box
-                sx={{
-                  backgroundColor: "var(--color-bg-success-secondary)",
-                  borderRadius: 2,
-                  p: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                }}
-              >
-                <Visibility sx={{ color: "var(--color-fg-success-primary)", fontSize: 20 }} />
-                <Typography
-                  variant="body2"
-                  sx={{ color: "var(--color-fg-success-primary)", fontWeight: 500 }}
-                >
-                  Esta factura es visible para todos los factorings registrados
-                  en la plataforma.
-                </Typography>
-              </Box>
-            ) : (
-              <FactoringsList
-                factorings={factura.visibilidadDetalle?.factorings || []}
-              />
-            )}
-          </Box>
-        )}
-
-        {/* Documentos + Acciones */}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
-            gap: { xs: 2, md: 3 },
-            gridAutoRows: "auto", // allow each row to size itself
-            alignItems: "start",  // prevent stretching children to full row height
-          }}
-        >
-          {/* Documentos Asociados */}
-          <DocumentosAsociadosCard
-            factura={factura}
-            adjuntos={factura.archivos ?? []}
-            onAdjuntosChange={(files) =>
-              setFactura((prev) => (prev ? { ...prev, archivos: files } : prev))
-            }
-            onUploadAdjunto={async (payload) => {
-              const uploaded = await uploadFacturaArchivo(factura.id, payload);
-              if (uploaded?.id) return uploaded;
-              const refreshed = await refreshFactura(factura.id);
-              const match = (refreshed.archivos ?? []).find(
-                (archivo: FacturaArchivo) =>
-                  archivo.nombreArchivo === payload.nombreArchivo,
-              );
-              if (!match) {
-                throw new Error("No se pudo confirmar el archivo subido");
-              }
-              return match;
-            }}
-            onDeleteAdjunto={(archivoId) =>
-              deleteFacturaArchivo(factura.id, archivoId)
-            }
-            onDownloadPdf={handleDescargarPdf}
-            {...(showXmlUi
-              ? {
-                  onUploadXmlClick: () => setUploadXmlModalOpen(true),
-                  onDownloadXml: handleDescargarXML,
-                }
-              : {})}
-          />
-
-          {/* Acciones */}
-          <Box
-            sx={{
-              gridColumn: { md: "2" },
-              backgroundColor: "var(--color-bg-default-primary)",
-              borderRadius: 3,
-              p: 3,
-              boxShadow: "var(--shadow-popover)",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-              <Box
-                sx={{
-                  backgroundColor: "var(--color-bg-default-tertiary)",
-                  borderRadius: 2,
-                  p: 1.5,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Settings sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Acciones
-                </Typography>
-                <Typography variant="body2">Gestiona esta factura</Typography>
-              </Box>
-            </Box>
-
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              {factura.estado?.toLowerCase() !== "cargada" && (
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  startIcon={<Visibility />}
-                  onClick={handleOpenOfertas}
-                  sx={{
-                    borderColor: "var(--color-border-accent-primary)",
-                    color: "var(--color-fg-accent-primary)",
-                    "&:hover": {
-                      borderColor: "var(--color-border-accent-secondary)",
-                      backgroundColor: "var(--color-bg-accent-secondary)",
-                    },
-                    textTransform: "none",
-                    fontWeight: 500,
-                    py: 1.5,
-                  }}
-                >
-                  Ver ofertas
-                </Button>
-              )}
-              {isCargada && (
-                <Button
-                  variant="contained"
-                  fullWidth
-                  startIcon={<Send />}
-                  onClick={handleEnviarCotizar}
-                  sx={{
-                    backgroundColor: "var(--color-bg-accent-primary)",
-                    "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
-                    "&:disabled": { opacity: 0.7 },
-                    textTransform: "none",
-                    fontWeight: 500,
-                    py: 1.5,
-                    color: "var(--color-fg-on-accent-primary)",
-                  }}
-                >
-                  Enviar a cotizar
-                </Button>
-              )}
-              {isInMarketplace && (
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  startIcon={<StorefrontIcon />}
-                  onClick={() => setRemoveMarketplaceModalOpen(true)}
-                  sx={{
-                    borderColor: "var(--color-border-danger-primary)",
-                    color: "var(--color-fg-danger-primary)",
-                    "&:hover": {
-                      borderColor: "var(--color-border-danger-secondary)",
-                      backgroundColor: "var(--color-bg-danger-secondary)",
-                    },
-                    textTransform: "none",
-                    fontWeight: 500,
-                    py: 1.5,
-                  }}
-                >
-                  Quitar del marketplace
-                </Button>
-              )}
-              {isCargada && (
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  startIcon={<Delete />}
-                  onClick={handleEliminar}
-                  sx={{
-                    borderColor: "var(--color-border-danger-primary)",
-                    color: "var(--color-fg-danger-primary)",
-                    "&:hover": {
-                      borderColor: "var(--color-border-danger-secondary)",
-                      backgroundColor: "var(--color-bg-danger-secondary)",
-                    },
-                    textTransform: "none",
-                    fontWeight: 500,
-                    py: 1.5,
-                  }}
-                >
-                  Eliminar factura
-                </Button>
-              )}
-            </Box>
-          </Box>
-        </Box>
-
-        {showXmlUi && (
-          <UploadXmlModal
-            open={uploadXmlModalOpen}
-            onClose={handleCloseUploadXmlModal}
-            onSuccess={handleUploadXmlSuccess}
-            facturaId={id || ""}
-          />
-        )}
-
-        {/* Delete Factura Modal */}
-        {factura && (
-          <DeleteFacturaModal
-            open={deleteModalOpen}
-            onClose={handleCloseDeleteModal}
-            onSuccess={handleDeleteSuccess}
-            facturaData={{
-              id: factura.id,
-              folio: factura.folio,
-              razonSocialReceptor: factura.razonSocialReceptor || "N/A",
-              montoTotal: factura.montoTotal,
-            }}
-          />
-        )}
-
-        {/* Remove from Marketplace Modal */}
-        {factura && (
-          <RemoveMarketplaceModal
-            open={removeMarketplaceModalOpen}
-            onClose={() => setRemoveMarketplaceModalOpen(false)}
-            onSuccess={() => fetchFactura()}
-            facturaData={{
-              id: factura.id,
-              folio: factura.folio,
-              razonSocialReceptor: factura.razonSocialReceptor || "N/A",
-            }}
-          />
-        )}
-
-        <DocumentsRequiredModal
-          open={documentsRequiredModalOpen}
-          onClose={() => setDocumentsRequiredModalOpen(false)}
-        />
-
-        <OfertasDrawer
-          open={ofertasDrawerOpen && !isCargada}
-          onClose={handleCloseOfertas}
-          factura={factura}
+          onFacturaChange={setFactura}
+          onDeleted={() => navigate("/facturas")}
+          variant="page"
+          openOfertas={shouldOpenOfertas}
           initialOfertaId={ofertaIdParam}
-          onOfertasActualizadas={fetchFactura}
+          onOfertasOpenChange={handleOfertasOpenChange}
         />
       </Box>
     </Layout>

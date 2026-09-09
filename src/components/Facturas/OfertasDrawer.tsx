@@ -38,6 +38,8 @@ interface OfertasDrawerProps {
   factura: Factura | null;
   initialOfertaId?: string | null;
   onOfertasActualizadas?: () => void;
+  /** Stack above another Drawer (e.g. FacturaDetalleDrawer). */
+  elevated?: boolean;
 }
 
 const SORT_OPTIONS = [
@@ -58,6 +60,7 @@ const OfertasDrawer = ({
   factura,
   initialOfertaId,
   onOfertasActualizadas,
+  elevated = false,
 }: OfertasDrawerProps) => {
   const { getOfertasByFacturaId, comentarEmpresa, loading } = useOfertas();
   const navigate = useNavigate();
@@ -163,6 +166,13 @@ const OfertasDrawer = ({
         anchor="right"
         open={open}
         onClose={onClose}
+        sx={
+          elevated
+            ? {
+                zIndex: (theme) => theme.zIndex.modal + 2,
+              }
+            : undefined
+        }
         PaperProps={{
           sx: {
             width: { xs: "100%", md: "75%", lg: "65%" },

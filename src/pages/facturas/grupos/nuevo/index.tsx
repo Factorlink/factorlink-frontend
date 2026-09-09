@@ -52,6 +52,7 @@ import DocumentsRequiredModal from "../../../../components/Modals/DocumentsRequi
 import GrupoEnviadoCotizarModal, {
   type GrupoEnviadoCotizarSummary,
 } from "../../../../components/Modals/GrupoEnviadoCotizarModal";
+import FacturaDetalleDrawer from "../../../../components/Facturas/FacturaDetalleDrawer";
 import { formatCurrency } from "../../../../components/Facturas/FacturaResumenCard";
 import { useFacturas } from "../../../../hooks/useFacturas";
 import { useFactoring } from "../../../../hooks/useFactoring";
@@ -167,6 +168,8 @@ const NuevoGrupoCotizacion = () => {
     useState<GrupoEnviadoCotizarSummary | null>(null);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
     useState(false);
+  const [detalleFacturaId, setDetalleFacturaId] = useState<string | null>(null);
+  const [detalleOpen, setDetalleOpen] = useState(false);
 
   const isBusy =
     submitPhase === "creating" || submitPhase === "sending";
@@ -834,13 +837,10 @@ const NuevoGrupoCotizacion = () => {
                                 <Tooltip title="Ver detalle">
                                   <IconButton
                                     size="small"
-                                    onClick={() =>
-                                      window.open(
-                                        `/facturas/${factura.id}`,
-                                        "_blank",
-                                        "noopener,noreferrer",
-                                      )
-                                    }
+                                    onClick={() => {
+                                      setDetalleFacturaId(factura.id);
+                                      setDetalleOpen(true);
+                                    }}
                                     sx={{
                                       color: "var(--color-fg-default-secondary)",
                                     }}
@@ -1366,6 +1366,27 @@ const NuevoGrupoCotizacion = () => {
       <DocumentsRequiredModal
         open={documentsRequiredModalOpen}
         onClose={() => setDocumentsRequiredModalOpen(false)}
+      />
+
+      <FacturaDetalleDrawer
+        open={detalleOpen}
+        onClose={() => {
+          setDetalleOpen(false);
+          setDetalleFacturaId(null);
+        }}
+        facturaId={detalleFacturaId}
+        onDeleted={() => {
+          const deletedId = detalleFacturaId;
+          setDetalleOpen(false);
+          setDetalleFacturaId(null);
+          if (deletedId) {
+            clearSelectionForIds([deletedId]);
+          }
+          void fetchCargadas();
+        }}
+        onFacturaUpdated={() => {
+          void fetchCargadas();
+        }}
       />
     </Layout>
   );
