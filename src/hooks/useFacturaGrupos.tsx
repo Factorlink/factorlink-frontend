@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../lib/axios";
 import type {
   CreateFacturaGrupoPayload,
+  Factura,
   FacturaGrupo,
   FacturaGrupoVisibilidad,
 } from "../types/factura";
@@ -59,6 +60,38 @@ export const useFacturaGrupos = () => {
     }
   };
 
+  const getFacturaGrupoById = async (id: string): Promise<FacturaGrupo> => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/factura-grupos/${id}`);
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFacturaGrupoFacturas = async (id: string): Promise<Factura[]> => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/factura-grupos/${id}/facturas`);
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendFacturaGrupoToMarketplace = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await api.post(
+        `/factura-grupos/${id}/send-to-marketplace`,
+      );
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const deleteFacturaGrupo = async (id: string) => {
     try {
       setLoading(true);
@@ -73,6 +106,9 @@ export const useFacturaGrupos = () => {
     loading,
     createFacturaGrupo,
     getFacturaGrupos,
+    getFacturaGrupoById,
+    getFacturaGrupoFacturas,
+    sendFacturaGrupoToMarketplace,
     deleteFacturaGrupo,
   };
 };

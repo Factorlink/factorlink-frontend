@@ -32,11 +32,15 @@ export interface CreateFacturaGrupoPayload {
 export interface FacturaGrupo {
     id: string;
     nombre?: string;
-    porcentajeFinanciamiento?: number;
+    porcentajeFinanciamiento?: string | number;
+    montoFinanciar?: string;
     plazo?: number;
     visibilidad?: FacturaGrupoVisibilidad | string;
     empresaId?: string;
     createdAt?: string;
+    estado?: string;
+    facturas?: Factura[];
+    visibilidades?: unknown[];
 }
 
 export interface Factura {
