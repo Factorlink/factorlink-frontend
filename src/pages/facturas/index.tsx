@@ -95,10 +95,10 @@ const formatDate = (dateString: string) => {
 
 const TAB_ROUTES = [
   "/facturas",
+  "/facturas/grupos",
   "/facturas/marketplace",
   "/facturas/ofertas",
   "/facturas/cedidas",
-  "/facturas/grupos",
 ];
 const MIN_GRUPO = 2;
 const MAX_GRUPO = 5;
@@ -610,6 +610,29 @@ const Facturas = () => {
               }
             />
             <Tab
+              icon={<Groups sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  Grupos de cotización
+                  {activeTab === 1 && meta.total > 0 && (
+                    <Chip
+                      label={meta.total}
+                      size="small"
+                      sx={{
+                        height: 22,
+                        minWidth: 22,
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        backgroundColor: "var(--color-bg-accent-primary)",
+                        color: "var(--color-fg-on-accent-primary)",
+                      }}
+                    />
+                  )}
+                </Box>
+              }
+            />
+            <Tab
               icon={<Storefront sx={{ fontSize: 18 }} />}
               iconPosition="start"
               label={
@@ -625,11 +648,11 @@ const Facturas = () => {
                         fontSize: "0.75rem",
                         fontWeight: 700,
                         backgroundColor:
-                          activeTab === 1
+                          activeTab === 2
                             ? "var(--color-bg-accent-primary)"
                             : "var(--color-bg-neutral-secondary)",
                         color:
-                          activeTab === 1
+                          activeTab === 2
                             ? "var(--color-fg-on-accent-primary)"
                             : "var(--color-fg-default-primary)",
                       }}
@@ -654,11 +677,11 @@ const Facturas = () => {
                         fontSize: "0.75rem",
                         fontWeight: 700,
                         backgroundColor:
-                          activeTab === 2
+                          activeTab === 3
                             ? "var(--color-bg-accent-primary)"
                             : "var(--color-bg-neutral-secondary)",
                         color:
-                          activeTab === 2
+                          activeTab === 3
                             ? "var(--color-fg-on-accent-primary)"
                             : "var(--color-fg-default-primary)",
                       }}
@@ -683,36 +706,13 @@ const Facturas = () => {
                         fontSize: "0.75rem",
                         fontWeight: 700,
                         backgroundColor:
-                          activeTab === 3
+                          activeTab === 4
                             ? "var(--color-bg-accent-primary)"
                             : "var(--color-bg-neutral-secondary)",
                         color:
-                          activeTab === 3
+                          activeTab === 4
                             ? "var(--color-fg-on-accent-primary)"
                             : "var(--color-fg-default-primary)",
-                      }}
-                    />
-                  )}
-                </Box>
-              }
-            />
-            <Tab
-              icon={<Groups sx={{ fontSize: 18 }} />}
-              iconPosition="start"
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  Grupos
-                  {activeTab === 4 && meta.total > 0 && (
-                    <Chip
-                      label={meta.total}
-                      size="small"
-                      sx={{
-                        height: 22,
-                        minWidth: 22,
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        backgroundColor: "var(--color-bg-accent-primary)",
-                        color: "var(--color-fg-on-accent-primary)",
                       }}
                     />
                   )}
@@ -1067,23 +1067,23 @@ const Facturas = () => {
             </TableContainer>
           </>
         ) : activeTab === 1 ? (
+          <FacturaGruposTable
+            empresaId={currentRole?.empresaId || ""}
+            onMetaChange={handleChildMetaChange}
+          />
+        ) : activeTab === 2 ? (
           <MarketplaceFacturasTable
             empresaId={currentRole?.empresaId || ""}
             onRemoveSuccess={() => fetchFacturas(filters)}
             onMetaChange={handleChildMetaChange}
           />
-        ) : activeTab === 2 ? (
+        ) : activeTab === 3 ? (
           <OfertasFacturasTable
             empresaId={currentRole?.empresaId || ""}
             onMetaChange={handleChildMetaChange}
           />
-        ) : activeTab === 3 ? (
-          <CedidasFacturasTable
-            empresaId={currentRole?.empresaId || ""}
-            onMetaChange={handleChildMetaChange}
-          />
         ) : (
-          <FacturaGruposTable
+          <CedidasFacturasTable
             empresaId={currentRole?.empresaId || ""}
             onMetaChange={handleChildMetaChange}
           />

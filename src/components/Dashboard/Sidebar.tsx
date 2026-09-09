@@ -13,6 +13,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/png/factorlink-logo.png";
 import {
   getMenuItemsByRole,
+  isMenuItemActive,
   mainMenuItems,
   bottomMenuItems,
 } from "../../config/menuConfig";
@@ -33,7 +34,6 @@ const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
-  const isActive = (path: string) => location.pathname === path;
   const { currentRole } = useAuthStore();
   const { logout, loading } = useAuth();
 
@@ -129,7 +129,7 @@ const Sidebar = () => {
       >
         {currentRole?.contexto &&
           getMenuItemsByRole(mainMenuItems, currentRole.role).map((item) => {
-            const active = isActive(item.path);
+            const active = isMenuItemActive(location.pathname, item);
             return (
               <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
                 <ListItemButton

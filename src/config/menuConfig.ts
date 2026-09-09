@@ -6,6 +6,7 @@ import {
   Settings,
   Logout,
   Storefront,
+  Groups,
 } from "@mui/icons-material";
 import type { SvgIconComponent } from "@mui/icons-material";
 import { ROLES } from "../utils/consts";
@@ -15,6 +16,8 @@ export interface MenuItem {
   icon: SvgIconComponent;
   path: string;
   roles: string[];
+  /** Active when pathname equals path or starts with `${path}/`. */
+  matchPrefix?: boolean;
 }
 
 const ALL_ROLES = [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN, ROLES.DEFAULT, ROLES.EMPRESA_USUARIO, ROLES.FACTORING_ANALISTA];
@@ -34,6 +37,13 @@ export const mainMenuItems: MenuItem[] = [
     icon: Description,
     path: "/facturas",
     roles: EMPRESA_ROLES,
+  },
+  {
+    text: "Grupos de Facturas",
+    icon: Groups,
+    path: "/facturas/grupos",
+    roles: EMPRESA_ROLES,
+    matchPrefix: true,
   },
   {
     text: "Marketplace",
@@ -69,6 +79,13 @@ export const bottomMenuItems: MenuItem[] = [
     roles: ALL_ROLES,
   },
 ];
+
+export const isMenuItemActive = (pathname: string, item: MenuItem) => {
+  if (item.matchPrefix) {
+    return pathname === item.path || pathname.startsWith(`${item.path}/`);
+  }
+  return pathname === item.path;
+};
 
 export const getMenuItemsByRole = (items: MenuItem[], userRole: string): MenuItem[] => {
   return items.filter((item) => item.roles.includes(userRole));
