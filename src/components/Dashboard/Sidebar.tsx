@@ -24,6 +24,9 @@ import LogoutConfirmDialog from "../Modals/LogoutConfirmDialog";
 const SIDEBAR_EXPANDED = 260;
 const SIDEBAR_RAIL = 72;
 
+const isGruposFacturasRoute = (pathname: string) =>
+  pathname.startsWith("/facturas/grupos");
+
 /**
  * CSS-first rail below `md` (768): width and labels follow viewport,
  * independent of `collapsed`. On `md+`, `collapsed` controls expand/rail.
@@ -31,11 +34,21 @@ const SIDEBAR_RAIL = 72;
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() =>
+    isGruposFacturasRoute(location.pathname),
+  );
+  const [pathForCollapse, setPathForCollapse] = useState(location.pathname);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const { currentRole } = useAuthStore();
   const { logout, loading } = useAuth();
+
+  if (location.pathname !== pathForCollapse) {
+    setPathForCollapse(location.pathname);
+    if (isGruposFacturasRoute(location.pathname)) {
+      setCollapsed(true);
+    }
+  }
 
   const railOnMd = collapsed;
 

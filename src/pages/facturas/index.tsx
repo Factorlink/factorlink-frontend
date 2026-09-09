@@ -177,7 +177,11 @@ const Facturas = () => {
 
   const handleVerDetalle = () => {
     if (selectedFactura) {
-      navigate(`/facturas/${selectedFactura.id}`);
+      if (selectedFactura.facturaGrupoId) {
+        navigate(`/facturas/grupos/${selectedFactura.facturaGrupoId}`);
+      } else {
+        navigate(`/facturas/${selectedFactura.id}`);
+      }
     }
     handleMenuClose();
   };
@@ -798,7 +802,7 @@ const Facturas = () => {
                       },
                     }}
                   >
-                    Eliminar facturas seleccionadas ({selectedIds.length})
+                    Eliminar facturas ({selectedIds.length})
                   </Button>
                   {selectedIds.length >= MIN_GRUPO &&
                     selectedIds.length <= MAX_GRUPO && (
@@ -973,19 +977,49 @@ const Facturas = () => {
                               />
                             </TableCell>
                             <TableCell>
-                              <Chip
-                                icon={statusConfig.icon as React.ReactElement}
-                                label={statusConfig.label}
-                                size="small"
+                              <Box
                                 sx={{
-                                  backgroundColor: statusConfig.bgColor,
-                                  color: statusConfig.color,
-                                  fontWeight: 500,
-                                  "& .MuiChip-icon": {
-                                    color: statusConfig.color,
-                                  },
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  alignItems: "center",
+                                  gap: 0.75,
                                 }}
-                              />
+                              >
+                                <Chip
+                                  icon={statusConfig.icon as React.ReactElement}
+                                  label={statusConfig.label}
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: statusConfig.bgColor,
+                                    color: statusConfig.color,
+                                    fontWeight: 500,
+                                    "& .MuiChip-icon": {
+                                      color: statusConfig.color,
+                                    },
+                                  }}
+                                />
+                                {factura.facturaGrupoId && (
+                                  <Chip
+                                    label={
+                                      factura.facturaGrupo?.nombre
+                                        ? `En grupo: ${factura.facturaGrupo.nombre}`
+                                        : "En grupo"
+                                    }
+                                    size="small"
+                                    variant="outlined"
+                                    sx={{
+                                      fontWeight: 500,
+                                      borderColor: "var(--color-border-accent-primary)",
+                                      color: "var(--color-fg-accent-primary)",
+                                      maxWidth: 180,
+                                      "& .MuiChip-label": {
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                      },
+                                    }}
+                                  />
+                                )}
+                              </Box>
                             </TableCell>
                             <TableCell>
                               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>

@@ -19,7 +19,6 @@ import {
   InputAdornment,
   InputLabel,
   MenuItem,
-  Pagination,
   Radio,
   RadioGroup,
   Select,
@@ -60,14 +59,11 @@ import { useFacturaGrupos } from "../../../../hooks/useFacturaGrupos";
 import useAuthStore from "../../../../store/authStore";
 import type { Factura, FacturaGrupoVisibilidad } from "../../../../types/factura";
 import type { Factoring } from "../../../../types/factoring";
-import type { Meta } from "../../../../types/meta";
 import { hasFacturaPdf } from "../../../../utils/facturaDocuments";
 import {
   appContentSx,
-  paginationSelectSx,
   tableScrollSx,
   tableWideSx,
-  toolbarRowSx,
 } from "../../../../theme/layoutStyles";
 
 type SubmitPhase = "idle" | "creating" | "sending" | "success" | "sendError";
@@ -81,9 +77,7 @@ const MAX_GRUPO = 5;
 const MIN_PLAZO = 1;
 const MAX_PLAZO = 180;
 const NOMBRE_MAX = 100;
-const DESCRIPCION_MAX = 200;
-const SEARCH_DEBOUNCE_MS = 400;
-const PAGE_LIMIT = 10;
+const FETCH_LIMIT = 100;
 
 const createDefaultGrupoNombre = () => {
   const fecha = new Date().toLocaleDateString("es-CL", {
@@ -122,7 +116,6 @@ const NuevoGrupoCotizacion = () => {
   ).slice(0, MAX_GRUPO);
 
   const [nombre, setNombre] = useState(createDefaultGrupoNombre);
-  const [descripcion, setDescripcion] = useState("");
   const [porcentajeFinanciamiento, setPorcentajeFinanciamiento] = useState(100);
   const [plazo, setPlazo] = useState(30);
   const [visibilidad, setVisibilidad] =
@@ -131,21 +124,7 @@ const NuevoGrupoCotizacion = () => {
   const [factorings, setFactorings] = useState<Factoring[]>([]);
 
   const [facturas, setFacturas] = useState<Factura[]>([]);
-  const [meta, setMeta] = useState<Meta>({
-    lastPage: 1,
-    limit: PAGE_LIMIT,
-    page: 1,
-    total: 0,
-    totalCargada: 0,
-    totalCedida: 0,
-    totalEnMarketplace: 0,
-    totalConOfertas: 0,
-    totalGeneral: 0,
-  });
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(PAGE_LIMIT);
   const [folioInput, setFolioInput] = useState("");
-  const [folioSearch, setFolioSearch] = useState("");
   const [loadingFacturas, setLoadingFacturas] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -174,16 +153,6 @@ const NuevoGrupoCotizacion = () => {
   const isBusy =
     submitPhase === "creating" || submitPhase === "sending";
 
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      const next = folioInput.trim();
-      if (next === folioSearch) return;
-      setFolioSearch(next);
-      setPage(1);
-    }, SEARCH_DEBOUNCE_MS);
-    return () => window.clearTimeout(timeout);
-  }, [folioInput, folioSearch]);
-
   const fetchCargadas = useCallback(async () => {
     if (!currentRole?.empresaId) {
       setLoadingFacturas(false);
@@ -192,17 +161,13 @@ const NuevoGrupoCotizacion = () => {
     setLoadingFacturas(true);
     setLoadError(null);
     try {
-      const { data, meta: metaResponse } = await getFacturas({
-        page,
-        limit,
+      const { data } = await getFacturas({
+        page: 1,
+        limit: FETCH_LIMIT,
         empresaId: currentRole.empresaId,
         estado: "CARGADA",
-        ...(folioSearch ? { folio: folioSearch } : {}),
       });
       setFacturas(data || []);
-      if (metaResponse) {
-        setMeta(metaResponse);
-      }
     } catch (err) {
       console.error("Error fetching facturas CARGADA:", err);
       setLoadError("No se pudieron cargar las facturas. Intente nuevamente.");
@@ -212,7 +177,7 @@ const NuevoGrupoCotizacion = () => {
     }
     // getFacturas is recreated every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentRole?.empresaId, page, limit, folioSearch]);
+  }, [currentRole?.empresaId]);
 
   useEffect(() => {
     void fetchCargadas();
@@ -362,7 +327,16 @@ const NuevoGrupoCotizacion = () => {
   const canSelectForGrupo = (factura: Factura) =>
     factura.estado?.toLowerCase() === "cargada" && !factura.facturaGrupoId;
 
-  const selectableFacturas = facturas.filter(canSelectForGrupo);
+  const folioFilter = folioInput.trim().toLowerCase();
+  const facturasFiltradas = folioFilter
+    ? facturas.filter((factura) =>
+        String(factura.folio ?? "")
+          .toLowerCase()
+          .includes(folioFilter),
+      )
+    : facturas;
+
+  const selectableFacturas = facturasFiltradas.filter(canSelectForGrupo);
   const allSelectableSelected =
     selectableFacturas.length > 0 &&
     selectableFacturas.every((factura) => selectedIds.includes(factura.id));
@@ -455,6 +429,7 @@ const NuevoGrupoCotizacion = () => {
     if (porcentajeFinanciamiento < 1 || porcentajeFinanciamiento > 100) {
       return "El porcentaje a financiar debe estar entre 1% y 100%";
     }
+    if (plazo === 0) return "El plazo es obligatorio";
     if (plazo < MIN_PLAZO || plazo > MAX_PLAZO) {
       return `El plazo debe estar entre ${MIN_PLAZO} y ${MAX_PLAZO} días`;
     }
@@ -560,9 +535,6 @@ const NuevoGrupoCotizacion = () => {
     navigate("/facturas");
   };
 
-  const from = meta.total === 0 ? 0 : (meta.page - 1) * meta.limit + 1;
-  const to = Math.min(meta.page * meta.limit, meta.total);
-
   return (
     <Layout>
       <Box sx={appContentSx}>
@@ -610,24 +582,12 @@ const NuevoGrupoCotizacion = () => {
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value.slice(0, NOMBRE_MAX))}
                 helperText={`${nombre.length}/${NOMBRE_MAX}`}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                label="Descripción (opcional)"
-                fullWidth
-                multiline
-                minRows={3}
-                value={descripcion}
-                onChange={(e) =>
-                  setDescripcion(e.target.value.slice(0, DESCRIPCION_MAX))
-                }
-                helperText={`${descripcion.length}/${DESCRIPCION_MAX}`}
               />
             </SectionPanel>
 
             <SectionPanel
               title="Seleccionar facturas"
-              subtitle={`${meta.total} facturas disponibles (solo facturas en estado CARGADA)`}
+              subtitle={`${facturas.length} facturas disponibles (solo facturas en estado CARGADA)`}
             >
               <Box
                 sx={{
@@ -674,7 +634,7 @@ const NuevoGrupoCotizacion = () => {
                 >
                   <CircularProgress />
                 </Box>
-              ) : facturas.length === 0 ? (
+              ) : facturasFiltradas.length === 0 ? (
                 <Box sx={{ textAlign: "center", py: 6 }}>
                   <Description
                     sx={{ fontSize: 48, color: "var(--color-fg-default-tertiary)", mb: 1 }}
@@ -683,7 +643,7 @@ const NuevoGrupoCotizacion = () => {
                     variant="body2"
                     sx={{ color: "var(--color-fg-default-secondary)" }}
                   >
-                    {folioSearch
+                    {folioFilter
                       ? "No se encontraron facturas con ese folio"
                       : "No hay facturas en estado CARGADA"}
                   </Typography>
@@ -716,7 +676,7 @@ const NuevoGrupoCotizacion = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {facturas.map((factura) => {
+                        {facturasFiltradas.map((factura) => {
                           const canSelect = canSelectForGrupo(factura);
                           const isSelected = selectedIds.includes(factura.id);
                           const isFetchingPdf = Boolean(pdfFetchingIds[factura.id]);
@@ -855,51 +815,6 @@ const NuevoGrupoCotizacion = () => {
                       </TableBody>
                     </Table>
                   </Box>
-                  <Box
-                    sx={[
-                      toolbarRowSx,
-                      { borderTop: "1px solid var(--color-border-default-primary)" },
-                    ]}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "var(--color-fg-default-secondary)" }}
-                    >
-                      Mostrando {from} a {to} de {meta.total} facturas
-                    </Typography>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <FormControl size="small" sx={paginationSelectSx}>
-                        <InputLabel id="grupo-limit-label">Filas por página</InputLabel>
-                        <Select
-                          labelId="grupo-limit-label"
-                          value={String(limit)}
-                          label="Filas por página"
-                          onChange={(e) => {
-                            setLimit(Number(e.target.value));
-                            setPage(1);
-                          }}
-                        >
-                          <MenuItem value={10}>10</MenuItem>
-                          <MenuItem value={20}>20</MenuItem>
-                          <MenuItem value={50}>50</MenuItem>
-                        </Select>
-                      </FormControl>
-                      {meta.lastPage > 1 && (
-                        <Pagination
-                          count={meta.lastPage}
-                          page={page}
-                          onChange={(_e, value) => setPage(value)}
-                          color="primary"
-                          shape="rounded"
-                          sx={{
-                            "& .MuiPaginationItem-root.Mui-selected": {
-                              color: "var(--color-fg-on-accent-primary)",
-                            },
-                          }}
-                        />
-                      )}
-                    </Box>
-                  </Box>
                 </>
               )}
             </SectionPanel>
@@ -1019,11 +934,13 @@ const NuevoGrupoCotizacion = () => {
                 }}
                 fullWidth
                 size="small"
-                error={plazo > MAX_PLAZO}
+                error={plazo < MIN_PLAZO || plazo > MAX_PLAZO}
                 helperText={
-                  plazo > MAX_PLAZO
-                    ? "El plazo máximo es de 180 días"
-                    : `Mínimo ${MIN_PLAZO} día, máximo ${MAX_PLAZO} días`
+                  plazo === 0
+                    ? "El plazo es obligatorio"
+                    : plazo > MAX_PLAZO
+                      ? "El plazo máximo es de 180 días"
+                      : `Mínimo ${MIN_PLAZO} día, máximo ${MAX_PLAZO} días`
                 }
               />
             </SectionPanel>
