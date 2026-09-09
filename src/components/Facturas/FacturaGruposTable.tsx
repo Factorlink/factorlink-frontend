@@ -22,9 +22,16 @@ import {
 } from "@mui/material";
 import { Groups, Visibility } from "@mui/icons-material";
 import type { SelectChangeEvent } from "@mui/material/Select";
+import { formatCurrency } from "./FacturaResumenCard";
 import { useFacturaGrupos } from "../../hooks/useFacturaGrupos";
 import type { FacturaGrupo } from "../../types/factura";
 import type { Meta } from "../../types/meta";
+import { getFacturaStatusConfig } from "../../theme";
+import {
+  getFacturaGrupoCantidad,
+  getFacturaGrupoMontoFinanciar,
+  getFacturaGrupoMontoTotal,
+} from "../../utils/facturaGrupo";
 import {
   paginationSelectSx,
   tableScrollSx,
@@ -40,20 +47,10 @@ interface FacturaGruposTableProps {
 
 const PAGE_LIMIT = 10;
 
-const formatDate = (dateString?: string) => {
-  if (!dateString) return "N/A";
-  return new Date(dateString).toLocaleDateString("es-CL", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-};
-
-const visibilidadLabel = (visibilidad?: string) => {
-  if (visibilidad === "SELECCIONADOS") return "Seleccionados";
-  if (visibilidad === "TODOS") return "Todos";
-  return visibilidad || "—";
-};
+const headerCellSx = {
+  fontWeight: 600,
+  color: "var(--color-fg-default-secondary)",
+} as const;
 
 const FacturaGruposTable = ({
   empresaId,
@@ -96,8 +93,20 @@ const FacturaGruposTable = ({
       const data = response?.data || [];
       setGrupos(data);
       if (response?.meta) {
-        setMeta(response.meta);
-        onMetaChange?.(response.meta);
+        const nextMeta: Meta = {
+          lastPage: 1,
+          limit: PAGE_LIMIT,
+          page: 1,
+          total: 0,
+          totalCargada: 0,
+          totalCedida: 0,
+          totalEnMarketplace: 0,
+          totalConOfertas: 0,
+          totalGeneral: 0,
+          ...response.meta,
+        };
+        setMeta(nextMeta);
+        onMetaChange?.(nextMeta);
       }
     } catch (err) {
       console.error("Error fetching factura grupos:", err);
@@ -167,111 +176,123 @@ const FacturaGruposTable = ({
                 <TableRow
                   sx={{ backgroundColor: "var(--color-bg-default-tertiary)" }}
                 >
-                  <TableCell
-                    sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}
-                  >
-                    Nombre
-                  </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}
-                  >
-                    Visibilidad
-                  </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}
-                  >
-                    %
-                  </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}
-                  >
-                    Plazo
-                  </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}
-                  >
-                    Fecha
-                  </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 600, color: "var(--color-fg-default-secondary)" }}
-                  >
-                    Acciones
-                  </TableCell>
+                  <TableCell sx={headerCellSx}>Nombre</TableCell>
+                  <TableCell sx={headerCellSx}>Facturas</TableCell>
+                  <TableCell sx={headerCellSx}>Monto total</TableCell>
+                  <TableCell sx={headerCellSx}>Monto a financiar</TableCell>
+                  <TableCell sx={headerCellSx}>%</TableCell>
+                  <TableCell sx={headerCellSx}>Plazo</TableCell>
+                  <TableCell sx={headerCellSx}>Estado</TableCell>
+                  <TableCell sx={headerCellSx}>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {grupos.map((grupo) => (
-                  <TableRow
-                    key={grupo.id}
-                    sx={{
-                      "&:hover": {
-                        backgroundColor: "var(--color-bg-default-tertiary)",
-                      },
-                      "&:last-child td": { borderBottom: 0 },
-                    }}
-                  >
-                    <TableCell>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 600,
-                          color: "var(--color-fg-default-primary)",
-                        }}
-                      >
-                        {grupo.nombre || "—"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "var(--color-fg-default-secondary)" }}
-                      >
-                        {visibilidadLabel(grupo.visibilidad)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {grupo.porcentajeFinanciamiento != null
-                          ? `${grupo.porcentajeFinanciamiento}%`
-                          : "—"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={`${grupo.plazo || 0} días`}
-                        size="small"
-                        sx={{
+                {grupos.map((grupo) => {
+                  const statusConfig = getFacturaStatusConfig(
+                    grupo.estado || "",
+                  );
+                  return (
+                    <TableRow
+                      key={grupo.id}
+                      sx={{
+                        "&:hover": {
                           backgroundColor: "var(--color-bg-default-tertiary)",
-                          color: "var(--color-fg-default-primary)",
-                          fontWeight: 500,
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "var(--color-fg-default-secondary)" }}
-                      >
-                        {formatDate(grupo.createdAt)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip title="Ver detalle">
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            navigate(`/facturas/grupos/${grupo.id}`, {
-                              state: { nombre: grupo.nombre },
-                            })
-                          }
-                          sx={{ color: "var(--color-fg-accent-primary)" }}
+                        },
+                        "&:last-child td": { borderBottom: 0 },
+                      }}
+                    >
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            color: "var(--color-fg-default-primary)",
+                          }}
                         >
-                          <Visibility />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                          {grupo.nombre || "—"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {getFacturaGrupoCantidad(grupo)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {formatCurrency(getFacturaGrupoMontoTotal(grupo))}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            color: "var(--color-fg-success-primary)",
+                          }}
+                        >
+                          {formatCurrency(getFacturaGrupoMontoFinanciar(grupo))}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {grupo.porcentajeFinanciamiento != null
+                            ? `${grupo.porcentajeFinanciamiento}%`
+                            : "—"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={`${grupo.plazo || 0} días`}
+                          size="small"
+                          sx={{
+                            backgroundColor: "var(--color-bg-default-tertiary)",
+                            color: "var(--color-fg-default-primary)",
+                            fontWeight: 500,
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {grupo.estado ? (
+                          <Chip
+                            icon={statusConfig.icon as React.ReactElement}
+                            label={statusConfig.label}
+                            size="small"
+                            sx={{
+                              backgroundColor: statusConfig.bgColor,
+                              color: statusConfig.color,
+                              fontWeight: 500,
+                              "& .MuiChip-icon": {
+                                color: statusConfig.color,
+                              },
+                            }}
+                          />
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            sx={{ color: "var(--color-fg-default-tertiary)" }}
+                          >
+                            —
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title="Ver grupo">
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              navigate(`/facturas/grupos/${grupo.id}`, {
+                                state: { nombre: grupo.nombre },
+                              })
+                            }
+                            sx={{ color: "var(--color-fg-accent-primary)" }}
+                          >
+                            <Visibility />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </Box>
