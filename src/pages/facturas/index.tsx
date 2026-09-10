@@ -62,6 +62,15 @@ import type { Factura } from "../../types/factura";
 import type { Meta } from "../../types/meta";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { INITIAL_FILTERS, SORTABLE_COLUMNS } from "../../utils/consts";
+import {
+  canEnviarFacturaIndividualACotizar,
+  canQuitarFacturaIndividualDelMarketplace,
+  isFacturaCargada,
+  isFacturaInGrupo,
+  isFacturaInMarketplace,
+  TOOLTIP_FACTURA_EN_GRUPO_ENVIAR,
+  TOOLTIP_FACTURA_EN_GRUPO_QUITAR,
+} from "../../utils/facturaGrupo";
 import { getFacturaStatusConfig } from "../../theme";
 import {
   tableShellSx,
@@ -186,12 +195,11 @@ const Facturas = () => {
     handleMenuClose();
   };
 
-  const isInMarketplace = (factura: Factura | null) => {
-    if (!factura) return false;
-    return factura.estado === "EN_MARKETPLACE" || factura.estado === "CON_OFERTAS";
-  };
+  const isInMarketplace = (factura: Factura | null) =>
+    isFacturaInMarketplace(factura);
 
   const openRemoveMarketplace = (factura: Factura) => {
+    if (!canQuitarFacturaIndividualDelMarketplace(factura)) return;
     setSelectedFactura(factura);
     setRemoveMarketplaceModalOpen(true);
     setAnchorEl(null);
@@ -245,6 +253,7 @@ const Facturas = () => {
   };
 
   const goToCotizar = (factura: Factura) => {
+    if (!canEnviarFacturaIndividualACotizar(factura)) return;
     if (currentRole && currentRole.nivel >= 3) {
       navigate(`/facturas/${factura.id}/cotizar`);
     } else {
@@ -259,19 +268,10 @@ const Facturas = () => {
     handleMenuClose();
   };
 
-  const canEnviarCotizar = (factura: Factura | null) => {
-    if (!factura) return false;
-    const estado = factura.estado?.toLowerCase();
-    return estado === "cargada";
-  };
-
-  const isCargada = (factura: Factura | null) => {
-    if (!factura) return false;
-    return factura.estado?.toLowerCase() === "cargada";
-  };
+  const isCargada = (factura: Factura | null) => isFacturaCargada(factura);
 
   const canSelectForGrupo = (factura: Factura | null) =>
-    Boolean(factura) && isCargada(factura) && !factura?.facturaGrupoId;
+    Boolean(factura) && isCargada(factura) && !isFacturaInGrupo(factura);
 
   const selectableFacturas = facturas.filter((factura) =>
     canSelectForGrupo(factura),
@@ -1023,26 +1023,52 @@ const Facturas = () => {
                             </TableCell>
                             <TableCell>
                               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                                {canEnviarCotizar(factura) && (
-                                  <Tooltip title="Enviar a cotizar">
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => goToCotizar(factura)}
-                                      sx={{ color: "var(--color-fg-accent-primary)" }}
-                                    >
-                                      <Send />
-                                    </IconButton>
+                                {isCargada(factura) && (
+                                  <Tooltip
+                                    title={
+                                      isFacturaInGrupo(factura)
+                                        ? TOOLTIP_FACTURA_EN_GRUPO_ENVIAR
+                                        : "Enviar a cotizar"
+                                    }
+                                    arrow
+                                  >
+                                    <span>
+                                      <IconButton
+                                        size="small"
+                                        disabled={isFacturaInGrupo(factura)}
+                                        onClick={() => goToCotizar(factura)}
+                                        sx={{
+                                          color: "var(--color-fg-accent-primary)",
+                                        }}
+                                      >
+                                        <Send />
+                                      </IconButton>
+                                    </span>
                                   </Tooltip>
                                 )}
                                 {isInMarketplace(factura) && (
-                                  <Tooltip title="Quitar del marketplace">
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => openRemoveMarketplace(factura)}
-                                      sx={{ color: "var(--color-fg-danger-primary)" }}
-                                    >
-                                      <StorefrontIcon />
-                                    </IconButton>
+                                  <Tooltip
+                                    title={
+                                      isFacturaInGrupo(factura)
+                                        ? TOOLTIP_FACTURA_EN_GRUPO_QUITAR
+                                        : "Quitar del marketplace"
+                                    }
+                                    arrow
+                                  >
+                                    <span>
+                                      <IconButton
+                                        size="small"
+                                        disabled={isFacturaInGrupo(factura)}
+                                        onClick={() =>
+                                          openRemoveMarketplace(factura)
+                                        }
+                                        sx={{
+                                          color: "var(--color-fg-danger-primary)",
+                                        }}
+                                      >
+                                        <StorefrontIcon />
+                                      </IconButton>
+                                    </span>
                                   </Tooltip>
                                 )}
                                 <IconButton
@@ -1144,46 +1170,82 @@ const Facturas = () => {
             </ListItemIcon>
             <ListItemText primary="Ver detalle" />
           </MenuItem>
-          {
-            isInMarketplace(selectedFactura) && (
-              <MenuItem
-                onClick={() =>
-                  selectedFactura && openRemoveMarketplace(selectedFactura)
-                }
-              >
-                <ListItemIcon>
-                  <StorefrontIcon sx={{ color: "var(--color-fg-danger-primary)" }} />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Quitar del marketplace"
-                  sx={{ "& .MuiTypography-root": { color: "var(--color-fg-danger-primary)" } }}
-                />
-              </MenuItem>
-            )
-          }
-          {
-            isCargada(selectedFactura) && (
-              <MenuItem onClick={handleEliminar}>
+          {isInMarketplace(selectedFactura) && (
+            <Tooltip
+              title={
+                isFacturaInGrupo(selectedFactura)
+                  ? TOOLTIP_FACTURA_EN_GRUPO_QUITAR
+                  : ""
+              }
+              arrow
+            >
+              <span>
+                <MenuItem
+                  disabled={isFacturaInGrupo(selectedFactura)}
+                  onClick={() =>
+                    selectedFactura && openRemoveMarketplace(selectedFactura)
+                  }
+                >
+                  <ListItemIcon>
+                    <StorefrontIcon
+                      sx={{ color: "var(--color-fg-danger-primary)" }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Quitar del marketplace"
+                    sx={{
+                      "& .MuiTypography-root": {
+                        color: "var(--color-fg-danger-primary)",
+                      },
+                    }}
+                  />
+                </MenuItem>
+              </span>
+            </Tooltip>
+          )}
+          {isCargada(selectedFactura) && (
+            <MenuItem onClick={handleEliminar}>
               <ListItemIcon>
                 <Delete sx={{ color: "var(--color-fg-danger-primary)" }} />
               </ListItemIcon>
               <ListItemText
                 primary="Eliminar"
-                sx={{ "& .MuiTypography-root": { color: "var(--color-fg-danger-primary)" } }}
+                sx={{
+                  "& .MuiTypography-root": {
+                    color: "var(--color-fg-danger-primary)",
+                  },
+                }}
               />
             </MenuItem>
-            )
-          }
-          {canEnviarCotizar(selectedFactura) && (
-            <MenuItem onClick={handleEnviarCotizar}>
-              <ListItemIcon>
-                <Send sx={{ color: "var(--color-fg-accent-primary)" }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Enviar a cotizar"
-                sx={{ "& .MuiTypography-root": { color: "var(--color-fg-accent-primary)" } }}
-              />
-            </MenuItem>
+          )}
+          {isCargada(selectedFactura) && (
+            <Tooltip
+              title={
+                isFacturaInGrupo(selectedFactura)
+                  ? TOOLTIP_FACTURA_EN_GRUPO_ENVIAR
+                  : ""
+              }
+              arrow
+            >
+              <span>
+                <MenuItem
+                  disabled={isFacturaInGrupo(selectedFactura)}
+                  onClick={handleEnviarCotizar}
+                >
+                  <ListItemIcon>
+                    <Send sx={{ color: "var(--color-fg-accent-primary)" }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Enviar a cotizar"
+                    sx={{
+                      "& .MuiTypography-root": {
+                        color: "var(--color-fg-accent-primary)",
+                      },
+                    }}
+                  />
+                </MenuItem>
+              </span>
+            </Tooltip>
           )}
         </Menu>
 

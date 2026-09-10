@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Tooltip } from "@mui/material";
 import { Send, Delete, Settings, Visibility } from "@mui/icons-material";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import type { Factura } from "../../types/factura";
@@ -13,6 +13,13 @@ import OfertasDrawer from "./OfertasDrawer";
 import FacturaDetalleInformacion, {
   FacturaDetalleDocumentos,
 } from "./FacturaDetalleInformacion";
+import {
+  canEnviarFacturaIndividualACotizar,
+  canQuitarFacturaIndividualDelMarketplace,
+  isFacturaInGrupo,
+  TOOLTIP_FACTURA_EN_GRUPO_ENVIAR,
+  TOOLTIP_FACTURA_EN_GRUPO_QUITAR,
+} from "../../utils/facturaGrupo";
 
 export type FacturaDetallePanelProps = {
   factura: Factura;
@@ -51,6 +58,10 @@ const FacturaDetallePanel = ({
   const isInMarketplace = ["EN_MARKETPLACE", "CON_OFERTAS"].includes(
     factura.estado,
   );
+  const inGrupo = isFacturaInGrupo(factura);
+  const canEnviarCotizar = canEnviarFacturaIndividualACotizar(factura);
+  const canQuitarMarketplace =
+    canQuitarFacturaIndividualDelMarketplace(factura);
   const ofertasDrawerOpen =
     isPage && !isCargada && (manualOfertasOpen || openOfertas);
 
@@ -65,6 +76,7 @@ const FacturaDetallePanel = ({
   };
 
   const handleEnviarCotizar = () => {
+    if (!canEnviarCotizar) return;
     if (currentRole && currentRole.nivel >= 3) {
       navigate(`/facturas/${factura.id}/cotizar`);
     } else {
@@ -184,46 +196,64 @@ const FacturaDetallePanel = ({
               </Button>
             )}
             {isCargada && (
-              <Button
-                variant="contained"
-                fullWidth
-                startIcon={<Send />}
-                onClick={handleEnviarCotizar}
-                sx={{
-                  backgroundColor: "var(--color-bg-accent-primary)",
-                  "&:hover": {
-                    backgroundColor: "var(--color-bg-accent-primary-hover)",
-                  },
-                  "&:disabled": { opacity: 0.7 },
-                  textTransform: "none",
-                  fontWeight: 500,
-                  py: 1.5,
-                  color: "var(--color-fg-on-accent-primary)",
-                }}
+              <Tooltip
+                title={inGrupo ? TOOLTIP_FACTURA_EN_GRUPO_ENVIAR : ""}
+                arrow
               >
-                Enviar a cotizar
-              </Button>
+                <span>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    startIcon={<Send />}
+                    disabled={!canEnviarCotizar}
+                    onClick={handleEnviarCotizar}
+                    sx={{
+                      backgroundColor: "var(--color-bg-accent-primary)",
+                      "&:hover": {
+                        backgroundColor:
+                          "var(--color-bg-accent-primary-hover)",
+                      },
+                      "&:disabled": { opacity: 0.7 },
+                      textTransform: "none",
+                      fontWeight: 500,
+                      py: 1.5,
+                      color: "var(--color-fg-on-accent-primary)",
+                    }}
+                  >
+                    Enviar a cotizar
+                  </Button>
+                </span>
+              </Tooltip>
             )}
             {isInMarketplace && (
-              <Button
-                variant="outlined"
-                fullWidth
-                startIcon={<StorefrontIcon />}
-                onClick={() => setRemoveMarketplaceModalOpen(true)}
-                sx={{
-                  borderColor: "var(--color-border-danger-primary)",
-                  color: "var(--color-fg-danger-primary)",
-                  "&:hover": {
-                    borderColor: "var(--color-border-danger-secondary)",
-                    backgroundColor: "var(--color-bg-danger-secondary)",
-                  },
-                  textTransform: "none",
-                  fontWeight: 500,
-                  py: 1.5,
-                }}
+              <Tooltip
+                title={inGrupo ? TOOLTIP_FACTURA_EN_GRUPO_QUITAR : ""}
+                arrow
               >
-                Quitar del marketplace
-              </Button>
+                <span>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<StorefrontIcon />}
+                    disabled={!canQuitarMarketplace}
+                    onClick={() => setRemoveMarketplaceModalOpen(true)}
+                    sx={{
+                      borderColor: "var(--color-border-danger-primary)",
+                      color: "var(--color-fg-danger-primary)",
+                      "&:hover": {
+                        borderColor: "var(--color-border-danger-secondary)",
+                        backgroundColor: "var(--color-bg-danger-secondary)",
+                      },
+                      "&:disabled": { opacity: 0.7 },
+                      textTransform: "none",
+                      fontWeight: 500,
+                      py: 1.5,
+                    }}
+                  >
+                    Quitar del marketplace
+                  </Button>
+                </span>
+              </Tooltip>
             )}
             {isCargada && (
               <Button

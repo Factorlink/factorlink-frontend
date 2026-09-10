@@ -16,6 +16,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Tooltip,
 } from "@mui/material";
 import {
   Storefront,
@@ -36,6 +37,10 @@ import FacturasFilters, {
   type FacturasFiltersValues,
 } from "./FacturasFilters";
 import { INITIAL_FILTERS } from "../../utils/consts";
+import {
+  isFacturaInGrupo,
+  TOOLTIP_FACTURA_EN_GRUPO_QUITAR,
+} from "../../utils/facturaGrupo";
 import {
   tableShellSx,
   tableScrollSx,
@@ -196,7 +201,7 @@ const MarketplaceFacturasTable = ({
   };
 
   const handleOpenRemoveModal = () => {
-    // selectedFactura is already set by handleMenuOpen
+    if (isFacturaInGrupo(selectedFactura)) return;
     setRemoveModalOpen(true);
     setAnchorEl(null);
   };
@@ -373,15 +378,33 @@ const MarketplaceFacturasTable = ({
             <ListItemText primary="Ver ofertas" />
           </MenuItem>
         )}
-        <MenuItem onClick={handleOpenRemoveModal}>
-          <ListItemIcon>
-            <Delete sx={{ color: "var(--color-fg-danger-primary)" }} />
-          </ListItemIcon>
-          <ListItemText
-            primary="Quitar del marketplace"
-            sx={{ "& .MuiTypography-root": { color: "var(--color-fg-danger-primary)" } }}
-          />
-        </MenuItem>
+        <Tooltip
+          title={
+            isFacturaInGrupo(selectedFactura)
+              ? TOOLTIP_FACTURA_EN_GRUPO_QUITAR
+              : ""
+          }
+          arrow
+        >
+          <span>
+            <MenuItem
+              disabled={isFacturaInGrupo(selectedFactura)}
+              onClick={handleOpenRemoveModal}
+            >
+              <ListItemIcon>
+                <Delete sx={{ color: "var(--color-fg-danger-primary)" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Quitar del marketplace"
+                sx={{
+                  "& .MuiTypography-root": {
+                    color: "var(--color-fg-danger-primary)",
+                  },
+                }}
+              />
+            </MenuItem>
+          </span>
+        </Tooltip>
       </Menu>
 
       {selectedFactura && (

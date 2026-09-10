@@ -152,6 +152,10 @@ const CotizarFactura = () => {
     setError(null);
     try {
       const data = await getFacturaById(id);
+      if (data.facturaGrupoId) {
+        navigate(`/facturas/grupos/${data.facturaGrupoId}`, { replace: true });
+        return;
+      }
       if (hasFacturaPdf(data)) {
         applyFacturaData(data);
         setPdfGate("ready");
@@ -169,7 +173,7 @@ const CotizarFactura = () => {
     } finally {
       setLoadingFactura(false);
     }
-  }, [id, currentRole?.empresa?.siiRutPersonal, obtainPdfFromSii]);
+  }, [id, currentRole?.empresa?.siiRutPersonal, obtainPdfFromSii, navigate]);
 
   useEffect(() => {
     if (id) {
