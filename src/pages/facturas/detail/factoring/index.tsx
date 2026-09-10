@@ -34,6 +34,7 @@ import {
   isOfertaCondicionada,
   puedeComentar,
 } from "../../../../utils/ofertaEstados";
+import { getFacturaGrupoFactoringPath } from "../../../../utils/facturaGrupo";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -121,6 +122,16 @@ const FacturaFactoringDetail = () => {
         currentRole.factoringId,
       );
       if (requestId !== requestIdRef.current) return;
+      if (data.facturaGrupoId) {
+        navigate(getFacturaGrupoFactoringPath(data.facturaGrupoId), {
+          replace: true,
+          state: {
+            from: backPath,
+            nombre: data.facturaGrupo?.nombre,
+          },
+        });
+        return;
+      }
       setFactura(data);
     } catch (err) {
       if (requestId !== requestIdRef.current) return;

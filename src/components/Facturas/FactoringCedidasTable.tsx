@@ -35,6 +35,11 @@ import FacturasFilters, {
 import { INITIAL_FILTERS } from "../../utils/consts";
 import { getFacturaStatusConfig } from "../../theme";
 import {
+  getFacturaFactoringPath,
+  isFacturaInGrupo,
+} from "../../utils/facturaGrupo";
+import FacturaGrupoChip from "./FacturaGrupoChip";
+import {
   tableShellSx,
   tableScrollSx,
   tableWideSx,
@@ -256,8 +261,11 @@ const FactoringCedidasTable = ({
   };
 
   const handleVerFactura = (factura: Factura) => {
-    navigate(`/facturas/${factura.id}/factoring`, {
-      state: { from: `${location.pathname}${location.search}` },
+    navigate(getFacturaFactoringPath(factura), {
+      state: {
+        from: `${location.pathname}${location.search}`,
+        nombre: factura.facturaGrupo?.nombre,
+      },
     });
   };
 
@@ -422,24 +430,36 @@ const FactoringCedidasTable = ({
                         }}
                       >
                         <TableCell>
-                          <Box>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "var(--color-fg-accent-primary)",
-                                fontWeight: 600,
-                              }}
-                            >
-                              #{factura.folio}
-                            </Typography>
-                            {factura.siiId && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "flex-start",
+                              gap: 0.75,
+                            }}
+                          >
+                            <Box>
                               <Typography
-                                variant="caption"
-                                sx={{ color: "var(--color-fg-default-secondary)" }}
+                                variant="body2"
+                                sx={{
+                                  color: "var(--color-fg-accent-primary)",
+                                  fontWeight: 600,
+                                }}
                               >
-                                SII ID {factura.siiId}
+                                #{factura.folio}
                               </Typography>
-                            )}
+                              {factura.siiId && (
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    color: "var(--color-fg-default-secondary)",
+                                  }}
+                                >
+                                  SII ID {factura.siiId}
+                                </Typography>
+                              )}
+                            </Box>
+                            <FacturaGrupoChip factura={factura} />
                           </Box>
                         </TableCell>
                         <TableCell>
@@ -545,7 +565,13 @@ const FactoringCedidasTable = ({
                           />
                         </TableCell>
                         <TableCell>
-                          <Tooltip title="Ver factura">
+                          <Tooltip
+                            title={
+                              isFacturaInGrupo(factura)
+                                ? "Ver grupo"
+                                : "Ver factura"
+                            }
+                          >
                             <IconButton
                               size="small"
                               onClick={() => handleVerFactura(factura)}

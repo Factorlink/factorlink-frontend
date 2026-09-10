@@ -28,6 +28,7 @@ import Marketplace from "./pages/marketplace";
 import FacturaFactoringDetail from "./pages/facturas/detail/factoring";
 import NuevoGrupoCotizacion from "./pages/facturas/grupos/nuevo";
 import FacturaGrupoDetalle from "./pages/facturas/grupos/detalle";
+import FacturaGrupoFactoringDetalle from "./pages/facturas/grupos/detalle/factoring";
 
 function App() {
   return (
@@ -124,6 +125,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <NuevoGrupoCotizacion />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/facturas/grupos/:id/factoring"
+            element={
+              <ProtectedRoute>
+                <FacturaGrupoFactoringDetalle />
               </ProtectedRoute>
             }
           />

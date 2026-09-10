@@ -46,3 +46,13 @@ export const canEnviarFacturaIndividualACotizar = (
 export const canQuitarFacturaIndividualDelMarketplace = (
   factura?: Factura | null,
 ) => isFacturaInMarketplace(factura) && !isFacturaInGrupo(factura);
+
+export const getFacturaGrupoFactoringPath = (grupoId: string) =>
+  `/facturas/grupos/${grupoId}/factoring`;
+
+export const getFacturaFactoringPath = (factura: Factura) => {
+  if (factura.facturaGrupoId) {
+    return getFacturaGrupoFactoringPath(factura.facturaGrupoId);
+  }
+  return `/facturas/${factura.id}/factoring`;
+};
