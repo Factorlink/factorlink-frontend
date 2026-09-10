@@ -20,7 +20,7 @@ export type OfertaPayloadInput = {
   montoAGirar: string | number;
   tasaDiariaMora: string | number;
   cobroPorDiaMora: string | number;
-  fechaExpiracion: string | Date;
+  vigenciaOfertaDias: string | number;
   comentario?: string | null;
   ofertaCondicionada?: boolean;
 };
@@ -63,6 +63,7 @@ const REQUIRED_NUMERIC_KEYS = [
   "montoAGirar",
   "tasaDiariaMora",
   "cobroPorDiaMora",
+  "vigenciaOfertaDias",
 ] as const;
 
 export const buildCreateOfertaPayload = (
@@ -79,10 +80,6 @@ export const buildCreateOfertaPayload = (
     facturaId: input.facturaId,
     factoringId: input.factoringId,
     fechaCotizacion: toRequiredDateOnly(input.fechaCotizacion, "fechaCotizacion"),
-    fechaExpiracion: toRequiredDateOnly(
-      input.fechaExpiracion,
-      "fechaExpiracion",
-    ),
     comentario: input.comentario?.trim() ?? "",
     ofertaCondicionada: Boolean(input.ofertaCondicionada),
     ...requiredNumeric,

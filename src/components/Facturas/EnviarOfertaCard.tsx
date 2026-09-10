@@ -45,8 +45,6 @@ const REQUIRED_MONEY_FIELDS = [
 ] as const;
 
 const today = new Date();
-const tomorrow = new Date(today);
-tomorrow.setDate(today.getDate() + 1);
 
 const blockNonNumericKeys = (
   e: React.KeyboardEvent<HTMLInputElement>,
@@ -87,6 +85,12 @@ const gridSx = {
   gap: 2,
 };
 
+const requiredAsteriskSx = {
+  "& .MuiFormLabel-asterisk": {
+    color: "var(--color-fg-danger-primary)",
+  },
+};
+
 const EnviarOfertaCard = ({
   factura,
   factoringId,
@@ -95,9 +99,7 @@ const EnviarOfertaCard = ({
 }: EnviarOfertaCardProps) => {
   const { createOferta, loading } = useOfertas();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [openPicker, setOpenPicker] = useState<
-    "fechaExpiracion" | "fechaCotizacion" | null
-  >(null);
+  const [openPicker, setOpenPicker] = useState<"fechaCotizacion" | null>(null);
   const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(
     null,
   );
@@ -115,11 +117,11 @@ const EnviarOfertaCard = ({
       firmaDigital: "0",
       tasaDiariaMora: 0 as number | string,
       cobroPorDiaMora: "0",
-      fechaExpiracion: null as Date | null,
+      vigenciaOfertaDias: 3 as number | string,
       comentario: "",
       ofertaCondicionada: false,
     },
-    validationSchema: createOfertaFormSchema(tomorrow),
+    validationSchema: createOfertaFormSchema(),
     onSubmit: () => {
       setConfirmOpen(true);
     },
@@ -179,7 +181,7 @@ const EnviarOfertaCard = ({
         montoAGirar: montosCalculados.montoAGirar,
         tasaDiariaMora: formik.values.tasaDiariaMora,
         cobroPorDiaMora: formik.values.cobroPorDiaMora,
-        fechaExpiracion: formik.values.fechaExpiracion!,
+        vigenciaOfertaDias: formik.values.vigenciaOfertaDias,
         comentario: formik.values.comentario,
         ofertaCondicionada: formik.values.ofertaCondicionada,
       });
@@ -201,7 +203,7 @@ const EnviarOfertaCard = ({
   };
 
   const renderDatePicker = (
-    name: "fechaExpiracion" | "fechaCotizacion",
+    name: "fechaCotizacion",
     label: string,
     fallbackHelper: string,
     minDate?: Date,
@@ -235,6 +237,7 @@ const EnviarOfertaCard = ({
           error: fieldError(name),
           helperText: fieldHelper(name, fallbackHelper),
           sx: {
+            ...requiredAsteriskSx,
             cursor: "pointer",
             "& .MuiOutlinedInput-root": {
               cursor: "pointer",
@@ -248,7 +251,11 @@ const EnviarOfertaCard = ({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-      <Box component="form" onSubmit={formik.handleSubmit}>
+      <Box
+        component="form"
+        onSubmit={formik.handleSubmit}
+        sx={requiredAsteriskSx}
+      >
         <Box
           sx={{
             display: "grid",
@@ -312,6 +319,7 @@ const EnviarOfertaCard = ({
                 name="porcentajeFinanciamiento"
                 label="Porcentaje de financiamiento (%)"
                 type="string"
+                required
                 inputProps={{ min: 1, max: 100, step: 1 }}
                 InputProps={{
                   endAdornment: (
@@ -343,6 +351,8 @@ const EnviarOfertaCard = ({
                 "fechaCotizacion",
                 "Fecha de cotización",
                 "Fecha de la cotización",
+                undefined,
+                true,
               )}
 
               <StyledTextField
@@ -350,6 +360,7 @@ const EnviarOfertaCard = ({
                 name="tasa30Dias"
                 label="Tasa 30 días (%)"
                 type="string"
+                required
                 inputProps={{ min: 0, max: 100, step: 0.01 }}
                 InputProps={{
                   endAdornment: (
@@ -472,13 +483,33 @@ const EnviarOfertaCard = ({
                 helperText={fieldHelper("cobroPorDiaMora", "Mayor o igual a 0")}
               />
 
-              {renderDatePicker(
-                "fechaExpiracion",
-                "Fecha de expiración",
-                "Fecha límite para que la empresa acepte",
-                tomorrow,
-                true,
-              )}
+              <StyledTextField
+                fullWidth
+                name="vigenciaOfertaDias"
+                label="Días de vigencia"
+                type="string"
+                inputMode="numeric"
+                required
+                value={formik.values.vigenciaOfertaDias}
+                onChange={(e) =>
+                  handleNonNegativeIntegerInputChange(
+                    e as React.ChangeEvent<HTMLInputElement>,
+                    formik.setFieldValue,
+                  )
+                }
+                onBlur={formik.handleBlur}
+                onKeyDown={(e) =>
+                  blockNonNumericKeys(
+                    e as React.KeyboardEvent<HTMLInputElement>,
+                    false,
+                  )
+                }
+                error={fieldError("vigenciaOfertaDias")}
+                helperText={fieldHelper(
+                  "vigenciaOfertaDias",
+                  "Mínimo 1 día, máximo 365. Por defecto 3",
+                )}
+              />
             </Box>
 
             <Typography variant="subtitle1" sx={sectionTitleSx}>
@@ -590,7 +621,7 @@ const EnviarOfertaCard = ({
                 display: "flex",
                 alignItems: "flex-start",
                 gap: 1.5,
-                mt: 1,
+                mt: 3,
                 p: 2,
                 borderRadius: 2,
                 backgroundColor: "var(--color-bg-accent-secondary)",
@@ -631,12 +662,12 @@ const EnviarOfertaCard = ({
             montoAGirar={montosCalculados.montoAGirar}
             tasa30Dias={formik.values.tasa30Dias}
             diasFinanciamiento={formik.values.diasFinanciamiento}
-            fechaExpiracion={formik.values.fechaExpiracion}
+            vigenciaOfertaDias={formik.values.vigenciaOfertaDias}
             submitDisabled={
               alertStatus === "success" ||
               !formik.isValid ||
               !formik.dirty ||
-              !formik.values.fechaExpiracion ||
+              !formik.values.vigenciaOfertaDias ||
               !formik.values.fechaCotizacion
             }
             onCancel={onCancel}

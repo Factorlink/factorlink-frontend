@@ -23,6 +23,9 @@ export const TOOLTIP_FACTURA_EN_GRUPO_ENVIAR =
 export const TOOLTIP_FACTURA_EN_GRUPO_QUITAR =
   "Esta acción no está disponible. La factura pertenece a un grupo y debe quitarse desde el grupo.";
 
+export const TOOLTIP_FACTURA_EN_GRUPO_ELIMINAR =
+  "Esta acción no está disponible. La factura pertenece a un grupo y no se puede eliminar de forma individual.";
+
 export const isFacturaInGrupo = (factura?: Factura | null) =>
   Boolean(factura?.facturaGrupoId);
 

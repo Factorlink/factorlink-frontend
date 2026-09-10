@@ -716,7 +716,7 @@ const FacturaGrupoDetalle = () => {
             puede deshacer.
           </Typography>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {grupo.nombre || "Grupo"} · {id}
+            {grupo.nombre || "Grupo"}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>

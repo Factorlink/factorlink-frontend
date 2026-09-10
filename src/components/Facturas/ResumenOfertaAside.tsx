@@ -1,10 +1,6 @@
 import { Box, Button, Typography } from "@mui/material";
 import { PieChart, Send } from "@mui/icons-material";
-import {
-  formatDateOnly,
-  formatMoney,
-  formatPercent,
-} from "../../utils/ofertaFormatters";
+import { formatMoney, formatPercent } from "../../utils/ofertaFormatters";
 
 interface ResumenOfertaAsideProps {
   montoTotal: string | number;
@@ -13,7 +9,7 @@ interface ResumenOfertaAsideProps {
   montoAGirar: number;
   tasa30Dias: string | number;
   diasFinanciamiento: string | number;
-  fechaExpiracion: Date | null;
+  vigenciaOfertaDias: string | number;
   submitDisabled: boolean;
   onCancel?: () => void;
 }
@@ -43,11 +39,12 @@ const ResumenOfertaAside = ({
   montoAGirar,
   tasa30Dias,
   diasFinanciamiento,
-  fechaExpiracion,
+  vigenciaOfertaDias,
   submitDisabled,
   onCancel,
 }: ResumenOfertaAsideProps) => {
   const dias = Number(diasFinanciamiento) || 0;
+  const vigencia = Number(vigenciaOfertaDias) || 0;
   const rows = [
     { label: "Monto total de la factura", value: formatMoney(montoTotal) },
     {
@@ -65,7 +62,10 @@ const ResumenOfertaAside = ({
       label: "Días de financiamiento",
       value: `${dias} ${dias === 1 ? "día" : "días"}`,
     },
-    { label: "Fecha de expiración", value: formatDateOnly(fechaExpiracion) },
+    {
+      label: "Vigencia de la oferta",
+      value: `${vigencia} ${vigencia === 1 ? "día" : "días"}`,
+    },
   ];
 
   return (
@@ -115,7 +115,9 @@ const ResumenOfertaAside = ({
           backgroundColor: "var(--color-bg-accent-secondary)",
         }}
       >
-        <PieChart sx={{ color: "var(--color-fg-accent-primary)", fontSize: 28 }} />
+        <PieChart
+          sx={{ color: "var(--color-fg-accent-primary)", fontSize: 28 }}
+        />
         <Box>
           <Typography
             variant="body2"

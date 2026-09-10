@@ -36,9 +36,7 @@ const DocumentosAsociadosCard = ({
   const hasAdjuntosHandlers = Boolean(
     onUploadAdjunto && onDeleteAdjunto && onAdjuntosChange,
   );
-  const canManageAdjuntos =
-    hasAdjuntosHandlers &&
-    ["EN_MARKETPLACE", "CON_OFERTAS"].includes(factura.estado);
+  const canManageAdjuntos = hasAdjuntosHandlers;
   const showAdjuntos = canManageAdjuntos || adjuntosList.length > 0;
 
   if (!hasFacturaPdf(factura)) {

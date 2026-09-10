@@ -6,7 +6,6 @@ import {
   Settings,
   Logout,
   Storefront,
-  Groups,
 } from "@mui/icons-material";
 import type { SvgIconComponent } from "@mui/icons-material";
 import { ROLES } from "../utils/consts";
@@ -37,13 +36,6 @@ export const mainMenuItems: MenuItem[] = [
     icon: Description,
     path: "/facturas",
     roles: EMPRESA_ROLES,
-  },
-  {
-    text: "Grupos de Facturas",
-    icon: Groups,
-    path: "/facturas/grupos",
-    roles: EMPRESA_ROLES,
-    matchPrefix: true,
   },
   {
     text: "Marketplace",

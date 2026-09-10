@@ -177,6 +177,10 @@ const FacturaGruposTable = ({
           totalConOfertas: 0,
           totalGeneral: 0,
           ...response.meta,
+          totalGrupo:
+            typeof response.meta.totalGrupo === "number"
+              ? response.meta.totalGrupo
+              : response.meta.total,
         };
         setMeta(nextMeta);
         onMetaChange?.(nextMeta);

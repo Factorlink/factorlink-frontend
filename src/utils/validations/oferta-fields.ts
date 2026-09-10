@@ -94,7 +94,7 @@ export const nonNegativeMoneyValidation = yup
     (_value, ctx) => String(ctx.originalValue ?? "").length <= 50,
   );
 
-export const createOfertaFormSchema = (minFechaExpiracion: Date) =>
+export const createOfertaFormSchema = () =>
   yup.object({
     diasFinanciamiento: positiveIntegerValidation,
     porcentajeFinanciamiento: yup
@@ -114,12 +114,14 @@ export const createOfertaFormSchema = (minFechaExpiracion: Date) =>
     firmaDigital: nonNegativeMoneyValidation,
     tasaDiariaMora: tasaDiariaMoraValidation,
     cobroPorDiaMora: nonNegativeMoneyValidation,
-    fechaExpiracion: yup
-      .date()
-      .typeError("Ingresa una fecha válida")
-      .required("La fecha de expiración es obligatoria")
-      .min(minFechaExpiracion, "La fecha debe ser posterior a hoy")
-      .nullable(),
+    vigenciaOfertaDias: yup
+      .number()
+      .transform(emptyToUndefined)
+      .typeError("Debe ser un número entero")
+      .required("Los días de vigencia son obligatorios")
+      .integer("Debe ser un número entero")
+      .min(1, "Debe ser al menos 1")
+      .max(365, "No puede superar 365 días"),
     comentario: yup
       .string()
       .trim()

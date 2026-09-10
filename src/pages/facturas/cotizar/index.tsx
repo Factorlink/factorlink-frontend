@@ -465,308 +465,385 @@ const CotizarFactura = () => {
 
         {showForm && factura && (
           <>
-        <FacturaResumenCard factura={factura} showSolicitudFields={false} />
-
-        <Box sx={{ mb: 3 }}>
-          <DocumentosAsociadosCard
-            factura={factura}
-            onDownloadPdf={handleDownloadPdf}
-            {...(showXmlUi
-              ? {
-                  onUploadXmlClick: () => setUploadXmlModalOpen(true),
-                  onDownloadXml: handleDownloadXml,
-                }
-              : {})}
-          />
-        </Box>
-
-        <AdjuntarDocumentosAdicionalesCard
-          files={adjuntos}
-          onChange={setAdjuntos}
-          facturaId={id || ""}
-          onUpload={async (payload) => {
-            const uploaded = await uploadFacturaArchivo(id!, payload);
-            if (uploaded?.id) return uploaded;
-            const refreshed = await refreshFactura(id!);
-            const match = (refreshed.archivos ?? []).find(
-              (archivo: FacturaArchivo) =>
-                archivo.nombreArchivo === payload.nombreArchivo,
-            );
-            if (!match) {
-              throw new Error("No se pudo confirmar el archivo subido");
-            }
-            return match;
-          }}
-          onDelete={(archivoId) => deleteFacturaArchivo(id!, archivoId)}
-          disabled={submitting}
-        />
-
-        <SectionPanel
-          title="Condiciones de financiamiento"
-          subtitle="Define el monto y el plazo de la solicitud"
-          icon={<RequestQuote sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />}
-        >
-          <Box sx={{ mb: 4 }}>
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}
-            >
-              Monto a Financiar: {truncateToTwo(montoFinanciar)}%
-            </Typography>
-            <Slider
-              value={montoFinanciar}
-              onChange={(_, value) => setMontoFinanciar(value as number)}
-              min={1}
-              max={100}
-              step={1}
-              valueLabelDisplay="auto"
-              valueLabelFormat={(value) => `${truncateToTwo(value)}%`}
-              sx={{
-                color: "var(--color-fg-accent-primary)",
-                "& .MuiSlider-thumb": {
-                  backgroundColor: "var(--color-bg-accent-primary)",
-                },
-                "& .MuiSlider-track": {
-                  backgroundColor: "var(--color-bg-accent-primary)",
-                },
-              }}
-            />
             <Box
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mt: 1,
-              }}
-            >
-              <Typography variant="caption" sx={{ color: "var(--color-fg-default-tertiary)" }}>
-                Monto Total: {formatCurrency(factura.montoTotal)}
-              </Typography>
-              <Chip
-                label={`A Financiar: ${formatCurrency(calculatedMontoFinanciar)}`}
-                sx={{
-                  backgroundColor: "var(--color-bg-success-secondary)",
-                  color: "var(--color-fg-success-primary)",
-                  fontWeight: 600,
-                }}
-              />
-            </Box>
-          </Box>
-
-          <Box>
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}
-            >
-              Plazo (días)
-            </Typography>
-            <TextField
-              value={plazo === 0 ? "" : plazo}
-              onChange={(e) => {
-                const value = e.target.value;
-                const onlyNums = value.replace(/[^0-9]/g, "");
-                if (onlyNums.startsWith("0") || onlyNums.length > 3) {
-                  return;
-                }
-                setPlazo(onlyNums === "" ? 0 : Number(onlyNums));
-              }}
-              fullWidth
-              size="small"
-              error={plazo > 180}
-              helperText={
-                plazo > 180
-                  ? "El plazo máximo es de 180 días"
-                  : `Mínimo ${MIN_PLAZO} día, Máximo ${MAX_PLAZO} días`
-              }
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "&.Mui-focused fieldset": {
-                    borderColor: plazo > 180 ? "var(--color-border-danger-secondary)" : "var(--color-border-accent-primary)",
-                  },
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  lg: "minmax(0, 1fr) minmax(320px, 400px)",
                 },
+                gap: 3,
+                alignItems: "start",
+                mb: 3,
               }}
-            />
-          </Box>
-        </SectionPanel>
-
-        <SectionPanel
-          title="Visibilidad en Marketplace"
-          subtitle="¿Quién puede ver esta factura?"
-          icon={<Visibility sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }} />}
-        >
-          <FormControl component="fieldset">
-            <FormLabel component="legend" sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}>
-              ¿Quién puede ver esta factura?
-            </FormLabel>
-            <RadioGroup
-              value={visibilidad}
-              onChange={(e) =>
-                setVisibilidad(e.target.value as "TODOS" | "SELECCIONADOS")
-              }
             >
-              <FormControlLabel
-                value="TODOS"
-                control={
-                  <Radio
-                    sx={{
-                      color: "var(--color-fg-default-secondary)",
-                      "&.Mui-checked": { color: "var(--color-fg-accent-primary)" },
-                    }}
-                  />
-                }
-                label="Todos los Factorings"
-              />
-              <FormControlLabel
-                value="SELECCIONADOS"
-                control={
-                  <Radio
-                    sx={{
-                      color: "var(--color-fg-default-secondary)",
-                      "&.Mui-checked": { color: "var(--color-fg-accent-primary)" },
-                    }}
-                  />
-                }
-                label="Solo Factorings seleccionados"
-              />
-            </RadioGroup>
-          </FormControl>
+              <Box sx={{ minWidth: 0 }}>
+                <FacturaResumenCard
+                  factura={factura}
+                  showSolicitudFields={false}
+                />
 
-          {visibilidad === "SELECCIONADOS" && (
-            <Box sx={{ maxWidth: 500 }}>
-              <FormControl fullWidth sx={{ mt: 2 }}>
-                <InputLabel>Seleccionar Factorings</InputLabel>
-                <Select
-                  multiple
-                  value={selectedFactorings}
-                  onChange={(e) =>
-                    setSelectedFactorings(e.target.value as string[])
+                <Box sx={{ mb: 3 }}>
+                  <DocumentosAsociadosCard
+                    factura={factura}
+                    onDownloadPdf={handleDownloadPdf}
+                    {...(showXmlUi
+                      ? {
+                          onUploadXmlClick: () => setUploadXmlModalOpen(true),
+                          onDownloadXml: handleDownloadXml,
+                        }
+                      : {})}
+                  />
+                </Box>
+
+                <AdjuntarDocumentosAdicionalesCard
+                  files={adjuntos}
+                  onChange={setAdjuntos}
+                  facturaId={id || ""}
+                  onUpload={async (payload) => {
+                    const uploaded = await uploadFacturaArchivo(id!, payload);
+                    if (uploaded?.id) return uploaded;
+                    const refreshed = await refreshFactura(id!);
+                    const match = (refreshed.archivos ?? []).find(
+                      (archivo: FacturaArchivo) =>
+                        archivo.nombreArchivo === payload.nombreArchivo,
+                    );
+                    if (!match) {
+                      throw new Error("No se pudo confirmar el archivo subido");
+                    }
+                    return match;
+                  }}
+                  onDelete={(archivoId) => deleteFacturaArchivo(id!, archivoId)}
+                  disabled={submitting}
+                />
+              </Box>
+
+              <Box
+                sx={{
+                  position: { lg: "sticky" },
+                  top: { lg: 24 },
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 3,
+                }}
+              >
+                <SectionPanel
+                  title="Condiciones de financiamiento"
+                  subtitle="Define el monto y el plazo de la solicitud"
+                  icon={
+                    <RequestQuote
+                      sx={{
+                        color: "var(--color-fg-accent-primary)",
+                        fontSize: 24,
+                      }}
+                    />
                   }
-                  label="Seleccionar Factorings"
-                  renderValue={(selected) => (
-                    <Box
-                      sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
+                >
+                  <Box sx={{ mb: 4 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}
                     >
-                      {selected.map((value) => {
-                        const factoring = factorings.find(
-                          (f) => f.id === value,
-                        );
-                        return (
-                          <Chip
-                            key={value}
-                            label={factoring?.razonSocial || value}
-                            size="small"
+                      Monto a Financiar: {truncateToTwo(montoFinanciar)}%
+                    </Typography>
+                    <Slider
+                      value={montoFinanciar}
+                      onChange={(_, value) =>
+                        setMontoFinanciar(value as number)
+                      }
+                      min={1}
+                      max={100}
+                      step={1}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={(value) =>
+                        `${truncateToTwo(value)}%`
+                      }
+                      sx={{
+                        color: "var(--color-fg-accent-primary)",
+                        "& .MuiSlider-thumb": {
+                          backgroundColor: "var(--color-bg-accent-primary)",
+                        },
+                        "& .MuiSlider-track": {
+                          backgroundColor: "var(--color-bg-accent-primary)",
+                        },
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mt: 1,
+                        flexWrap: "wrap",
+                        gap: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{ color: "var(--color-fg-default-tertiary)" }}
+                      >
+                        Monto Total: {formatCurrency(factura.montoTotal)}
+                      </Typography>
+                      <Chip
+                        label={`A Financiar: ${formatCurrency(calculatedMontoFinanciar)}`}
+                        sx={{
+                          backgroundColor: "var(--color-bg-success-secondary)",
+                          color: "var(--color-fg-success-primary)",
+                          fontWeight: 600,
+                        }}
+                      />
+                    </Box>
+                  </Box>
+
+                  <Box>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: "var(--color-fg-default-secondary)", mb: 1 }}
+                    >
+                      Plazo (días)
+                    </Typography>
+                    <TextField
+                      value={plazo === 0 ? "" : plazo}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const onlyNums = value.replace(/[^0-9]/g, "");
+                        if (onlyNums.startsWith("0") || onlyNums.length > 3) {
+                          return;
+                        }
+                        setPlazo(onlyNums === "" ? 0 : Number(onlyNums));
+                      }}
+                      fullWidth
+                      size="small"
+                      error={plazo > 180}
+                      helperText={
+                        plazo > 180
+                          ? "El plazo máximo es de 180 días"
+                          : `Mínimo ${MIN_PLAZO} día, Máximo ${MAX_PLAZO} días`
+                      }
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          "&.Mui-focused fieldset": {
+                            borderColor:
+                              plazo > 180
+                                ? "var(--color-border-danger-secondary)"
+                                : "var(--color-border-accent-primary)",
+                          },
+                        },
+                      }}
+                    />
+                  </Box>
+                </SectionPanel>
+
+                <SectionPanel
+                  title="Visibilidad en Marketplace"
+                  subtitle="¿Quién puede ver esta factura?"
+                  icon={
+                    <Visibility
+                      sx={{
+                        color: "var(--color-fg-accent-primary)",
+                        fontSize: 24,
+                      }}
+                    />
+                  }
+                >
+                  <FormControl component="fieldset">
+                    <FormLabel
+                      component="legend"
+                      sx={{
+                        color: "var(--color-fg-default-secondary)",
+                        mb: 1,
+                      }}
+                    >
+                      ¿Quién puede ver esta factura?
+                    </FormLabel>
+                    <RadioGroup
+                      value={visibilidad}
+                      onChange={(e) =>
+                        setVisibilidad(
+                          e.target.value as "TODOS" | "SELECCIONADOS",
+                        )
+                      }
+                    >
+                      <FormControlLabel
+                        value="TODOS"
+                        control={
+                          <Radio
                             sx={{
-                              backgroundColor: "var(--color-bg-accent-secondary)",
-                              color: "var(--color-fg-accent-primary)",
-                              fontWeight: 500,
+                              color: "var(--color-fg-default-secondary)",
+                              "&.Mui-checked": {
+                                color: "var(--color-fg-accent-primary)",
+                              },
                             }}
                           />
-                        );
-                      })}
+                        }
+                        label="Todos los Factorings"
+                      />
+                      <FormControlLabel
+                        value="SELECCIONADOS"
+                        control={
+                          <Radio
+                            sx={{
+                              color: "var(--color-fg-default-secondary)",
+                              "&.Mui-checked": {
+                                color: "var(--color-fg-accent-primary)",
+                              },
+                            }}
+                          />
+                        }
+                        label="Solo Factorings seleccionados"
+                      />
+                    </RadioGroup>
+                  </FormControl>
+
+                  {visibilidad === "SELECCIONADOS" && (
+                    <Box>
+                      <FormControl fullWidth sx={{ mt: 2 }}>
+                        <InputLabel>Seleccionar Factorings</InputLabel>
+                        <Select
+                          multiple
+                          value={selectedFactorings}
+                          onChange={(e) =>
+                            setSelectedFactorings(e.target.value as string[])
+                          }
+                          label="Seleccionar Factorings"
+                          renderValue={(selected) => (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 0.5,
+                              }}
+                            >
+                              {selected.map((value) => {
+                                const factoring = factorings.find(
+                                  (f) => f.id === value,
+                                );
+                                return (
+                                  <Chip
+                                    key={value}
+                                    label={factoring?.razonSocial || value}
+                                    size="small"
+                                    sx={{
+                                      backgroundColor:
+                                        "var(--color-bg-accent-secondary)",
+                                      color: "var(--color-fg-accent-primary)",
+                                      fontWeight: 500,
+                                    }}
+                                  />
+                                );
+                              })}
+                            </Box>
+                          )}
+                          disabled={loadingFactorings}
+                        >
+                          {factorings.map((factoring) => {
+                            const isSelected = selectedFactorings.includes(
+                              factoring.id!,
+                            );
+                            return (
+                              <MenuItem
+                                key={factoring.id}
+                                value={factoring.id}
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                  backgroundColor: isSelected
+                                    ? "var(--color-bg-accent-secondary)"
+                                    : "transparent",
+                                  "&:hover": {
+                                    backgroundColor: isSelected
+                                      ? "var(--color-bg-accent-secondary-hover)"
+                                      : undefined,
+                                  },
+                                }}
+                              >
+                                <span>
+                                  {factoring.razonSocial} - {factoring.rut}
+                                </span>
+                                {isSelected && (
+                                  <Check
+                                    sx={{
+                                      color: "var(--color-fg-accent-primary)",
+                                      ml: 1,
+                                      fontSize: 20,
+                                    }}
+                                  />
+                                )}
+                              </MenuItem>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
                     </Box>
                   )}
-                  disabled={loadingFactorings}
+                </SectionPanel>
+
+                {submitError && (
+                  <Alert
+                    severity="error"
+                    onClose={() => setSubmitError(null)}
+                  >
+                    {submitError}
+                  </Alert>
+                )}
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    justifyContent: "space-between",
+                    gap: 1.5,
+                  }}
                 >
-                  {factorings.map((factoring) => {
-                    const isSelected = selectedFactorings.includes(
-                      factoring.id!,
-                    );
-                    return (
-                      <MenuItem
-                        key={factoring.id}
-                        value={factoring.id}
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          backgroundColor: isSelected
-                            ? "var(--color-bg-accent-secondary)"
-                            : "transparent",
-                          "&:hover": {
-                            backgroundColor: isSelected
-                              ? "var(--color-bg-accent-secondary-hover)"
-                              : undefined,
-                          },
-                        }}
-                      >
-                        <span>
-                          {factoring.razonSocial} - {factoring.rut}
-                        </span>
-                        {isSelected && (
-                          <Check
-                            sx={{ color: "var(--color-fg-accent-primary)", ml: 1, fontSize: 20 }}
-                          />
-                        )}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
+                  <Button
+                    variant="outlined"
+                    onClick={handleBack}
+                    sx={{
+                      borderColor: "var(--color-fg-default-secondary)",
+                      color: "var(--color-fg-default-secondary)",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      px: 4,
+                      py: 1.5,
+                      "&:hover": {
+                        borderColor: "var(--color-fg-default-primary)",
+                        backgroundColor: "var(--color-bg-default-tertiary)",
+                      },
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<Send />}
+                    onClick={handleEnviarACotizar}
+                    disabled={Boolean(getValidationError()) || submitting}
+                    sx={{
+                      backgroundColor: "var(--color-bg-accent-primary)",
+                      "&:hover": {
+                        backgroundColor:
+                          "var(--color-bg-accent-primary-hover)",
+                      },
+                      "&:disabled": {
+                        backgroundColor: "var(--color-bg-disabled-primary)",
+                      },
+                      textTransform: "none",
+                      fontWeight: 600,
+                      px: 4,
+                      py: 1.5,
+                      color: "var(--color-fg-on-accent-primary)",
+                    }}
+                  >
+                    {submitting ? (
+                      <CircularProgress size={24} color="inherit" />
+                    ) : (
+                      "Enviar a cotizar"
+                    )}
+                  </Button>
+                </Box>
+              </Box>
             </Box>
-          )}
-        </SectionPanel>
-
-        {submitError && (
-          <Alert
-            severity="error"
-            sx={{ mb: 2 }}
-            onClose={() => setSubmitError(null)}
-          >
-            {submitError}
-          </Alert>
-        )}
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            mt: 1,
-            mb: 3,
-          }}
-        >
-          <Button
-            variant="outlined"
-            onClick={handleBack}
-            sx={{
-              borderColor: "var(--color-fg-default-secondary)",
-              color: "var(--color-fg-default-secondary)",
-              textTransform: "none",
-              fontWeight: 600,
-              px: 4,
-              py: 1.5,
-              "&:hover": {
-                borderColor: "var(--color-fg-default-primary)",
-                backgroundColor: "var(--color-bg-default-tertiary)",
-              },
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<Send />}
-            onClick={handleEnviarACotizar}
-            disabled={Boolean(getValidationError()) || submitting}
-            sx={{
-              backgroundColor: "var(--color-bg-accent-primary)",
-              "&:hover": { backgroundColor: "var(--color-bg-accent-primary-hover)" },
-              "&:disabled": {
-                backgroundColor: "var(--color-bg-disabled-primary)",
-              },
-              textTransform: "none",
-              fontWeight: 600,
-              px: 4,
-              py: 1.5,
-              color: "var(--color-fg-on-accent-primary)",
-            }}
-          >
-            {submitting ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Enviar a cotizar"
-            )}
-          </Button>
-        </Box>
           </>
         )}
 

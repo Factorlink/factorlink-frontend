@@ -31,6 +31,7 @@ export interface Oferta {
     factoringId: string;
     facturaId: string;
     fechaExpiracion: string;
+    vigenciaOfertaDias?: OfertaNumericValue;
     porcentajeFinanciamiento: string;
     factoring?: Factoring;
     ofertaCondicionada?: boolean;
@@ -55,14 +56,14 @@ export type CreateOfertaPayload = {
     facturaId: string;
     factoringId: string;
     porcentajeFinanciamiento: number;
-    fechaExpiracion: string;
+    vigenciaOfertaDias: number;
     comentario: string;
     ofertaCondicionada: boolean;
 } & OfertaCamposFinancieros;
 
 export type UpdateOfertaPayload = {
     porcentajeFinanciamiento?: number;
-    fechaExpiracion?: string;
+    vigenciaOfertaDias?: number;
     comentario?: string;
     ofertaCondicionada?: boolean;
 } & Partial<OfertaCamposFinancieros>;

@@ -80,12 +80,19 @@ const NOMBRE_MAX = 100;
 const FETCH_LIMIT = 100;
 
 const createDefaultGrupoNombre = () => {
-  const fecha = new Date().toLocaleDateString("es-CL", {
+  const now = new Date();
+  const fecha = now.toLocaleDateString("es-CL", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
-  return `Grupo ${fecha}`;
+  const hora = now.toLocaleTimeString("es-CL", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  return `Grupo ${fecha} ${hora}`;
 };
 
 const toMonto = (value: string | number) => {
@@ -328,13 +335,16 @@ const NuevoGrupoCotizacion = () => {
     factura.estado?.toLowerCase() === "cargada" && !factura.facturaGrupoId;
 
   const folioFilter = folioInput.trim().toLowerCase();
+  const facturasDisponibles = facturas.filter(
+    (factura) => !factura.facturaGrupoId,
+  );
   const facturasFiltradas = folioFilter
-    ? facturas.filter((factura) =>
+    ? facturasDisponibles.filter((factura) =>
         String(factura.folio ?? "")
           .toLowerCase()
           .includes(folioFilter),
       )
-    : facturas;
+    : facturasDisponibles;
 
   const selectableFacturas = facturasFiltradas.filter(canSelectForGrupo);
   const allSelectableSelected =
@@ -587,7 +597,7 @@ const NuevoGrupoCotizacion = () => {
 
             <SectionPanel
               title="Seleccionar facturas"
-              subtitle={`${facturas.length} facturas disponibles (solo facturas en estado CARGADA)`}
+              subtitle={`${facturasDisponibles.length} facturas disponibles (CARGADA y sin grupo)`}
             >
               <Box
                 sx={{
@@ -645,7 +655,7 @@ const NuevoGrupoCotizacion = () => {
                   >
                     {folioFilter
                       ? "No se encontraron facturas con ese folio"
-                      : "No hay facturas en estado CARGADA"}
+                      : "No hay facturas CARGADA disponibles para agrupar"}
                   </Typography>
                 </Box>
               ) : (

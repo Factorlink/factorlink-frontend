@@ -70,6 +70,7 @@ import {
   isFacturaInMarketplace,
   TOOLTIP_FACTURA_EN_GRUPO_ENVIAR,
   TOOLTIP_FACTURA_EN_GRUPO_QUITAR,
+  TOOLTIP_FACTURA_EN_GRUPO_ELIMINAR,
 } from "../../utils/facturaGrupo";
 import { getFacturaStatusConfig } from "../../theme";
 import {
@@ -186,13 +187,17 @@ const Facturas = () => {
 
   const handleVerDetalle = () => {
     if (selectedFactura) {
-      if (selectedFactura.facturaGrupoId) {
-        navigate(`/facturas/grupos/${selectedFactura.facturaGrupoId}`);
-      } else {
-        navigate(`/facturas/${selectedFactura.id}`);
-      }
+      goToDetalle(selectedFactura);
     }
     handleMenuClose();
+  };
+
+  const goToDetalle = (factura: Factura) => {
+    if (factura.facturaGrupoId) {
+      navigate(`/facturas/grupos/${factura.facturaGrupoId}`);
+    } else {
+      navigate(`/facturas/${factura.id}`);
+    }
   };
 
   const isInMarketplace = (factura: Factura | null) =>
@@ -206,6 +211,7 @@ const Facturas = () => {
   };
 
   const handleEliminar = () => {
+    if (isFacturaInGrupo(selectedFactura)) return;
     if (isInMarketplace(selectedFactura)) {
       setRemoveMarketplaceModalOpen(true);
     } else {
@@ -373,13 +379,25 @@ const Facturas = () => {
 
       const { data, meta: metaResponse } = await getFacturas(params);
       setFacturas(data || []);
-      setMeta(metaResponse);
+      setMeta((prev) => ({
+        ...metaResponse,
+        totalGrupo:
+          typeof metaResponse.totalGrupo === "number"
+            ? metaResponse.totalGrupo
+            : prev.totalGrupo,
+      }));
     },
     [currentRole?.empresaId, meta.page, meta.limit],
   );
 
   const handleChildMetaChange = useCallback((childMeta: Meta) => {
-    setMeta(childMeta);
+    setMeta((prev) => ({
+      ...childMeta,
+      totalGrupo:
+        typeof childMeta.totalGrupo === "number"
+          ? childMeta.totalGrupo
+          : prev.totalGrupo,
+    }));
   }, []);
 
   // Reset filters, meta and URL params when switching tabs
@@ -394,7 +412,8 @@ const Facturas = () => {
       setFilters(resetFilters);
       clearSelection();
       // Reset meta to zeros - the active tab's component will update it via onMetaChange
-      setMeta({
+      // Preserve totalGrupo so the Grupos tab badge stays visible across tabs
+      setMeta((prev) => ({
         lastPage: 1,
         limit: 10,
         page: 1,
@@ -404,7 +423,8 @@ const Facturas = () => {
         totalEnMarketplace: 0,
         totalConOfertas: 0,
         totalGeneral: 0,
-      });
+        totalGrupo: prev.totalGrupo,
+      }));
 
       // Only fetch from tab 0's endpoint when switching TO tab 0
       if (activeTab === 0) {
@@ -619,17 +639,23 @@ const Facturas = () => {
               label={
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   Grupos de cotización
-                  {activeTab === 1 && meta.total > 0 && (
+                  {(meta.totalGrupo ?? 0) > 0 && (
                     <Chip
-                      label={meta.total}
+                      label={meta.totalGrupo}
                       size="small"
                       sx={{
                         height: 22,
                         minWidth: 22,
                         fontSize: "0.75rem",
                         fontWeight: 700,
-                        backgroundColor: "var(--color-bg-accent-primary)",
-                        color: "var(--color-fg-on-accent-primary)",
+                        backgroundColor:
+                          activeTab === 1
+                            ? "var(--color-bg-accent-primary)"
+                            : "var(--color-bg-neutral-secondary)",
+                        color:
+                          activeTab === 1
+                            ? "var(--color-fg-on-accent-primary)"
+                            : "var(--color-fg-default-primary)",
                       }}
                     />
                   )}
@@ -980,8 +1006,15 @@ const Facturas = () => {
                               <Box
                                 sx={{
                                   display: "flex",
-                                  flexWrap: "wrap",
-                                  alignItems: "center",
+                                  flexDirection: factura.facturaGrupoId
+                                    ? "column"
+                                    : "row",
+                                  flexWrap: factura.facturaGrupoId
+                                    ? "nowrap"
+                                    : "wrap",
+                                  alignItems: factura.facturaGrupoId
+                                    ? "flex-start"
+                                    : "center",
                                   gap: 0.75,
                                 }}
                               >
@@ -1001,15 +1034,13 @@ const Facturas = () => {
                                 {factura.facturaGrupoId && (
                                   <Chip
                                     label={
-                                      factura.facturaGrupo?.nombre
-                                        ? `En grupo: ${factura.facturaGrupo.nombre}`
-                                        : "En grupo"
+                                      factura.facturaGrupo?.nombre || "Grupo"
                                     }
                                     size="small"
-                                    variant="outlined"
                                     sx={{
                                       fontWeight: 500,
-                                      borderColor: "var(--color-border-accent-primary)",
+                                      backgroundColor:
+                                        "var(--color-bg-accent-secondary)",
                                       color: "var(--color-fg-accent-primary)",
                                       maxWidth: 180,
                                       "& .MuiChip-label": {
@@ -1046,6 +1077,19 @@ const Facturas = () => {
                                     </span>
                                   </Tooltip>
                                 )}
+                                {!isCargada(factura) && (
+                                  <Tooltip title="Ver detalle" arrow>
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => goToDetalle(factura)}
+                                      sx={{
+                                        color: "var(--color-fg-accent-primary)",
+                                      }}
+                                    >
+                                      <Visibility />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
                                 {isInMarketplace(factura) && (
                                   <Tooltip
                                     title={
@@ -1071,13 +1115,17 @@ const Facturas = () => {
                                     </span>
                                   </Tooltip>
                                 )}
-                                <IconButton
-                                  size="small"
-                                  onClick={(e) => handleMenuOpen(e, factura)}
-                                  sx={{ color: "var(--color-fg-default-secondary)" }}
-                                >
-                                  <MoreVert />
-                                </IconButton>
+                                {isCargada(factura) && (
+                                  <IconButton
+                                    size="small"
+                                    onClick={(e) => handleMenuOpen(e, factura)}
+                                    sx={{
+                                      color: "var(--color-fg-default-secondary)",
+                                    }}
+                                  >
+                                    <MoreVert />
+                                  </IconButton>
+                                )}
                               </Box>
                             </TableCell>
                           </TableRow>
@@ -1204,19 +1252,33 @@ const Facturas = () => {
             </Tooltip>
           )}
           {isCargada(selectedFactura) && (
-            <MenuItem onClick={handleEliminar}>
-              <ListItemIcon>
-                <Delete sx={{ color: "var(--color-fg-danger-primary)" }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Eliminar"
-                sx={{
-                  "& .MuiTypography-root": {
-                    color: "var(--color-fg-danger-primary)",
-                  },
-                }}
-              />
-            </MenuItem>
+            <Tooltip
+              title={
+                isFacturaInGrupo(selectedFactura)
+                  ? TOOLTIP_FACTURA_EN_GRUPO_ELIMINAR
+                  : ""
+              }
+              arrow
+            >
+              <span>
+                <MenuItem
+                  disabled={isFacturaInGrupo(selectedFactura)}
+                  onClick={handleEliminar}
+                >
+                  <ListItemIcon>
+                    <Delete sx={{ color: "var(--color-fg-danger-primary)" }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Eliminar"
+                    sx={{
+                      "& .MuiTypography-root": {
+                        color: "var(--color-fg-danger-primary)",
+                      },
+                    }}
+                  />
+                </MenuItem>
+              </span>
+            </Tooltip>
           )}
           {isCargada(selectedFactura) && (
             <Tooltip
@@ -1263,7 +1325,13 @@ const Facturas = () => {
                 empresaId: currentRole.empresaId,
               }).then(({ data, meta: metaResponse }) => {
                 setFacturas(data || []);
-                setMeta(metaResponse);
+                setMeta((prev) => ({
+                  ...metaResponse,
+                  totalGrupo:
+                    typeof metaResponse.totalGrupo === "number"
+                      ? metaResponse.totalGrupo
+                      : prev.totalGrupo,
+                }));
               });
             }
           }}
