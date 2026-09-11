@@ -95,6 +95,7 @@ type FacturaGrupoOfertaFormProps = {
   onSave: (borrador: OfertaGrupoBorrador) => void;
   onDelete?: () => void;
   onCancel?: () => void;
+  disabled?: boolean;
 };
 
 const buildInitialValues = (
@@ -145,6 +146,7 @@ const FacturaGrupoOfertaForm = ({
   onSave,
   onDelete,
   onCancel,
+  disabled = false,
 }: FacturaGrupoOfertaFormProps) => {
   const [openPicker, setOpenPicker] = useState<"fechaCotizacion" | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -664,12 +666,14 @@ const FacturaGrupoOfertaForm = ({
             vigenciaOfertaDias={formik.values.vigenciaOfertaDias}
             submitLabel="Guardar oferta"
             submitDisabled={
+              disabled ||
               !formik.isValid ||
               !formik.values.vigenciaOfertaDias ||
               !formik.values.fechaCotizacion
             }
             showDelete={hasBorrador}
             onDelete={() => setDeleteConfirmOpen(true)}
+            deleteDisabled={disabled}
             onCancel={onCancel}
           />
         </Box>

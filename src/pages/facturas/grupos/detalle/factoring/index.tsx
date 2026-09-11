@@ -165,10 +165,11 @@ const FacturaGrupoFactoringDetalle = () => {
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(tabFromUrl);
-  const [detalleFactura, setDetalleFactura] = useState<Factura | null>(null);
+  const [detalleFacturaId, setDetalleFacturaId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [sendErrorReason, setSendErrorReason] = useState<string | null>(null);
   const [sendSuccessOpen, setSendSuccessOpen] = useState(false);
 
   const loadDetalle = useCallback(async () => {
@@ -230,13 +231,14 @@ const FacturaGrupoFactoringDetalle = () => {
   };
 
   const handleVerDetalle = (factura: Factura) => {
-    setDetalleFactura(factura);
+    setDetalleFacturaId(factura.id);
     setDrawerOpen(true);
   };
 
   const handleCloseDrawer = () => {
+    if (sendingOfertas) return;
     setDrawerOpen(false);
-    setDetalleFactura(null);
+    setDetalleFacturaId(null);
   };
 
   const handleSaveBorrador = (borrador: OfertaGrupoBorrador) => {
@@ -257,6 +259,7 @@ const FacturaGrupoFactoringDetalle = () => {
   const handleEnviarOfertaAlGrupo = () => {
     if (!canEnviarOfertaAlGrupo(borradores) || !id) return;
     setSendError(null);
+    setSendErrorReason(null);
     setSendConfirmOpen(true);
   };
 
@@ -264,6 +267,7 @@ const FacturaGrupoFactoringDetalle = () => {
     if (!id || !canEnviarOfertaAlGrupo(borradores)) return;
     try {
       setSendError(null);
+      setSendErrorReason(null);
       const ofertas = Object.values(borradores).map((borrador) =>
         buildCreateOfertaPayload(borrador),
       );
@@ -278,12 +282,13 @@ const FacturaGrupoFactoringDetalle = () => {
     } catch (err) {
       console.error("Error sending ofertas grupo facturas:", err);
       const axiosError = err as {
-        response?: { data?: { message?: string } };
+        response?: { data?: { message?: string; reason?: string } };
       };
       setSendError(
         axiosError?.response?.data?.message ||
           "No se pudo enviar la oferta al grupo. Intente nuevamente.",
       );
+      setSendErrorReason(axiosError?.response?.data?.reason || null);
     }
   };
 
@@ -303,6 +308,10 @@ const FacturaGrupoFactoringDetalle = () => {
   const montoFinanciar = getFacturaGrupoMontoFinanciar(grupo);
   const canSend = canEnviarOfertaAlGrupo(borradores);
   const borradoresCount = Object.keys(borradores).length;
+  const detalleFactura = useMemo(
+    () => facturas.find((factura) => factura.id === detalleFacturaId) ?? null,
+    [facturas, detalleFacturaId],
+  );
   const historyOfertas = useMemo(
     () => aggregateGrupoHistoryOfertas(facturas),
     [facturas],
@@ -759,6 +768,7 @@ const FacturaGrupoFactoringDetalle = () => {
           <Button
             variant="outlined"
             onClick={handleBack}
+            disabled={sendingOfertas}
             sx={{
               textTransform: "none",
               fontWeight: 600,
@@ -804,10 +814,15 @@ const FacturaGrupoFactoringDetalle = () => {
         factura={detalleFactura}
         factoringId={factoringId}
         borrador={
-          detalleFactura ? borradores[detalleFactura.id] ?? null : null
+          detalleFacturaId ? borradores[detalleFacturaId] ?? null : null
         }
         onSaveBorrador={handleSaveBorrador}
         onDeleteBorrador={handleDeleteBorrador}
+        onOfertaActualizada={() => {
+          void loadDetalle();
+        }}
+        sending={sendingOfertas}
+        grupoPlazo={grupo?.plazo || 0}
       />
 
       <Dialog
@@ -829,7 +844,14 @@ const FacturaGrupoFactoringDetalle = () => {
           </Typography>
           {sendError && (
             <Alert severity="error" sx={{ mt: 1 }}>
-              {sendError}
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {sendError}
+              </Typography>
+              {sendErrorReason && (
+                <Typography variant="body2" sx={{ mt: 0.75 }}>
+                  {sendErrorReason}
+                </Typography>
+              )}
             </Alert>
           )}
         </DialogContent>

@@ -24,6 +24,13 @@ import DocumentosAsociadosCard from "./DocumentosAsociadosCard";
 import FacturaGrupoOfertaForm from "./FacturaGrupoOfertaForm";
 import { hasFacturaPdf } from "../../utils/facturaDocuments";
 import type { OfertaGrupoBorrador } from "../../utils/facturaGrupoOferta";
+import {
+  isOfertaCondicionada,
+  puedeComentar,
+} from "../../utils/ofertaEstados";
+import { useOfertas } from "../../hooks/useOfertas";
+import ConversacionOferta from "../Ofertas/ConversacionOferta";
+import DetalleOfertaFactoring from "../Ofertas/DetalleOfertaFactoring";
 
 type FacturaGrupoFactoringDetalleDrawerProps = {
   open: boolean;
@@ -33,6 +40,9 @@ type FacturaGrupoFactoringDetalleDrawerProps = {
   borrador?: OfertaGrupoBorrador | null;
   onSaveBorrador: (borrador: OfertaGrupoBorrador) => void;
   onDeleteBorrador: (facturaId: string) => void;
+  onOfertaActualizada?: () => void;
+  sending?: boolean;
+  grupoPlazo?: number;
 };
 
 type DrawerTab = "informacion" | "tu_oferta" | "comentarios";
@@ -119,9 +129,15 @@ const FacturaGrupoFactoringDetalleDrawer = ({
   borrador,
   onSaveBorrador,
   onDeleteBorrador,
+  onOfertaActualizada,
+  sending = false,
+  grupoPlazo = 0,
 }: FacturaGrupoFactoringDetalleDrawerProps) => {
   const [tab, setTab] = useState<DrawerTab>("informacion");
+  const { createComentario } = useOfertas();
   const statusConfig = getFacturaStatusConfig(factura?.estado || "");
+  const ofertaEnviada = factura?.ofertaFactoring ?? null;
+  const hasBorrador = Boolean(borrador);
 
   useEffect(() => {
     if (open) {
@@ -129,11 +145,88 @@ const FacturaGrupoFactoringDetalleDrawer = ({
     }
   }, [open, factura?.id]);
 
+  const handleClose = () => {
+    if (sending) return;
+    onClose();
+  };
+
+  const renderTuOferta = () => {
+    if (!factura || !factoringId) {
+      return (
+        <StubTabContent message="No se pudo cargar el formulario de oferta." />
+      );
+    }
+
+    if (hasBorrador || !ofertaEnviada) {
+      return (
+        <FacturaGrupoOfertaForm
+          key={factura.id}
+          factura={factura}
+          factoringId={factoringId}
+          borrador={borrador}
+          onSave={onSaveBorrador}
+          onDelete={() => onDeleteBorrador(factura.id)}
+          onCancel={handleClose}
+          disabled={sending}
+        />
+      );
+    }
+
+    return (
+      <DetalleOfertaFactoring
+        key={ofertaEnviada.id}
+        oferta={ofertaEnviada}
+        plazo={grupoPlazo || factura.plazo || 0}
+        onOfertaCancelada={onOfertaActualizada}
+        onOfertaFinalEnviada={onOfertaActualizada}
+      />
+    );
+  };
+
+  const renderComentarios = () => {
+    if (!ofertaEnviada?.id) {
+      return (
+        <StubTabContent message="Los comentarios están disponibles cuando la oferta enviada sea condicionada." />
+      );
+    }
+
+    if (!isOfertaCondicionada(ofertaEnviada)) {
+      return (
+        <StubTabContent message="Los comentarios están disponibles cuando la oferta enviada sea condicionada." />
+      );
+    }
+
+    return (
+      <ConversacionOferta
+        key={ofertaEnviada.id}
+        ofertaId={ofertaEnviada.id}
+        ladoActual="FACTORING"
+        ocultarSiVacia={false}
+        puedeComentar={
+          !sending &&
+          puedeComentar(ofertaEnviada) &&
+          isOfertaCondicionada(ofertaEnviada)
+        }
+        onEnviarComentario={(texto) =>
+          createComentario(ofertaEnviada.id, texto)
+        }
+        placeholderComentario="Escribe tu respuesta..."
+        textoBotonEnviar="Enviar comentario"
+      />
+    );
+  };
+
   return (
     <Drawer
       anchor="right"
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
+      disableEscapeKeyDown={sending}
+      slotProps={{
+        backdrop: {
+          sx: sending ? { pointerEvents: "auto" } : undefined,
+        },
+      }}
       PaperProps={{
         sx: {
           width: { xs: "100%", md: "75%", lg: "65%" },
@@ -191,7 +284,12 @@ const FacturaGrupoFactoringDetalleDrawer = ({
             />
           )}
         </Box>
-        <IconButton onClick={onClose} aria-label="Cerrar" size="small">
+        <IconButton
+          onClick={handleClose}
+          aria-label="Cerrar"
+          size="small"
+          disabled={sending}
+        >
           <Close />
         </IconButton>
       </Box>
@@ -209,7 +307,10 @@ const FacturaGrupoFactoringDetalleDrawer = ({
         <>
           <Tabs
             value={tab}
-            onChange={(_e, value: DrawerTab) => setTab(value)}
+            onChange={(_e, value: DrawerTab) => {
+              if (sending) return;
+              setTab(value);
+            }}
             variant="scrollable"
             scrollButtons="auto"
             allowScrollButtonsMobile
@@ -230,18 +331,21 @@ const FacturaGrupoFactoringDetalleDrawer = ({
               icon={<InfoOutlined sx={{ fontSize: 18 }} />}
               iconPosition="start"
               label="Información"
+              disabled={sending}
             />
             <Tab
               value="tu_oferta"
               icon={<RequestQuote sx={{ fontSize: 18 }} />}
               iconPosition="start"
               label="Tu oferta"
+              disabled={sending}
             />
             <Tab
               value="comentarios"
               icon={<ChatBubbleOutline sx={{ fontSize: 18 }} />}
               iconPosition="start"
               label="Comentarios"
+              disabled={sending}
             />
           </Tabs>
 
@@ -251,6 +355,8 @@ const FacturaGrupoFactoringDetalleDrawer = ({
               overflow: "auto",
               mt: 1,
               pr: 0.5,
+              pointerEvents: sending ? "none" : "auto",
+              opacity: sending ? 0.7 : 1,
             }}
           >
             <TabPanel value="informacion" current={tab}>
@@ -381,23 +487,11 @@ const FacturaGrupoFactoringDetalleDrawer = ({
             </TabPanel>
 
             <TabPanel value="tu_oferta" current={tab}>
-              {factura && factoringId ? (
-                <FacturaGrupoOfertaForm
-                  key={factura.id}
-                  factura={factura}
-                  factoringId={factoringId}
-                  borrador={borrador}
-                  onSave={onSaveBorrador}
-                  onDelete={() => onDeleteBorrador(factura.id)}
-                  onCancel={onClose}
-                />
-              ) : (
-                <StubTabContent message="No se pudo cargar el formulario de oferta." />
-              )}
+              {renderTuOferta()}
             </TabPanel>
 
             <TabPanel value="comentarios" current={tab}>
-              <StubTabContent message="Los comentarios de la oferta se implementarán en una siguiente historia." />
+              {renderComentarios()}
             </TabPanel>
           </Box>
         </>
