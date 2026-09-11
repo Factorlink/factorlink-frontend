@@ -70,6 +70,8 @@ export interface Factura {
     rutFirmante: string;
     rutReceptor: string;
     siiId: string;
+    /** Estado reportado por el SII (si el backend lo envía). */
+    estadoSii?: string | null;
     tipoDocumento: string;
     urlFactura?: string | null;
     urlFacturaPdf?: string | null;
