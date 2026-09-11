@@ -21,12 +21,18 @@ import {
   formatDate,
 } from "./FacturaResumenCard";
 import DocumentosAsociadosCard from "./DocumentosAsociadosCard";
+import FacturaGrupoOfertaForm from "./FacturaGrupoOfertaForm";
 import { hasFacturaPdf } from "../../utils/facturaDocuments";
+import type { OfertaGrupoBorrador } from "../../utils/facturaGrupoOferta";
 
 type FacturaGrupoFactoringDetalleDrawerProps = {
   open: boolean;
   onClose: () => void;
   factura: Factura | null;
+  factoringId: string;
+  borrador?: OfertaGrupoBorrador | null;
+  onSaveBorrador: (borrador: OfertaGrupoBorrador) => void;
+  onDeleteBorrador: (facturaId: string) => void;
 };
 
 type DrawerTab = "informacion" | "tu_oferta" | "comentarios";
@@ -109,6 +115,10 @@ const FacturaGrupoFactoringDetalleDrawer = ({
   open,
   onClose,
   factura,
+  factoringId,
+  borrador,
+  onSaveBorrador,
+  onDeleteBorrador,
 }: FacturaGrupoFactoringDetalleDrawerProps) => {
   const [tab, setTab] = useState<DrawerTab>("informacion");
   const statusConfig = getFacturaStatusConfig(factura?.estado || "");
@@ -371,7 +381,19 @@ const FacturaGrupoFactoringDetalleDrawer = ({
             </TabPanel>
 
             <TabPanel value="tu_oferta" current={tab}>
-              <StubTabContent message="La oferta para esta factura se implementará en una siguiente historia." />
+              {factura && factoringId ? (
+                <FacturaGrupoOfertaForm
+                  key={factura.id}
+                  factura={factura}
+                  factoringId={factoringId}
+                  borrador={borrador}
+                  onSave={onSaveBorrador}
+                  onDelete={() => onDeleteBorrador(factura.id)}
+                  onCancel={onClose}
+                />
+              ) : (
+                <StubTabContent message="No se pudo cargar el formulario de oferta." />
+              )}
             </TabPanel>
 
             <TabPanel value="comentarios" current={tab}>

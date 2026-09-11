@@ -1,5 +1,8 @@
 import type { Factura } from "../types/factura";
 import type { Oferta } from "../types/oferta";
+import type { OfertaPayloadInput } from "./ofertaPayload";
+
+export type OfertaGrupoBorrador = OfertaPayloadInput;
 
 export type FacturaGrupoOfertaDisplay = {
   kind: "sin_oferta" | "borrador" | "creada";
@@ -14,15 +17,23 @@ export const getFacturaOfertaEstadoRaw = (factura?: Factura | null) =>
     factura?.ofertaFactoring?.estado || factura?.factoringIsOfertme,
   );
 
-export const isOfertaPreparada = (factura?: Factura | null) =>
-  getFacturaOfertaEstadoRaw(factura) === "borrador";
+export const hasOfertaGrupoBorrador = (
+  borradores: Record<string, OfertaGrupoBorrador>,
+  facturaId?: string | null,
+) => Boolean(facturaId && borradores[facturaId]);
 
-export const canEnviarOfertaAlGrupo = (facturas: Factura[]) =>
-  facturas.some(isOfertaPreparada);
+export const canEnviarOfertaAlGrupo = (
+  borradores: Record<string, OfertaGrupoBorrador>,
+) => Object.keys(borradores).length > 0;
 
 export const getFacturaGrupoOfertaDisplay = (
   factura?: Factura | null,
+  hasBorradorLocal = false,
 ): FacturaGrupoOfertaDisplay => {
+  if (hasBorradorLocal) {
+    return { kind: "borrador", label: "Borrador" };
+  }
+
   const estado = getFacturaOfertaEstadoRaw(factura);
 
   if (!estado) {
@@ -37,7 +48,6 @@ export const getFacturaGrupoOfertaDisplay = (
     return { kind: "creada", label: "Oferta creada" };
   }
 
-  // activa / aceptada / rechazada / expirada / etc.
   return { kind: "creada", label: "Oferta creada" };
 };
 

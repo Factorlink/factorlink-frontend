@@ -11,6 +11,10 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   Snackbar,
   Tab,
@@ -39,6 +43,7 @@ import FacturaGrupoFactoringDetalleDrawer from "../../../../../components/Factur
 import { formatCurrency } from "../../../../../components/Facturas/FacturaResumenCard";
 import HistorialOfertasFactoring from "../../../../../components/Ofertas/HistorialOfertasFactoring";
 import { useFacturaGrupos } from "../../../../../hooks/useFacturaGrupos";
+import { useOfertas } from "../../../../../hooks/useOfertas";
 import useAuthStore from "../../../../../store/authStore";
 import type { Factura, FacturaGrupo } from "../../../../../types/factura";
 import { getFacturaStatusConfig } from "../../../../../theme";
@@ -50,7 +55,9 @@ import {
   aggregateGrupoHistoryOfertas,
   canEnviarOfertaAlGrupo,
   getFacturaGrupoOfertaDisplay,
+  type OfertaGrupoBorrador,
 } from "../../../../../utils/facturaGrupoOferta";
+import { buildCreateOfertaPayload } from "../../../../../utils/ofertaPayload";
 import {
   appContentSx,
   tableScrollSx,
@@ -102,8 +109,14 @@ const TabPanel = ({
   </div>
 );
 
-const FacturaGrupoOfertaCell = ({ factura }: { factura: Factura }) => {
-  const display = getFacturaGrupoOfertaDisplay(factura);
+const FacturaGrupoOfertaCell = ({
+  factura,
+  hasBorrador,
+}: {
+  factura: Factura;
+  hasBorrador: boolean;
+}) => {
+  const display = getFacturaGrupoOfertaDisplay(factura, hasBorrador);
 
   if (display.kind === "sin_oferta") {
     return (
@@ -137,6 +150,7 @@ const FacturaGrupoFactoringDetalle = () => {
   const { currentRole } = useAuthStore();
   const { getFacturaGrupoById, getFacturaGrupoFacturasFactoring } =
     useFacturaGrupos();
+  const { createOfertasGrupoFacturas, loading: sendingOfertas } = useOfertas();
   const factoringId = currentRole?.factoringId || "";
 
   const state = (location.state as GrupoFactoringLocationState | null) ?? null;
@@ -145,12 +159,17 @@ const FacturaGrupoFactoringDetalle = () => {
 
   const [grupo, setGrupo] = useState<FacturaGrupo | null>(null);
   const [facturas, setFacturas] = useState<Factura[]>([]);
+  const [borradores, setBorradores] = useState<
+    Record<string, OfertaGrupoBorrador>
+  >({});
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(tabFromUrl);
   const [detalleFactura, setDetalleFactura] = useState<Factura | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [sendStubOpen, setSendStubOpen] = useState(false);
+  const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [sendSuccessOpen, setSendSuccessOpen] = useState(false);
 
   const loadDetalle = useCallback(async () => {
     if (!id) {
@@ -220,9 +239,52 @@ const FacturaGrupoFactoringDetalle = () => {
     setDetalleFactura(null);
   };
 
+  const handleSaveBorrador = (borrador: OfertaGrupoBorrador) => {
+    setBorradores((prev) => ({
+      ...prev,
+      [borrador.facturaId]: borrador,
+    }));
+  };
+
+  const handleDeleteBorrador = (facturaId: string) => {
+    setBorradores((prev) => {
+      const next = { ...prev };
+      delete next[facturaId];
+      return next;
+    });
+  };
+
   const handleEnviarOfertaAlGrupo = () => {
-    if (!canEnviarOfertaAlGrupo(facturas)) return;
-    setSendStubOpen(true);
+    if (!canEnviarOfertaAlGrupo(borradores) || !id) return;
+    setSendError(null);
+    setSendConfirmOpen(true);
+  };
+
+  const handleConfirmEnviarOfertaAlGrupo = async () => {
+    if (!id || !canEnviarOfertaAlGrupo(borradores)) return;
+    try {
+      setSendError(null);
+      const ofertas = Object.values(borradores).map((borrador) =>
+        buildCreateOfertaPayload(borrador),
+      );
+      await createOfertasGrupoFacturas({
+        facturaGrupoId: id,
+        ofertas,
+      });
+      setBorradores({});
+      setSendConfirmOpen(false);
+      setSendSuccessOpen(true);
+      await loadDetalle();
+    } catch (err) {
+      console.error("Error sending ofertas grupo facturas:", err);
+      const axiosError = err as {
+        response?: { data?: { message?: string } };
+      };
+      setSendError(
+        axiosError?.response?.data?.message ||
+          "No se pudo enviar la oferta al grupo. Intente nuevamente.",
+      );
+    }
   };
 
   const montoTotal = useMemo(() => {
@@ -239,7 +301,8 @@ const FacturaGrupoFactoringDetalle = () => {
   }, [facturas, grupo]);
 
   const montoFinanciar = getFacturaGrupoMontoFinanciar(grupo);
-  const canSend = canEnviarOfertaAlGrupo(facturas);
+  const canSend = canEnviarOfertaAlGrupo(borradores);
+  const borradoresCount = Object.keys(borradores).length;
   const historyOfertas = useMemo(
     () => aggregateGrupoHistoryOfertas(facturas),
     [facturas],
@@ -586,7 +649,10 @@ const FacturaGrupoFactoringDetalle = () => {
                               </Typography>
                             </TableCell>
                             <TableCell>
-                              <FacturaGrupoOfertaCell factura={factura} />
+                              <FacturaGrupoOfertaCell
+                                factura={factura}
+                                hasBorrador={Boolean(borradores[factura.id])}
+                              />
                             </TableCell>
                             <TableCell>
                               <Tooltip title="Ver factura">
@@ -704,8 +770,14 @@ const FacturaGrupoFactoringDetalle = () => {
           </Button>
           <Button
             variant="contained"
-            startIcon={<Send />}
-            disabled={!canSend}
+            startIcon={
+              sendingOfertas ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <Send />
+              )
+            }
+            disabled={!canSend || sendingOfertas}
             onClick={handleEnviarOfertaAlGrupo}
             sx={{
               textTransform: "none",
@@ -730,21 +802,78 @@ const FacturaGrupoFactoringDetalle = () => {
         open={drawerOpen}
         onClose={handleCloseDrawer}
         factura={detalleFactura}
+        factoringId={factoringId}
+        borrador={
+          detalleFactura ? borradores[detalleFactura.id] ?? null : null
+        }
+        onSaveBorrador={handleSaveBorrador}
+        onDeleteBorrador={handleDeleteBorrador}
       />
 
+      <Dialog
+        open={sendConfirmOpen}
+        onClose={() => !sendingOfertas && setSendConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "var(--radius-l)" } }}
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          ¿Enviar oferta al grupo?
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 1.5 }}>
+            Se enviarán {borradoresCount} oferta
+            {borradoresCount === 1 ? "" : "s"} borrador
+            {borradoresCount === 1 ? "" : "es"} al grupo. Las facturas sin
+            borrador no se incluirán.
+          </Typography>
+          {sendError && (
+            <Alert severity="error" sx={{ mt: 1 }}>
+              {sendError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button
+            onClick={() => setSendConfirmOpen(false)}
+            disabled={sendingOfertas}
+            sx={{ textTransform: "none", fontWeight: 600 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              void handleConfirmEnviarOfertaAlGrupo();
+            }}
+            disabled={sendingOfertas}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              color: "var(--color-fg-on-accent-primary)",
+            }}
+          >
+            {sendingOfertas ? (
+              <CircularProgress size={22} color="inherit" />
+            ) : (
+              "Enviar"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar
-        open={sendStubOpen}
+        open={sendSuccessOpen}
         autoHideDuration={4000}
-        onClose={() => setSendStubOpen(false)}
+        onClose={() => setSendSuccessOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
-          severity="info"
-          onClose={() => setSendStubOpen(false)}
+          severity="success"
+          onClose={() => setSendSuccessOpen(false)}
           sx={{ width: "100%" }}
         >
-          El envío de la oferta al grupo se implementará en una siguiente
-          historia.
+          Oferta enviada al grupo correctamente.
         </Alert>
       </Snackbar>
     </Layout>

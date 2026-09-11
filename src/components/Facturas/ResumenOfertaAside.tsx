@@ -1,5 +1,5 @@
 import { Box, Button, Typography } from "@mui/material";
-import { PieChart, Send } from "@mui/icons-material";
+import { Delete, PieChart, Save, Send } from "@mui/icons-material";
 import { formatMoney, formatPercent } from "../../utils/ofertaFormatters";
 
 interface ResumenOfertaAsideProps {
@@ -12,6 +12,10 @@ interface ResumenOfertaAsideProps {
   vigenciaOfertaDias: string | number;
   submitDisabled: boolean;
   onCancel?: () => void;
+  submitLabel?: string;
+  showDelete?: boolean;
+  onDelete?: () => void;
+  deleteDisabled?: boolean;
 }
 
 const rowSx = {
@@ -42,9 +46,14 @@ const ResumenOfertaAside = ({
   vigenciaOfertaDias,
   submitDisabled,
   onCancel,
+  submitLabel = "Enviar oferta",
+  showDelete = false,
+  onDelete,
+  deleteDisabled = false,
 }: ResumenOfertaAsideProps) => {
   const dias = Number(diasFinanciamiento) || 0;
   const vigencia = Number(vigenciaOfertaDias) || 0;
+  const isSaveLabel = submitLabel.toLowerCase().includes("guardar");
   const rows = [
     { label: "Monto total de la factura", value: formatMoney(montoTotal) },
     {
@@ -138,7 +147,7 @@ const ResumenOfertaAside = ({
         type="submit"
         variant="contained"
         fullWidth
-        startIcon={<Send />}
+        startIcon={isSaveLabel ? <Save /> : <Send />}
         disabled={submitDisabled}
         sx={{
           textTransform: "none",
@@ -149,8 +158,33 @@ const ResumenOfertaAside = ({
           mb: 1.5,
         }}
       >
-        Enviar oferta
+        {submitLabel}
       </Button>
+      {showDelete && (
+        <Button
+          type="button"
+          variant="outlined"
+          fullWidth
+          startIcon={<Delete />}
+          onClick={onDelete}
+          disabled={deleteDisabled}
+          sx={{
+            textTransform: "none",
+            fontWeight: 600,
+            py: 1.25,
+            borderRadius: 2,
+            mb: 1.5,
+            color: "var(--color-fg-danger-primary)",
+            borderColor: "var(--color-border-danger-secondary)",
+            "&:hover": {
+              borderColor: "var(--color-border-danger-secondary)",
+              backgroundColor: "var(--color-bg-danger-secondary)",
+            },
+          }}
+        >
+          Eliminar oferta
+        </Button>
+      )}
       <Button
         type="button"
         variant="outlined"

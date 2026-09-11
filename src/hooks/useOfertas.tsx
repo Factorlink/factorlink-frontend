@@ -7,6 +7,7 @@ import {
 import type {
   ComentarioOferta,
   ComentariosOfertaResponse,
+  CreateOfertaPayload,
   Oferta,
   RespondOfertaPayload,
   UpdateOfertaPayload,
@@ -17,6 +18,11 @@ type GetOfertasParams = {
   order?: string;
 };
 
+export type CreateOfertasGrupoFacturasPayload = {
+  facturaGrupoId: string;
+  ofertas: CreateOfertaPayload[];
+};
+
 export const useOfertas = () => {
   const [loading, setLoading] = useState(false);
 
@@ -25,6 +31,18 @@ export const useOfertas = () => {
       setLoading(true);
       const payload = buildCreateOfertaPayload(data);
       const response = await api.post("/ofertas", payload);
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createOfertasGrupoFacturas = async (
+    data: CreateOfertasGrupoFacturasPayload,
+  ) => {
+    try {
+      setLoading(true);
+      const response = await api.post("/ofertas-grupo-facturas", data);
       return response.data;
     } finally {
       setLoading(false);
@@ -129,6 +147,7 @@ export const useOfertas = () => {
   return {
     loading,
     createOferta,
+    createOfertasGrupoFacturas,
     getOfertasByFacturaId,
     getOfertaById,
     updateOferta,
