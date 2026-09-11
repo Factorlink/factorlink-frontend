@@ -32,6 +32,7 @@ export interface CreateFacturaGrupoPayload {
 export interface FacturaGrupo {
     id: string;
     nombre?: string;
+    descripcion?: string | null;
     porcentajeFinanciamiento?: string | number;
     montoFinanciar?: string;
     plazo?: number;

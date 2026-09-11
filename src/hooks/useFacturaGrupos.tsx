@@ -60,10 +60,20 @@ export const useFacturaGrupos = () => {
     }
   };
 
-  const getFacturaGrupoById = async (id: string): Promise<FacturaGrupo> => {
+  const getFacturaGrupoById = async (
+    id: string,
+    options?: { factoringId?: string },
+  ): Promise<FacturaGrupo> => {
     try {
       setLoading(true);
-      const response = await api.get(`/factura-grupos/${id}`);
+      const search = new URLSearchParams();
+      if (options?.factoringId) {
+        search.set("factoringId", options.factoringId);
+      }
+      const query = search.toString();
+      const response = await api.get(
+        `/factura-grupos/${id}${query ? `?${query}` : ""}`,
+      );
       return response.data;
     } finally {
       setLoading(false);
@@ -75,6 +85,23 @@ export const useFacturaGrupos = () => {
       setLoading(true);
       const response = await api.get(`/factura-grupos/${id}/facturas`);
       return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFacturaGrupoFacturasFactoring = async (
+    id: string,
+    factoringId: string,
+  ): Promise<Factura[]> => {
+    try {
+      setLoading(true);
+      const search = new URLSearchParams();
+      search.set("factoringId", factoringId);
+      const response = await api.get(
+        `/factura-grupos/${id}/facturas/factoring?${search.toString()}`,
+      );
+      return response.data?.data ?? [];
     } finally {
       setLoading(false);
     }
@@ -120,6 +147,7 @@ export const useFacturaGrupos = () => {
     getFacturaGrupos,
     getFacturaGrupoById,
     getFacturaGrupoFacturas,
+    getFacturaGrupoFacturasFactoring,
     sendFacturaGrupoToMarketplace,
     removeFacturaGrupoFromMarketplace,
     deleteFacturaGrupo,
