@@ -1,10 +1,5 @@
-import { useCallback, useEffect, useMemo, useState, type ReactElement, type ReactNode } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState, type ReactElement } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Alert,
   Box,
@@ -17,14 +12,12 @@ import {
   DialogTitle,
   IconButton,
   Snackbar,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -32,7 +25,6 @@ import {
   ArrowBack,
   Description,
   ErrorOutline,
-  History,
   InfoOutlined,
   Send,
   Visibility,
@@ -41,7 +33,6 @@ import Layout from "../../../../../components/Layout";
 import SectionPanel from "../../../../../components/SectionPanel";
 import FacturaGrupoFactoringDetalleDrawer from "../../../../../components/Facturas/FacturaGrupoFactoringDetalleDrawer";
 import { formatCurrency } from "../../../../../components/Facturas/FacturaResumenCard";
-import HistorialOfertasFactoring from "../../../../../components/Ofertas/HistorialOfertasFactoring";
 import { useFacturaGrupos } from "../../../../../hooks/useFacturaGrupos";
 import { useOfertas } from "../../../../../hooks/useOfertas";
 import useAuthStore from "../../../../../store/authStore";
@@ -52,9 +43,9 @@ import {
   getFacturaGrupoMontoTotal,
 } from "../../../../../utils/facturaGrupo";
 import {
-  aggregateGrupoHistoryOfertas,
   canEnviarOfertaAlGrupo,
   getFacturaGrupoOfertaDisplay,
+  grupoTieneOfertaEnviada,
   type OfertaGrupoBorrador,
 } from "../../../../../utils/facturaGrupoOferta";
 import { buildCreateOfertaPayload } from "../../../../../utils/ofertaPayload";
@@ -77,10 +68,6 @@ const getMarketplaceBackPath = (from: unknown) => {
   return "/marketplace";
 };
 
-const getTabIndex = (tab: string | null) => (tab === "historial" ? 1 : 0);
-
-const getTabParam = (index: number) => (index === 1 ? "historial" : null);
-
 const formatDate = (dateString?: string) => {
   if (!dateString) return "N/A";
   return new Date(dateString).toLocaleDateString("es-CL", {
@@ -94,20 +81,6 @@ const headerCellSx = {
   fontWeight: 600,
   color: "var(--color-fg-default-secondary)",
 } as const;
-
-const TabPanel = ({
-  children,
-  value,
-  index,
-}: {
-  children?: ReactNode;
-  index: number;
-  value: number;
-}) => (
-  <div role="tabpanel" hidden={value !== index}>
-    {value === index ? <Box sx={{ pt: 3 }}>{children}</Box> : null}
-  </div>
-);
 
 const FacturaGrupoOfertaCell = ({
   factura,
@@ -146,7 +119,6 @@ const FacturaGrupoFactoringDetalle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { currentRole } = useAuthStore();
   const { getFacturaGrupoById, getFacturaGrupoFacturasFactoring } =
     useFacturaGrupos();
@@ -155,7 +127,6 @@ const FacturaGrupoFactoringDetalle = () => {
 
   const state = (location.state as GrupoFactoringLocationState | null) ?? null;
   const backPath = getMarketplaceBackPath(state?.from);
-  const tabFromUrl = getTabIndex(searchParams.get("tab"));
 
   const [grupo, setGrupo] = useState<FacturaGrupo | null>(null);
   const [facturas, setFacturas] = useState<Factura[]>([]);
@@ -164,7 +135,6 @@ const FacturaGrupoFactoringDetalle = () => {
   >({});
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState(tabFromUrl);
   const [detalleFacturaId, setDetalleFacturaId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
@@ -208,23 +178,16 @@ const FacturaGrupoFactoringDetalle = () => {
     void loadDetalle();
   }, [loadDetalle]);
 
-  useEffect(() => {
-    setActiveTab(tabFromUrl);
-  }, [tabFromUrl]);
+  const grupoBloqueado = useMemo(
+    () => grupoTieneOfertaEnviada(facturas),
+    [facturas],
+  );
 
-  const goToTab = (index: number) => {
-    setActiveTab(index);
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        const param = getTabParam(index);
-        if (param) next.set("tab", param);
-        else next.delete("tab");
-        return next;
-      },
-      { replace: true },
-    );
-  };
+  useEffect(() => {
+    if (grupoBloqueado) {
+      setBorradores({});
+    }
+  }, [grupoBloqueado]);
 
   const handleBack = () => {
     navigate(backPath);
@@ -242,6 +205,7 @@ const FacturaGrupoFactoringDetalle = () => {
   };
 
   const handleSaveBorrador = (borrador: OfertaGrupoBorrador) => {
+    if (grupoBloqueado) return;
     setBorradores((prev) => ({
       ...prev,
       [borrador.facturaId]: borrador,
@@ -257,14 +221,14 @@ const FacturaGrupoFactoringDetalle = () => {
   };
 
   const handleEnviarOfertaAlGrupo = () => {
-    if (!canEnviarOfertaAlGrupo(borradores) || !id) return;
+    if (!canEnviarOfertaAlGrupo(borradores, facturas) || !id) return;
     setSendError(null);
     setSendErrorReason(null);
     setSendConfirmOpen(true);
   };
 
   const handleConfirmEnviarOfertaAlGrupo = async () => {
-    if (!id || !canEnviarOfertaAlGrupo(borradores)) return;
+    if (!id || !canEnviarOfertaAlGrupo(borradores, facturas)) return;
     try {
       setSendError(null);
       setSendErrorReason(null);
@@ -306,16 +270,8 @@ const FacturaGrupoFactoringDetalle = () => {
   }, [facturas, grupo]);
 
   const montoFinanciar = getFacturaGrupoMontoFinanciar(grupo);
-  const canSend = canEnviarOfertaAlGrupo(borradores);
+  const canSend = canEnviarOfertaAlGrupo(borradores, facturas);
   const borradoresCount = Object.keys(borradores).length;
-  const detalleFactura = useMemo(
-    () => facturas.find((factura) => factura.id === detalleFacturaId) ?? null,
-    [facturas, detalleFacturaId],
-  );
-  const historyOfertas = useMemo(
-    () => aggregateGrupoHistoryOfertas(facturas),
-    [facturas],
-  );
   const statusConfig = getFacturaStatusConfig(grupo?.estado || "");
   const tituloNombre =
     grupo?.nombre?.trim() || state?.nombre?.trim() || "Grupo de cotización";
@@ -433,44 +389,21 @@ const FacturaGrupoFactoringDetalle = () => {
 
         <Typography
           variant="body2"
-          sx={{ color: "var(--color-fg-default-secondary)", mb: 2 }}
+          sx={{ color: "var(--color-fg-default-secondary)", mb: 3 }}
         >
-          Revisa la información del grupo y las facturas asociadas. Debes
-          completar al menos una oferta para enviar al grupo.
+          {grupoBloqueado
+            ? "Ya se envió una oferta en este grupo. Puedes revisar el detalle de cada factura y su historial."
+            : "Revisa la información del grupo y las facturas asociadas. Debes completar al menos una oferta para enviar al grupo."}
         </Typography>
 
-        <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 0 }}>
-          <Tabs
-            value={activeTab}
-            onChange={(_e, newValue: number) => goToTab(newValue)}
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-          >
-            <Tab
-              icon={<Description sx={{ fontSize: 18 }} />}
-              iconPosition="start"
-              label="Resumen del grupo"
-              sx={{ textTransform: "none", fontWeight: 600 }}
+        <SectionPanel
+          title="Información del grupo"
+          icon={
+            <Description
+              sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }}
             />
-            <Tab
-              icon={<History sx={{ fontSize: 18 }} />}
-              iconPosition="start"
-              label="Historial de ofertas"
-              sx={{ textTransform: "none", fontWeight: 600 }}
-            />
-          </Tabs>
-        </Box>
-
-        <TabPanel value={activeTab} index={0}>
-          <SectionPanel
-            title="Información del grupo"
-            icon={
-              <Description
-                sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }}
-              />
-            }
-          >
+          }
+        >
             <Box
               sx={{
                 display: "grid",
@@ -695,123 +628,77 @@ const FacturaGrupoFactoringDetalle = () => {
                     },
                   }}
                 >
-                  Debes completar al menos una oferta en alguna de las facturas
-                  para poder enviar la oferta al grupo.
+                  {grupoBloqueado
+                    ? "Ya se envió una oferta en este grupo. No es posible enviar ofertas adicionales."
+                    : "Debes completar al menos una oferta en alguna de las facturas para poder enviar la oferta al grupo."}
                 </Alert>
               </>
             )}
           </SectionPanel>
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={1}>
-          {historyOfertas.length === 0 ? (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                py: 8,
-                gap: 1,
-              }}
-            >
-              <History
-                sx={{
-                  fontSize: 56,
-                  color: "var(--color-fg-default-tertiary)",
-                  mb: 1,
-                }}
-              />
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  color: "var(--color-fg-default-secondary)",
-                }}
-              >
-                Aún no hay ofertas en el historial del grupo
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{ color: "var(--color-fg-default-tertiary)" }}
-              >
-                Las ofertas enviadas desde las facturas del grupo aparecerán
-                aquí.
-              </Typography>
-            </Box>
-          ) : (
-            <HistorialOfertasFactoring
-              ofertas={historyOfertas}
-              plazo={grupo.plazo || 0}
-            />
-          )}
-        </TabPanel>
       </Box>
 
-      {activeTab === 0 && (
-        <Box
+      <Box
+        sx={{
+          position: "sticky",
+          bottom: 0,
+          zIndex: 10,
+          display: "flex",
+          justifyContent: "flex-end",
+          flexWrap: "wrap",
+          gap: 2,
+          px: 3,
+          py: 2,
+          backgroundColor: "var(--color-bg-default-primary)",
+          borderTop: "1px solid var(--color-border-default-primary)",
+          boxShadow: "var(--shadow-card)",
+        }}
+      >
+        <Button
+          variant="outlined"
+          onClick={handleBack}
+          disabled={sendingOfertas}
           sx={{
-            position: "sticky",
-            bottom: 0,
-            zIndex: 10,
-            display: "flex",
-            justifyContent: "flex-end",
-            flexWrap: "wrap",
-            gap: 2,
-            px: 3,
-            py: 2,
-            backgroundColor: "var(--color-bg-default-primary)",
-            borderTop: "1px solid var(--color-border-default-primary)",
-            boxShadow: "var(--shadow-card)",
+            textTransform: "none",
+            fontWeight: 600,
+            borderColor: "var(--color-fg-default-secondary)",
+            color: "var(--color-fg-default-secondary)",
           }}
         >
-          <Button
-            variant="outlined"
-            onClick={handleBack}
-            disabled={sendingOfertas}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              borderColor: "var(--color-fg-default-secondary)",
-              color: "var(--color-fg-default-secondary)",
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={
-              sendingOfertas ? (
-                <CircularProgress size={18} color="inherit" />
-              ) : (
-                <Send />
-              )
-            }
-            disabled={!canSend || sendingOfertas}
-            onClick={handleEnviarOfertaAlGrupo}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              color: "var(--color-fg-on-accent-primary)",
-              backgroundColor: "var(--color-bg-accent-primary)",
-              "&:hover": {
-                backgroundColor: "var(--color-bg-accent-primary-hover)",
-              },
-              "&:disabled": {
-                backgroundColor: "var(--color-bg-disabled-primary)",
-                color: "var(--color-fg-disabled-primary)",
-              },
-            }}
-          >
-            Enviar oferta al grupo
-          </Button>
-        </Box>
-      )}
+          Cancelar
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={
+            sendingOfertas ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              <Send />
+            )
+          }
+          disabled={!canSend || sendingOfertas || grupoBloqueado}
+          onClick={handleEnviarOfertaAlGrupo}
+          sx={{
+            textTransform: "none",
+            fontWeight: 600,
+            color: "var(--color-fg-on-accent-primary)",
+            backgroundColor: "var(--color-bg-accent-primary)",
+            "&:hover": {
+              backgroundColor: "var(--color-bg-accent-primary-hover)",
+            },
+            "&:disabled": {
+              backgroundColor: "var(--color-bg-disabled-primary)",
+              color: "var(--color-fg-disabled-primary)",
+            },
+          }}
+        >
+          Enviar oferta al grupo
+        </Button>
+      </Box>
 
       <FacturaGrupoFactoringDetalleDrawer
         open={drawerOpen}
         onClose={handleCloseDrawer}
-        factura={detalleFactura}
+        facturaId={detalleFacturaId}
         factoringId={factoringId}
         borrador={
           detalleFacturaId ? borradores[detalleFacturaId] ?? null : null
@@ -822,6 +709,7 @@ const FacturaGrupoFactoringDetalle = () => {
           void loadDetalle();
         }}
         sending={sendingOfertas}
+        grupoBloqueado={grupoBloqueado}
         grupoPlazo={grupo?.plazo || 0}
       />
 

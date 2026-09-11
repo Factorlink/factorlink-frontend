@@ -22,9 +22,14 @@ export const hasOfertaGrupoBorrador = (
   facturaId?: string | null,
 ) => Boolean(facturaId && borradores[facturaId]);
 
+export const grupoTieneOfertaEnviada = (facturas: Factura[]) =>
+  facturas.some((factura) => Boolean(factura.ofertaFactoring));
+
 export const canEnviarOfertaAlGrupo = (
   borradores: Record<string, OfertaGrupoBorrador>,
-) => Object.keys(borradores).length > 0;
+  facturas: Factura[] = [],
+) =>
+  Object.keys(borradores).length > 0 && !grupoTieneOfertaEnviada(facturas);
 
 export const getFacturaGrupoOfertaDisplay = (
   factura?: Factura | null,

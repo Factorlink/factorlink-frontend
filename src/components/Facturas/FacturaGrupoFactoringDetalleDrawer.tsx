@@ -1,7 +1,15 @@
-import { useEffect, useState, type ReactElement, type ReactNode } from "react";
 import {
+  useCallback,
+  useEffect,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from "react";
+import {
+  Alert,
   Box,
   Chip,
+  CircularProgress,
   Drawer,
   IconButton,
   Tab,
@@ -11,15 +19,13 @@ import {
 import {
   ChatBubbleOutline,
   Close,
+  History,
   InfoOutlined,
   RequestQuote,
 } from "@mui/icons-material";
 import type { Factura } from "../../types/factura";
 import { getFacturaStatusConfig } from "../../theme";
-import {
-  formatCurrency,
-  formatDate,
-} from "./FacturaResumenCard";
+import { formatCurrency, formatDate } from "./FacturaResumenCard";
 import DocumentosAsociadosCard from "./DocumentosAsociadosCard";
 import FacturaGrupoOfertaForm from "./FacturaGrupoOfertaForm";
 import { hasFacturaPdf } from "../../utils/facturaDocuments";
@@ -28,24 +34,31 @@ import {
   isOfertaCondicionada,
   puedeComentar,
 } from "../../utils/ofertaEstados";
+import { useFacturas } from "../../hooks/useFacturas";
 import { useOfertas } from "../../hooks/useOfertas";
 import ConversacionOferta from "../Ofertas/ConversacionOferta";
 import DetalleOfertaFactoring from "../Ofertas/DetalleOfertaFactoring";
+import HistorialOfertasFactoring from "../Ofertas/HistorialOfertasFactoring";
 
 type FacturaGrupoFactoringDetalleDrawerProps = {
   open: boolean;
   onClose: () => void;
-  factura: Factura | null;
+  facturaId: string | null;
   factoringId: string;
   borrador?: OfertaGrupoBorrador | null;
   onSaveBorrador: (borrador: OfertaGrupoBorrador) => void;
   onDeleteBorrador: (facturaId: string) => void;
   onOfertaActualizada?: () => void;
   sending?: boolean;
+  grupoBloqueado?: boolean;
   grupoPlazo?: number;
 };
 
-type DrawerTab = "informacion" | "tu_oferta" | "comentarios";
+type DrawerTab =
+  | "informacion"
+  | "tu_oferta"
+  | "historial"
+  | "comentarios";
 
 const TabPanel = ({
   value,
@@ -124,26 +137,65 @@ const StubTabContent = ({ message }: { message: string }) => (
 const FacturaGrupoFactoringDetalleDrawer = ({
   open,
   onClose,
-  factura,
+  facturaId,
   factoringId,
   borrador,
   onSaveBorrador,
   onDeleteBorrador,
   onOfertaActualizada,
   sending = false,
+  grupoBloqueado = false,
   grupoPlazo = 0,
 }: FacturaGrupoFactoringDetalleDrawerProps) => {
   const [tab, setTab] = useState<DrawerTab>("informacion");
+  const [factura, setFactura] = useState<Factura | null>(null);
+  const [loadingDetalle, setLoadingDetalle] = useState(false);
+  const [errorDetalle, setErrorDetalle] = useState<string | null>(null);
+  const { getFacturaByIdAndFactoringId } = useFacturas();
   const { createComentario } = useOfertas();
-  const statusConfig = getFacturaStatusConfig(factura?.estado || "");
-  const ofertaEnviada = factura?.ofertaFactoring ?? null;
-  const hasBorrador = Boolean(borrador);
+
+  const loadDetalle = useCallback(
+    async (id: string, factoring: string) => {
+      setLoadingDetalle(true);
+      setErrorDetalle(null);
+      try {
+        const data = await getFacturaByIdAndFactoringId(id, factoring);
+        setFactura(data);
+      } catch (err) {
+        console.error("Error loading factura detalle in grupo drawer:", err);
+        setFactura(null);
+        setErrorDetalle("No se pudo cargar la factura. Intente nuevamente.");
+      } finally {
+        setLoadingDetalle(false);
+      }
+    },
+    // hook methods are recreated every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   useEffect(() => {
-    if (open) {
+    if (!open || !facturaId || !factoringId) {
+      setFactura(null);
+      setErrorDetalle(null);
+      setLoadingDetalle(false);
       setTab("informacion");
+      return;
     }
-  }, [open, factura?.id]);
+    setTab("informacion");
+    void loadDetalle(facturaId, factoringId);
+  }, [open, facturaId, factoringId, loadDetalle]);
+
+  const statusConfig = getFacturaStatusConfig(factura?.estado || "");
+  const ofertaEnviada = factura?.ofertaFactoring ?? null;
+  const plazo = grupoPlazo || factura?.plazo || 0;
+
+  const refreshAfterOfertaChange = async () => {
+    if (facturaId && factoringId) {
+      await loadDetalle(facturaId, factoringId);
+    }
+    onOfertaActualizada?.();
+  };
 
   const handleClose = () => {
     if (sending) return;
@@ -157,28 +209,38 @@ const FacturaGrupoFactoringDetalleDrawer = ({
       );
     }
 
-    if (hasBorrador || !ofertaEnviada) {
+    if (ofertaEnviada) {
       return (
-        <FacturaGrupoOfertaForm
-          key={factura.id}
-          factura={factura}
-          factoringId={factoringId}
-          borrador={borrador}
-          onSave={onSaveBorrador}
-          onDelete={() => onDeleteBorrador(factura.id)}
-          onCancel={handleClose}
-          disabled={sending}
+        <DetalleOfertaFactoring
+          key={ofertaEnviada.id}
+          oferta={ofertaEnviada}
+          plazo={plazo}
+          onOfertaCancelada={() => {
+            void refreshAfterOfertaChange();
+          }}
+          onOfertaFinalEnviada={() => {
+            void refreshAfterOfertaChange();
+          }}
         />
       );
     }
 
+    if (grupoBloqueado) {
+      return (
+        <StubTabContent message="Ya se envió una oferta en este grupo. No es posible crear ofertas en otras facturas." />
+      );
+    }
+
     return (
-      <DetalleOfertaFactoring
-        key={ofertaEnviada.id}
-        oferta={ofertaEnviada}
-        plazo={grupoPlazo || factura.plazo || 0}
-        onOfertaCancelada={onOfertaActualizada}
-        onOfertaFinalEnviada={onOfertaActualizada}
+      <FacturaGrupoOfertaForm
+        key={factura.id}
+        factura={factura}
+        factoringId={factoringId}
+        borrador={borrador}
+        onSave={onSaveBorrador}
+        onDelete={() => onDeleteBorrador(factura.id)}
+        onCancel={handleClose}
+        disabled={sending}
       />
     );
   };
@@ -294,7 +356,42 @@ const FacturaGrupoFactoringDetalleDrawer = ({
         </IconButton>
       </Box>
 
-      {!factura ? (
+      {loadingDetalle ? (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flex: 1,
+            py: 6,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : errorDetalle ? (
+        <Box sx={{ py: 3 }}>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {errorDetalle}
+          </Alert>
+          {facturaId && factoringId && (
+            <Typography
+              component="button"
+              variant="body2"
+              onClick={() => void loadDetalle(facturaId, factoringId)}
+              sx={{
+                border: 0,
+                background: "none",
+                cursor: "pointer",
+                color: "var(--color-fg-accent-primary)",
+                fontWeight: 600,
+                p: 0,
+              }}
+            >
+              Reintentar
+            </Typography>
+          )}
+        </Box>
+      ) : !factura ? (
         <Box sx={{ py: 4 }}>
           <Typography
             variant="body2"
@@ -337,7 +434,14 @@ const FacturaGrupoFactoringDetalleDrawer = ({
               value="tu_oferta"
               icon={<RequestQuote sx={{ fontSize: 18 }} />}
               iconPosition="start"
-              label="Tu oferta"
+              label={ofertaEnviada ? "Tu oferta" : "Enviar oferta"}
+              disabled={sending}
+            />
+            <Tab
+              value="historial"
+              icon={<History sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label="Historial"
               disabled={sending}
             />
             <Tab
@@ -488,6 +592,13 @@ const FacturaGrupoFactoringDetalleDrawer = ({
 
             <TabPanel value="tu_oferta" current={tab}>
               {renderTuOferta()}
+            </TabPanel>
+
+            <TabPanel value="historial" current={tab}>
+              <HistorialOfertasFactoring
+                ofertas={factura.historyOfertas || []}
+                plazo={plazo}
+              />
             </TabPanel>
 
             <TabPanel value="comentarios" current={tab}>
