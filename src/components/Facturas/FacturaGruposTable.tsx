@@ -37,8 +37,10 @@ import type { Meta } from "../../types/meta";
 import { getFacturaStatusConfig } from "../../theme";
 import {
   getFacturaGrupoCantidad,
+  getFacturaGrupoEmpresaPath,
   getFacturaGrupoMontoFinanciar,
   getFacturaGrupoMontoTotal,
+  isFacturaGrupoCargada,
 } from "../../utils/facturaGrupo";
 import {
   paginationSelectSx,
@@ -418,13 +420,25 @@ const FacturaGruposTable = ({
                           )}
                         </TableCell>
                         <TableCell>
-                          <Tooltip title="Ver grupo">
+                          <Tooltip
+                            title={
+                              isFacturaGrupoCargada(grupo.estado)
+                                ? "Editar grupo"
+                                : "Ver grupo"
+                            }
+                          >
                             <IconButton
                               size="small"
                               onClick={() =>
-                                navigate(`/facturas/grupos/${grupo.id}`, {
-                                  state: { nombre: grupo.nombre },
-                                })
+                                navigate(
+                                  getFacturaGrupoEmpresaPath(
+                                    grupo.id,
+                                    grupo.estado,
+                                  ),
+                                  {
+                                    state: { nombre: grupo.nombre },
+                                  },
+                                )
                               }
                               sx={{ color: "var(--color-fg-accent-primary)" }}
                             >

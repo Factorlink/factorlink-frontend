@@ -50,6 +50,18 @@ export const canQuitarFacturaIndividualDelMarketplace = (
 export const getFacturaGrupoFactoringPath = (grupoId: string) =>
   `/facturas/grupos/${grupoId}/factoring`;
 
+export const isFacturaGrupoCargada = (estado?: string | null) =>
+  (estado || "").trim().toUpperCase() === "CARGADA";
+
+/** Detalle del grupo; si está CARGADA, va directo a editar. */
+export const getFacturaGrupoEmpresaPath = (
+  grupoId: string,
+  estado?: string | null,
+) =>
+  isFacturaGrupoCargada(estado)
+    ? `/facturas/grupos/${grupoId}/editar`
+    : `/facturas/grupos/${grupoId}`;
+
 export const getFacturaFactoringPath = (factura: Factura) => {
   if (factura.facturaGrupoId) {
     return getFacturaGrupoFactoringPath(factura.facturaGrupoId);

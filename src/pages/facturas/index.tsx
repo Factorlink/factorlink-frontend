@@ -65,7 +65,9 @@ import { INITIAL_FILTERS, SORTABLE_COLUMNS } from "../../utils/consts";
 import {
   canEnviarFacturaIndividualACotizar,
   canQuitarFacturaIndividualDelMarketplace,
+  getFacturaGrupoEmpresaPath,
   isFacturaCargada,
+  isFacturaGrupoCargada,
   isFacturaInGrupo,
   isFacturaInMarketplace,
   TOOLTIP_FACTURA_EN_GRUPO_ENVIAR,
@@ -194,7 +196,12 @@ const Facturas = () => {
 
   const goToDetalle = (factura: Factura) => {
     if (factura.facturaGrupoId) {
-      navigate(`/facturas/grupos/${factura.facturaGrupoId}`);
+      const grupoEstado =
+        factura.facturaGrupo?.estado ||
+        (isFacturaCargada(factura) ? "CARGADA" : undefined);
+      navigate(
+        getFacturaGrupoEmpresaPath(factura.facturaGrupoId, grupoEstado),
+      );
     } else {
       navigate(`/facturas/${factura.id}`);
     }
@@ -1077,8 +1084,24 @@ const Facturas = () => {
                                     </span>
                                   </Tooltip>
                                 )}
-                                {!isCargada(factura) && (
-                                  <Tooltip title="Ver detalle" arrow>
+                                {(!isCargada(factura) ||
+                                  isFacturaInGrupo(factura)) && (
+                                  <Tooltip
+                                    title={
+                                      isFacturaInGrupo(factura) &&
+                                      isFacturaGrupoCargada(
+                                        factura.facturaGrupo?.estado ||
+                                          (isCargada(factura)
+                                            ? "CARGADA"
+                                            : undefined),
+                                      )
+                                        ? "Editar grupo"
+                                        : isFacturaInGrupo(factura)
+                                          ? "Ver grupo"
+                                          : "Ver detalle"
+                                    }
+                                    arrow
+                                  >
                                     <IconButton
                                       size="small"
                                       onClick={() => goToDetalle(factura)}
