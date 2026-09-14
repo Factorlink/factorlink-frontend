@@ -27,6 +27,7 @@ import CotizarFactura from "./pages/facturas/cotizar";
 import Marketplace from "./pages/marketplace";
 import FacturaFactoringDetail from "./pages/facturas/detail/factoring";
 import NuevoGrupoCotizacion from "./pages/facturas/grupos/nuevo";
+import EditarGrupoCotizacion from "./pages/facturas/grupos/editar";
 import FacturaGrupoDetalle from "./pages/facturas/grupos/detalle";
 import FacturaGrupoFactoringDetalle from "./pages/facturas/grupos/detalle/factoring";
 
@@ -125,6 +126,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <NuevoGrupoCotizacion />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/facturas/grupos/:id/editar"
+            element={
+              <ProtectedRoute>
+                <EditarGrupoCotizacion />
               </ProtectedRoute>
             }
           />

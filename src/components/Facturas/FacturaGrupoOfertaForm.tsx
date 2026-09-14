@@ -23,6 +23,7 @@ import type { OfertaGrupoBorrador } from "../../utils/facturaGrupoOferta";
 import { computeOfertaMontos } from "../../utils/ofertaCalculations";
 import { formatMoney, parseDateOnly } from "../../utils/ofertaFormatters";
 import {
+  clearZeroOnFocus,
   createOfertaFormSchema,
   handleDecimalRateInputChange,
   handleNonNegativeIntegerInputChange,
@@ -47,6 +48,11 @@ const REQUIRED_MONEY_FIELDS = [
   { name: "gastosAdministrativos", label: "Gastos administrativos" },
   { name: "firmaDigital", label: "Firma digital" },
 ] as const;
+
+const CLEAR_ZERO_ON_FOCUS_MONEY = new Set([
+  "saldoPendiente",
+  "firmaDigital",
+]);
 
 const today = new Date();
 
@@ -393,6 +399,13 @@ const FacturaGrupoOfertaForm = ({
                     formik.setFieldValue,
                   )
                 }
+                onFocus={() =>
+                  clearZeroOnFocus(
+                    "tasa30Dias",
+                    formik.values.tasa30Dias,
+                    formik.setFieldValue,
+                  )
+                }
                 onBlur={formik.handleBlur}
                 onKeyDown={(e) =>
                   blockNonNumericKeys(
@@ -419,6 +432,16 @@ const FacturaGrupoOfertaForm = ({
                       e as React.ChangeEvent<HTMLInputElement>,
                       formik.setFieldValue,
                     )
+                  }
+                  onFocus={
+                    CLEAR_ZERO_ON_FOCUS_MONEY.has(field.name)
+                      ? () =>
+                          clearZeroOnFocus(
+                            field.name,
+                            formik.values[field.name],
+                            formik.setFieldValue,
+                          )
+                      : undefined
                   }
                   onBlur={formik.handleBlur}
                   onKeyDown={(e) =>
@@ -457,6 +480,13 @@ const FacturaGrupoOfertaForm = ({
                     formik.setFieldValue,
                   )
                 }
+                onFocus={() =>
+                  clearZeroOnFocus(
+                    "tasaDiariaMora",
+                    formik.values.tasaDiariaMora,
+                    formik.setFieldValue,
+                  )
+                }
                 onBlur={formik.handleBlur}
                 onKeyDown={(e) =>
                   blockNonNumericKeys(
@@ -482,6 +512,13 @@ const FacturaGrupoOfertaForm = ({
                 onChange={(e) =>
                   handleNonNegativeIntegerInputChange(
                     e as React.ChangeEvent<HTMLInputElement>,
+                    formik.setFieldValue,
+                  )
+                }
+                onFocus={() =>
+                  clearZeroOnFocus(
+                    "cobroPorDiaMora",
+                    formik.values.cobroPorDiaMora,
                     formik.setFieldValue,
                   )
                 }

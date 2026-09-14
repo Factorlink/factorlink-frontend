@@ -131,6 +131,19 @@ export const useFacturaGrupos = () => {
     }
   };
 
+  const updateFacturaGrupo = async (
+    id: string,
+    payload: CreateFacturaGrupoPayload,
+  ): Promise<FacturaGrupo> => {
+    try {
+      setLoading(true);
+      const response = await api.patch(`/factura-grupos/${id}`, payload);
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const deleteFacturaGrupo = async (id: string) => {
     try {
       setLoading(true);
@@ -144,6 +157,7 @@ export const useFacturaGrupos = () => {
   return {
     loading,
     createFacturaGrupo,
+    updateFacturaGrupo,
     getFacturaGrupos,
     getFacturaGrupoById,
     getFacturaGrupoFacturas,

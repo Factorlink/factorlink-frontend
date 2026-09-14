@@ -29,6 +29,8 @@ export interface CreateFacturaGrupoPayload {
     facturaIds: string[];
 }
 
+export type UpdateFacturaGrupoPayload = CreateFacturaGrupoPayload;
+
 export interface FacturaGrupo {
     id: string;
     nombre?: string;

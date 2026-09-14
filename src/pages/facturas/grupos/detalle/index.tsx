@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Alert,
   Box,
@@ -25,6 +25,7 @@ import {
   ArrowBack,
   Delete,
   Description,
+  Edit,
   ErrorOutline,
   Send,
   Storefront,
@@ -49,6 +50,12 @@ import {
   tableShellSx,
   tableWideSx,
 } from "../../../../theme/layoutStyles";
+
+type LocationState = {
+  editBlockedMessage?: string;
+};
+
+type MarketplaceAction = "edit" | "delete" | null;
 
 const normalizeGrupoEstado = (estado?: string) =>
   (estado || "").trim().toUpperCase();
@@ -76,6 +83,7 @@ const headerCellSx = {
 const FacturaGrupoDetalle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentRole } = useAuthStore();
   const {
     getFacturaGrupoById,
@@ -92,9 +100,10 @@ const FacturaGrupoDetalle = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
-  const [removing, setRemoving] = useState(false);
-  const [removeError, setRemoveError] = useState<string | null>(null);
+  const [marketplaceAction, setMarketplaceAction] =
+    useState<MarketplaceAction>(null);
+  const [marketplaceBusy, setMarketplaceBusy] = useState(false);
+  const [marketplaceError, setMarketplaceError] = useState<string | null>(null);
   const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
@@ -102,6 +111,17 @@ const FacturaGrupoDetalle = () => {
     useState(false);
   const [detalleFacturaId, setDetalleFacturaId] = useState<string | null>(null);
   const [detalleOpen, setDetalleOpen] = useState(false);
+  const [editBlockedMessage, setEditBlockedMessage] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const state = location.state as LocationState | null;
+    if (state?.editBlockedMessage) {
+      setEditBlockedMessage(state.editBlockedMessage);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   const goToGrupos = (replace = false) => {
     navigate("/facturas/grupos", { replace });
@@ -154,21 +174,51 @@ const FacturaGrupoDetalle = () => {
     }
   };
 
-  const handleRemoveFromMarketplace = async () => {
+  const handleRemoveFromMarketplaceForEdit = async () => {
     if (!id) return;
     try {
-      setRemoving(true);
-      setRemoveError(null);
+      setMarketplaceBusy(true);
+      setMarketplaceError(null);
       await removeFacturaGrupoFromMarketplace(id);
-      setRemoveConfirmOpen(false);
-      await loadDetalle();
+      setMarketplaceAction(null);
+      navigate(`/facturas/grupos/${id}/editar`);
     } catch (err) {
       console.error("Error removing factura grupo from marketplace:", err);
-      setRemoveError(
+      setMarketplaceError(
         "No se pudo quitar el grupo del marketplace. Intente nuevamente.",
       );
     } finally {
-      setRemoving(false);
+      setMarketplaceBusy(false);
+    }
+  };
+
+  const handleRemoveFromMarketplaceAndDelete = async () => {
+    if (!id) return;
+    try {
+      setMarketplaceBusy(true);
+      setMarketplaceError(null);
+      await removeFacturaGrupoFromMarketplace(id);
+      try {
+        await deleteFacturaGrupo(id);
+        goToGrupos(true);
+      } catch (deleteErr) {
+        console.error(
+          "Error deleting factura grupo after marketplace remove:",
+          deleteErr,
+        );
+        setMarketplaceAction(null);
+        setMarketplaceError(
+          "El grupo se quitó del marketplace, pero no se pudo eliminar. Intenta eliminarlo desde el detalle.",
+        );
+        await loadDetalle();
+      }
+    } catch (err) {
+      console.error("Error removing factura grupo from marketplace:", err);
+      setMarketplaceError(
+        "No se pudo quitar el grupo del marketplace. Intente nuevamente.",
+      );
+    } finally {
+      setMarketplaceBusy(false);
     }
   };
 
@@ -210,8 +260,11 @@ const FacturaGrupoDetalle = () => {
   const statusConfig = getFacturaStatusConfig(grupo?.estado || "");
   const grupoEstado = normalizeGrupoEstado(grupo?.estado);
   const canDelete = grupoEstado === "CARGADA";
+  const canEdit = grupoEstado === "CARGADA";
   const canSendToMarketplace = grupoEstado === "CARGADA";
-  const canRemoveFromMarketplace = grupoEstado === "EN_MARKETPLACE";
+  const canManageMarketplace =
+    grupoEstado === "EN_MARKETPLACE" || grupoEstado === "CON_OFERTAS";
+  const marketplaceDialogOpen = marketplaceAction !== null;
 
   if (loadingPage) {
     return (
@@ -337,13 +390,23 @@ const FacturaGrupoDetalle = () => {
           </Alert>
         )}
 
-        {removeError && (
+        {marketplaceError && !marketplaceDialogOpen && (
           <Alert
             severity="error"
             sx={{ mb: 2 }}
-            onClose={() => setRemoveError(null)}
+            onClose={() => setMarketplaceError(null)}
           >
-            {removeError}
+            {marketplaceError}
+          </Alert>
+        )}
+
+        {editBlockedMessage && (
+          <Alert
+            severity="warning"
+            sx={{ mb: 2 }}
+            onClose={() => setEditBlockedMessage(null)}
+          >
+            {editBlockedMessage}
           </Alert>
         )}
 
@@ -624,30 +687,49 @@ const FacturaGrupoDetalle = () => {
           >
             Volver
           </Button>
-          {canRemoveFromMarketplace && (
-            <Button
-              variant="outlined"
-              startIcon={<Storefront />}
-              onClick={() => {
-                setRemoveError(null);
-                setRemoveConfirmOpen(true);
-              }}
-              disabled={removing}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                color: "var(--color-fg-danger-primary)",
-                borderColor: "var(--color-border-danger-secondary)",
-                "&:hover": {
+          {canManageMarketplace && (
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<Edit />}
+                onClick={() => {
+                  setMarketplaceError(null);
+                  setMarketplaceAction("edit");
+                }}
+                disabled={marketplaceBusy}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  color: "var(--color-fg-default-primary)",
+                  borderColor: "var(--color-fg-default-secondary)",
+                }}
+              >
+                Sacar de marketplace para editar
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<Storefront />}
+                onClick={() => {
+                  setMarketplaceError(null);
+                  setMarketplaceAction("delete");
+                }}
+                disabled={marketplaceBusy}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  color: "var(--color-fg-danger-primary)",
                   borderColor: "var(--color-border-danger-secondary)",
-                  backgroundColor: "var(--color-bg-danger-secondary)",
-                },
-              }}
-            >
-              Quitar grupo del Marketplace
-            </Button>
+                  "&:hover": {
+                    borderColor: "var(--color-border-danger-secondary)",
+                    backgroundColor: "var(--color-bg-danger-secondary)",
+                  },
+                }}
+              >
+                Sacar de marketplace y eliminar
+              </Button>
+            </Box>
           )}
-          {(canDelete || canSendToMarketplace) && (
+          {(canDelete || canEdit || canSendToMarketplace) && (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
               {canDelete && (
                 <Button
@@ -667,6 +749,22 @@ const FacturaGrupoDetalle = () => {
                   }}
                 >
                   Eliminar grupo
+                </Button>
+              )}
+              {canEdit && id && (
+                <Button
+                  variant="outlined"
+                  startIcon={<Edit />}
+                  onClick={() => navigate(`/facturas/grupos/${id}/editar`)}
+                  disabled={deleting || sending}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderColor: "var(--color-fg-default-secondary)",
+                    color: "var(--color-fg-default-primary)",
+                  }}
+                >
+                  Editar
                 </Button>
               )}
               {canSendToMarketplace && (
@@ -753,8 +851,8 @@ const FacturaGrupoDetalle = () => {
       </Dialog>
 
       <Dialog
-        open={removeConfirmOpen}
-        onClose={() => !removing && setRemoveConfirmOpen(false)}
+        open={marketplaceDialogOpen}
+        onClose={() => !marketplaceBusy && setMarketplaceAction(null)}
         maxWidth="xs"
         fullWidth
         PaperProps={{
@@ -762,27 +860,34 @@ const FacturaGrupoDetalle = () => {
         }}
       >
         <DialogTitle sx={{ fontWeight: 600 }}>
-          ¿Quitar del marketplace?
+          {marketplaceAction === "delete"
+            ? "¿Sacar de marketplace y eliminar?"
+            : "¿Sacar de marketplace para editar?"}
         </DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 1.5 }}>
-            El grupo será retirado del marketplace y dejará de estar visible
-            para los factoring. Podrás volver a enviarlo a cotizar más adelante.
+            {marketplaceAction === "delete"
+              ? "El grupo se retirará del marketplace y se eliminará de forma permanente. Las ofertas recibidas se perderán y esta acción no se puede deshacer."
+              : "El grupo se retirará del marketplace para que puedas editarlo. Las ofertas recibidas se perderán. Luego podrás volver a enviarlo a cotizar."}
           </Typography>
+          <Alert severity="warning" sx={{ mb: 1.5 }}>
+            Importante: las ofertas anteriores asociadas a este grupo se
+            perderán.
+          </Alert>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
             {grupo.nombre || "Grupo"} · {facturas.length} factura
             {facturas.length === 1 ? "" : "s"}
           </Typography>
-          {removeError && (
+          {marketplaceError && (
             <Alert severity="error" sx={{ mt: 2 }}>
-              {removeError}
+              {marketplaceError}
             </Alert>
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
           <Button
-            onClick={() => setRemoveConfirmOpen(false)}
-            disabled={removing}
+            onClick={() => setMarketplaceAction(null)}
+            disabled={marketplaceBusy}
             sx={{ textTransform: "none", fontWeight: 600 }}
           >
             Cancelar
@@ -790,9 +895,13 @@ const FacturaGrupoDetalle = () => {
           <Button
             variant="contained"
             onClick={() => {
-              void handleRemoveFromMarketplace();
+              if (marketplaceAction === "delete") {
+                void handleRemoveFromMarketplaceAndDelete();
+              } else {
+                void handleRemoveFromMarketplaceForEdit();
+              }
             }}
-            disabled={removing}
+            disabled={marketplaceBusy}
             sx={{
               textTransform: "none",
               fontWeight: 600,
@@ -803,10 +912,12 @@ const FacturaGrupoDetalle = () => {
               },
             }}
           >
-            {removing ? (
+            {marketplaceBusy ? (
               <CircularProgress size={22} color="inherit" />
+            ) : marketplaceAction === "delete" ? (
+              "Sacar y eliminar"
             ) : (
-              "Quitar del marketplace"
+              "Sacar y editar"
             )}
           </Button>
         </DialogActions>
