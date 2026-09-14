@@ -29,7 +29,10 @@ export interface CreateFacturaGrupoPayload {
     facturaIds: string[];
 }
 
-export type UpdateFacturaGrupoPayload = CreateFacturaGrupoPayload;
+export type UpdateFacturaGrupoPayload = Omit<
+    CreateFacturaGrupoPayload,
+    "empresaId"
+>;
 
 export interface FacturaGrupo {
     id: string;

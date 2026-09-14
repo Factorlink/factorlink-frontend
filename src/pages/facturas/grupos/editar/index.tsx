@@ -500,7 +500,7 @@ const EditarGrupoCotizacion = () => {
       setDocumentsRequiredModalOpen(true);
       return;
     }
-    if (!grupoId || saving || !currentRole.empresaId) return;
+    if (!grupoId || saving) return;
 
     const validationError = getValidationError();
     if (validationError) {
@@ -524,7 +524,6 @@ const EditarGrupoCotizacion = () => {
       setSaving(true);
       setSubmitError(null);
       await updateFacturaGrupo(grupoId, {
-        empresaId: currentRole.empresaId,
         nombre: trimmedNombre,
         porcentajeFinanciamiento,
         plazo,

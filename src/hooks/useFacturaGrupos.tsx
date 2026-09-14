@@ -5,6 +5,7 @@ import type {
   Factura,
   FacturaGrupo,
   FacturaGrupoVisibilidad,
+  UpdateFacturaGrupoPayload,
 } from "../types/factura";
 
 export type GetFacturaGruposParams = {
@@ -133,7 +134,7 @@ export const useFacturaGrupos = () => {
 
   const updateFacturaGrupo = async (
     id: string,
-    payload: CreateFacturaGrupoPayload,
+    payload: UpdateFacturaGrupoPayload,
   ): Promise<FacturaGrupo> => {
     try {
       setLoading(true);
