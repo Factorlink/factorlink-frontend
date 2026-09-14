@@ -14,6 +14,7 @@ import { useNotificaciones } from "../../hooks/useNotificaciones";
 import { useOfertas } from "../../hooks/useOfertas";
 import {
   getNotificationRoute,
+  isFacturaGrupoNotification,
   isOfertaNotification,
   sortReadNotifications,
   sortUnreadNotifications,
@@ -124,10 +125,13 @@ const NotificationTray: FC<NotificationTrayProps> = ({
     setMarkingId(notification.id);
 
     try {
-      const ofertaPromise =
-        isOfertaNotification(notification.tipo) && notification.entidadId
-          ? getOfertaById(notification.entidadId).catch(() => null)
-          : Promise.resolve(null);
+      const shouldFetchOferta =
+        isOfertaNotification(notification.tipo) &&
+        !isFacturaGrupoNotification(notification) &&
+        Boolean(notification.entidadId);
+      const ofertaPromise = shouldFetchOferta
+        ? getOfertaById(notification.entidadId).catch(() => null)
+        : Promise.resolve(null);
       const readPromise = !notification.leida
         ? markAsRead(notification.id, userId, context)
         : Promise.resolve();

@@ -9,11 +9,16 @@ import {
   Sync,
 } from "@mui/icons-material";
 import type { Role } from "../types/role";
-import type {
-  Notificacion,
-  NotificacionContext,
-  NotificationTipo,
+import {
+  FACTURA_GRUPO_ENTIDAD,
+  type Notificacion,
+  type NotificacionContext,
+  type NotificationTipo,
 } from "../types/notificacion";
+import {
+  getFacturaGrupoEmpresaPath,
+  getFacturaGrupoFactoringPath,
+} from "./facturaGrupo";
 
 export const getNotificacionContextFromRole = (
   role: Role | null,
@@ -106,6 +111,10 @@ export const formatNotificationDate = (date: string): string => {
 export const isOfertaNotification = (tipo: NotificationTipo): boolean =>
   OFERTA_TIPOS.includes(tipo);
 
+export const isFacturaGrupoNotification = (
+  notification: Notificacion,
+): boolean => notification.entidad === FACTURA_GRUPO_ENTIDAD;
+
 export const getNotificationRoute = (
   notification: Notificacion,
   currentRole: Role | null,
@@ -116,6 +125,18 @@ export const getNotificationRoute = (
   if (INVITACION_TIPOS.includes(tipo)) return "/invitations";
 
   if (isOfertaNotification(tipo)) {
+    if (isFacturaGrupoNotification(notification)) {
+      if (!notification.entidadId) {
+        return currentRole?.contexto === "factoring"
+          ? "/marketplace"
+          : "/facturas/ofertas";
+      }
+
+      return currentRole?.contexto === "factoring"
+        ? getFacturaGrupoFactoringPath(notification.entidadId)
+        : getFacturaGrupoEmpresaPath(notification.entidadId);
+    }
+
     if (!facturaId) {
       return currentRole?.contexto === "factoring"
         ? "/marketplace"

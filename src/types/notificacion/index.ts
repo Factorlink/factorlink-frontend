@@ -15,6 +15,15 @@ export type NotificationTipo =
   | "DOCUMENTO_LEGAL_APROBADO"
   | "DOCUMENTO_LEGAL_RECHAZADO";
 
+/** Valores conocidos de `entidad`; se mantiene `string` para valores futuros del backend. */
+export type NotificationEntidad =
+  | "oferta"
+  | "factura_grupo"
+  | "factura_sync"
+  | (string & {});
+
+export const FACTURA_GRUPO_ENTIDAD = "factura_grupo" as const;
+
 export interface Notificacion {
   id: string;
   userId: string;
@@ -23,7 +32,7 @@ export interface Notificacion {
   tipo: NotificationTipo;
   titulo: string;
   mensaje: string;
-  entidad: string;
+  entidad: NotificationEntidad;
   entidadId: string;
   leida: boolean;
   readAt: string | null;
