@@ -20,6 +20,18 @@ export type GetFacturaGruposParams = {
   plazo?: number;
 };
 
+export type GetFacturaGruposFactoringParams = {
+  factoringId: string;
+  page: number;
+  limit: number;
+  sortBy?: string;
+  order?: string;
+  nombre?: string;
+  visibilidad?: FacturaGrupoVisibilidad | string;
+  porcentajeFinanciamiento?: number;
+  plazo?: number;
+};
+
 export const useFacturaGrupos = () => {
   const [loading, setLoading] = useState(false);
 
@@ -55,6 +67,36 @@ export const useFacturaGrupos = () => {
       if (params.plazo != null) search.set("plazo", String(params.plazo));
 
       const response = await api.get(`/factura-grupos?${search.toString()}`);
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFacturaGruposFactoring = async (
+    params: GetFacturaGruposFactoringParams,
+  ) => {
+    try {
+      setLoading(true);
+      const search = new URLSearchParams();
+      search.set("factoringId", params.factoringId);
+      search.set("page", String(params.page));
+      search.set("limit", String(params.limit));
+      if (params.sortBy) search.set("sortBy", params.sortBy);
+      if (params.order) search.set("order", params.order);
+      if (params.nombre) search.set("nombre", params.nombre);
+      if (params.visibilidad) search.set("visibilidad", params.visibilidad);
+      if (params.porcentajeFinanciamiento != null) {
+        search.set(
+          "porcentajeFinanciamiento",
+          String(params.porcentajeFinanciamiento),
+        );
+      }
+      if (params.plazo != null) search.set("plazo", String(params.plazo));
+
+      const response = await api.get(
+        `/factura-grupos/factoring?${search.toString()}`,
+      );
       return response.data;
     } finally {
       setLoading(false);
@@ -160,6 +202,7 @@ export const useFacturaGrupos = () => {
     createFacturaGrupo,
     updateFacturaGrupo,
     getFacturaGrupos,
+    getFacturaGruposFactoring,
     getFacturaGrupoById,
     getFacturaGrupoFacturas,
     getFacturaGrupoFacturasFactoring,

@@ -194,6 +194,14 @@ function App() {
             }
           />
           <Route
+            path="/marketplace/grupos"
+            element={
+              <ProtectedRoute>
+                <Marketplace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/marketplace/ofertas"
             element={
               <ProtectedRoute>

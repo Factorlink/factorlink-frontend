@@ -7,9 +7,10 @@ import {
   Tabs,
   Tab,
 } from "@mui/material";
-import { Storefront, Visibility, CheckCircle } from "@mui/icons-material";
+import { Groups, Storefront, Visibility, CheckCircle } from "@mui/icons-material";
 import Layout from "../../components/Layout";
 import FactoringMarketplaceTable from "../../components/Facturas/FactoringMarketplaceTable";
+import FactoringGruposTable from "../../components/Facturas/FactoringGruposTable";
 import FactoringOfertasTable from "../../components/Facturas/FactoringOfertasTable";
 import FactoringCedidasTable from "../../components/Facturas/FactoringCedidasTable";
 import useAuthStore from "../../store/authStore";
@@ -21,6 +22,7 @@ import {
 
 const TAB_ROUTES = [
   "/marketplace",
+  "/marketplace/grupos",
   "/marketplace/ofertas",
   "/marketplace/cedidas",
 ];
@@ -35,6 +37,7 @@ const EMPTY_META: Meta = {
   totalEnMarketplace: 0,
   totalConOfertas: 0,
   totalGeneral: 0,
+  totalGrupo: 0,
 };
 
 const getTabFromPath = (pathname: string) => {
@@ -49,6 +52,7 @@ const preserveBadgeMeta = (prev: Meta): Meta => ({
   totalConOfertas: prev.totalConOfertas,
   totalCedida: prev.totalCedida,
   totalGeneral: prev.totalGeneral,
+  totalGrupo: prev.totalGrupo,
 });
 
 const Marketplace = () => {
@@ -84,6 +88,10 @@ const Marketplace = () => {
         typeof childMeta.totalGeneral === "number"
           ? childMeta.totalGeneral
           : prev.totalGeneral,
+      totalGrupo:
+        typeof childMeta.totalGrupo === "number"
+          ? childMeta.totalGrupo
+          : prev.totalGrupo,
     }));
   }, []);
 
@@ -118,9 +126,10 @@ const Marketplace = () => {
 
   const marketplaceBadge =
     meta.totalEnMarketplace || (activeTab === 0 ? meta.total : 0);
+  const gruposBadge = meta.totalGrupo || (activeTab === 1 ? meta.total : 0);
   const ofertasBadge =
-    meta.totalConOfertas || (activeTab === 1 ? meta.total : 0);
-  const cedidasBadge = meta.totalCedida || (activeTab === 2 ? meta.total : 0);
+    meta.totalConOfertas || (activeTab === 2 ? meta.total : 0);
+  const cedidasBadge = meta.totalCedida || (activeTab === 3 ? meta.total : 0);
 
   return (
     <Layout>
@@ -200,6 +209,22 @@ const Marketplace = () => {
               }
             />
             <Tab
+              icon={<Groups sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  Grupos de cotización
+                  {gruposBadge > 0 && (
+                    <Chip
+                      label={gruposBadge}
+                      size="small"
+                      sx={tabChipSx(activeTab === 1)}
+                    />
+                  )}
+                </Box>
+              }
+            />
+            <Tab
               icon={<Visibility sx={{ fontSize: 18 }} />}
               iconPosition="start"
               label={
@@ -209,7 +234,7 @@ const Marketplace = () => {
                     <Chip
                       label={ofertasBadge}
                       size="small"
-                      sx={tabChipSx(activeTab === 1)}
+                      sx={tabChipSx(activeTab === 2)}
                     />
                   )}
                 </Box>
@@ -225,7 +250,7 @@ const Marketplace = () => {
                     <Chip
                       label={cedidasBadge}
                       size="small"
-                      sx={tabChipSx(activeTab === 2)}
+                      sx={tabChipSx(activeTab === 3)}
                     />
                   )}
                 </Box>
@@ -241,6 +266,12 @@ const Marketplace = () => {
             onMetaChange={handleChildMetaChange}
           />
         ) : activeTab === 1 ? (
+          <FactoringGruposTable
+            key={`grupos-${factoringId}`}
+            factoringId={factoringId}
+            onMetaChange={handleChildMetaChange}
+          />
+        ) : activeTab === 2 ? (
           <FactoringOfertasTable
             key={`ofertas-${factoringId}`}
             factoringId={factoringId}
