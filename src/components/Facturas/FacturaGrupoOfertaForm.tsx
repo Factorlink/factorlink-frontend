@@ -729,7 +729,7 @@ const FacturaGrupoOfertaForm = ({
         fullWidth
         PaperProps={{ sx: { borderRadius: "var(--radius-l)" } }}
       >
-        <DialogTitle sx={{ fontWeight: 600 }}>Eliminar oferta</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600 }}>Eliminar borrador</DialogTitle>
         <DialogContent>
           <Typography variant="body2">
             ¿Eliminar el borrador de la factura #{factura.folio}? Esta acción no

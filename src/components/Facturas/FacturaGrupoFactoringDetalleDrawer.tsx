@@ -215,6 +215,7 @@ const FacturaGrupoFactoringDetalleDrawer = ({
           key={ofertaEnviada.id}
           oferta={ofertaEnviada}
           plazo={plazo}
+          montoTotal={factura.montoTotal}
           onOfertaCancelada={() => {
             void refreshAfterOfertaChange();
           }}

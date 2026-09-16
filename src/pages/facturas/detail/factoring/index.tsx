@@ -405,6 +405,7 @@ const FacturaFactoringDetail = () => {
               <DetalleOfertaFactoring
                 oferta={ofertaFactoring}
                 plazo={factura.plazo || 0}
+                montoTotal={factura.montoTotal}
                 onOfertaCancelada={fetchFactura}
                 onOfertaFinalEnviada={fetchFactura}
               />

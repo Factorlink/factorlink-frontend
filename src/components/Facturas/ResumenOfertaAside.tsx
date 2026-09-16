@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { Delete, PieChart, Save, Send } from "@mui/icons-material";
 import { formatMoney, formatPercent } from "../../utils/ofertaFormatters";
@@ -10,12 +11,16 @@ interface ResumenOfertaAsideProps {
   tasa30Dias: string | number;
   diasFinanciamiento: string | number;
   vigenciaOfertaDias: string | number;
-  submitDisabled: boolean;
+  /** Cuando true, oculta botones del formulario y muestra `detailActions` si se pasan. */
+  readOnly?: boolean;
+  detailActions?: ReactNode;
+  submitDisabled?: boolean;
   onCancel?: () => void;
   submitLabel?: string;
   showDelete?: boolean;
   onDelete?: () => void;
   deleteDisabled?: boolean;
+  deleteLabel?: string;
   secondarySubmitLabel?: string;
   onSecondarySubmit?: () => void;
   secondarySubmitDisabled?: boolean;
@@ -47,12 +52,15 @@ const ResumenOfertaAside = ({
   tasa30Dias,
   diasFinanciamiento,
   vigenciaOfertaDias,
-  submitDisabled,
+  readOnly = false,
+  detailActions,
+  submitDisabled = false,
   onCancel,
   submitLabel = "Enviar oferta",
   showDelete = false,
   onDelete,
   deleteDisabled = false,
+  deleteLabel = "Eliminar borrador",
   secondarySubmitLabel,
   onSecondarySubmit,
   secondarySubmitDisabled = false,
@@ -149,82 +157,88 @@ const ResumenOfertaAside = ({
         </Box>
       </Box>
 
-      <Button
-        type="submit"
-        variant="contained"
-        fullWidth
-        startIcon={isSaveLabel ? <Save /> : <Send />}
-        disabled={submitDisabled}
-        sx={{
-          textTransform: "none",
-          fontWeight: 600,
-          color: "var(--color-fg-on-accent-primary)",
-          py: 1.25,
-          borderRadius: 2,
-          mb: 1.5,
-        }}
-      >
-        {submitLabel}
-      </Button>
-      {secondarySubmitLabel && onSecondarySubmit && (
-        <Button
-          type="button"
-          variant="outlined"
-          fullWidth
-          startIcon={<Send />}
-          onClick={onSecondarySubmit}
-          disabled={secondarySubmitDisabled}
-          sx={{
-            textTransform: "none",
-            fontWeight: 600,
-            py: 1.25,
-            borderRadius: 2,
-            mb: 1.5,
-          }}
-        >
-          {secondarySubmitLabel}
-        </Button>
-      )}
-      {showDelete && (
-        <Button
-          type="button"
-          variant="outlined"
-          fullWidth
-          startIcon={<Delete />}
-          onClick={onDelete}
-          disabled={deleteDisabled}
-          sx={{
-            textTransform: "none",
-            fontWeight: 600,
-            py: 1.25,
-            borderRadius: 2,
-            mb: 1.5,
-            color: "var(--color-fg-danger-primary)",
-            borderColor: "var(--color-border-danger-secondary)",
-            "&:hover": {
-              borderColor: "var(--color-border-danger-secondary)",
-              backgroundColor: "var(--color-bg-danger-secondary)",
-            },
-          }}
-        >
-          Eliminar oferta
-        </Button>
-      )}
-      {onCancel && (
-        <Button
-          type="button"
-          variant="outlined"
-          fullWidth
-          onClick={onCancel}
-          sx={{
-            textTransform: "none",
-            fontWeight: 600,
-            py: 1.25,
-            borderRadius: 2,
-          }}
-        >
-          Cancelar
-        </Button>
+      {readOnly ? (
+        detailActions
+      ) : (
+        <>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            startIcon={isSaveLabel ? <Save /> : <Send />}
+            disabled={submitDisabled}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              color: "var(--color-fg-on-accent-primary)",
+              py: 1.25,
+              borderRadius: 2,
+              mb: 1.5,
+            }}
+          >
+            {submitLabel}
+          </Button>
+          {secondarySubmitLabel && onSecondarySubmit && (
+            <Button
+              type="button"
+              variant="outlined"
+              fullWidth
+              startIcon={<Send />}
+              onClick={onSecondarySubmit}
+              disabled={secondarySubmitDisabled}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                py: 1.25,
+                borderRadius: 2,
+                mb: 1.5,
+              }}
+            >
+              {secondarySubmitLabel}
+            </Button>
+          )}
+          {showDelete && (
+            <Button
+              type="button"
+              variant="outlined"
+              fullWidth
+              startIcon={<Delete />}
+              onClick={onDelete}
+              disabled={deleteDisabled}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                py: 1.25,
+                borderRadius: 2,
+                mb: 1.5,
+                color: "var(--color-fg-danger-primary)",
+                borderColor: "var(--color-border-danger-secondary)",
+                "&:hover": {
+                  borderColor: "var(--color-border-danger-secondary)",
+                  backgroundColor: "var(--color-bg-danger-secondary)",
+                },
+              }}
+            >
+              {deleteLabel}
+            </Button>
+          )}
+          {onCancel && (
+            <Button
+              type="button"
+              variant="outlined"
+              fullWidth
+              onClick={onCancel}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                py: 1.25,
+                borderRadius: 2,
+              }}
+            >
+              Cancelar
+            </Button>
+          )}
+        </>
       )}
     </Box>
   );

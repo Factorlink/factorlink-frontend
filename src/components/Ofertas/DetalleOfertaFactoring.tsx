@@ -3,8 +3,6 @@ import { Box, Button, Typography, Chip } from "@mui/material";
 import {
   Send,
   AccessTime,
-  Percent,
-  AccountBalance,
   CalendarToday,
   CheckCircle,
   Cancel,
@@ -15,8 +13,7 @@ import {
 import type { Oferta } from "../../types/oferta";
 import {
   formatDateTime,
-  formatMoney,
-  formatPercent,
+  toFiniteNumber,
 } from "../../utils/ofertaFormatters";
 import {
   isOfertaCondicionada,
@@ -27,6 +24,7 @@ import {
 } from "../../utils/ofertaEstados";
 import { getOfertaEstadoBadge } from "../../utils/ofertaEstadoBadge";
 import SectionPanel from "../SectionPanel";
+import ResumenOfertaAside from "../Facturas/ResumenOfertaAside";
 import OfertaCamposDetalle from "./OfertaCamposDetalle";
 import CancelarOfertaModal from "../Modals/CancelarOfertaModal";
 import EnviarOfertaFinalModal from "../Modals/EnviarOfertaFinalModal";
@@ -90,6 +88,7 @@ const getEstadoBanner = (oferta: Oferta) => {
 interface DetalleOfertaFactoringProps {
   oferta: Oferta;
   plazo: number;
+  montoTotal: string | number;
   onOfertaCancelada?: () => void;
   onOfertaFinalEnviada?: () => void;
 }
@@ -97,6 +96,7 @@ interface DetalleOfertaFactoringProps {
 const DetalleOfertaFactoring = ({
   oferta,
   plazo,
+  montoTotal,
   onOfertaCancelada,
   onOfertaFinalEnviada,
 }: DetalleOfertaFactoringProps) => {
@@ -107,12 +107,73 @@ const DetalleOfertaFactoring = ({
   const banner = getEstadoBanner(oferta);
   const BannerIcon = banner.icon;
   const condicionada = isOfertaCondicionada(oferta);
+  const showActions = puedeCancelar(oferta);
+
+  const diasFinanciamiento =
+    toFiniteNumber(oferta.diasFinanciamiento) ?? plazo;
+  const montoAFinanciar = toFiniteNumber(oferta.montoAFinanciar) ?? 0;
+  const montoAGirar = toFiniteNumber(oferta.montoAGirar) ?? 0;
+  const vigenciaOfertaDias = toFiniteNumber(oferta.vigenciaOfertaDias) ?? 0;
+
+  const detailActions = showActions ? (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      {puedeEnviarOfertaFinal(oferta) && (
+        <Button
+          type="button"
+          variant="contained"
+          fullWidth
+          startIcon={<Send />}
+          onClick={() => setOfertaFinalOpen(true)}
+          sx={{
+            textTransform: "none",
+            fontWeight: 600,
+            color: "var(--color-fg-on-accent-primary)",
+            py: 1.25,
+            borderRadius: 2,
+          }}
+        >
+          Enviar oferta final
+        </Button>
+      )}
+      <Button
+        type="button"
+        variant="outlined"
+        fullWidth
+        startIcon={<DeleteOutline />}
+        onClick={() => setCancelarOpen(true)}
+        sx={{
+          textTransform: "none",
+          fontWeight: 600,
+          py: 1.25,
+          borderRadius: 2,
+          color: "var(--color-fg-danger-primary)",
+          borderColor: "var(--color-border-danger-secondary)",
+          "&:hover": {
+            borderColor: "var(--color-fg-danger-primary)",
+            backgroundColor: "var(--color-bg-danger-secondary)",
+          },
+        }}
+      >
+        Cancelar oferta
+      </Button>
+    </Box>
+  ) : undefined;
 
   return (
-    <SectionPanel
-      title="Estado de tu oferta"
-      icon={<Send sx={{ color: "primary.main", fontSize: 24 }} />}
-    >
+    <>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 340px" },
+          gap: 3,
+          alignItems: "start",
+          mb: 3,
+        }}
+      >
+        <SectionPanel
+          title="Estado de tu oferta"
+          icon={<Send sx={{ color: "primary.main", fontSize: 24 }} />}
+        >
           <Box
             sx={{
               display: "flex",
@@ -124,7 +185,9 @@ const DetalleOfertaFactoring = ({
               mb: 3,
             }}
           >
-            <BannerIcon sx={{ color: banner.color, fontSize: 20, flexShrink: 0 }} />
+            <BannerIcon
+              sx={{ color: banner.color, fontSize: 20, flexShrink: 0 }}
+            />
             <Typography variant="body2" sx={{ color: banner.color }}>
               {banner.text}
             </Typography>
@@ -132,231 +195,121 @@ const DetalleOfertaFactoring = ({
 
           <Box
             sx={{
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 2,
-              p: 3,
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 1.5,
+              mb: 2,
             }}
           >
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Tu oferta
+            </Typography>
             <Box
               sx={{
                 display: "flex",
                 flexWrap: "wrap",
-                justifyContent: "space-between",
                 alignItems: "center",
-                gap: 1.5,
-                mb: 3,
+                gap: 1,
               }}
             >
-              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                Tu oferta
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  gap: 1,
-                }}
-              >
-                {condicionada && (
-                  <Chip
-                    icon={<InfoOutlined sx={{ fontSize: 16 }} />}
-                    label="Oferta condicionada"
-                    size="small"
-                    sx={{
-                      backgroundColor: "var(--color-bg-warning-secondary)",
-                      color: "var(--color-fg-warning-primary)",
-                      fontWeight: 600,
-                      "& .MuiChip-icon": {
-                        color: "var(--color-fg-warning-primary)",
-                      },
-                    }}
-                  />
-                )}
+              {condicionada && (
                 <Chip
-                  icon={<EstadoIcon sx={{ fontSize: 16 }} />}
-                  label={estadoConfig.label}
+                  icon={<InfoOutlined sx={{ fontSize: 16 }} />}
+                  label="Oferta condicionada"
                   size="small"
                   sx={{
-                    backgroundColor: estadoConfig.bg,
-                    color: estadoConfig.color,
+                    backgroundColor: "var(--color-bg-warning-secondary)",
+                    color: "var(--color-fg-warning-primary)",
                     fontWeight: 600,
-                    "& .MuiChip-icon": { color: estadoConfig.color },
-                  }}
-                />
-              </Box>
-            </Box>
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "1fr 1fr",
-                  md: "repeat(4, minmax(0, 1fr))",
-                },
-                gap: 3,
-                mb: 3,
-              }}
-            >
-              <Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    mb: 0.5,
-                  }}
-                >
-                  <Percent sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
-                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Financiamiento
-                  </Typography>
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  {oferta.porcentajeFinanciamiento}%
-                </Typography>
-              </Box>
-
-              <Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    mb: 0.5,
-                  }}
-                >
-                  <Percent sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
-                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Tasa 30 días
-                  </Typography>
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  {formatPercent(oferta.tasa30Dias)}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    mb: 0.5,
-                  }}
-                >
-                  <AccountBalance sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
-                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Monto a financiar
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 700, color: "primary.main" }}
-                >
-                  {formatMoney(oferta.montoAFinanciar)}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    mb: 0.5,
-                  }}
-                >
-                  <AccessTime sx={{ fontSize: 16, color: "var(--color-fg-default-secondary)" }} />
-                  <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                    Días financiamiento
-                  </Typography>
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  {oferta.diasFinanciamiento ?? plazo} días
-                </Typography>
-              </Box>
-            </Box>
-
-            <OfertaCamposDetalle oferta={oferta} />
-
-            <Box
-              sx={{
-                display: "flex",
-                gap: 3,
-                mb: oferta.comentario ? 3 : 0,
-                mt: 3,
-                pt: 2,
-                borderTop: "1px solid",
-                borderColor: "divider",
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <CalendarToday sx={{ fontSize: 16, color: "var(--color-fg-default-tertiary)" }} />
-                <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                  Enviada: {formatDateTime(oferta.createdAt)}
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <CalendarToday sx={{ fontSize: 16, color: "var(--color-fg-default-tertiary)" }} />
-                <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                  Expira: {formatDateShort(oferta.fechaExpiracion)}
-                </Typography>
-              </Box>
-            </Box>
-
-            {puedeCancelar(oferta) && (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "flex-end",
-                  gap: 2,
-                  mt: 3,
-                  pt: 2,
-                  borderTop: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Button
-                  variant="outlined"
-                  startIcon={<DeleteOutline />}
-                  onClick={() => setCancelarOpen(true)}
-                  sx={{
-                    textTransform: "none",
-                    fontWeight: 600,
-                    borderRadius: "var(--radius-m)",
-                    color: "var(--color-fg-danger-primary)",
-                    borderColor: "var(--color-border-danger-secondary)",
-                    "&:hover": {
-                      borderColor: "var(--color-fg-danger-primary)",
-                      backgroundColor: "var(--color-bg-danger-secondary)",
+                    "& .MuiChip-icon": {
+                      color: "var(--color-fg-warning-primary)",
                     },
                   }}
-                >
-                  Cancelar oferta
-                </Button>
-
-                {puedeEnviarOfertaFinal(oferta) && (
-                  <Button
-                    variant="contained"
-                    startIcon={<Send />}
-                    onClick={() => setOfertaFinalOpen(true)}
-                    sx={{
-                      textTransform: "none",
-                      fontWeight: 600,
-                      borderRadius: "var(--radius-m)",
-                      color: "var(--color-fg-on-accent-primary)",
-                    }}
-                  >
-                    Enviar oferta final
-                  </Button>
-                )}
-              </Box>
-            )}
+                />
+              )}
+              <Chip
+                icon={<EstadoIcon sx={{ fontSize: 16 }} />}
+                label={estadoConfig.label}
+                size="small"
+                sx={{
+                  backgroundColor: estadoConfig.bg,
+                  color: estadoConfig.color,
+                  fontWeight: 600,
+                  "& .MuiChip-icon": { color: estadoConfig.color },
+                }}
+              />
+            </Box>
           </Box>
+
+          <OfertaCamposDetalle oferta={oferta} />
+
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 3,
+              mt: 3,
+              pt: 2,
+              borderTop: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <CalendarToday
+                sx={{ fontSize: 16, color: "var(--color-fg-default-tertiary)" }}
+              />
+              <Typography
+                variant="body2"
+                sx={{ color: "var(--color-fg-default-secondary)" }}
+              >
+                Enviada: {formatDateTime(oferta.createdAt)}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <CalendarToday
+                sx={{ fontSize: 16, color: "var(--color-fg-default-tertiary)" }}
+              />
+              <Typography
+                variant="body2"
+                sx={{ color: "var(--color-fg-default-secondary)" }}
+              >
+                Expira: {formatDateShort(oferta.fechaExpiracion)}
+              </Typography>
+            </Box>
+          </Box>
+
+          {oferta.comentario?.trim() && (
+            <Box sx={{ mt: 3 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 600, color: "text.primary", mb: 1 }}
+              >
+                Comentario
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: "var(--color-fg-default-secondary)" }}
+              >
+                {oferta.comentario}
+              </Typography>
+            </Box>
+          )}
+        </SectionPanel>
+
+        <ResumenOfertaAside
+          readOnly
+          montoTotal={montoTotal}
+          porcentajeFinanciamiento={oferta.porcentajeFinanciamiento}
+          montoAFinanciar={montoAFinanciar}
+          montoAGirar={montoAGirar}
+          tasa30Dias={oferta.tasa30Dias ?? 0}
+          diasFinanciamiento={diasFinanciamiento}
+          vigenciaOfertaDias={vigenciaOfertaDias}
+          detailActions={detailActions}
+        />
+      </Box>
 
       <CancelarOfertaModal
         open={cancelarOpen}
@@ -371,7 +324,7 @@ const DetalleOfertaFactoring = ({
         onSuccess={onOfertaFinalEnviada}
         oferta={oferta}
       />
-    </SectionPanel>
+    </>
   );
 };
 
