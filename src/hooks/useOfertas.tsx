@@ -111,10 +111,28 @@ export const useOfertas = () => {
   /** Canal de comentarios del lado Factoring. */
   const createComentario = async (
     ofertaId: string,
-    comentario: string
+    comentario: string,
+    archivos?: File[]
   ): Promise<ComentarioOferta> => {
     try {
       setLoading(true);
+      if (archivos?.length) {
+        const formData = new FormData();
+        formData.append("comentario", comentario);
+        archivos.forEach((archivo) => {
+          formData.append("archivos", archivo);
+        });
+        const response = await api.post(
+          `/ofertas/${ofertaId}/comentarios`,
+          formData,
+          {
+            headers: {
+              "Content-Type": false,
+            },
+          }
+        );
+        return response.data;
+      }
       const response = await api.post(`/ofertas/${ofertaId}/comentarios`, {
         comentario,
       });
@@ -141,9 +159,35 @@ export const useOfertas = () => {
    * Canal de comentarios del lado Empresa. Omite `estado` a propósito: enviarlo
    * aceptaría o rechazaría la oferta si dejó de estar condicionada.
    */
-  const comentarEmpresa = async (ofertaId: string, comentarioEmpresa: string) =>
-    responderOferta(ofertaId, { comentarioEmpresa });
-
+  const comentarEmpresa = async (
+    ofertaId: string,
+    comentarioEmpresa: string,
+    archivos?: File[]
+  ): Promise<Oferta> => {
+    if (!archivos?.length) {
+      return responderOferta(ofertaId, { comentarioEmpresa });
+    }
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("comentarioEmpresa", comentarioEmpresa);
+      archivos.forEach((archivo) => {
+        formData.append("archivos", archivo);
+      });
+      const response = await api.patch(
+        `/ofertas/${ofertaId}/responder`,
+        formData,
+        {
+          headers: {
+            "Content-Type": false,
+          },
+        }
+      );
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
   return {
     loading,
     createOferta,

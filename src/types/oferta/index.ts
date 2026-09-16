@@ -82,11 +82,21 @@ export interface ComentarioOfertaUsuario {
     tipo: ComentarioOfertaTipo;
 }
 
+export interface ComentarioArchivo {
+    id: string;
+    nombreArchivo: string;
+    mimeType: string;
+    signedUrl: string;
+    urlArchivo?: string;
+    createdAt?: string;
+}
+
 export interface ComentarioOferta {
     id: string;
     comentario: string;
     createdAt: string;
     usuario: ComentarioOfertaUsuario;
+    archivos?: ComentarioArchivo[];
 }
 
 export interface ComentariosOfertaResponse {

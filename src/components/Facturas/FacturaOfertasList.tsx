@@ -290,8 +290,8 @@ const FacturaOfertasList = ({
                 onToggle={() => handleToggleRow(oferta.id)}
                 onAceptar={() => setAceptarModal({ open: true, oferta })}
                 onRechazar={() => setRechazarModal({ open: true, oferta })}
-                onEnviarComentario={async (texto) => {
-                  await comentarEmpresa(oferta.id, texto);
+                onEnviarComentario={async (texto, archivos) => {
+                  await comentarEmpresa(oferta.id, texto, archivos);
                 }}
                 cardRef={(el) => {
                   cardRefs.current[oferta.id] = el;

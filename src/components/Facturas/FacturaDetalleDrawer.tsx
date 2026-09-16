@@ -453,8 +453,12 @@ const FacturaDetalleDrawer = ({
                           puedeComentarOferta(selectedOferta) &&
                           isOfertaCondicionada(selectedOferta)
                         }
-                        onEnviarComentario={async (texto) => {
-                          await comentarEmpresa(selectedOferta.id, texto);
+                        onEnviarComentario={async (texto, archivos) => {
+                          await comentarEmpresa(
+                            selectedOferta.id,
+                            texto,
+                            archivos,
+                          );
                         }}
                       />
                     ) : (

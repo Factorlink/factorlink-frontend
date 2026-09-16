@@ -1,25 +1,47 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
+  IconButton,
+  Link,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { ChatBubbleOutline, Send } from "@mui/icons-material";
+import {
+  AttachFile,
+  ChatBubbleOutline,
+  Close,
+  Download,
+  InsertDriveFile,
+  Send,
+} from "@mui/icons-material";
 import type {
+  ComentarioArchivo,
   ComentarioOferta,
   ComentarioOfertaTipo,
 } from "../../types/oferta";
 import { useOfertas } from "../../hooks/useOfertas";
 import { formatDateTime } from "../../utils/ofertaFormatters";
+import {
+  ALLOWED_EXTENSIONS,
+  formatFileSize,
+  MAX_ARCHIVOS_COMENTARIO,
+  validateFile,
+} from "../../utils/validations/file-fields";
 import SectionPanel from "../SectionPanel";
 
 const LADO_LABEL: Record<ComentarioOfertaTipo, string> = {
   EMPRESA: "Empresa",
   FACTORING: "Factoring",
 };
+
+const ACCEPT_ATTR = ALLOWED_EXTENSIONS.join(",");
+
+const isImageMime = (mimeType: string) => mimeType.startsWith("image/");
 
 interface ConversacionOfertaProps {
   ofertaId: string;
@@ -31,10 +53,140 @@ interface ConversacionOfertaProps {
    * Cada lado usa un endpoint distinto. Si resuelve con el comentario creado se
    * agrega a la lista; si resuelve vacío se recargan los comentarios.
    */
-  onEnviarComentario?: (texto: string) => Promise<ComentarioOferta | void>;
+  onEnviarComentario?: (
+    texto: string,
+    archivos: File[],
+  ) => Promise<ComentarioOferta | void>;
   placeholderComentario?: string;
   textoBotonEnviar?: string;
 }
+
+const ArchivosComentario = ({ archivos }: { archivos: ComentarioArchivo[] }) => {
+  if (!archivos.length) return null;
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        mt: 1.5,
+      }}
+    >
+      {archivos.map((archivo) => {
+        const esImagen = isImageMime(archivo.mimeType);
+        if (esImagen && archivo.signedUrl) {
+          return (
+            <Box key={archivo.id}>
+              <Link
+                href={archivo.signedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="none"
+                sx={{ display: "block" }}
+              >
+                <Box
+                  component="img"
+                  src={archivo.signedUrl}
+                  alt={archivo.nombreArchivo}
+                  sx={{
+                    display: "block",
+                    maxWidth: "100%",
+                    maxHeight: 200,
+                    borderRadius: "var(--radius-s)",
+                    objectFit: "contain",
+                    border: "1px solid",
+                    borderColor: "var(--color-border-default-primary)",
+                    backgroundColor: "var(--color-bg-default-primary)",
+                  }}
+                />
+              </Link>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "var(--color-fg-default-tertiary)",
+                  display: "block",
+                  mt: 0.5,
+                }}
+              >
+                {archivo.nombreArchivo}
+              </Typography>
+            </Box>
+          );
+        }
+
+        return (
+          <Box
+            key={archivo.id}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              p: 1,
+              borderRadius: "var(--radius-s)",
+              border: "1px solid",
+              borderColor: "var(--color-border-default-primary)",
+              backgroundColor: "var(--color-bg-default-primary)",
+            }}
+          >
+            <InsertDriveFile
+              sx={{
+                fontSize: 20,
+                color: "var(--color-fg-default-secondary)",
+                flexShrink: 0,
+              }}
+            />
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              {archivo.signedUrl ? (
+                <Link
+                  href={archivo.signedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={archivo.nombreArchivo}
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    display: "block",
+                  }}
+                >
+                  {archivo.nombreArchivo}
+                </Link>
+              ) : (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {archivo.nombreArchivo}
+                </Typography>
+              )}
+            </Box>
+            {archivo.signedUrl && (
+              <IconButton
+                size="small"
+                component="a"
+                href={archivo.signedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download={archivo.nombreArchivo}
+                aria-label={`Descargar ${archivo.nombreArchivo}`}
+              >
+                <Download fontSize="small" />
+              </IconButton>
+            )}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+};
 
 const ConversacionOferta = ({
   ofertaId,
@@ -50,9 +202,11 @@ const ConversacionOferta = ({
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nuevoComentario, setNuevoComentario] = useState("");
+  const [archivosPendientes, setArchivosPendientes] = useState<File[]>([]);
   const [enviando, setEnviando] = useState(false);
   const [errorEnvio, setErrorEnvio] = useState<string | null>(null);
   const requestIdRef = useRef(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchComentarios = async (mostrarCargando = true) => {
     const requestId = ++requestIdRef.current;
@@ -83,16 +237,61 @@ const ConversacionOferta = ({
   }, [ofertaId]);
 
   const puedeEnviar = puedeComentar && Boolean(onEnviarComentario);
+  const tieneContenido =
+    Boolean(nuevoComentario.trim()) || archivosPendientes.length > 0;
+
+  const handleSelectArchivos = (event: ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (!selected.length) return;
+
+    setErrorEnvio(null);
+    const errores: string[] = [];
+    const aceptados: File[] = [];
+
+    for (const file of selected) {
+      if (archivosPendientes.length + aceptados.length >= MAX_ARCHIVOS_COMENTARIO) {
+        errores.push(
+          `Máximo ${MAX_ARCHIVOS_COMENTARIO} archivos por comentario.`,
+        );
+        break;
+      }
+      const result = validateFile(file);
+      if (!result.valid) {
+        errores.push(`${file.name}: ${result.errors.join(", ")}`);
+        continue;
+      }
+      const duplicado = [...archivosPendientes, ...aceptados].some(
+        (f) => f.name === file.name && f.size === file.size,
+      );
+      if (duplicado) continue;
+      aceptados.push(file);
+    }
+
+    if (aceptados.length) {
+      setArchivosPendientes((prev) => [...prev, ...aceptados]);
+    }
+    if (errores.length) {
+      setErrorEnvio(errores[0]);
+    }
+  };
+
+  const handleRemoveArchivo = (index: number) => {
+    setArchivosPendientes((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleEnviar = async () => {
     const texto = nuevoComentario.trim();
-    if (!texto || !onEnviarComentario) return;
+    if ((!texto && archivosPendientes.length === 0) || !onEnviarComentario) {
+      return;
+    }
 
     setEnviando(true);
     setErrorEnvio(null);
     try {
-      const creado = await onEnviarComentario(texto);
+      const creado = await onEnviarComentario(texto, archivosPendientes);
       setNuevoComentario("");
+      setArchivosPendientes([]);
       if (creado?.id) {
         setComentarios((prev) => [...prev, creado]);
       } else {
@@ -250,15 +449,18 @@ const ConversacionOferta = ({
                       {formatDateTime(comentario.createdAt)}
                     </Typography>
                   </Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      whiteSpace: "pre-wrap",
-                      color: "var(--color-fg-default-primary)",
-                    }}
-                  >
-                    {comentario.comentario}
-                  </Typography>
+                  {comentario.comentario ? (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        whiteSpace: "pre-wrap",
+                        color: "var(--color-fg-default-primary)",
+                      }}
+                    >
+                      {comentario.comentario}
+                    </Typography>
+                  ) : null}
+                  <ArchivosComentario archivos={comentario.archivos ?? []} />
                 </Box>
               </Box>
             );
@@ -276,7 +478,7 @@ const ConversacionOferta = ({
           }}
         >
           {errorEnvio && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setErrorEnvio(null)}>
               {errorEnvio}
             </Alert>
           )}
@@ -293,6 +495,29 @@ const ConversacionOferta = ({
             inputProps={{ maxLength: 500 }}
           />
 
+          {archivosPendientes.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 1,
+                mt: 1.5,
+              }}
+            >
+              {archivosPendientes.map((file, index) => (
+                <Chip
+                  key={`${file.name}-${file.size}-${index}`}
+                  icon={<InsertDriveFile />}
+                  label={`${file.name} (${formatFileSize(file.size)})`}
+                  onDelete={enviando ? undefined : () => handleRemoveArchivo(index)}
+                  deleteIcon={<Close />}
+                  variant="outlined"
+                  sx={{ maxWidth: "100%" }}
+                />
+              ))}
+            </Box>
+          )}
+
           <Box
             sx={{
               display: "flex",
@@ -302,17 +527,47 @@ const ConversacionOferta = ({
               mt: 1.5,
             }}
           >
-            <Typography
-              variant="caption"
-              sx={{ color: "var(--color-fg-default-tertiary)" }}
-            >
-              {nuevoComentario.length}/500
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                hidden
+                multiple
+                accept={ACCEPT_ATTR}
+                onChange={handleSelectArchivos}
+              />
+              <Tooltip
+                title={`Adjuntar archivos (máx. ${MAX_ARCHIVOS_COMENTARIO})`}
+              >
+                <span>
+                  <IconButton
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={
+                      enviando ||
+                      archivosPendientes.length >= MAX_ARCHIVOS_COMENTARIO
+                    }
+                    aria-label="Adjuntar archivos"
+                    size="small"
+                  >
+                    <AttachFile />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <Typography
+                variant="caption"
+                sx={{ color: "var(--color-fg-default-tertiary)" }}
+              >
+                {nuevoComentario.length}/500
+                {archivosPendientes.length > 0
+                  ? ` · ${archivosPendientes.length}/${MAX_ARCHIVOS_COMENTARIO} archivos`
+                  : ""}
+              </Typography>
+            </Box>
             <Button
               variant="contained"
               startIcon={enviando ? undefined : <Send />}
               onClick={handleEnviar}
-              disabled={enviando || !nuevoComentario.trim()}
+              disabled={enviando || !tieneContenido}
               sx={{
                 textTransform: "none",
                 fontWeight: 600,

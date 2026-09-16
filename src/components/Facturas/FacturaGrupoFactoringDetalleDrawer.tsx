@@ -269,8 +269,8 @@ const FacturaGrupoFactoringDetalleDrawer = ({
           puedeComentar(ofertaEnviada) &&
           isOfertaCondicionada(ofertaEnviada)
         }
-        onEnviarComentario={(texto) =>
-          createComentario(ofertaEnviada.id, texto)
+        onEnviarComentario={(texto, archivos) =>
+          createComentario(ofertaEnviada.id, texto, archivos)
         }
         placeholderComentario="Escribe tu respuesta..."
         textoBotonEnviar="Enviar comentario"

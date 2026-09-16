@@ -1,6 +1,9 @@
 // Tamaño máximo permitido (20MB en bytes)
 export const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
+/** Máximo de archivos adjuntos por comentario de oferta. */
+export const MAX_ARCHIVOS_COMENTARIO = 10;
+
 // Tipos MIME permitidos
 export const ALLOWED_MIME_TYPES = [
   'application/pdf',

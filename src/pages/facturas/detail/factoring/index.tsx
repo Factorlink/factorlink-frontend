@@ -416,8 +416,8 @@ const FacturaFactoringDetail = () => {
                   puedeComentar(ofertaFactoring) &&
                   isOfertaCondicionada(ofertaFactoring)
                 }
-                onEnviarComentario={(texto) =>
-                  createComentario(ofertaFactoring.id, texto)
+                onEnviarComentario={(texto, archivos) =>
+                  createComentario(ofertaFactoring.id, texto, archivos)
                 }
               />
             </>

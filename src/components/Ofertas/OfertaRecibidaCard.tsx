@@ -35,7 +35,7 @@ interface OfertaRecibidaCardProps {
   onToggle: () => void;
   onAceptar: () => void;
   onRechazar: () => void;
-  onEnviarComentario: (texto: string) => Promise<void>;
+  onEnviarComentario: (texto: string, archivos: File[]) => Promise<void>;
   cardRef?: (el: HTMLDivElement | null) => void;
 }
 
