@@ -271,66 +271,88 @@ const FacturaResumenCard = ({ factura, showSolicitudFields }: FacturaResumenCard
           </Box>
         </Box>
 
-        <Box
-          sx={[
-            statsRowSx,
-            {
-              mb: 0,
-              pt: 3,
-              borderTop: "1px solid",
-              borderColor: "divider",
-            },
-          ]}
-        >
-          <Box>
-            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-              Monto total
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
-            >
-              {formatCurrency(factura.montoTotal)}
-            </Typography>
+        {showSolicitudFields && (
+          <Box
+            sx={[
+              statsRowSx,
+              {
+                mb: 0,
+                pt: 3,
+                borderTop: "1px solid",
+                borderColor: "divider",
+              },
+            ]}
+          >
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ color: "var(--color-fg-default-secondary)" }}
+              >
+                Monto total
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  color: "var(--color-fg-default-primary)",
+                }}
+              >
+                {formatCurrency(factura.montoTotal)}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ color: "var(--color-fg-default-secondary)" }}
+              >
+                Financiamiento solicitado
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  color: "var(--color-fg-default-primary)",
+                }}
+              >
+                {factura.porcentajeFinanciamiento || 0}%
+              </Typography>
+            </Box>
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ color: "var(--color-fg-success-primary)" }}
+              >
+                Monto a financiar
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  color: "var(--color-fg-success-primary)",
+                }}
+              >
+                {formatCurrency(factura.montoFinanciar)}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ color: "var(--color-fg-default-secondary)" }}
+              >
+                Plazo solicitado
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  color: "var(--color-fg-default-primary)",
+                }}
+              >
+                {factura.plazo || 0} {factura.plazo === 1 ? "día" : "días"}
+              </Typography>
+            </Box>
           </Box>
-          {showSolicitudFields && (
-            <>
-              <Box>
-                <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                  Financiamiento solicitado
-                </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
-                >
-                  {factura.porcentajeFinanciamiento || 0}%
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" sx={{ color: "var(--color-fg-success-primary)" }}>
-                  Monto a financiar
-                </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 700, color: "var(--color-fg-success-primary)" }}
-                >
-                  {formatCurrency(factura.montoFinanciar)}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-                  Plazo solicitado
-                </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 700, color: "var(--color-fg-default-primary)" }}
-                >
-                  {factura.plazo || 0} {factura.plazo === 1 ? "día" : "días"}
-                </Typography>
-              </Box>
-            </>
-          )}
-        </Box>
+        )}
       </SectionPanel>
 
       <SectionPanel title="Montos del documento">

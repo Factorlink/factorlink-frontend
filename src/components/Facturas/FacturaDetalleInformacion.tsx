@@ -56,7 +56,7 @@ const FacturaDetalleInformacion = ({
     <>
       <FacturaResumenCard
         factura={factura}
-        showSolicitudFields={!isCargada}
+        showSolicitudFields={false}
       />
 
       {!isCargada && (
