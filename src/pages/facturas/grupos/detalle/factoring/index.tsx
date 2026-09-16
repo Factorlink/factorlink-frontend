@@ -44,8 +44,9 @@ import {
 } from "../../../../../utils/facturaGrupo";
 import {
   canEnviarOfertaAlGrupo,
+  facturaTieneOfertaEnviada,
+  getBorradoresPendientesEnvio,
   getFacturaGrupoOfertaDisplay,
-  grupoTieneOfertaEnviada,
   type OfertaGrupoBorrador,
 } from "../../../../../utils/facturaGrupoOferta";
 import { buildCreateOfertaPayload } from "../../../../../utils/ofertaPayload";
@@ -141,6 +142,7 @@ const FacturaGrupoFactoringDetalle = () => {
   const [sendError, setSendError] = useState<string | null>(null);
   const [sendErrorReason, setSendErrorReason] = useState<string | null>(null);
   const [sendSuccessOpen, setSendSuccessOpen] = useState(false);
+  const [individualSendErrorOpen, setIndividualSendErrorOpen] = useState(false);
 
   const loadDetalle = useCallback(async () => {
     if (!id) {
@@ -178,16 +180,20 @@ const FacturaGrupoFactoringDetalle = () => {
     void loadDetalle();
   }, [loadDetalle]);
 
-  const grupoBloqueado = useMemo(
-    () => grupoTieneOfertaEnviada(facturas),
-    [facturas],
-  );
-
+  // Limpia borradores locales de facturas que ya tienen oferta enviada.
   useEffect(() => {
-    if (grupoBloqueado) {
-      setBorradores({});
-    }
-  }, [grupoBloqueado]);
+    setBorradores((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const factura of facturas) {
+        if (facturaTieneOfertaEnviada(factura) && next[factura.id]) {
+          delete next[factura.id];
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [facturas]);
 
   const handleBack = () => {
     navigate(backPath);
@@ -205,7 +211,8 @@ const FacturaGrupoFactoringDetalle = () => {
   };
 
   const handleSaveBorrador = (borrador: OfertaGrupoBorrador) => {
-    if (grupoBloqueado) return;
+    const factura = facturas.find((f) => f.id === borrador.facturaId);
+    if (facturaTieneOfertaEnviada(factura)) return;
     setBorradores((prev) => ({
       ...prev,
       [borrador.facturaId]: borrador,
@@ -232,7 +239,8 @@ const FacturaGrupoFactoringDetalle = () => {
     try {
       setSendError(null);
       setSendErrorReason(null);
-      const ofertas = Object.values(borradores).map((borrador) =>
+      const pendientes = getBorradoresPendientesEnvio(borradores, facturas);
+      const ofertas = pendientes.map((borrador) =>
         buildCreateOfertaPayload(borrador),
       );
       await createOfertasGrupoFacturas({
@@ -256,6 +264,43 @@ const FacturaGrupoFactoringDetalle = () => {
     }
   };
 
+  const handleEnviarOfertaIndividual = async (
+    borrador: OfertaGrupoBorrador,
+  ) => {
+    if (!id) return;
+    const factura = facturas.find((f) => f.id === borrador.facturaId);
+    if (facturaTieneOfertaEnviada(factura)) return;
+
+    try {
+      setSendError(null);
+      setSendErrorReason(null);
+      const payload = buildCreateOfertaPayload(borrador);
+      await createOfertasGrupoFacturas({
+        facturaGrupoId: id,
+        ofertas: [payload],
+      });
+      setBorradores((prev) => {
+        const next = { ...prev };
+        delete next[borrador.facturaId];
+        return next;
+      });
+      handleCloseDrawer();
+      setSendSuccessOpen(true);
+      await loadDetalle();
+    } catch (err) {
+      console.error("Error sending oferta individual:", err);
+      const axiosError = err as {
+        response?: { data?: { message?: string; reason?: string } };
+      };
+      setSendError(
+        axiosError?.response?.data?.message ||
+          "No se pudo enviar la oferta individual. Intente nuevamente.",
+      );
+      setSendErrorReason(axiosError?.response?.data?.reason || null);
+      setIndividualSendErrorOpen(true);
+    }
+  };
+
   const montoTotal = useMemo(() => {
     if (facturas.length > 0) {
       return facturas.reduce((sum, factura) => {
@@ -270,8 +315,12 @@ const FacturaGrupoFactoringDetalle = () => {
   }, [facturas, grupo]);
 
   const montoFinanciar = getFacturaGrupoMontoFinanciar(grupo);
+  const pendientesEnvio = useMemo(
+    () => getBorradoresPendientesEnvio(borradores, facturas),
+    [borradores, facturas],
+  );
   const canSend = canEnviarOfertaAlGrupo(borradores, facturas);
-  const borradoresCount = Object.keys(borradores).length;
+  const borradoresCount = pendientesEnvio.length;
   const statusConfig = getFacturaStatusConfig(grupo?.estado || "");
   const tituloNombre =
     grupo?.nombre?.trim() || state?.nombre?.trim() || "Grupo de cotización";
@@ -391,9 +440,8 @@ const FacturaGrupoFactoringDetalle = () => {
           variant="body2"
           sx={{ color: "var(--color-fg-default-secondary)", mb: 3 }}
         >
-          {grupoBloqueado
-            ? "Ya se envió una oferta en este grupo. Puedes revisar el detalle de cada factura y su historial."
-            : "Revisa la información del grupo y las facturas asociadas. Debes completar al menos una oferta para enviar al grupo."}
+          Revisa la información del grupo y las facturas asociadas. Puedes
+          guardar borradores, enviar ofertas de forma individual o al grupo.
         </Typography>
 
         <SectionPanel
@@ -628,9 +676,10 @@ const FacturaGrupoFactoringDetalle = () => {
                     },
                   }}
                 >
-                  {grupoBloqueado
-                    ? "Ya se envió una oferta en este grupo. No es posible enviar ofertas adicionales."
-                    : "Debes completar al menos una oferta en alguna de las facturas para poder enviar la oferta al grupo."}
+                  Debes completar al menos una oferta en alguna de las facturas
+                  pendientes para poder enviar la oferta al grupo. También
+                  puedes enviar una oferta de forma individual desde el detalle
+                  de cada factura.
                 </Alert>
               </>
             )}
@@ -675,7 +724,7 @@ const FacturaGrupoFactoringDetalle = () => {
               <Send />
             )
           }
-          disabled={!canSend || sendingOfertas || grupoBloqueado}
+          disabled={!canSend || sendingOfertas}
           onClick={handleEnviarOfertaAlGrupo}
           sx={{
             textTransform: "none",
@@ -704,12 +753,12 @@ const FacturaGrupoFactoringDetalle = () => {
           detalleFacturaId ? borradores[detalleFacturaId] ?? null : null
         }
         onSaveBorrador={handleSaveBorrador}
+        onEnviarIndividual={handleEnviarOfertaIndividual}
         onDeleteBorrador={handleDeleteBorrador}
         onOfertaActualizada={() => {
           void loadDetalle();
         }}
         sending={sendingOfertas}
-        grupoBloqueado={grupoBloqueado}
         grupoPlazo={grupo?.plazo || 0}
       />
 
@@ -783,7 +832,29 @@ const FacturaGrupoFactoringDetalle = () => {
           onClose={() => setSendSuccessOpen(false)}
           sx={{ width: "100%" }}
         >
-          Oferta enviada al grupo correctamente.
+          Oferta enviada correctamente.
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={individualSendErrorOpen}
+        autoHideDuration={6000}
+        onClose={() => setIndividualSendErrorOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIndividualSendErrorOpen(false)}
+          sx={{ width: "100%" }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {sendError || "No se pudo enviar la oferta individual."}
+          </Typography>
+          {sendErrorReason && (
+            <Typography variant="body2" sx={{ mt: 0.75 }}>
+              {sendErrorReason}
+            </Typography>
+          )}
         </Alert>
       </Snackbar>
     </Layout>

@@ -12,14 +12,13 @@ export type OfertaPayloadInput = {
   retencion: string | number;
   costoFinanciamiento: string | number;
   precioCompra: string | number;
-  saldoPendiente: string | number;
+  /** Opcional en form; vacío se envía como 0. */
+  saldoPendiente?: string | number | null;
   montoComision: string | number;
   ivaComision: string | number;
   gastosAdministrativos: string | number;
-  firmaDigital: string | number;
   montoAGirar: string | number;
   tasaDiariaMora: string | number;
-  cobroPorDiaMora: string | number;
   vigenciaOfertaDias: string | number;
   comentario?: string | null;
   ofertaCondicionada?: boolean;
@@ -55,14 +54,11 @@ const REQUIRED_NUMERIC_KEYS = [
   "retencion",
   "costoFinanciamiento",
   "precioCompra",
-  "saldoPendiente",
   "montoComision",
   "ivaComision",
   "gastosAdministrativos",
-  "firmaDigital",
   "montoAGirar",
   "tasaDiariaMora",
-  "cobroPorDiaMora",
   "vigenciaOfertaDias",
 ] as const;
 
@@ -83,5 +79,6 @@ export const buildCreateOfertaPayload = (
     comentario: input.comentario?.trim() ?? "",
     ofertaCondicionada: Boolean(input.ofertaCondicionada),
     ...requiredNumeric,
+    saldoPendiente: toFiniteNumber(input.saldoPendiente) ?? 0,
   };
 };

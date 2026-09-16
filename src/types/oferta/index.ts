@@ -16,10 +16,8 @@ export type OfertaCamposFinancieros = {
     montoComision: number;
     ivaComision: number;
     gastosAdministrativos: number;
-    firmaDigital: number;
     montoAGirar: number;
     tasaDiariaMora: number;
-    cobroPorDiaMora: number;
 };
 
 export interface Oferta {
@@ -46,10 +44,8 @@ export interface Oferta {
     montoComision?: OfertaNumericValue;
     ivaComision?: OfertaNumericValue;
     gastosAdministrativos?: OfertaNumericValue;
-    firmaDigital?: OfertaNumericValue;
     montoAGirar?: OfertaNumericValue;
     tasaDiariaMora?: OfertaNumericValue;
-    cobroPorDiaMora?: OfertaNumericValue;
 }
 
 export type CreateOfertaPayload = {

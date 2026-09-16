@@ -8,7 +8,6 @@ export type OfertaMontosInput = {
   saldoPendiente: string | number | null | undefined;
   montoComision: string | number | null | undefined;
   gastosAdministrativos: string | number | null | undefined;
-  firmaDigital: string | number | null | undefined;
 };
 
 export type OfertaMontosCalculados = {
@@ -57,15 +56,13 @@ export const calcMontoAGirar = (
   montoComision: number,
   ivaComision: number,
   gastosAdministrativos: number,
-  firmaDigital: number,
 ): number =>
   Math.round(
     precioCompra -
       saldoPendiente -
       montoComision -
       ivaComision -
-      gastosAdministrativos -
-      firmaDigital,
+      gastosAdministrativos,
   );
 
 export const computeOfertaMontos = (
@@ -78,7 +75,6 @@ export const computeOfertaMontos = (
   const saldoPendiente = toNum(input.saldoPendiente);
   const montoComision = toNum(input.montoComision);
   const gastosAdministrativos = toNum(input.gastosAdministrativos);
-  const firmaDigital = toNum(input.firmaDigital);
 
   const ivaComision = calcIvaComision(montoComision);
   const montoAFinanciar = calcMontoAFinanciar(
@@ -98,7 +94,6 @@ export const computeOfertaMontos = (
     montoComision,
     ivaComision,
     gastosAdministrativos,
-    firmaDigital,
   );
 
   return {

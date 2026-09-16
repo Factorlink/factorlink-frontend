@@ -16,6 +16,9 @@ interface ResumenOfertaAsideProps {
   showDelete?: boolean;
   onDelete?: () => void;
   deleteDisabled?: boolean;
+  secondarySubmitLabel?: string;
+  onSecondarySubmit?: () => void;
+  secondarySubmitDisabled?: boolean;
 }
 
 const rowSx = {
@@ -50,6 +53,9 @@ const ResumenOfertaAside = ({
   showDelete = false,
   onDelete,
   deleteDisabled = false,
+  secondarySubmitLabel,
+  onSecondarySubmit,
+  secondarySubmitDisabled = false,
 }: ResumenOfertaAsideProps) => {
   const dias = Number(diasFinanciamiento) || 0;
   const vigencia = Number(vigenciaOfertaDias) || 0;
@@ -160,6 +166,25 @@ const ResumenOfertaAside = ({
       >
         {submitLabel}
       </Button>
+      {secondarySubmitLabel && onSecondarySubmit && (
+        <Button
+          type="button"
+          variant="outlined"
+          fullWidth
+          startIcon={<Send />}
+          onClick={onSecondarySubmit}
+          disabled={secondarySubmitDisabled}
+          sx={{
+            textTransform: "none",
+            fontWeight: 600,
+            py: 1.25,
+            borderRadius: 2,
+            mb: 1.5,
+          }}
+        >
+          {secondarySubmitLabel}
+        </Button>
+      )}
       {showDelete && (
         <Button
           type="button"
@@ -185,20 +210,22 @@ const ResumenOfertaAside = ({
           Eliminar oferta
         </Button>
       )}
-      <Button
-        type="button"
-        variant="outlined"
-        fullWidth
-        onClick={onCancel}
-        sx={{
-          textTransform: "none",
-          fontWeight: 600,
-          py: 1.25,
-          borderRadius: 2,
-        }}
-      >
-        Cancelar
-      </Button>
+      {onCancel && (
+        <Button
+          type="button"
+          variant="outlined"
+          fullWidth
+          onClick={onCancel}
+          sx={{
+            textTransform: "none",
+            fontWeight: 600,
+            py: 1.25,
+            borderRadius: 2,
+          }}
+        >
+          Cancelar
+        </Button>
+      )}
     </Box>
   );
 };

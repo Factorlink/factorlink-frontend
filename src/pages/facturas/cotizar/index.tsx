@@ -79,7 +79,7 @@ const CotizarFactura = () => {
   const [uploadXmlModalOpen, setUploadXmlModalOpen] = useState(false);
 
   const [montoFinanciar, setMontoFinanciar] = useState<number>(100);
-  const [plazo, setPlazo] = useState<number>(1);
+  const [plazo, setPlazo] = useState<number>(30);
   const [visibilidad, setVisibilidad] = useState<"TODOS" | "SELECCIONADOS">(
     "TODOS",
   );
@@ -105,15 +105,9 @@ const CotizarFactura = () => {
   const applyFacturaData = (data: Factura) => {
     setFactura(data);
     setAdjuntos(data.archivos ?? []);
-    if (data.montoTotal) {
-      const percentage = data.montoFinanciar
-        ? (parseFloat(data.montoFinanciar) / parseFloat(data.montoTotal)) * 100
-        : 100;
-      setMontoFinanciar(truncateToTwo(percentage));
-    }
-    if (data.plazo) {
-      setPlazo(data.plazo);
-    }
+    // Defaults fijos para cotizar: 100% y 30 días (el usuario puede editarlos).
+    setMontoFinanciar(100);
+    setPlazo(30);
   };
 
   const obtainPdfFromSii = useCallback(async () => {

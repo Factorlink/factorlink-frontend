@@ -38,17 +38,14 @@ const COMPUTED_MONEY_FIELDS = [
   { key: "montoAGirar", label: "Monto a girar", emphasize: true },
 ] as const;
 
-const REQUIRED_MONEY_FIELDS = [
-  { name: "saldoPendiente", label: "Saldo pendiente" },
-  { name: "montoComision", label: "Monto de comisión" },
-  { name: "gastosAdministrativos", label: "Gastos administrativos" },
-  { name: "firmaDigital", label: "Firma digital" },
+const MONEY_FIELDS = [
+  { name: "montoComision", label: "Monto de comisión", required: true },
+  {
+    name: "gastosAdministrativos",
+    label: "Gastos administrativos",
+    required: true,
+  },
 ] as const;
-
-const CLEAR_ZERO_ON_FOCUS_MONEY = new Set([
-  "saldoPendiente",
-  "firmaDigital",
-]);
 
 const today = new Date();
 
@@ -117,12 +114,10 @@ const EnviarOfertaCard = ({
       porcentajeFinanciamiento: 100 as number | string,
       fechaCotizacion: today as Date | null,
       tasa30Dias: 0 as number | string,
-      saldoPendiente: "0",
       montoComision: "",
       gastosAdministrativos: "",
-      firmaDigital: "0",
+      saldoPendiente: "0",
       tasaDiariaMora: 0 as number | string,
-      cobroPorDiaMora: "0",
       vigenciaOfertaDias: 3 as number | string,
       comentario: "",
       ofertaCondicionada: false,
@@ -143,7 +138,6 @@ const EnviarOfertaCard = ({
         saldoPendiente: formik.values.saldoPendiente,
         montoComision: formik.values.montoComision,
         gastosAdministrativos: formik.values.gastosAdministrativos,
-        firmaDigital: formik.values.firmaDigital,
       }),
     [
       factura.montoTotal,
@@ -153,7 +147,6 @@ const EnviarOfertaCard = ({
       formik.values.saldoPendiente,
       formik.values.montoComision,
       formik.values.gastosAdministrativos,
-      formik.values.firmaDigital,
     ],
   );
 
@@ -183,10 +176,8 @@ const EnviarOfertaCard = ({
         montoComision: formik.values.montoComision,
         ivaComision: montosCalculados.ivaComision,
         gastosAdministrativos: formik.values.gastosAdministrativos,
-        firmaDigital: formik.values.firmaDigital,
         montoAGirar: montosCalculados.montoAGirar,
         tasaDiariaMora: formik.values.tasaDiariaMora,
-        cobroPorDiaMora: formik.values.cobroPorDiaMora,
         vigenciaOfertaDias: formik.values.vigenciaOfertaDias,
         comentario: formik.values.comentario,
         ofertaCondicionada: formik.values.ofertaCondicionada,
@@ -398,7 +389,7 @@ const EnviarOfertaCard = ({
                 helperText={fieldHelper("tasa30Dias", TASA_RANGE_MESSAGE)}
               />
 
-              {REQUIRED_MONEY_FIELDS.map((field) => (
+              {MONEY_FIELDS.map((field) => (
                 <StyledTextField
                   key={field.name}
                   fullWidth
@@ -406,23 +397,13 @@ const EnviarOfertaCard = ({
                   label={field.label}
                   type="string"
                   inputMode="numeric"
-                  required
+                  required={field.required}
                   value={formik.values[field.name]}
                   onChange={(e) =>
                     handleNonNegativeIntegerInputChange(
                       e as React.ChangeEvent<HTMLInputElement>,
                       formik.setFieldValue,
                     )
-                  }
-                  onFocus={
-                    CLEAR_ZERO_ON_FOCUS_MONEY.has(field.name)
-                      ? () =>
-                          clearZeroOnFocus(
-                            field.name,
-                            formik.values[field.name],
-                            formik.setFieldValue,
-                          )
-                      : undefined
                   }
                   onBlur={formik.handleBlur}
                   onKeyDown={(e) =>
@@ -484,44 +465,6 @@ const EnviarOfertaCard = ({
 
               <StyledTextField
                 fullWidth
-                name="cobroPorDiaMora"
-                label="Cobro por día de mora"
-                type="string"
-                inputMode="numeric"
-                required
-                value={formik.values.cobroPorDiaMora}
-                onChange={(e) =>
-                  handleNonNegativeIntegerInputChange(
-                    e as React.ChangeEvent<HTMLInputElement>,
-                    formik.setFieldValue,
-                  )
-                }
-                onFocus={() =>
-                  clearZeroOnFocus(
-                    "cobroPorDiaMora",
-                    formik.values.cobroPorDiaMora,
-                    formik.setFieldValue,
-                  )
-                }
-                onBlur={formik.handleBlur}
-                onKeyDown={(e) =>
-                  blockNonNumericKeys(
-                    e as React.KeyboardEvent<HTMLInputElement>,
-                    false,
-                  )
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
-                  ),
-                }}
-                inputProps={{ maxLength: 50 }}
-                error={fieldError("cobroPorDiaMora")}
-                helperText={fieldHelper("cobroPorDiaMora", "Mayor o igual a 0")}
-              />
-
-              <StyledTextField
-                fullWidth
                 name="vigenciaOfertaDias"
                 label="Días de vigencia"
                 type="string"
@@ -546,6 +489,36 @@ const EnviarOfertaCard = ({
                   "vigenciaOfertaDias",
                   "Mínimo 1 día, máximo 365. Por defecto 3",
                 )}
+              />
+
+              <StyledTextField
+                fullWidth
+                name="saldoPendiente"
+                label="Saldo pendiente"
+                type="string"
+                inputMode="numeric"
+                value={formik.values.saldoPendiente}
+                onChange={(e) =>
+                  handleNonNegativeIntegerInputChange(
+                    e as React.ChangeEvent<HTMLInputElement>,
+                    formik.setFieldValue,
+                  )
+                }
+                onBlur={formik.handleBlur}
+                onKeyDown={(e) =>
+                  blockNonNumericKeys(
+                    e as React.KeyboardEvent<HTMLInputElement>,
+                    false,
+                  )
+                }
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ),
+                }}
+                inputProps={{ maxLength: 50 }}
+                error={fieldError("saldoPendiente")}
+                helperText={fieldHelper("saldoPendiente", "Mayor o igual a 0")}
               />
             </Box>
 

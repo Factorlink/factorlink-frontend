@@ -47,10 +47,10 @@ type FacturaGrupoFactoringDetalleDrawerProps = {
   factoringId: string;
   borrador?: OfertaGrupoBorrador | null;
   onSaveBorrador: (borrador: OfertaGrupoBorrador) => void;
+  onEnviarIndividual: (borrador: OfertaGrupoBorrador) => void | Promise<void>;
   onDeleteBorrador: (facturaId: string) => void;
   onOfertaActualizada?: () => void;
   sending?: boolean;
-  grupoBloqueado?: boolean;
   grupoPlazo?: number;
 };
 
@@ -141,10 +141,10 @@ const FacturaGrupoFactoringDetalleDrawer = ({
   factoringId,
   borrador,
   onSaveBorrador,
+  onEnviarIndividual,
   onDeleteBorrador,
   onOfertaActualizada,
   sending = false,
-  grupoBloqueado = false,
   grupoPlazo = 0,
 }: FacturaGrupoFactoringDetalleDrawerProps) => {
   const [tab, setTab] = useState<DrawerTab>("informacion");
@@ -225,12 +225,6 @@ const FacturaGrupoFactoringDetalleDrawer = ({
       );
     }
 
-    if (grupoBloqueado) {
-      return (
-        <StubTabContent message="Ya se envió una oferta en este grupo. No es posible crear ofertas en otras facturas." />
-      );
-    }
-
     return (
       <FacturaGrupoOfertaForm
         key={factura.id}
@@ -238,9 +232,11 @@ const FacturaGrupoFactoringDetalleDrawer = ({
         factoringId={factoringId}
         borrador={borrador}
         onSave={onSaveBorrador}
+        onSaveSuccess={handleClose}
+        onEnviarIndividual={onEnviarIndividual}
         onDelete={() => onDeleteBorrador(factura.id)}
-        onCancel={handleClose}
         disabled={sending}
+        sendingIndividual={sending}
       />
     );
   };

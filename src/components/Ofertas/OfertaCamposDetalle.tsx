@@ -36,11 +36,6 @@ const CONDICIONES_FIELDS: FieldDef[] = [
     label: "Tasa diaria de mora",
     format: formatPercent,
   },
-  {
-    key: "cobroPorDiaMora",
-    label: "Cobro por día de mora",
-    format: formatMoney,
-  },
 ];
 
 const MONTOS_FIELDS: FieldDef[] = [
@@ -52,7 +47,6 @@ const MONTOS_FIELDS: FieldDef[] = [
     format: formatMoney,
   },
   { key: "precioCompra", label: "Precio de compra", format: formatMoney },
-  { key: "saldoPendiente", label: "Saldo pendiente", format: formatMoney },
   { key: "montoComision", label: "Monto de comisión", format: formatMoney },
   { key: "ivaComision", label: "IVA comisión", format: formatMoney },
   {
@@ -60,7 +54,7 @@ const MONTOS_FIELDS: FieldDef[] = [
     label: "Gastos administrativos",
     format: formatMoney,
   },
-  { key: "firmaDigital", label: "Firma digital", format: formatMoney },
+  { key: "saldoPendiente", label: "Saldo pendiente", format: formatMoney },
   {
     key: "montoAGirar",
     label: "Monto a girar",

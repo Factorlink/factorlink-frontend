@@ -22,19 +22,40 @@ export const hasOfertaGrupoBorrador = (
   facturaId?: string | null,
 ) => Boolean(facturaId && borradores[facturaId]);
 
+export const facturaTieneOfertaEnviada = (factura?: Factura | null) =>
+  Boolean(factura?.ofertaFactoring);
+
 export const grupoTieneOfertaEnviada = (facturas: Factura[]) =>
-  facturas.some((factura) => Boolean(factura.ofertaFactoring));
+  facturas.some((factura) => facturaTieneOfertaEnviada(factura));
+
+/** Borradores de facturas que aún no tienen oferta enviada. */
+export const getBorradoresPendientesEnvio = (
+  borradores: Record<string, OfertaGrupoBorrador>,
+  facturas: Factura[] = [],
+): OfertaGrupoBorrador[] => {
+  const ofertadas = new Set(
+    facturas
+      .filter((factura) => facturaTieneOfertaEnviada(factura))
+      .map((factura) => factura.id),
+  );
+  return Object.values(borradores).filter(
+    (borrador) => !ofertadas.has(borrador.facturaId),
+  );
+};
 
 export const canEnviarOfertaAlGrupo = (
   borradores: Record<string, OfertaGrupoBorrador>,
   facturas: Factura[] = [],
-) =>
-  Object.keys(borradores).length > 0 && !grupoTieneOfertaEnviada(facturas);
+) => getBorradoresPendientesEnvio(borradores, facturas).length > 0;
 
 export const getFacturaGrupoOfertaDisplay = (
   factura?: Factura | null,
   hasBorradorLocal = false,
 ): FacturaGrupoOfertaDisplay => {
+  if (facturaTieneOfertaEnviada(factura)) {
+    return { kind: "creada", label: "Oferta creada" };
+  }
+
   if (hasBorradorLocal) {
     return { kind: "borrador", label: "Borrador" };
   }

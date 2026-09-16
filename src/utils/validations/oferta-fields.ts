@@ -107,6 +107,21 @@ export const nonNegativeMoneyValidation = yup
     (_value, ctx) => String(ctx.originalValue ?? "").length <= 50,
   );
 
+/** Opcional: vacío se trata como 0 en submit; si hay valor debe ser entero ≥ 0. */
+export const optionalNonNegativeMoneyValidation = yup
+  .number()
+  .transform(emptyToUndefined)
+  .typeError("Debe ser un número")
+  .nullable()
+  .notRequired()
+  .integer("Debe ser un número entero")
+  .min(0, "No puede ser negativo")
+  .test(
+    "max-length",
+    "No puede exceder 50 caracteres",
+    (_value, ctx) => String(ctx.originalValue ?? "").length <= 50,
+  );
+
 export const createOfertaFormSchema = () =>
   yup.object({
     diasFinanciamiento: positiveIntegerValidation,
@@ -121,12 +136,10 @@ export const createOfertaFormSchema = () =>
       .required("La fecha de cotización es obligatoria")
       .nullable(),
     tasa30Dias: tasaValidation,
-    saldoPendiente: nonNegativeMoneyValidation,
     montoComision: nonNegativeMoneyValidation,
     gastosAdministrativos: nonNegativeMoneyValidation,
-    firmaDigital: nonNegativeMoneyValidation,
+    saldoPendiente: optionalNonNegativeMoneyValidation,
     tasaDiariaMora: tasaDiariaMoraValidation,
-    cobroPorDiaMora: nonNegativeMoneyValidation,
     vigenciaOfertaDias: yup
       .number()
       .transform(emptyToUndefined)

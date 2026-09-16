@@ -42,17 +42,14 @@ const COMPUTED_MONEY_FIELDS = [
   { key: "montoAGirar", label: "Monto a girar", emphasize: true },
 ] as const;
 
-const REQUIRED_MONEY_FIELDS = [
-  { name: "saldoPendiente", label: "Saldo pendiente" },
-  { name: "montoComision", label: "Monto de comisión" },
-  { name: "gastosAdministrativos", label: "Gastos administrativos" },
-  { name: "firmaDigital", label: "Firma digital" },
+const MONEY_FIELDS = [
+  { name: "montoComision", label: "Monto de comisión", required: true },
+  {
+    name: "gastosAdministrativos",
+    label: "Gastos administrativos",
+    required: true,
+  },
 ] as const;
-
-const CLEAR_ZERO_ON_FOCUS_MONEY = new Set([
-  "saldoPendiente",
-  "firmaDigital",
-]);
 
 const today = new Date();
 
@@ -99,9 +96,11 @@ type FacturaGrupoOfertaFormProps = {
   factoringId: string;
   borrador?: OfertaGrupoBorrador | null;
   onSave: (borrador: OfertaGrupoBorrador) => void;
+  onSaveSuccess?: () => void;
+  onEnviarIndividual?: (borrador: OfertaGrupoBorrador) => void | Promise<void>;
   onDelete?: () => void;
-  onCancel?: () => void;
   disabled?: boolean;
+  sendingIndividual?: boolean;
 };
 
 const buildInitialValues = (
@@ -116,12 +115,10 @@ const buildInitialValues = (
       fechaCotizacion:
         parseDateOnly(borrador.fechaCotizacion as string | Date) ?? today,
       tasa30Dias: borrador.tasa30Dias as number | string,
-      saldoPendiente: String(borrador.saldoPendiente ?? "0"),
       montoComision: String(borrador.montoComision ?? ""),
       gastosAdministrativos: String(borrador.gastosAdministrativos ?? ""),
-      firmaDigital: String(borrador.firmaDigital ?? "0"),
+      saldoPendiente: String(borrador.saldoPendiente ?? "0"),
       tasaDiariaMora: borrador.tasaDiariaMora as number | string,
-      cobroPorDiaMora: String(borrador.cobroPorDiaMora ?? "0"),
       vigenciaOfertaDias: borrador.vigenciaOfertaDias as number | string,
       comentario: borrador.comentario ?? "",
       ofertaCondicionada: Boolean(borrador.ofertaCondicionada),
@@ -133,15 +130,52 @@ const buildInitialValues = (
     porcentajeFinanciamiento: 100 as number | string,
     fechaCotizacion: today as Date | null,
     tasa30Dias: 0 as number | string,
-    saldoPendiente: "0",
     montoComision: "",
     gastosAdministrativos: "",
-    firmaDigital: "0",
+    saldoPendiente: "0",
     tasaDiariaMora: 0 as number | string,
-    cobroPorDiaMora: "0",
     vigenciaOfertaDias: 3 as number | string,
     comentario: "",
     ofertaCondicionada: false,
+  };
+};
+
+const buildBorradorFromValues = (
+  factura: Factura,
+  factoringId: string,
+  values: ReturnType<typeof buildInitialValues>,
+): OfertaGrupoBorrador | null => {
+  if (!values.fechaCotizacion) return null;
+  const montos = computeOfertaMontos({
+    montoTotal: factura.montoTotal,
+    porcentajeFinanciamiento: values.porcentajeFinanciamiento,
+    diasFinanciamiento: values.diasFinanciamiento,
+    tasa30Dias: values.tasa30Dias,
+    saldoPendiente: values.saldoPendiente,
+    montoComision: values.montoComision,
+    gastosAdministrativos: values.gastosAdministrativos,
+  });
+
+  return {
+    facturaId: factura.id,
+    factoringId,
+    diasFinanciamiento: values.diasFinanciamiento,
+    porcentajeFinanciamiento: values.porcentajeFinanciamiento,
+    fechaCotizacion: values.fechaCotizacion,
+    montoAFinanciar: montos.montoAFinanciar,
+    tasa30Dias: values.tasa30Dias,
+    retencion: montos.retencion,
+    costoFinanciamiento: montos.costoFinanciamiento,
+    precioCompra: montos.precioCompra,
+    saldoPendiente: values.saldoPendiente || "0",
+    montoComision: values.montoComision,
+    ivaComision: montos.ivaComision,
+    gastosAdministrativos: values.gastosAdministrativos,
+    montoAGirar: montos.montoAGirar,
+    tasaDiariaMora: values.tasaDiariaMora,
+    vigenciaOfertaDias: values.vigenciaOfertaDias,
+    comentario: values.comentario,
+    ofertaCondicionada: values.ofertaCondicionada,
   };
 };
 
@@ -150,56 +184,26 @@ const FacturaGrupoOfertaForm = ({
   factoringId,
   borrador,
   onSave,
+  onSaveSuccess,
+  onEnviarIndividual,
   onDelete,
-  onCancel,
   disabled = false,
+  sendingIndividual = false,
 }: FacturaGrupoOfertaFormProps) => {
   const [openPicker, setOpenPicker] = useState<"fechaCotizacion" | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [savedFlash, setSavedFlash] = useState(false);
   const hasBorrador = Boolean(borrador);
 
   const formik = useFormik({
     enableReinitialize: true,
+    validateOnMount: true,
     initialValues: buildInitialValues(factura, borrador),
     validationSchema: createOfertaFormSchema(),
     onSubmit: (values) => {
-      if (!values.fechaCotizacion) return;
-      const montos = computeOfertaMontos({
-        montoTotal: factura.montoTotal,
-        porcentajeFinanciamiento: values.porcentajeFinanciamiento,
-        diasFinanciamiento: values.diasFinanciamiento,
-        tasa30Dias: values.tasa30Dias,
-        saldoPendiente: values.saldoPendiente,
-        montoComision: values.montoComision,
-        gastosAdministrativos: values.gastosAdministrativos,
-        firmaDigital: values.firmaDigital,
-      });
-
-      onSave({
-        facturaId: factura.id,
-        factoringId,
-        diasFinanciamiento: values.diasFinanciamiento,
-        porcentajeFinanciamiento: values.porcentajeFinanciamiento,
-        fechaCotizacion: values.fechaCotizacion,
-        montoAFinanciar: montos.montoAFinanciar,
-        tasa30Dias: values.tasa30Dias,
-        retencion: montos.retencion,
-        costoFinanciamiento: montos.costoFinanciamiento,
-        precioCompra: montos.precioCompra,
-        saldoPendiente: values.saldoPendiente,
-        montoComision: values.montoComision,
-        ivaComision: montos.ivaComision,
-        gastosAdministrativos: values.gastosAdministrativos,
-        firmaDigital: values.firmaDigital,
-        montoAGirar: montos.montoAGirar,
-        tasaDiariaMora: values.tasaDiariaMora,
-        cobroPorDiaMora: values.cobroPorDiaMora,
-        vigenciaOfertaDias: values.vigenciaOfertaDias,
-        comentario: values.comentario,
-        ofertaCondicionada: values.ofertaCondicionada,
-      });
-      setSavedFlash(true);
+      const next = buildBorradorFromValues(factura, factoringId, values);
+      if (!next) return;
+      onSave(next);
+      onSaveSuccess?.();
     },
   });
 
@@ -213,7 +217,6 @@ const FacturaGrupoOfertaForm = ({
         saldoPendiente: formik.values.saldoPendiente,
         montoComision: formik.values.montoComision,
         gastosAdministrativos: formik.values.gastosAdministrativos,
-        firmaDigital: formik.values.firmaDigital,
       }),
     [
       factura.montoTotal,
@@ -223,9 +226,39 @@ const FacturaGrupoOfertaForm = ({
       formik.values.saldoPendiente,
       formik.values.montoComision,
       formik.values.gastosAdministrativos,
-      formik.values.firmaDigital,
     ],
   );
+
+  const isFormComplete =
+    formik.isValid &&
+    Boolean(formik.values.fechaCotizacion) &&
+    Boolean(formik.values.vigenciaOfertaDias) &&
+    formik.values.montoComision !== "" &&
+    formik.values.gastosAdministrativos !== "" &&
+    formik.values.diasFinanciamiento !== "" &&
+    formik.values.porcentajeFinanciamiento !== "";
+
+  const actionsDisabled = disabled || sendingIndividual || !isFormComplete;
+
+  const handleEnviarIndividual = async () => {
+    if (!onEnviarIndividual || disabled || sendingIndividual) return;
+    const errors = await formik.validateForm();
+    if (Object.keys(errors).length > 0) {
+      formik.setTouched(
+        Object.fromEntries(
+          Object.keys(formik.values).map((key) => [key, true]),
+        ) as typeof formik.touched,
+      );
+      return;
+    }
+    const next = buildBorradorFromValues(
+      factura,
+      factoringId,
+      formik.values,
+    );
+    if (!next) return;
+    await onEnviarIndividual(next);
+  };
 
   const fieldError = (name: keyof typeof formik.values) =>
     Boolean(formik.touched[name] && formik.errors[name]);
@@ -258,16 +291,7 @@ const FacturaGrupoOfertaForm = ({
             {hasBorrador && (
               <Alert severity="info" sx={{ mb: 2 }}>
                 Borrador guardado. Puedes seguir editando o eliminarlo antes de
-                enviar la oferta al grupo.
-              </Alert>
-            )}
-            {savedFlash && (
-              <Alert
-                severity="success"
-                sx={{ mb: 2 }}
-                onClose={() => setSavedFlash(false)}
-              >
-                Oferta guardada como borrador.
+                enviar la oferta.
               </Alert>
             )}
 
@@ -417,7 +441,7 @@ const FacturaGrupoOfertaForm = ({
                 helperText={fieldHelper("tasa30Dias", TASA_RANGE_MESSAGE)}
               />
 
-              {REQUIRED_MONEY_FIELDS.map((field) => (
+              {MONEY_FIELDS.map((field) => (
                 <StyledTextField
                   key={field.name}
                   fullWidth
@@ -425,23 +449,13 @@ const FacturaGrupoOfertaForm = ({
                   label={field.label}
                   type="string"
                   inputMode="numeric"
-                  required
+                  required={field.required}
                   value={formik.values[field.name]}
                   onChange={(e) =>
                     handleNonNegativeIntegerInputChange(
                       e as React.ChangeEvent<HTMLInputElement>,
                       formik.setFieldValue,
                     )
-                  }
-                  onFocus={
-                    CLEAR_ZERO_ON_FOCUS_MONEY.has(field.name)
-                      ? () =>
-                          clearZeroOnFocus(
-                            field.name,
-                            formik.values[field.name],
-                            formik.setFieldValue,
-                          )
-                      : undefined
                   }
                   onBlur={formik.handleBlur}
                   onKeyDown={(e) =>
@@ -503,44 +517,6 @@ const FacturaGrupoOfertaForm = ({
 
               <StyledTextField
                 fullWidth
-                name="cobroPorDiaMora"
-                label="Cobro por día de mora"
-                type="string"
-                inputMode="numeric"
-                required
-                value={formik.values.cobroPorDiaMora}
-                onChange={(e) =>
-                  handleNonNegativeIntegerInputChange(
-                    e as React.ChangeEvent<HTMLInputElement>,
-                    formik.setFieldValue,
-                  )
-                }
-                onFocus={() =>
-                  clearZeroOnFocus(
-                    "cobroPorDiaMora",
-                    formik.values.cobroPorDiaMora,
-                    formik.setFieldValue,
-                  )
-                }
-                onBlur={formik.handleBlur}
-                onKeyDown={(e) =>
-                  blockNonNumericKeys(
-                    e as React.KeyboardEvent<HTMLInputElement>,
-                    false,
-                  )
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
-                  ),
-                }}
-                inputProps={{ maxLength: 50 }}
-                error={fieldError("cobroPorDiaMora")}
-                helperText={fieldHelper("cobroPorDiaMora", "Mayor o igual a 0")}
-              />
-
-              <StyledTextField
-                fullWidth
                 name="vigenciaOfertaDias"
                 label="Días de vigencia"
                 type="string"
@@ -565,6 +541,36 @@ const FacturaGrupoOfertaForm = ({
                   "vigenciaOfertaDias",
                   "Mínimo 1 día, máximo 365",
                 )}
+              />
+
+              <StyledTextField
+                fullWidth
+                name="saldoPendiente"
+                label="Saldo pendiente"
+                type="string"
+                inputMode="numeric"
+                value={formik.values.saldoPendiente}
+                onChange={(e) =>
+                  handleNonNegativeIntegerInputChange(
+                    e as React.ChangeEvent<HTMLInputElement>,
+                    formik.setFieldValue,
+                  )
+                }
+                onBlur={formik.handleBlur}
+                onKeyDown={(e) =>
+                  blockNonNumericKeys(
+                    e as React.KeyboardEvent<HTMLInputElement>,
+                    false,
+                  )
+                }
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ),
+                }}
+                inputProps={{ maxLength: 50 }}
+                error={fieldError("saldoPendiente")}
+                helperText={fieldHelper("saldoPendiente", "Mayor o igual a 0")}
               />
             </Box>
 
@@ -687,8 +693,9 @@ const FacturaGrupoOfertaForm = ({
                 variant="body2"
                 sx={{ color: "var(--color-fg-default-secondary)" }}
               >
-                Guardar deja un borrador local. La oferta se envía al grupo solo
-                con el botón &quot;Enviar oferta al grupo&quot;.
+                Guardar borrador deja la oferta localmente. También puedes
+                enviar esta factura de forma individual o usar &quot;Enviar
+                oferta al grupo&quot; con todos los borradores pendientes.
               </Typography>
             </Box>
           </SectionPanel>
@@ -701,17 +708,16 @@ const FacturaGrupoOfertaForm = ({
             tasa30Dias={formik.values.tasa30Dias}
             diasFinanciamiento={formik.values.diasFinanciamiento}
             vigenciaOfertaDias={formik.values.vigenciaOfertaDias}
-            submitLabel="Guardar oferta"
-            submitDisabled={
-              disabled ||
-              !formik.isValid ||
-              !formik.values.vigenciaOfertaDias ||
-              !formik.values.fechaCotizacion
-            }
+            submitLabel="Guardar borrador"
+            submitDisabled={actionsDisabled}
             showDelete={hasBorrador}
             onDelete={() => setDeleteConfirmOpen(true)}
-            deleteDisabled={disabled}
-            onCancel={onCancel}
+            deleteDisabled={disabled || sendingIndividual}
+            secondarySubmitLabel="Enviar oferta individual"
+            onSecondarySubmit={() => {
+              void handleEnviarIndividual();
+            }}
+            secondarySubmitDisabled={actionsDisabled}
           />
         </Box>
       </Box>
