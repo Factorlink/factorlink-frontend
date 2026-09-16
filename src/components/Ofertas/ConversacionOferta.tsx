@@ -15,10 +15,13 @@ import {
   AttachFile,
   ChatBubbleOutline,
   Close,
+  Description,
   Download,
   InsertDriveFile,
+  PictureAsPdf,
   Send,
 } from "@mui/icons-material";
+import type { SvgIconComponent } from "@mui/icons-material";
 import type {
   ComentarioArchivo,
   ComentarioOferta,
@@ -43,6 +46,29 @@ const ACCEPT_ATTR = ALLOWED_EXTENSIONS.join(",");
 
 const isImageMime = (mimeType: string) => mimeType.startsWith("image/");
 
+const getDocumentoIcon = (
+  mimeType: string,
+  nombreArchivo: string,
+): SvgIconComponent => {
+  const extension = nombreArchivo
+    .toLowerCase()
+    .substring(nombreArchivo.lastIndexOf("."));
+  const mime = mimeType.toLowerCase();
+
+  if (mime === "application/pdf" || extension === ".pdf") {
+    return PictureAsPdf;
+  }
+  if (
+    mime === "application/msword" ||
+    mime ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    extension === ".doc" ||
+    extension === ".docx"
+  ) {
+    return Description;
+  }
+  return Description;
+};
 interface ConversacionOfertaProps {
   ofertaId: string;
   ladoActual: ComentarioOfertaTipo;
@@ -115,6 +141,11 @@ const ArchivosComentario = ({ archivos }: { archivos: ComentarioArchivo[] }) => 
           );
         }
 
+        const DocumentoIcon = getDocumentoIcon(
+          archivo.mimeType,
+          archivo.nombreArchivo,
+        );
+
         return (
           <Box
             key={archivo.id}
@@ -129,7 +160,7 @@ const ArchivosComentario = ({ archivos }: { archivos: ComentarioArchivo[] }) => 
               backgroundColor: "var(--color-bg-default-primary)",
             }}
           >
-            <InsertDriveFile
+            <DocumentoIcon
               sx={{
                 fontSize: 20,
                 color: "var(--color-fg-default-secondary)",
@@ -237,8 +268,7 @@ const ConversacionOferta = ({
   }, [ofertaId]);
 
   const puedeEnviar = puedeComentar && Boolean(onEnviarComentario);
-  const tieneContenido =
-    Boolean(nuevoComentario.trim()) || archivosPendientes.length > 0;
+  const tieneTexto = Boolean(nuevoComentario.trim());
 
   const handleSelectArchivos = (event: ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(event.target.files ?? []);
@@ -282,7 +312,7 @@ const ConversacionOferta = ({
 
   const handleEnviar = async () => {
     const texto = nuevoComentario.trim();
-    if ((!texto && archivosPendientes.length === 0) || !onEnviarComentario) {
+    if (!texto || !onEnviarComentario) {
       return;
     }
 
@@ -567,7 +597,7 @@ const ConversacionOferta = ({
               variant="contained"
               startIcon={enviando ? undefined : <Send />}
               onClick={handleEnviar}
-              disabled={enviando || !tieneContenido}
+              disabled={enviando || !tieneTexto}
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
