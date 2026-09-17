@@ -78,6 +78,13 @@ const DOCUMENTO_LEGAL_TIPOS: NotificationTipo[] = [
   "DOCUMENTO_LEGAL_RECHAZADO",
 ];
 
+export type NotificationRouteContext = {
+  facturaId?: string | null;
+  facturaGrupoId?: string | null;
+  /** Id de la oferta (normalmente notification.entidadId cuando entidad=oferta). */
+  ofertaId?: string | null;
+};
+
 export const getNotificationTipoLabel = (tipo: NotificationTipo): string =>
   TIPO_LABELS[tipo] ?? tipo;
 
@@ -111,16 +118,42 @@ export const formatNotificationDate = (date: string): string => {
 export const isOfertaNotification = (tipo: NotificationTipo): boolean =>
   OFERTA_TIPOS.includes(tipo);
 
+export const isOfertaConversacionNotification = (
+  tipo: NotificationTipo,
+): boolean => OFERTA_CONVERSACION_TIPOS.includes(tipo);
+
 export const isFacturaGrupoNotification = (
   notification: Notificacion,
 ): boolean => notification.entidad === FACTURA_GRUPO_ENTIDAD;
 
+const getFactoringGrupoDrawerTab = (tipo: NotificationTipo) => {
+  if (OFERTA_CONVERSACION_TIPOS.includes(tipo)) return "comentarios";
+  if (
+    tipo === "OFERTA_ACEPTADA" ||
+    tipo === "OFERTA_RECHAZADA" ||
+    tipo === "OFERTA_ACTUALIZADA"
+  ) {
+    return "tu_oferta";
+  }
+  return "historial";
+};
+
+const getEmpresaGrupoDrawerTab = (tipo: NotificationTipo) => {
+  if (OFERTA_CONVERSACION_TIPOS.includes(tipo)) return "comentarios";
+  return "ofertas";
+};
+
 export const getNotificationRoute = (
   notification: Notificacion,
   currentRole: Role | null,
-  facturaId?: string | null,
+  routeContext?: NotificationRouteContext | string | null,
 ): string | null => {
   const { tipo } = notification;
+  // Compat: callers antiguos pasaban solo facturaId como 3er arg.
+  const ctx: NotificationRouteContext =
+    typeof routeContext === "string" || routeContext == null
+      ? { facturaId: routeContext }
+      : routeContext;
 
   if (INVITACION_TIPOS.includes(tipo)) return "/invitations";
 
@@ -137,6 +170,31 @@ export const getNotificationRoute = (
         : getFacturaGrupoEmpresaPath(notification.entidadId);
     }
 
+    const facturaId = ctx.facturaId;
+    const facturaGrupoId = ctx.facturaGrupoId;
+    const ofertaId =
+      ctx.ofertaId ??
+      (notification.entidadId ? notification.entidadId : null);
+
+    if (facturaGrupoId && facturaId) {
+      if (currentRole?.contexto === "factoring") {
+        const tab = getFactoringGrupoDrawerTab(tipo);
+        return getFacturaGrupoFactoringPath(facturaGrupoId, {
+          facturaId,
+          tab,
+          ofertaId: tab === "historial" ? ofertaId : null,
+        });
+      }
+
+      const tab = getEmpresaGrupoDrawerTab(tipo);
+      return getFacturaGrupoEmpresaPath(facturaGrupoId, undefined, {
+        facturaId,
+        tab,
+        ofertaId:
+          tab === "ofertas" || tab === "comentarios" ? ofertaId : null,
+      });
+    }
+
     if (!facturaId) {
       return currentRole?.contexto === "factoring"
         ? "/marketplace"
@@ -150,15 +208,15 @@ export const getNotificationRoute = (
       }
 
       const params = new URLSearchParams({ tab: "historial" });
-      if (notification.entidadId) {
-        params.set("ofertaId", notification.entidadId);
+      if (ofertaId) {
+        params.set("ofertaId", ofertaId);
       }
       return `/facturas/${facturaId}/factoring?${params.toString()}`;
     }
 
     const params = new URLSearchParams({ ofertas: "true" });
-    if (tipo !== "OFERTA_EXPIRADA" && notification.entidadId) {
-      params.set("ofertaId", notification.entidadId);
+    if (tipo !== "OFERTA_EXPIRADA" && ofertaId) {
+      params.set("ofertaId", ofertaId);
     }
     return `/facturas/${facturaId}?${params.toString()}`;
   }

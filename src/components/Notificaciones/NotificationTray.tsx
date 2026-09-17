@@ -12,6 +12,7 @@ import type { Notificacion, NotificacionContext } from "../../types/notificacion
 import type { Role } from "../../types/role";
 import { useNotificaciones } from "../../hooks/useNotificaciones";
 import { useOfertas } from "../../hooks/useOfertas";
+import { useFacturas } from "../../hooks/useFacturas";
 import {
   getNotificationRoute,
   isFacturaGrupoNotification,
@@ -62,6 +63,7 @@ const NotificationTray: FC<NotificationTrayProps> = ({
   const navigate = useNavigate();
   const { getUnread, getRead, markAsRead } = useNotificaciones();
   const { getOfertaById } = useOfertas();
+  const { getFacturaById, getFacturaByIdAndFactoringId } = useFacturas();
 
   const [tabValue, setTabValue] = useState(0);
   const [unread, setUnread] = useState<Notificacion[]>([]);
@@ -143,11 +145,27 @@ const NotificationTray: FC<NotificationTrayProps> = ({
         setHasLoadedRead(false);
       }
 
-      const route = getNotificationRoute(
-        notification,
-        currentRole,
-        oferta?.facturaId,
-      );
+      let facturaGrupoId: string | null = null;
+      if (oferta?.facturaId) {
+        try {
+          const factura =
+            currentRole?.contexto === "factoring" && currentRole.factoringId
+              ? await getFacturaByIdAndFactoringId(
+                  oferta.facturaId,
+                  currentRole.factoringId,
+                )
+              : await getFacturaById(oferta.facturaId);
+          facturaGrupoId = factura?.facturaGrupoId ?? null;
+        } catch {
+          facturaGrupoId = null;
+        }
+      }
+
+      const route = getNotificationRoute(notification, currentRole, {
+        facturaId: oferta?.facturaId,
+        facturaGrupoId,
+        ofertaId: oferta?.id ?? notification.entidadId,
+      });
       if (route) {
         onClose();
         navigate(route);

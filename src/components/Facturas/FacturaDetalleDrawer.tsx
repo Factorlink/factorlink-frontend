@@ -22,6 +22,9 @@ export type FacturaDetalleDrawerProps = {
   facturaId: string | null;
   onDeleted?: () => void;
   onFacturaUpdated?: () => void;
+  initialTab?: FacturaDetalleTab | null;
+  ofertaId?: string | null;
+  onTabChange?: (tab: FacturaDetalleTab) => void;
 };
 
 const FacturaDetalleDrawer = ({
@@ -29,12 +32,17 @@ const FacturaDetalleDrawer = ({
   onClose,
   facturaId,
   onFacturaUpdated,
+  initialTab = null,
+  ofertaId = null,
+  onTabChange,
 }: FacturaDetalleDrawerProps) => {
   const { getFacturaById } = useFacturas();
   const [factura, setFactura] = useState<Factura | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<FacturaDetalleTab>("informacion");
+  const [tab, setTab] = useState<FacturaDetalleTab>(
+    initialTab || "informacion",
+  );
   const [tabsKey, setTabsKey] = useState(0);
 
   const loadFactura = useCallback(async (id: string) => {
@@ -58,16 +66,25 @@ const FacturaDetalleDrawer = ({
       setFactura(null);
       setError(null);
       setLoading(false);
-      setTab("informacion");
       return;
     }
     void loadFactura(facturaId);
   }, [open, facturaId, loadFactura]);
 
+  useEffect(() => {
+    if (!open) return;
+    setTab(initialTab || "informacion");
+  }, [open, facturaId, initialTab]);
+
   const statusConfig = getFacturaStatusConfig(factura?.estado || "");
 
   const handleFacturaChange = (next: Factura) => {
     setFactura(next);
+  };
+
+  const handleTabChange = (next: FacturaDetalleTab) => {
+    setTab(next);
+    onTabChange?.(next);
   };
 
   const handleOfertasActualizadas = () => {
@@ -245,7 +262,8 @@ const FacturaDetalleDrawer = ({
             factura={factura}
             onFacturaChange={handleFacturaChange}
             activeTab={tab}
-            onTabChange={setTab}
+            onTabChange={handleTabChange}
+            initialOfertaId={ofertaId}
             onOfertasActualizadas={handleOfertasActualizadas}
             enabled={open}
             dense

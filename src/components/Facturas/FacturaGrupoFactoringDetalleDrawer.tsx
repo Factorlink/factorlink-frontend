@@ -30,6 +30,7 @@ import DocumentosAsociadosCard from "./DocumentosAsociadosCard";
 import FacturaGrupoOfertaForm from "./FacturaGrupoOfertaForm";
 import { hasFacturaPdf } from "../../utils/facturaDocuments";
 import type { OfertaGrupoBorrador } from "../../utils/facturaGrupoOferta";
+import type { FacturaGrupoFactoringDrawerTab } from "../../utils/facturaGrupo";
 import {
   isOfertaCondicionada,
   puedeComentar,
@@ -52,13 +53,12 @@ type FacturaGrupoFactoringDetalleDrawerProps = {
   onOfertaActualizada?: () => void;
   sending?: boolean;
   grupoPlazo?: number;
+  initialTab?: FacturaGrupoFactoringDrawerTab | null;
+  ofertaId?: string | null;
+  onTabChange?: (tab: FacturaGrupoFactoringDrawerTab) => void;
 };
 
-type DrawerTab =
-  | "informacion"
-  | "tu_oferta"
-  | "historial"
-  | "comentarios";
+type DrawerTab = FacturaGrupoFactoringDrawerTab;
 
 const TabPanel = ({
   value,
@@ -146,8 +146,11 @@ const FacturaGrupoFactoringDetalleDrawer = ({
   onOfertaActualizada,
   sending = false,
   grupoPlazo = 0,
+  initialTab = null,
+  ofertaId = null,
+  onTabChange,
 }: FacturaGrupoFactoringDetalleDrawerProps) => {
-  const [tab, setTab] = useState<DrawerTab>("informacion");
+  const [tab, setTab] = useState<DrawerTab>(initialTab || "informacion");
   const [factura, setFactura] = useState<Factura | null>(null);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
   const [errorDetalle, setErrorDetalle] = useState<string | null>(null);
@@ -179,12 +182,15 @@ const FacturaGrupoFactoringDetalleDrawer = ({
       setFactura(null);
       setErrorDetalle(null);
       setLoadingDetalle(false);
-      setTab("informacion");
       return;
     }
-    setTab("informacion");
     void loadDetalle(facturaId, factoringId);
   }, [open, facturaId, factoringId, loadDetalle]);
+
+  useEffect(() => {
+    if (!open) return;
+    setTab(initialTab || "informacion");
+  }, [open, facturaId, initialTab]);
 
   const statusConfig = getFacturaStatusConfig(factura?.estado || "");
   const ofertaEnviada = factura?.ofertaFactoring ?? null;
@@ -200,6 +206,12 @@ const FacturaGrupoFactoringDetalleDrawer = ({
   const handleClose = () => {
     if (sending) return;
     onClose();
+  };
+
+  const handleTabChange = (value: DrawerTab) => {
+    if (sending) return;
+    setTab(value);
+    onTabChange?.(value);
   };
 
   const renderTuOferta = () => {
@@ -402,8 +414,7 @@ const FacturaGrupoFactoringDetalleDrawer = ({
           <Tabs
             value={tab}
             onChange={(_e, value: DrawerTab) => {
-              if (sending) return;
-              setTab(value);
+              handleTabChange(value);
             }}
             variant="scrollable"
             scrollButtons="auto"
@@ -595,6 +606,7 @@ const FacturaGrupoFactoringDetalleDrawer = ({
               <HistorialOfertasFactoring
                 ofertas={factura.historyOfertas || []}
                 plazo={plazo}
+                initialOfertaId={ofertaId}
               />
             </TabPanel>
 

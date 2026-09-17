@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import {
   Alert,
   Box,
@@ -35,6 +40,7 @@ import Layout from "../../../../components/Layout";
 import SectionPanel from "../../../../components/SectionPanel";
 import DocumentsRequiredModal from "../../../../components/Modals/DocumentsRequiredModal";
 import FacturaDetalleDrawer from "../../../../components/Facturas/FacturaDetalleDrawer";
+import type { FacturaDetalleTab } from "../../../../components/Facturas/FacturaDetalleTabs";
 import { formatCurrency } from "../../../../components/Facturas/FacturaResumenCard";
 import { useFacturaGrupos } from "../../../../hooks/useFacturaGrupos";
 import useAuthStore from "../../../../store/authStore";
@@ -43,6 +49,7 @@ import { getFacturaStatusConfig } from "../../../../theme";
 import {
   getFacturaGrupoMontoFinanciar,
   getFacturaGrupoMontoTotal,
+  parseFacturaGrupoEmpresaTab,
 } from "../../../../utils/facturaGrupo";
 import {
   appContentSx,
@@ -84,6 +91,7 @@ const FacturaGrupoDetalle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { currentRole } = useAuthStore();
   const {
     getFacturaGrupoById,
@@ -109,11 +117,68 @@ const FacturaGrupoDetalle = () => {
   const [sendError, setSendError] = useState<string | null>(null);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
     useState(false);
-  const [detalleFacturaId, setDetalleFacturaId] = useState<string | null>(null);
-  const [detalleOpen, setDetalleOpen] = useState(false);
+  const detalleFacturaId = searchParams.get("facturaId");
+  const detalleOpen = Boolean(detalleFacturaId);
+  const drawerTab =
+    parseFacturaGrupoEmpresaTab(searchParams.get("tab")) || "informacion";
+  const ofertaIdParam = searchParams.get("ofertaId");
   const [editBlockedMessage, setEditBlockedMessage] = useState<string | null>(
     null,
   );
+
+  const setDrawerParams = (
+    next: {
+      facturaId?: string | null;
+      tab?: FacturaDetalleTab | null;
+      ofertaId?: string | null;
+    },
+    replace = true,
+  ) => {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        if (next.facturaId === null) {
+          params.delete("facturaId");
+          params.delete("tab");
+          params.delete("ofertaId");
+          return params;
+        }
+        if (next.facturaId !== undefined && next.facturaId) {
+          params.set("facturaId", next.facturaId);
+        }
+        if (next.tab === null) {
+          params.delete("tab");
+        } else if (next.tab !== undefined) {
+          if (next.tab === "informacion") params.delete("tab");
+          else params.set("tab", next.tab);
+        }
+        if (next.ofertaId === null) {
+          params.delete("ofertaId");
+        } else if (next.ofertaId !== undefined) {
+          if (next.ofertaId) params.set("ofertaId", next.ofertaId);
+          else params.delete("ofertaId");
+        }
+        const tab = params.get("tab");
+        if (tab !== "ofertas" && tab !== "comentarios") {
+          params.delete("ofertaId");
+        }
+        return params;
+      },
+      { replace },
+    );
+  };
+
+  const handleCloseDrawer = () => {
+    setDrawerParams({ facturaId: null });
+  };
+
+  const handleDrawerTabChange = (tab: FacturaDetalleTab) => {
+    setDrawerParams({
+      tab,
+      ofertaId:
+        tab === "ofertas" || tab === "comentarios" ? ofertaIdParam : null,
+    });
+  };
 
   useEffect(() => {
     const state = location.state as LocationState | null;
@@ -645,8 +710,11 @@ const FacturaGrupoDetalle = () => {
                               <IconButton
                                 size="small"
                                 onClick={() => {
-                                  setDetalleFacturaId(factura.id);
-                                  setDetalleOpen(true);
+                                  setDrawerParams({
+                                    facturaId: factura.id,
+                                    tab: "informacion",
+                                    ofertaId: null,
+                                  });
                                 }}
                                 sx={{
                                   color: "var(--color-fg-default-secondary)",
@@ -990,14 +1058,13 @@ const FacturaGrupoDetalle = () => {
 
       <FacturaDetalleDrawer
         open={detalleOpen}
-        onClose={() => {
-          setDetalleOpen(false);
-          setDetalleFacturaId(null);
-        }}
+        onClose={handleCloseDrawer}
         facturaId={detalleFacturaId}
+        initialTab={drawerTab}
+        ofertaId={ofertaIdParam}
+        onTabChange={handleDrawerTabChange}
         onDeleted={() => {
-          setDetalleOpen(false);
-          setDetalleFacturaId(null);
+          handleCloseDrawer();
           void loadDetalle();
         }}
         onFacturaUpdated={() => {

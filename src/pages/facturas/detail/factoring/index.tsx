@@ -34,7 +34,10 @@ import {
   isOfertaCondicionada,
   puedeComentar,
 } from "../../../../utils/ofertaEstados";
-import { getFacturaGrupoFactoringPath } from "../../../../utils/facturaGrupo";
+import {
+  getFacturaGrupoFactoringPath,
+  mapIndividualFactoringTabToGrupo,
+} from "../../../../utils/facturaGrupo";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -123,13 +126,26 @@ const FacturaFactoringDetail = () => {
       );
       if (requestId !== requestIdRef.current) return;
       if (data.facturaGrupoId) {
-        navigate(getFacturaGrupoFactoringPath(data.facturaGrupoId), {
-          replace: true,
-          state: {
-            from: backPath,
-            nombre: data.facturaGrupo?.nombre,
+        const mappedTab = mapIndividualFactoringTabToGrupo(
+          searchParams.get("tab"),
+        );
+        navigate(
+          getFacturaGrupoFactoringPath(data.facturaGrupoId, {
+            facturaId: data.id,
+            tab: mappedTab,
+            ofertaId:
+              mappedTab === "historial"
+                ? searchParams.get("ofertaId")
+                : null,
+          }),
+          {
+            replace: true,
+            state: {
+              from: backPath,
+              nombre: data.facturaGrupo?.nombre,
+            },
           },
-        });
+        );
         return;
       }
       setFactura(data);

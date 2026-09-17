@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import {
   Alert,
   Box,
@@ -41,6 +46,8 @@ import { getFacturaStatusConfig } from "../../../../../theme";
 import {
   getFacturaGrupoMontoFinanciar,
   getFacturaGrupoMontoTotal,
+  parseFacturaGrupoFactoringTab,
+  type FacturaGrupoFactoringDrawerTab,
 } from "../../../../../utils/facturaGrupo";
 import {
   canEnviarOfertaAlGrupo,
@@ -120,6 +127,7 @@ const FacturaGrupoFactoringDetalle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { currentRole } = useAuthStore();
   const { getFacturaGrupoById, getFacturaGrupoFacturasFactoring } =
     useFacturaGrupos();
@@ -129,6 +137,12 @@ const FacturaGrupoFactoringDetalle = () => {
   const state = (location.state as GrupoFactoringLocationState | null) ?? null;
   const backPath = getMarketplaceBackPath(state?.from);
 
+  const detalleFacturaId = searchParams.get("facturaId");
+  const drawerOpen = Boolean(detalleFacturaId);
+  const drawerTab =
+    parseFacturaGrupoFactoringTab(searchParams.get("tab")) || "informacion";
+  const ofertaIdParam = searchParams.get("ofertaId");
+
   const [grupo, setGrupo] = useState<FacturaGrupo | null>(null);
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [borradores, setBorradores] = useState<
@@ -136,8 +150,6 @@ const FacturaGrupoFactoringDetalle = () => {
   >({});
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [detalleFacturaId, setDetalleFacturaId] = useState<string | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [sendErrorReason, setSendErrorReason] = useState<string | null>(null);
@@ -199,15 +211,61 @@ const FacturaGrupoFactoringDetalle = () => {
     navigate(backPath);
   };
 
+  const setDrawerParams = (
+    next: {
+      facturaId?: string | null;
+      tab?: FacturaGrupoFactoringDrawerTab | null;
+      ofertaId?: string | null;
+    },
+    replace = true,
+  ) => {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        if (next.facturaId === null) {
+          params.delete("facturaId");
+          params.delete("tab");
+          params.delete("ofertaId");
+          return params;
+        }
+        if (next.facturaId !== undefined && next.facturaId) {
+          params.set("facturaId", next.facturaId);
+        }
+        if (next.tab === null) {
+          params.delete("tab");
+        } else if (next.tab !== undefined) {
+          if (next.tab === "informacion") params.delete("tab");
+          else params.set("tab", next.tab);
+        }
+        if (next.ofertaId === null) {
+          params.delete("ofertaId");
+        } else if (next.ofertaId !== undefined) {
+          if (next.ofertaId) params.set("ofertaId", next.ofertaId);
+          else params.delete("ofertaId");
+        }
+        // ofertaId only meaningful on historial
+        const tab = params.get("tab");
+        if (tab !== "historial") params.delete("ofertaId");
+        return params;
+      },
+      { replace },
+    );
+  };
+
   const handleVerDetalle = (factura: Factura) => {
-    setDetalleFacturaId(factura.id);
-    setDrawerOpen(true);
+    setDrawerParams({ facturaId: factura.id, tab: "informacion", ofertaId: null });
   };
 
   const handleCloseDrawer = () => {
     if (sendingOfertas) return;
-    setDrawerOpen(false);
-    setDetalleFacturaId(null);
+    setDrawerParams({ facturaId: null });
+  };
+
+  const handleDrawerTabChange = (tab: FacturaGrupoFactoringDrawerTab) => {
+    setDrawerParams({
+      tab,
+      ofertaId: tab === "historial" ? ofertaIdParam : null,
+    });
   };
 
   const handleSaveBorrador = (borrador: OfertaGrupoBorrador) => {
@@ -760,6 +818,9 @@ const FacturaGrupoFactoringDetalle = () => {
         }}
         sending={sendingOfertas}
         grupoPlazo={grupo?.plazo || 0}
+        initialTab={drawerTab}
+        ofertaId={ofertaIdParam}
+        onTabChange={handleDrawerTabChange}
       />
 
       <Dialog
