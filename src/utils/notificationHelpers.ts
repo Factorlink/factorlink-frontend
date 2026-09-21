@@ -293,3 +293,88 @@ export const sortReadNotifications = (
     const bTime = b.readAt ? new Date(b.readAt).getTime() : 0;
     return bTime - aTime;
   });
+
+/** Orden estable de grupos conocidos por `entidad`. */
+const ENTIDAD_ORDER = [
+  "oferta",
+  "factura_grupo",
+  "factura_sync",
+  "invitacion",
+  "documento_legal",
+  "otros",
+] as const;
+
+const ENTIDAD_LABELS: Record<string, string> = {
+  oferta: "Ofertas",
+  factura_grupo: "Grupos de facturas",
+  factura_sync: "Sincronización",
+  invitacion: "Invitaciones",
+  documento_legal: "Documentos legales",
+  otros: "Otros",
+};
+
+/** Clave de agrupación: solo `entidad` (grupos fijos / predefinidos). */
+export const getNotificationGroupKey = (notification: Notificacion): string => {
+  const entidad = (notification.entidad || "").trim();
+  return entidad || "otros";
+};
+
+export const getNotificationEntidadLabel = (entidad: string): string =>
+  ENTIDAD_LABELS[entidad] ??
+  (entidad
+    ? entidad.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase())
+    : ENTIDAD_LABELS.otros);
+
+export type NotificationTrayGroup = {
+  key: string;
+  label: string;
+  unreadCount: number;
+  notifications: Notificacion[];
+};
+
+/**
+ * Agrupa notificaciones solo por `entidad` (sin entidadId).
+ * Dentro de cada grupo se preserva el orden recibido (ya ordenado por fecha).
+ * Los grupos conocidos siguen ENTIDAD_ORDER; el resto va al final por recencia.
+ */
+export const groupNotificationsForTray = (
+  notifications: Notificacion[],
+): NotificationTrayGroup[] => {
+  const groups = new Map<string, Notificacion[]>();
+
+  for (const notification of notifications) {
+    const key = getNotificationGroupKey(notification);
+    const list = groups.get(key);
+    if (list) {
+      list.push(notification);
+    } else {
+      groups.set(key, [notification]);
+    }
+  }
+
+  const latestTime = (items: Notificacion[]) =>
+    items.reduce((max, item) => {
+      const t = new Date(item.createdAt).getTime();
+      return Number.isNaN(t) ? max : Math.max(max, t);
+    }, 0);
+
+  const orderIndex = (key: string) => {
+    const idx = ENTIDAD_ORDER.indexOf(
+      key as (typeof ENTIDAD_ORDER)[number],
+    );
+    return idx === -1 ? ENTIDAD_ORDER.length : idx;
+  };
+
+  return [...groups.entries()]
+    .map(([key, items]) => ({
+      key,
+      label: getNotificationEntidadLabel(key),
+      unreadCount: items.filter((item) => !item.leida).length,
+      notifications: items,
+    }))
+    .sort((a, b) => {
+      const orderDiff = orderIndex(a.key) - orderIndex(b.key);
+      if (orderDiff !== 0) return orderDiff;
+      return latestTime(b.notifications) - latestTime(a.notifications);
+    });
+};

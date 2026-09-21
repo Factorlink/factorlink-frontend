@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useState,
   type FC,
   type ReactNode,
@@ -15,13 +16,16 @@ import { useOfertas } from "../../hooks/useOfertas";
 import { useFacturas } from "../../hooks/useFacturas";
 import { useFacturaGrupos } from "../../hooks/useFacturaGrupos";
 import {
+  groupNotificationsForTray,
   getNotificationRoute,
   isFacturaGrupoNotification,
   isOfertaNotification,
   pickFacturaForGrupoOfertaNotification,
   sortReadNotifications,
   sortUnreadNotifications,
+  type NotificationTrayGroup,
 } from "../../utils/notificationHelpers";
+import NotificationGroup from "./NotificationGroup";
 import NotificationItem from "./NotificationItem";
 import {
   NotificationEmptyState,
@@ -53,6 +57,20 @@ interface NotificationTrayProps {
   onClose: () => void;
 }
 
+const defaultExpandedKeys = (
+  groups: NotificationTrayGroup[],
+  expandUnreadGroups: boolean,
+): Set<string> => {
+  const keys = new Set<string>();
+  if (!expandUnreadGroups) return keys;
+  for (const group of groups) {
+    if (group.notifications.length > 1 && group.unreadCount > 0) {
+      keys.add(group.key);
+    }
+  }
+  return keys;
+};
+
 const NotificationTray: FC<NotificationTrayProps> = ({
   userId,
   context,
@@ -79,6 +97,13 @@ const NotificationTray: FC<NotificationTrayProps> = ({
   const [hasLoadedRead, setHasLoadedRead] = useState(false);
   const [markingId, setMarkingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+
+  const unreadGroups = useMemo(
+    () => groupNotificationsForTray(unread),
+    [unread],
+  );
+  const readGroups = useMemo(() => groupNotificationsForTray(read), [read]);
 
   const fetchUnread = useCallback(async () => {
     try {
@@ -88,6 +113,9 @@ const NotificationTray: FC<NotificationTrayProps> = ({
       const sorted = sortUnreadNotifications(data.notifications ?? []);
       setUnread(sorted);
       onUnreadCountChange(data.count ?? sorted.length);
+      setExpandedKeys(
+        defaultExpandedKeys(groupNotificationsForTray(sorted), true),
+      );
     } catch {
       setErrorUnread(true);
     } finally {
@@ -100,8 +128,11 @@ const NotificationTray: FC<NotificationTrayProps> = ({
       setLoadingRead(true);
       setErrorRead(false);
       const data = await getRead(userId, context);
-      setRead(sortReadNotifications(data.notifications ?? []));
+      const sorted = sortReadNotifications(data.notifications ?? []);
+      setRead(sorted);
       setHasLoadedRead(true);
+      // Leídas: grupos colapsados por defecto.
+      setExpandedKeys(new Set());
     } catch {
       setErrorRead(true);
     } finally {
@@ -124,6 +155,20 @@ const NotificationTray: FC<NotificationTrayProps> = ({
   const handleTabChange = (_: SyntheticEvent, nextValue: number) => {
     setTabValue(nextValue);
     setActionError(null);
+    if (nextValue === 0) {
+      setExpandedKeys(defaultExpandedKeys(unreadGroups, true));
+    } else if (hasLoadedRead) {
+      setExpandedKeys(new Set());
+    }
+  };
+
+  const toggleGroup = (key: string) => {
+    setExpandedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
   };
 
   const handleNotificationClick = async (notification: Notificacion) => {
@@ -219,6 +264,41 @@ const NotificationTray: FC<NotificationTrayProps> = ({
     }
   };
 
+  const renderGroups = (groups: NotificationTrayGroup[]) =>
+    groups.map((group) => {
+      if (group.notifications.length === 1) {
+        const notification = group.notifications[0];
+        return (
+          <NotificationItem
+            key={notification.id}
+            notification={notification}
+            onClick={handleNotificationClick}
+            disabled={markingId === notification.id}
+          />
+        );
+      }
+
+      return (
+        <NotificationGroup
+          key={group.key}
+          label={group.label}
+          count={group.notifications.length}
+          unreadCount={group.unreadCount}
+          expanded={expandedKeys.has(group.key)}
+          onToggle={() => toggleGroup(group.key)}
+        >
+          {group.notifications.map((notification) => (
+            <NotificationItem
+              key={notification.id}
+              notification={notification}
+              onClick={handleNotificationClick}
+              disabled={markingId === notification.id}
+            />
+          ))}
+        </NotificationGroup>
+      );
+    });
+
   const renderUnreadContent = () => {
     if (loadingUnread) return <NotificationLoadingState />;
     if (errorUnread) {
@@ -229,14 +309,7 @@ const NotificationTray: FC<NotificationTrayProps> = ({
         <NotificationEmptyState message="No tienes notificaciones nuevas." />
       );
     }
-    return unread.map((notification) => (
-      <NotificationItem
-        key={notification.id}
-        notification={notification}
-        onClick={handleNotificationClick}
-        disabled={markingId === notification.id}
-      />
-    ));
+    return renderGroups(unreadGroups);
   };
 
   const renderReadContent = () => {
@@ -249,14 +322,7 @@ const NotificationTray: FC<NotificationTrayProps> = ({
         <NotificationEmptyState message="Aún no tienes notificaciones en tu historial." />
       );
     }
-    return read.map((notification) => (
-      <NotificationItem
-        key={notification.id}
-        notification={notification}
-        onClick={handleNotificationClick}
-        disabled={markingId === notification.id}
-      />
-    ));
+    return renderGroups(readGroups);
   };
 
   return (
