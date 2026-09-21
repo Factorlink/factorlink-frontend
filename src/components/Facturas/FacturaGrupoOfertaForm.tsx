@@ -556,6 +556,13 @@ const FacturaGrupoOfertaForm = ({
                     formik.setFieldValue,
                   )
                 }
+                onFocus={() =>
+                  clearZeroOnFocus(
+                    "saldoPendiente",
+                    formik.values.saldoPendiente,
+                    formik.setFieldValue,
+                  )
+                }
                 onBlur={formik.handleBlur}
                 onKeyDown={(e) =>
                   blockNonNumericKeys(
@@ -615,19 +622,37 @@ const FacturaGrupoOfertaForm = ({
             >
               Comentario
             </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: "var(--color-fg-default-secondary)", mb: 2 }}
+            >
+              {formik.values.ofertaCondicionada
+                ? "Las ofertas condicionadas exigen un comentario."
+                : "Información adicional sobre tu oferta (opcional)"}
+            </Typography>
             <StyledTextField
               fullWidth
               name="comentario"
-              label="Comentario"
+              label={
+                formik.values.ofertaCondicionada
+                  ? "Comentario"
+                  : "Comentario (opcional)"
+              }
               placeholder="Añade información adicional sobre tu oferta..."
               multiline
               rows={3}
+              required={formik.values.ofertaCondicionada}
               inputProps={{ maxLength: 500 }}
               value={formik.values.comentario}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               error={fieldError("comentario")}
-              helperText={fieldHelper("comentario", "Máximo 500 caracteres")}
+              helperText={fieldHelper(
+                "comentario",
+                formik.values.ofertaCondicionada
+                  ? "Las ofertas condicionadas exigen un comentario."
+                  : "Máximo 500 caracteres",
+              )}
               sx={{ mb: 2 }}
             />
 
@@ -637,7 +662,18 @@ const FacturaGrupoOfertaForm = ({
                   id="ofertaCondicionada"
                   name="ofertaCondicionada"
                   checked={formik.values.ofertaCondicionada}
-                  onChange={formik.handleChange}
+                  onChange={(_, checked) => {
+                    void (async () => {
+                      await formik.setFieldValue("ofertaCondicionada", checked);
+                      if (checked) {
+                        await formik.setFieldTouched("comentario", true, false);
+                      }
+                      await formik.validateForm({
+                        ...formik.values,
+                        ofertaCondicionada: checked,
+                      });
+                    })();
+                  }}
                   size="small"
                 />
               }

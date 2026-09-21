@@ -151,6 +151,14 @@ export const createOfertaFormSchema = () =>
     comentario: yup
       .string()
       .trim()
-      .max(500, "El comentario no puede exceder 500 caracteres"),
+      .max(500, "El comentario no puede exceder 500 caracteres")
+      .when("ofertaCondicionada", {
+        is: true,
+        then: (schema) =>
+          schema.required(
+            "El comentario es obligatorio en ofertas condicionadas",
+          ),
+        otherwise: (schema) => schema.notRequired(),
+      }),
     ofertaCondicionada: yup.boolean(),
   });
