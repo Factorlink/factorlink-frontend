@@ -13,10 +13,12 @@ import type { Role } from "../../types/role";
 import { useNotificaciones } from "../../hooks/useNotificaciones";
 import { useOfertas } from "../../hooks/useOfertas";
 import { useFacturas } from "../../hooks/useFacturas";
+import { useFacturaGrupos } from "../../hooks/useFacturaGrupos";
 import {
   getNotificationRoute,
   isFacturaGrupoNotification,
   isOfertaNotification,
+  pickFacturaForGrupoOfertaNotification,
   sortReadNotifications,
   sortUnreadNotifications,
 } from "../../utils/notificationHelpers";
@@ -62,8 +64,10 @@ const NotificationTray: FC<NotificationTrayProps> = ({
 }) => {
   const navigate = useNavigate();
   const { getUnread, getRead, markAsRead } = useNotificaciones();
-  const { getOfertaById } = useOfertas();
+  const { getOfertaById, getOfertasByFacturaId } = useOfertas();
   const { getFacturaById, getFacturaByIdAndFactoringId } = useFacturas();
+  const { getFacturaGrupoFacturas, getFacturaGrupoFacturasFactoring } =
+    useFacturaGrupos();
 
   const [tabValue, setTabValue] = useState(0);
   const [unread, setUnread] = useState<Notificacion[]>([]);
@@ -127,6 +131,9 @@ const NotificationTray: FC<NotificationTrayProps> = ({
     setMarkingId(notification.id);
 
     try {
+      const isGrupoOferta =
+        isOfertaNotification(notification.tipo) &&
+        isFacturaGrupoNotification(notification);
       const shouldFetchOferta =
         isOfertaNotification(notification.tipo) &&
         !isFacturaGrupoNotification(notification) &&
@@ -145,7 +152,14 @@ const NotificationTray: FC<NotificationTrayProps> = ({
         setHasLoadedRead(false);
       }
 
+      let facturaId: string | null = oferta?.facturaId ?? null;
       let facturaGrupoId: string | null = null;
+      let ofertaId: string | null =
+        oferta?.id ??
+        (isFacturaGrupoNotification(notification)
+          ? null
+          : notification.entidadId || null);
+
       if (oferta?.facturaId) {
         try {
           const factura =
@@ -159,12 +173,38 @@ const NotificationTray: FC<NotificationTrayProps> = ({
         } catch {
           facturaGrupoId = null;
         }
+      } else if (isGrupoOferta && notification.entidadId) {
+        // entidad=factura_grupo: resolver una factura del grupo para abrir el drawer.
+        facturaGrupoId = notification.entidadId;
+        try {
+          const facturas =
+            currentRole?.contexto === "factoring" && currentRole.factoringId
+              ? await getFacturaGrupoFacturasFactoring(
+                  notification.entidadId,
+                  currentRole.factoringId,
+                )
+              : await getFacturaGrupoFacturas(notification.entidadId);
+          const candidate = pickFacturaForGrupoOfertaNotification(facturas);
+          if (candidate) {
+            facturaId = candidate.id;
+            try {
+              const data = await getOfertasByFacturaId(candidate.id);
+              const list = Array.isArray(data) ? data : data?.data || [];
+              ofertaId = list[0]?.id ?? null;
+            } catch {
+              ofertaId = null;
+            }
+          }
+        } catch {
+          facturaId = null;
+          ofertaId = null;
+        }
       }
 
       const route = getNotificationRoute(notification, currentRole, {
-        facturaId: oferta?.facturaId,
+        facturaId,
         facturaGrupoId,
-        ofertaId: oferta?.id ?? notification.entidadId,
+        ofertaId,
       });
       if (route) {
         onClose();

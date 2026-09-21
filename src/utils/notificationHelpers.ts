@@ -143,6 +143,49 @@ const getEmpresaGrupoDrawerTab = (tipo: NotificationTipo) => {
   return "ofertas";
 };
 
+/** Path de drawer de grupo con tab/oferta según el tipo de notificación. */
+const getOfertaGrupoDrawerPath = (
+  tipo: NotificationTipo,
+  currentRole: Role | null,
+  facturaGrupoId: string,
+  facturaId: string,
+  ofertaId?: string | null,
+) => {
+  if (currentRole?.contexto === "factoring") {
+    const tab = getFactoringGrupoDrawerTab(tipo);
+    return getFacturaGrupoFactoringPath(facturaGrupoId, {
+      facturaId,
+      tab,
+      ofertaId: tab === "historial" ? ofertaId : null,
+    });
+  }
+
+  const tab = getEmpresaGrupoDrawerTab(tipo);
+  return getFacturaGrupoEmpresaPath(facturaGrupoId, undefined, {
+    facturaId,
+    tab,
+    ofertaId: tab === "ofertas" || tab === "comentarios" ? ofertaId : null,
+  });
+};
+
+/**
+ * Elige una factura del grupo para deep-link de notificaciones de oferta.
+ * Prioriza facturas con ofertas recibidas / en estado CON_OFERTAS.
+ */
+export const pickFacturaForGrupoOfertaNotification = <
+  T extends { id: string; estado?: string; numeroOfertasRecibidas?: number },
+>(
+  facturas: T[],
+): T | null => {
+  if (!facturas.length) return null;
+  return (
+    facturas.find((f) => (f.numeroOfertasRecibidas ?? 0) > 0) ??
+    facturas.find((f) => (f.estado || "").toUpperCase() === "CON_OFERTAS") ??
+    facturas[0] ??
+    null
+  );
+};
+
 export const getNotificationRoute = (
   notification: Notificacion,
   currentRole: Role | null,
@@ -165,9 +208,24 @@ export const getNotificationRoute = (
           : "/facturas/ofertas";
       }
 
+      const facturaGrupoId = notification.entidadId;
+      const facturaId = ctx.facturaId;
+      // Para entidad=factura_grupo, entidadId es el grupo — no usarlo como ofertaId.
+      const ofertaId = ctx.ofertaId ?? null;
+
+      if (facturaId) {
+        return getOfertaGrupoDrawerPath(
+          tipo,
+          currentRole,
+          facturaGrupoId,
+          facturaId,
+          ofertaId,
+        );
+      }
+
       return currentRole?.contexto === "factoring"
-        ? getFacturaGrupoFactoringPath(notification.entidadId)
-        : getFacturaGrupoEmpresaPath(notification.entidadId);
+        ? getFacturaGrupoFactoringPath(facturaGrupoId)
+        : getFacturaGrupoEmpresaPath(facturaGrupoId);
     }
 
     const facturaId = ctx.facturaId;
@@ -177,22 +235,13 @@ export const getNotificationRoute = (
       (notification.entidadId ? notification.entidadId : null);
 
     if (facturaGrupoId && facturaId) {
-      if (currentRole?.contexto === "factoring") {
-        const tab = getFactoringGrupoDrawerTab(tipo);
-        return getFacturaGrupoFactoringPath(facturaGrupoId, {
-          facturaId,
-          tab,
-          ofertaId: tab === "historial" ? ofertaId : null,
-        });
-      }
-
-      const tab = getEmpresaGrupoDrawerTab(tipo);
-      return getFacturaGrupoEmpresaPath(facturaGrupoId, undefined, {
+      return getOfertaGrupoDrawerPath(
+        tipo,
+        currentRole,
+        facturaGrupoId,
         facturaId,
-        tab,
-        ofertaId:
-          tab === "ofertas" || tab === "comentarios" ? ofertaId : null,
-      });
+        ofertaId,
+      );
     }
 
     if (!facturaId) {

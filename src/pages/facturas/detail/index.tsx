@@ -13,6 +13,7 @@ import type { Factura } from "../../../types/factura";
 import { useFacturas } from "../../../hooks/useFacturas";
 import FacturaDetallePanel from "../../../components/Facturas/FacturaDetallePanel";
 import { appContentSx } from "../../../theme/layoutStyles";
+import { getFacturaGrupoEmpresaPath } from "../../../utils/facturaGrupo";
 
 const FacturaDetail = () => {
   const { getFacturaById, loading } = useFacturas();
@@ -24,11 +25,33 @@ const FacturaDetail = () => {
     searchParams.get("ofertas") === "true" || Boolean(ofertaIdParam);
   const [factura, setFactura] = useState<Factura | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [redirectingToGrupo, setRedirectingToGrupo] = useState(false);
 
   const fetchFactura = async () => {
     try {
       setError(null);
+      setRedirectingToGrupo(false);
       const data = await getFacturaById(id!);
+      if (data.facturaGrupoId) {
+        setRedirectingToGrupo(true);
+        const openOfertas =
+          searchParams.get("ofertas") === "true" ||
+          Boolean(searchParams.get("ofertaId"));
+        navigate(
+          getFacturaGrupoEmpresaPath(data.facturaGrupoId, undefined, {
+            facturaId: data.id,
+            tab: openOfertas ? "ofertas" : undefined,
+            ofertaId: searchParams.get("ofertaId"),
+          }),
+          {
+            replace: true,
+            state: {
+              nombre: data.facturaGrupo?.nombre,
+            },
+          },
+        );
+        return;
+      }
       setFactura(data);
     } catch (err) {
       console.error("Error fetching factura:", err);
@@ -89,7 +112,7 @@ const FacturaDetail = () => {
     );
   };
 
-  if (loading && !factura) {
+  if ((loading && !factura) || redirectingToGrupo) {
     return (
       <Layout>
         <Box
@@ -107,7 +130,9 @@ const FacturaDetail = () => {
             variant="body1"
             sx={{ color: "var(--color-fg-default-secondary)" }}
           >
-            Cargando factura...
+            {redirectingToGrupo
+              ? "Redirigiendo al grupo..."
+              : "Cargando factura..."}
           </Typography>
         </Box>
       </Layout>
