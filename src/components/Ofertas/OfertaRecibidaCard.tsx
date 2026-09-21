@@ -19,15 +19,18 @@ import {
   formatDateOnly,
   formatMoney,
   formatPercent,
+  toFiniteNumber,
 } from "../../utils/ofertaFormatters";
 import { isOfertaCondicionada } from "../../utils/ofertaEstados";
 import { getOfertaEstadoBadge } from "../../utils/ofertaEstadoBadge";
+import ResumenOfertaAside from "../Facturas/ResumenOfertaAside";
 import ConversacionOferta from "./ConversacionOferta";
 import OfertaCamposDetalle from "./OfertaCamposDetalle";
 
 interface OfertaRecibidaCardProps {
   oferta: Oferta;
   plazo: number;
+  montoTotal: string | number;
   expandida: boolean;
   disponible: boolean;
   mostrarAcciones: boolean;
@@ -42,6 +45,7 @@ interface OfertaRecibidaCardProps {
 const OfertaRecibidaCard = ({
   oferta,
   plazo,
+  montoTotal,
   expandida,
   disponible,
   mostrarAcciones,
@@ -55,6 +59,12 @@ const OfertaRecibidaCard = ({
   const estadoChip = getOfertaEstadoBadge(oferta.estado, "Recibida");
   const EstadoIcon = estadoChip.icon;
   const condicionada = isOfertaCondicionada(oferta);
+
+  const diasFinanciamiento =
+    toFiniteNumber(oferta.diasFinanciamiento) ?? plazo;
+  const montoAFinanciar = toFiniteNumber(oferta.montoAFinanciar) ?? 0;
+  const montoAGirar = toFiniteNumber(oferta.montoAGirar) ?? 0;
+  const vigenciaOfertaDias = toFiniteNumber(oferta.vigenciaOfertaDias) ?? 0;
 
   const resumen = [
     {
@@ -85,6 +95,69 @@ const OfertaRecibidaCard = ({
         : "var(--color-fg-danger-primary)",
     },
   ];
+
+  const detailActions = mostrarAcciones ? (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      {!condicionada && (
+        <Button
+          type="button"
+          variant="contained"
+          fullWidth
+          startIcon={<CheckCircle />}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAceptar();
+          }}
+          sx={{
+            backgroundColor: "var(--color-bg-success-primary)",
+            color: "var(--color-fg-on-accent-primary)",
+            textTransform: "none",
+            fontWeight: 600,
+            borderRadius: 2,
+            py: 1.25,
+            "&:hover": {
+              backgroundColor: "var(--color-bg-success-primary-hover)",
+            },
+          }}
+        >
+          Aceptar oferta
+        </Button>
+      )}
+      <Button
+        type="button"
+        variant="outlined"
+        fullWidth
+        startIcon={<Cancel />}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRechazar();
+        }}
+        sx={{
+          borderColor: "var(--color-fg-danger-primary)",
+          color: "var(--color-fg-danger-primary)",
+          textTransform: "none",
+          fontWeight: 600,
+          borderRadius: 2,
+          py: 1.25,
+          "&:hover": {
+            borderColor: "var(--color-border-danger-secondary)",
+            backgroundColor: "var(--color-bg-danger-secondary)",
+          },
+        }}
+      >
+        Rechazar oferta
+      </Button>
+      {condicionada && (
+        <Typography
+          variant="caption"
+          sx={{ color: "var(--color-fg-default-secondary)" }}
+        >
+          Responde en la conversación para negociar las condiciones. Podrás
+          aceptar la oferta cuando el factoring envíe la oferta final.
+        </Typography>
+      )}
+    </Box>
+  ) : undefined;
 
   return (
     <Paper
@@ -211,101 +284,36 @@ const OfertaRecibidaCard = ({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "1fr",
+              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 340px" },
               gap: 3,
               alignItems: "start",
+              mb: 3,
             }}
           >
-            <Box>
-              
+            <OfertaCamposDetalle oferta={oferta} />
 
-              <OfertaCamposDetalle oferta={oferta} />
-            </Box>
-
-            <ConversacionOferta
-              ofertaId={oferta.id}
-              ladoActual="EMPRESA"
-              puedeComentar={puedeComentar}
-              onEnviarComentario={onEnviarComentario}
-              placeholderComentario="Escribe una respuesta para el factoring..."
-              textoBotonEnviar="Responder oferta"
+            <ResumenOfertaAside
+              readOnly
+              title="Resumen de la oferta"
+              montoTotal={montoTotal}
+              porcentajeFinanciamiento={oferta.porcentajeFinanciamiento}
+              montoAFinanciar={montoAFinanciar}
+              montoAGirar={montoAGirar}
+              tasa30Dias={oferta.tasa30Dias ?? 0}
+              diasFinanciamiento={diasFinanciamiento}
+              vigenciaOfertaDias={vigenciaOfertaDias}
+              detailActions={detailActions}
             />
           </Box>
 
-          {mostrarAcciones && (
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 2,
-                mt: 1,
-                pt: 2.5,
-                borderTop: "1px solid var(--color-border-default-primary)",
-              }}
-            >
-              {!condicionada && (
-                <Button
-                  variant="contained"
-                  startIcon={<CheckCircle />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAceptar();
-                  }}
-                  sx={{
-                    backgroundColor: "var(--color-bg-success-primary)",
-                    color: "var(--color-fg-on-accent-primary)",
-                    textTransform: "none",
-                    fontWeight: 600,
-                    borderRadius: 2,
-                    px: 3,
-                    py: 1,
-                    "&:hover": {
-                      backgroundColor: "var(--color-bg-success-primary-hover)",
-                    },
-                  }}
-                >
-                  Aceptar oferta
-                </Button>
-              )}
-              <Button
-                variant="outlined"
-                startIcon={<Cancel />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRechazar();
-                }}
-                sx={{
-                  borderColor: "var(--color-fg-danger-primary)",
-                  color: "var(--color-fg-danger-primary)",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  borderRadius: 2,
-                  px: 3,
-                  py: 1,
-                  "&:hover": {
-                    borderColor: "var(--color-border-danger-secondary)",
-                    backgroundColor: "var(--color-bg-danger-secondary)",
-                  },
-                }}
-              >
-                Rechazar oferta
-              </Button>
-
-              {condicionada && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    alignSelf: "center",
-                    color: "var(--color-fg-default-secondary)",
-                  }}
-                >
-                  Responde en la conversación para negociar las condiciones.
-                  Podrás aceptar la oferta cuando el factoring envíe la oferta
-                  final.
-                </Typography>
-              )}
-            </Box>
-          )}
+          <ConversacionOferta
+            ofertaId={oferta.id}
+            ladoActual="EMPRESA"
+            puedeComentar={puedeComentar}
+            onEnviarComentario={onEnviarComentario}
+            placeholderComentario="Escribe una respuesta para el factoring..."
+            textoBotonEnviar="Responder oferta"
+          />
         </Box>
       </Collapse>
     </Paper>

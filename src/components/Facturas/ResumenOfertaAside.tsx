@@ -14,6 +14,8 @@ interface ResumenOfertaAsideProps {
   /** Cuando true, oculta botones del formulario y muestra `detailActions` si se pasan. */
   readOnly?: boolean;
   detailActions?: ReactNode;
+  /** Título del panel; por defecto "Resumen de tu oferta" (voz factoring). */
+  title?: string;
   submitDisabled?: boolean;
   onCancel?: () => void;
   submitLabel?: string;
@@ -54,6 +56,7 @@ const ResumenOfertaAside = ({
   vigenciaOfertaDias,
   readOnly = false,
   detailActions,
+  title = "Resumen de tu oferta",
   submitDisabled = false,
   onCancel,
   submitLabel = "Enviar oferta",
@@ -106,7 +109,7 @@ const ResumenOfertaAside = ({
         variant="h6"
         sx={{ fontWeight: 600, color: "text.primary", mb: 2.5 }}
       >
-        Resumen de tu oferta
+        {title}
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mb: 2.5 }}>

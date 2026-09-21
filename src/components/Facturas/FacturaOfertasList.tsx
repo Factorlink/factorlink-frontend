@@ -281,6 +281,7 @@ const FacturaOfertasList = ({
                 key={oferta.id}
                 oferta={oferta}
                 plazo={factura.plazo || 0}
+                montoTotal={factura.montoTotal}
                 expandida={expandedRow === oferta.id}
                 disponible={disponible}
                 mostrarAcciones={disponible && !respondida && !aceptadas}
