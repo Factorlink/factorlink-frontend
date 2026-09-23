@@ -3,6 +3,7 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   FormControl,
   InputLabel,
   MenuItem,
@@ -229,7 +230,29 @@ const FacturaDetalleTabs = ({
               value="ofertas"
               icon={<RequestQuote sx={{ fontSize: 18 }} />}
               iconPosition="start"
-              label="Ofertas"
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  Ofertas
+                  <Chip
+                    label={ofertas.length}
+                    size="small"
+                    sx={{
+                      height: 22,
+                      minWidth: 22,
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      backgroundColor:
+                        tab === "ofertas"
+                          ? "var(--color-bg-accent-primary)"
+                          : "var(--color-bg-neutral-secondary)",
+                      color:
+                        tab === "ofertas"
+                          ? "var(--color-fg-on-accent-primary)"
+                          : "var(--color-fg-default-primary)",
+                    }}
+                  />
+                </Box>
+              }
               sx={{ textTransform: "none", minHeight: 48 }}
             />
           )}

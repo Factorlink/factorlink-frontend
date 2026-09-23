@@ -114,7 +114,7 @@ const AceptarOfertaModal = ({
     onClose();
   };
 
-  const canSubmit = siiPasswordCertificadoPersonal.length > 0;
+  const canSubmit = siiPasswordCertificadoPersonal.length === 4;
 
   return (
     <>
@@ -212,7 +212,7 @@ const AceptarOfertaModal = ({
               onChange={(e) =>
                 setSiiPasswordCertificadoPersonal(digitsOnly(e.target.value))
               }
-              placeholder="Hasta 4 dígitos"
+              placeholder="4 dígitos"
               sx={{ mt: 2 }}
               inputProps={{
                 maxLength: 4,
