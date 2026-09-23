@@ -67,6 +67,7 @@ export type UpdateOfertaPayload = {
 export type RespondOfertaPayload = {
     estado?: "aceptada" | "rechazada";
     comentarioEmpresa?: string;
+    siiPasswordCertificadoPersonal?: string;
 };
 
 /** El backend resuelve el bando del autor; el frontend no lo infiere. */

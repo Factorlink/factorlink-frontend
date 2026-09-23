@@ -8,8 +8,6 @@ import {
   Typography,
   IconButton,
   Button,
-  Alert,
-  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -22,6 +20,8 @@ import {
   isInformed,
   type OptionalValue,
 } from "../../utils/ofertaFormatters";
+import CederFacturaProgressModal from "./CederFacturaProgressModal";
+import FacturaCedidaModal from "./FacturaCedidaModal";
 
 interface AceptarOfertaModalProps {
   open: boolean;
@@ -38,6 +38,8 @@ interface AceptarOfertaModalProps {
   };
 }
 
+type AcceptPhase = "confirm" | "loading" | "error" | "success";
+
 const buildResumenLine = (ofertaData: AceptarOfertaModalProps["ofertaData"]) => {
   const parts = [
     `Monto a financiar: ${formatMoney(ofertaData.montoAFinanciar)}`,
@@ -52,101 +54,116 @@ const buildResumenLine = (ofertaData: AceptarOfertaModalProps["ofertaData"]) => 
   return parts.join(" • ");
 };
 
+const digitsOnly = (value: string) => value.replace(/\D/g, "").slice(0, 4);
+
 const AceptarOfertaModal = ({
   open,
   onClose,
   onSuccess,
   ofertaData,
 }: AceptarOfertaModalProps) => {
-  const [alertStatus, setAlertStatus] = useState<"success" | "error" | null>(null);
-  const [alertMessage, setAlertMessage] = useState("");
+  const [phase, setPhase] = useState<AcceptPhase>("confirm");
+  const [errorMessage, setErrorMessage] = useState("");
   const [comentario, setComentario] = useState("");
-  const { responderOferta, loading } = useOfertas();
+  const [siiPasswordCertificadoPersonal, setSiiPasswordCertificadoPersonal] =
+    useState("");
+  const { responderOferta } = useOfertas();
+
+  const resetForm = () => {
+    setPhase("confirm");
+    setErrorMessage("");
+    setComentario("");
+    setSiiPasswordCertificadoPersonal("");
+  };
 
   const handleAccept = async () => {
+    setPhase("loading");
     try {
       await responderOferta(ofertaData.id, {
         estado: "aceptada",
         comentarioEmpresa: comentario,
+        siiPasswordCertificadoPersonal,
       });
-      setAlertStatus("success");
-      setAlertMessage("Oferta aceptada correctamente.");
+      setPhase("success");
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string } };
       };
-      setAlertStatus("error");
-      setAlertMessage(
+      setErrorMessage(
         axiosError?.response?.data?.message ||
-          "Ocurrió un error al aceptar la oferta"
+          "Ocurrió un error al aceptar la oferta",
       );
+      setPhase("error");
     }
   };
 
-  const handleClose = () => {
-    if (alertStatus === "success") {
-      onSuccess?.();
-    }
-    setAlertStatus(null);
-    setAlertMessage("");
-    setComentario("");
+  const handleCloseConfirm = () => {
+    resetForm();
     onClose();
   };
 
+  const handleCancelError = () => {
+    setPhase("confirm");
+    setErrorMessage("");
+    setSiiPasswordCertificadoPersonal("");
+  };
+
+  const handleSuccessClose = () => {
+    resetForm();
+    onSuccess?.();
+    onClose();
+  };
+
+  const canSubmit = siiPasswordCertificadoPersonal.length > 0;
+
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: "var(--radius-l)",
-          overflow: "hidden",
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          px: 3,
-          pt: 3,
-          pb: 1,
+    <>
+      <Dialog
+        open={open && phase === "confirm"}
+        onClose={handleCloseConfirm}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "var(--radius-l)",
+            overflow: "hidden",
+          },
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Box
-            sx={{
-              width: 48,
-              height: 48,
-              borderRadius: "var(--radius-m)",
-              backgroundColor: "var(--color-bg-success-primary)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <CheckCircleIcon sx={{ color: "white", fontSize: 24 }} />
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: 3,
+            pt: 3,
+            pb: 1,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: "var(--radius-m)",
+                backgroundColor: "var(--color-bg-success-primary)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <CheckCircleIcon sx={{ color: "white", fontSize: 24 }} />
+            </Box>
+            <Typography variant="h6" fontWeight={600}>
+              ¿Aceptar oferta?
+            </Typography>
           </Box>
-          <Typography variant="h6" fontWeight={600}>
-            ¿Aceptar oferta?
-          </Typography>
-        </Box>
-        <IconButton onClick={handleClose} disabled={loading}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+          <IconButton onClick={handleCloseConfirm}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
 
-      <DialogContent sx={{ px: 3, pb: 3 }}>
-        {alertStatus && (
-          <Alert severity={alertStatus} sx={{ mb: 3 }}>
-            {alertMessage}
-          </Alert>
-        )}
-
-        {alertStatus !== "success" && (
+        <DialogContent sx={{ px: 3, pb: 3 }}>
           <Box sx={{ borderRadius: "var(--radius-m)", p: 2, mt: 2 }}>
             <Box
               sx={{
@@ -183,9 +200,27 @@ const AceptarOfertaModal = ({
             </Box>
 
             <Typography variant="body2" sx={{ color: "var(--color-fg-success-primary)", lineHeight: 1.6 }}>
-              Al aceptar esta oferta, se notificará al factoring y se procederá
-              con el financiamiento. Esta acción no se puede deshacer.
+              Al aceptar esta oferta, la factura se va a ceder al factoring.
+              Esta acción no se puede deshacer.
             </Typography>
+
+            <TextField
+              label="Clave del certificado personal"
+              type="password"
+              fullWidth
+              value={siiPasswordCertificadoPersonal}
+              onChange={(e) =>
+                setSiiPasswordCertificadoPersonal(digitsOnly(e.target.value))
+              }
+              placeholder="Hasta 4 dígitos"
+              sx={{ mt: 2 }}
+              inputProps={{
+                maxLength: 4,
+                inputMode: "numeric",
+                autoComplete: "off",
+                "aria-label": "siiPasswordCertificadoPersonal",
+              }}
+            />
 
             <TextField
               label="Comentario (opcional)"
@@ -195,35 +230,33 @@ const AceptarOfertaModal = ({
               fullWidth
               value={comentario}
               onChange={(e) => setComentario(e.target.value)}
-              disabled={loading}
               placeholder="Escribe un comentario para el factoring..."
               sx={{ mt: 2 }}
               inputProps={{ maxLength: 500 }}
             />
           </Box>
-        )}
-      </DialogContent>
+        </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 3, pt: 2, gap: 2 }}>
-        <Button
-          variant="outlined"
-          onClick={handleClose}
-          disabled={loading}
-          sx={{
-            flex: 1,
-            py: 1.5,
-            borderRadius: "var(--radius-m)",
-            textTransform: "none",
-            fontWeight: 600,
-          }}
-        >
-          {alertStatus === "success" ? "Cerrar" : "Cancelar"}
-        </Button>
-        {alertStatus !== "success" && (
+        <DialogActions sx={{ px: 3, pb: 3, pt: 2, gap: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={handleCloseConfirm}
+            sx={{
+              flex: 1,
+              py: 1.5,
+              borderRadius: "var(--radius-m)",
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            Cancelar
+          </Button>
           <Button
             variant="contained"
-            onClick={handleAccept}
-            disabled={loading}
+            onClick={() => {
+              void handleAccept();
+            }}
+            disabled={!canSubmit}
             sx={{
               flex: 1,
               py: 1.5,
@@ -235,17 +268,36 @@ const AceptarOfertaModal = ({
               "&:hover": {
                 backgroundColor: "var(--color-bg-success-primary-hover)",
               },
+              "&.Mui-disabled": {
+                backgroundColor: "var(--color-bg-disabled-primary)",
+                color: "var(--color-fg-on-accent-primary)",
+                opacity: 0.7,
+              },
             }}
           >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Aceptar oferta"
-            )}
+            Aceptar y ceder
           </Button>
-        )}
-      </DialogActions>
-    </Dialog>
+        </DialogActions>
+      </Dialog>
+
+      <CederFacturaProgressModal
+        open={open && (phase === "loading" || phase === "error")}
+        status={phase === "error" ? "error" : "loading"}
+        errorMessage={errorMessage}
+        onRetry={() => {
+          void handleAccept();
+        }}
+        onCancel={handleCancelError}
+      />
+
+      <FacturaCedidaModal
+        open={open && phase === "success"}
+        factoringName={ofertaData.factoringName}
+        montoAFinanciar={ofertaData.montoAFinanciar}
+        tasa30Dias={ofertaData.tasa30Dias}
+        onClose={handleSuccessClose}
+      />
+    </>
   );
 };
 
