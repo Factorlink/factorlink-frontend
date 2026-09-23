@@ -57,20 +57,6 @@ interface NotificationTrayProps {
   onClose: () => void;
 }
 
-const defaultExpandedKeys = (
-  groups: NotificationTrayGroup[],
-  expandUnreadGroups: boolean,
-): Set<string> => {
-  const keys = new Set<string>();
-  if (!expandUnreadGroups) return keys;
-  for (const group of groups) {
-    if (group.notifications.length > 1 && group.unreadCount > 0) {
-      keys.add(group.key);
-    }
-  }
-  return keys;
-};
-
 const NotificationTray: FC<NotificationTrayProps> = ({
   userId,
   context,
@@ -113,9 +99,7 @@ const NotificationTray: FC<NotificationTrayProps> = ({
       const sorted = sortUnreadNotifications(data.notifications ?? []);
       setUnread(sorted);
       onUnreadCountChange(data.count ?? sorted.length);
-      setExpandedKeys(
-        defaultExpandedKeys(groupNotificationsForTray(sorted), true),
-      );
+      setExpandedKeys(new Set());
     } catch {
       setErrorUnread(true);
     } finally {
@@ -131,7 +115,6 @@ const NotificationTray: FC<NotificationTrayProps> = ({
       const sorted = sortReadNotifications(data.notifications ?? []);
       setRead(sorted);
       setHasLoadedRead(true);
-      // Leídas: grupos colapsados por defecto.
       setExpandedKeys(new Set());
     } catch {
       setErrorRead(true);
@@ -155,11 +138,7 @@ const NotificationTray: FC<NotificationTrayProps> = ({
   const handleTabChange = (_: SyntheticEvent, nextValue: number) => {
     setTabValue(nextValue);
     setActionError(null);
-    if (nextValue === 0) {
-      setExpandedKeys(defaultExpandedKeys(unreadGroups, true));
-    } else if (hasLoadedRead) {
-      setExpandedKeys(new Set());
-    }
+    setExpandedKeys(new Set());
   };
 
   const toggleGroup = (key: string) => {
