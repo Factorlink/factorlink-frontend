@@ -9,6 +9,7 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   Dialog,
@@ -27,6 +28,7 @@ import {
   Typography,
 } from "@mui/material";
 import {
+  Add,
   ArrowBack,
   Description,
   ErrorOutline,
@@ -37,6 +39,7 @@ import {
 import Layout from "../../../../../components/Layout";
 import SectionPanel from "../../../../../components/SectionPanel";
 import FacturaGrupoFactoringDetalleDrawer from "../../../../../components/Facturas/FacturaGrupoFactoringDetalleDrawer";
+import FacturaGrupoOfertaGrupalDrawer from "../../../../../components/Facturas/FacturaGrupoOfertaGrupalDrawer";
 import { formatCurrency } from "../../../../../components/Facturas/FacturaResumenCard";
 import { useFacturaGrupos } from "../../../../../hooks/useFacturaGrupos";
 import { useOfertas } from "../../../../../hooks/useOfertas";
@@ -155,6 +158,12 @@ const FacturaGrupoFactoringDetalle = () => {
   const [sendErrorReason, setSendErrorReason] = useState<string | null>(null);
   const [sendSuccessOpen, setSendSuccessOpen] = useState(false);
   const [individualSendErrorOpen, setIndividualSendErrorOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [ofertaGrupalOpen, setOfertaGrupalOpen] = useState(false);
+  const [grupalSendError, setGrupalSendError] = useState<string | null>(null);
+  const [grupalSendErrorReason, setGrupalSendErrorReason] = useState<
+    string | null
+  >(null);
 
   const loadDetalle = useCallback(async () => {
     if (!id) {
@@ -319,6 +328,117 @@ const FacturaGrupoFactoringDetalle = () => {
           "No se pudo enviar la oferta al grupo. Intente nuevamente.",
       );
       setSendErrorReason(axiosError?.response?.data?.reason || null);
+    }
+  };
+
+  const selectableFacturas = useMemo(
+    () => facturas.filter((factura) => !facturaTieneOfertaEnviada(factura)),
+    [facturas],
+  );
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const facturasSeleccionadas = useMemo(
+    () =>
+      facturas.filter(
+        (factura) =>
+          selectedIdSet.has(factura.id) && !facturaTieneOfertaEnviada(factura),
+      ),
+    [facturas, selectedIdSet],
+  );
+  const allSelectableSelected =
+    selectableFacturas.length > 0 &&
+    selectableFacturas.every((factura) => selectedIdSet.has(factura.id));
+  const someSelectableSelected =
+    selectableFacturas.some((factura) => selectedIdSet.has(factura.id)) &&
+    !allSelectableSelected;
+
+  useEffect(() => {
+    const eligible = new Set(selectableFacturas.map((factura) => factura.id));
+    setSelectedIds((prev) => {
+      const next = prev.filter((id) => eligible.has(id));
+      if (next.length === prev.length && next.every((id, index) => id === prev[index])) {
+        return prev;
+      }
+      return next;
+    });
+  }, [selectableFacturas]);
+
+  const handleToggleSelectFactura = (factura: Factura) => {
+    if (facturaTieneOfertaEnviada(factura) || sendingOfertas) return;
+    setSelectedIds((prev) =>
+      prev.includes(factura.id)
+        ? prev.filter((id) => id !== factura.id)
+        : [...prev, factura.id],
+    );
+  };
+
+  const handleToggleSelectAll = () => {
+    if (sendingOfertas || selectableFacturas.length === 0) return;
+    if (allSelectableSelected) {
+      const selectableIdSet = new Set(
+        selectableFacturas.map((factura) => factura.id),
+      );
+      setSelectedIds((prev) => prev.filter((id) => !selectableIdSet.has(id)));
+      return;
+    }
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      selectableFacturas.forEach((factura) => next.add(factura.id));
+      return Array.from(next);
+    });
+  };
+
+  const handleOpenOfertaGrupal = () => {
+    if (facturasSeleccionadas.length === 0 || sendingOfertas) return;
+    setGrupalSendError(null);
+    setGrupalSendErrorReason(null);
+    setOfertaGrupalOpen(true);
+  };
+
+  const handleCloseOfertaGrupal = () => {
+    if (sendingOfertas) return;
+    setOfertaGrupalOpen(false);
+  };
+
+  const handleCrearOfertaGrupal = async (
+    borradoresGrupales: OfertaGrupoBorrador[],
+  ) => {
+    if (!id || borradoresGrupales.length === 0) return;
+    try {
+      setGrupalSendError(null);
+      setGrupalSendErrorReason(null);
+      const ofertas = borradoresGrupales.map((borrador) =>
+        buildCreateOfertaPayload(borrador),
+      );
+      await createOfertasGrupoFacturas({
+        facturaGrupoId: id,
+        ofertas,
+      });
+      const sentIds = new Set(
+        borradoresGrupales.map((borrador) => borrador.facturaId),
+      );
+      setBorradores((prev) => {
+        const next = { ...prev };
+        sentIds.forEach((facturaId) => {
+          delete next[facturaId];
+        });
+        return next;
+      });
+      setSelectedIds([]);
+      setOfertaGrupalOpen(false);
+      setSendSuccessOpen(true);
+      await loadDetalle();
+    } catch (err) {
+      console.error("Error creating oferta grupal:", err);
+      const axiosError = err as {
+        response?: { data?: { message?: string; reason?: string } };
+        message?: string;
+      };
+      setGrupalSendError(
+        axiosError?.response?.data?.message ||
+          (err instanceof Error ? err.message : null) ||
+          "No se pudo crear la oferta grupal. Intente nuevamente.",
+      );
+      setGrupalSendErrorReason(axiosError?.response?.data?.reason || null);
     }
   };
 
@@ -603,6 +723,34 @@ const FacturaGrupoFactoringDetalle = () => {
                 sx={{ color: "var(--color-fg-accent-primary)", fontSize: 24 }}
               />
             }
+            action={
+              facturas.length > 0 ? (
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<Add />}
+                  disabled={
+                    facturasSeleccionadas.length === 0 || sendingOfertas
+                  }
+                  onClick={handleOpenOfertaGrupal}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    color: "var(--color-fg-on-accent-primary)",
+                    backgroundColor: "var(--color-bg-accent-primary)",
+                    "&:hover": {
+                      backgroundColor: "var(--color-bg-accent-primary-hover)",
+                    },
+                    "&:disabled": {
+                      backgroundColor: "var(--color-bg-disabled-primary)",
+                      color: "var(--color-fg-disabled-primary)",
+                    },
+                  }}
+                >
+                  Crear oferta grupal
+                </Button>
+              ) : undefined
+            }
           >
             {facturas.length === 0 ? (
               <Typography
@@ -623,6 +771,20 @@ const FacturaGrupoFactoringDetalle = () => {
                               "var(--color-bg-default-tertiary)",
                           }}
                         >
+                          <TableCell padding="checkbox" sx={{ width: 48 }}>
+                            <Checkbox
+                              indeterminate={someSelectableSelected}
+                              checked={allSelectableSelected}
+                              disabled={
+                                selectableFacturas.length === 0 ||
+                                sendingOfertas
+                              }
+                              onChange={handleToggleSelectAll}
+                              inputProps={{
+                                "aria-label": "Seleccionar facturas sin oferta",
+                              }}
+                            />
+                          </TableCell>
                           <TableCell sx={headerCellSx}>Folio</TableCell>
                           <TableCell sx={headerCellSx}>Receptor</TableCell>
                           <TableCell sx={headerCellSx}>Fecha emisión</TableCell>
@@ -632,17 +794,46 @@ const FacturaGrupoFactoringDetalle = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {facturas.map((factura) => (
+                        {facturas.map((factura) => {
+                          const canSelect = !facturaTieneOfertaEnviada(factura);
+                          const isSelected = selectedIdSet.has(factura.id);
+                          return (
                           <TableRow
                             key={factura.id}
                             sx={{
+                              backgroundColor: isSelected
+                                ? "var(--color-bg-accent-secondary)"
+                                : undefined,
                               "&:hover": {
-                                backgroundColor:
-                                  "var(--color-bg-default-tertiary)",
+                                backgroundColor: isSelected
+                                  ? "var(--color-bg-accent-secondary)"
+                                  : "var(--color-bg-default-tertiary)",
                               },
                               "&:last-child td": { borderBottom: 0 },
                             }}
                           >
+                            <TableCell padding="checkbox">
+                              <Tooltip
+                                title={
+                                  canSelect
+                                    ? ""
+                                    : "Esta factura ya tiene una oferta"
+                                }
+                              >
+                                <span>
+                                  <Checkbox
+                                    checked={isSelected}
+                                    disabled={!canSelect || sendingOfertas}
+                                    onChange={() =>
+                                      handleToggleSelectFactura(factura)
+                                    }
+                                    inputProps={{
+                                      "aria-label": `Seleccionar factura ${factura.folio}`,
+                                    }}
+                                  />
+                                </span>
+                              </Tooltip>
+                            </TableCell>
                             <TableCell>
                               <Typography
                                 variant="body2"
@@ -716,7 +907,8 @@ const FacturaGrupoFactoringDetalle = () => {
                               </Tooltip>
                             </TableCell>
                           </TableRow>
-                        ))}
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </Box>
@@ -734,10 +926,12 @@ const FacturaGrupoFactoringDetalle = () => {
                     },
                   }}
                 >
-                  Debes completar al menos una oferta en alguna de las facturas
-                  pendientes para poder enviar la oferta al grupo. También
-                  puedes enviar una oferta de forma individual desde el detalle
-                  de cada factura.
+                  Selecciona una o más facturas sin oferta y haz clic en
+                  &quot;Crear oferta grupal&quot; para aplicar las mismas
+                  condiciones. También puedes guardar un borrador en cada
+                  factura y enviarlo con &quot;Enviar oferta al grupo&quot;, o
+                  enviar una oferta individual desde el detalle de cada
+                  factura.
                 </Alert>
               </>
             )}
@@ -801,6 +995,18 @@ const FacturaGrupoFactoringDetalle = () => {
           Enviar oferta al grupo
         </Button>
       </Box>
+
+      <FacturaGrupoOfertaGrupalDrawer
+        open={ofertaGrupalOpen}
+        onClose={handleCloseOfertaGrupal}
+        facturas={facturasSeleccionadas}
+        factoringId={factoringId}
+        plazo={grupo.plazo}
+        sending={sendingOfertas}
+        error={grupalSendError}
+        errorReason={grupalSendErrorReason}
+        onCreate={handleCrearOfertaGrupal}
+      />
 
       <FacturaGrupoFactoringDetalleDrawer
         open={drawerOpen}

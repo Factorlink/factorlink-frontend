@@ -50,6 +50,12 @@ export const calcPrecioCompra = (
   costoFinanciamiento: number,
 ): number => Math.round(montoAFinanciar - costoFinanciamiento);
 
+/** El backend rechaza la oferta si el monto a girar es negativo. Cero sigue siendo válido. */
+export const montoAGirarEsNegativo = (montoAGirar: number) => montoAGirar < 0;
+
+export const MONTO_A_GIRAR_NEGATIVO_MESSAGE =
+  "El monto a girar no puede ser negativo. Comisión, IVA, gastos administrativos y saldo pendiente superan el precio de compra. Baja esos montos para poder enviar la oferta.";
+
 export const calcMontoAGirar = (
   precioCompra: number,
   saldoPendiente: number,

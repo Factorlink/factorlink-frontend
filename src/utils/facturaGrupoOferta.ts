@@ -1,8 +1,37 @@
 import type { Factura } from "../types/factura";
 import type { Oferta } from "../types/oferta";
+import {
+  computeOfertaMontos,
+  montoAGirarEsNegativo,
+} from "./ofertaCalculations";
+import { toFiniteNumber } from "./ofertaFormatters";
 import type { OfertaPayloadInput } from "./ofertaPayload";
 
 export type OfertaGrupoBorrador = OfertaPayloadInput;
+
+/** Valores del formulario de oferta, compartidos por la oferta individual y la grupal. */
+export type OfertaGrupoFormValues = {
+  diasFinanciamiento: number | string;
+  porcentajeFinanciamiento: number | string;
+  fechaCotizacion: Date | null;
+  tasa30Dias: number | string;
+  montoComision: string | number;
+  gastosAdministrativos: string | number;
+  saldoPendiente: string | number;
+  tasaDiariaMora: number | string;
+  vigenciaOfertaDias: number | string;
+  comentario: string;
+  ofertaCondicionada: boolean;
+};
+
+export type OfertaGrupalPreviewRow = {
+  facturaId: string;
+  folio: string;
+  montoTotal: number;
+  montoAFinanciar: number;
+  montoComision: number;
+  montoAGirar: number;
+};
 
 export type FacturaGrupoOfertaDisplay = {
   kind: "sin_oferta" | "borrador" | "creada";
@@ -46,7 +75,124 @@ export const getBorradoresPendientesEnvio = (
 export const canEnviarOfertaAlGrupo = (
   borradores: Record<string, OfertaGrupoBorrador>,
   facturas: Factura[] = [],
-) => getBorradoresPendientesEnvio(borradores, facturas).length > 0;
+) => {
+  const pendientes = getBorradoresPendientesEnvio(borradores, facturas);
+  return (
+    pendientes.length > 0 &&
+    pendientes.every(
+      (borrador) =>
+        !montoAGirarEsNegativo(toFiniteNumber(borrador.montoAGirar) ?? 0),
+    )
+  );
+};
+
+export const buildOfertaGrupalInitialValues = (
+  plazo?: number | null,
+): OfertaGrupoFormValues => ({
+  diasFinanciamiento: plazo || "",
+  porcentajeFinanciamiento: 100,
+  fechaCotizacion: new Date(),
+  tasa30Dias: 0,
+  montoComision: "",
+  gastosAdministrativos: "",
+  saldoPendiente: "0",
+  tasaDiariaMora: 0,
+  vigenciaOfertaDias: 3,
+  comentario: "",
+  ofertaCondicionada: false,
+});
+
+export const buildOfertaGrupoBorrador = (
+  factura: Factura,
+  factoringId: string,
+  values: OfertaGrupoFormValues,
+): OfertaGrupoBorrador | null => {
+  if (!values.fechaCotizacion) return null;
+  const montos = computeOfertaMontos({
+    montoTotal: factura.montoTotal,
+    porcentajeFinanciamiento: values.porcentajeFinanciamiento,
+    diasFinanciamiento: values.diasFinanciamiento,
+    tasa30Dias: values.tasa30Dias,
+    saldoPendiente: values.saldoPendiente,
+    montoComision: values.montoComision,
+    gastosAdministrativos: values.gastosAdministrativos,
+  });
+
+  return {
+    facturaId: factura.id,
+    factoringId,
+    diasFinanciamiento: values.diasFinanciamiento,
+    porcentajeFinanciamiento: values.porcentajeFinanciamiento,
+    fechaCotizacion: values.fechaCotizacion,
+    montoAFinanciar: montos.montoAFinanciar,
+    tasa30Dias: values.tasa30Dias,
+    retencion: montos.retencion,
+    costoFinanciamiento: montos.costoFinanciamiento,
+    precioCompra: montos.precioCompra,
+    saldoPendiente: values.saldoPendiente || "0",
+    montoComision: values.montoComision,
+    ivaComision: montos.ivaComision,
+    gastosAdministrativos: values.gastosAdministrativos,
+    montoAGirar: montos.montoAGirar,
+    tasaDiariaMora: values.tasaDiariaMora,
+    vigenciaOfertaDias: values.vigenciaOfertaDias,
+    comentario: values.comentario,
+    ofertaCondicionada: values.ofertaCondicionada,
+  };
+};
+
+export const buildOfertaGrupalBorradores = (
+  facturas: Factura[],
+  factoringId: string,
+  values: OfertaGrupoFormValues,
+): OfertaGrupoBorrador[] | null => {
+  const borradores: OfertaGrupoBorrador[] = [];
+  for (const factura of facturas) {
+    const borrador = buildOfertaGrupoBorrador(factura, factoringId, values);
+    if (!borrador) return null;
+    borradores.push(borrador);
+  }
+  return borradores;
+};
+
+export const buildOfertaGrupalPreview = (
+  facturas: Factura[],
+  values: Pick<
+    OfertaGrupoFormValues,
+    | "porcentajeFinanciamiento"
+    | "diasFinanciamiento"
+    | "tasa30Dias"
+    | "saldoPendiente"
+    | "montoComision"
+    | "gastosAdministrativos"
+  >,
+): OfertaGrupalPreviewRow[] =>
+  facturas.map((factura) => {
+    const montos = computeOfertaMontos({
+      montoTotal: factura.montoTotal,
+      porcentajeFinanciamiento: values.porcentajeFinanciamiento,
+      diasFinanciamiento: values.diasFinanciamiento,
+      tasa30Dias: values.tasa30Dias,
+      saldoPendiente: values.saldoPendiente,
+      montoComision: values.montoComision,
+      gastosAdministrativos: values.gastosAdministrativos,
+    });
+
+    return {
+      facturaId: factura.id,
+      folio: factura.folio,
+      montoTotal: toFiniteNumber(factura.montoTotal) ?? 0,
+      montoAFinanciar: montos.montoAFinanciar,
+      montoComision: toFiniteNumber(values.montoComision) ?? 0,
+      montoAGirar: montos.montoAGirar,
+    };
+  });
+
+export const sumFacturasMontoTotal = (facturas: Factura[]) =>
+  facturas.reduce(
+    (sum, factura) => sum + (toFiniteNumber(factura.montoTotal) ?? 0),
+    0,
+  );
 
 export const getFacturaGrupoOfertaDisplay = (
   factura?: Factura | null,

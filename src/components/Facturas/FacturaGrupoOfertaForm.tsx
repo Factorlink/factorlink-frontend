@@ -19,9 +19,17 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
 import { StyledTextField, StyledDatePicker } from "../../pages/register/styles";
 import type { Factura } from "../../types/factura";
-import type { OfertaGrupoBorrador } from "../../utils/facturaGrupoOferta";
-import { computeOfertaMontos } from "../../utils/ofertaCalculations";
-import { formatMoney, parseDateOnly } from "../../utils/ofertaFormatters";
+import {
+  buildOfertaGrupoBorrador,
+  type OfertaGrupoBorrador,
+  type OfertaGrupoFormValues,
+} from "../../utils/facturaGrupoOferta";
+import {
+  computeOfertaMontos,
+  MONTO_A_GIRAR_NEGATIVO_MESSAGE,
+  montoAGirarEsNegativo,
+} from "../../utils/ofertaCalculations";
+import { formatMoney, parseDateOnly, toFiniteNumber } from "../../utils/ofertaFormatters";
 import {
   clearZeroOnFocus,
   createOfertaFormSchema,
@@ -106,7 +114,7 @@ type FacturaGrupoOfertaFormProps = {
 const buildInitialValues = (
   factura: Factura,
   borrador?: OfertaGrupoBorrador | null,
-) => {
+): OfertaGrupoFormValues => {
   if (borrador) {
     return {
       diasFinanciamiento: borrador.diasFinanciamiento as number | string,
@@ -140,45 +148,6 @@ const buildInitialValues = (
   };
 };
 
-const buildBorradorFromValues = (
-  factura: Factura,
-  factoringId: string,
-  values: ReturnType<typeof buildInitialValues>,
-): OfertaGrupoBorrador | null => {
-  if (!values.fechaCotizacion) return null;
-  const montos = computeOfertaMontos({
-    montoTotal: factura.montoTotal,
-    porcentajeFinanciamiento: values.porcentajeFinanciamiento,
-    diasFinanciamiento: values.diasFinanciamiento,
-    tasa30Dias: values.tasa30Dias,
-    saldoPendiente: values.saldoPendiente,
-    montoComision: values.montoComision,
-    gastosAdministrativos: values.gastosAdministrativos,
-  });
-
-  return {
-    facturaId: factura.id,
-    factoringId,
-    diasFinanciamiento: values.diasFinanciamiento,
-    porcentajeFinanciamiento: values.porcentajeFinanciamiento,
-    fechaCotizacion: values.fechaCotizacion,
-    montoAFinanciar: montos.montoAFinanciar,
-    tasa30Dias: values.tasa30Dias,
-    retencion: montos.retencion,
-    costoFinanciamiento: montos.costoFinanciamiento,
-    precioCompra: montos.precioCompra,
-    saldoPendiente: values.saldoPendiente || "0",
-    montoComision: values.montoComision,
-    ivaComision: montos.ivaComision,
-    gastosAdministrativos: values.gastosAdministrativos,
-    montoAGirar: montos.montoAGirar,
-    tasaDiariaMora: values.tasaDiariaMora,
-    vigenciaOfertaDias: values.vigenciaOfertaDias,
-    comentario: values.comentario,
-    ofertaCondicionada: values.ofertaCondicionada,
-  };
-};
-
 const FacturaGrupoOfertaForm = ({
   factura,
   factoringId,
@@ -200,8 +169,13 @@ const FacturaGrupoOfertaForm = ({
     initialValues: buildInitialValues(factura, borrador),
     validationSchema: createOfertaFormSchema(),
     onSubmit: (values) => {
-      const next = buildBorradorFromValues(factura, factoringId, values);
-      if (!next) return;
+      const next = buildOfertaGrupoBorrador(factura, factoringId, values);
+      if (
+        !next ||
+        montoAGirarEsNegativo(toFiniteNumber(next.montoAGirar) ?? 0)
+      ) {
+        return;
+      }
       onSave(next);
       onSaveSuccess?.();
     },
@@ -229,6 +203,10 @@ const FacturaGrupoOfertaForm = ({
     ],
   );
 
+  const montoAGirarNegativo = montoAGirarEsNegativo(
+    montosCalculados.montoAGirar,
+  );
+
   const isFormComplete =
     formik.isValid &&
     Boolean(formik.values.fechaCotizacion) &&
@@ -238,10 +216,18 @@ const FacturaGrupoOfertaForm = ({
     formik.values.diasFinanciamiento !== "" &&
     formik.values.porcentajeFinanciamiento !== "";
 
-  const actionsDisabled = disabled || sendingIndividual || !isFormComplete;
+  const actionsDisabled =
+    disabled || sendingIndividual || !isFormComplete || montoAGirarNegativo;
 
   const handleEnviarIndividual = async () => {
-    if (!onEnviarIndividual || disabled || sendingIndividual) return;
+    if (
+      !onEnviarIndividual ||
+      disabled ||
+      sendingIndividual ||
+      montoAGirarNegativo
+    ) {
+      return;
+    }
     const errors = await formik.validateForm();
     if (Object.keys(errors).length > 0) {
       formik.setTouched(
@@ -251,7 +237,7 @@ const FacturaGrupoOfertaForm = ({
       );
       return;
     }
-    const next = buildBorradorFromValues(
+    const next = buildOfertaGrupoBorrador(
       factura,
       factoringId,
       formik.values,
@@ -587,6 +573,8 @@ const FacturaGrupoOfertaForm = ({
             <Box sx={{ ...gridSx, mb: 1 }}>
               {COMPUTED_MONEY_FIELDS.map((field) => {
                 const emphasize = "emphasize" in field && field.emphasize;
+                const montoNegativo =
+                  field.key === "montoAGirar" && montoAGirarNegativo;
                 return (
                   <StyledTextField
                     key={field.key}
@@ -604,9 +592,14 @@ const FacturaGrupoOfertaForm = ({
                         cursor: "not-allowed",
                         "& input": {
                           cursor: "not-allowed",
-                          ...(emphasize
-                            ? { color: "primary.main", fontWeight: 600 }
+                          ...(emphasize || montoNegativo
+                            ? { fontWeight: 600 }
                             : {}),
+                          ...(montoNegativo
+                            ? { color: "var(--color-fg-danger-primary)" }
+                            : emphasize
+                              ? { color: "primary.main" }
+                              : {}),
                         },
                       },
                     }}
@@ -615,6 +608,12 @@ const FacturaGrupoOfertaForm = ({
                 );
               })}
             </Box>
+
+            {montoAGirarNegativo && (
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                {MONTO_A_GIRAR_NEGATIVO_MESSAGE}
+              </Alert>
+            )}
 
             <Typography
               variant="h6"

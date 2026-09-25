@@ -19,7 +19,11 @@ import ConfirmarOfertaModal from "../Modals/ConfirmarOfertaModal";
 import ResumenOfertaAside from "./ResumenOfertaAside";
 import SectionPanel from "../SectionPanel";
 import { formatMoney } from "../../utils/ofertaFormatters";
-import { computeOfertaMontos } from "../../utils/ofertaCalculations";
+import {
+  computeOfertaMontos,
+  MONTO_A_GIRAR_NEGATIVO_MESSAGE,
+  montoAGirarEsNegativo,
+} from "../../utils/ofertaCalculations";
 import {
   clearZeroOnFocus,
   createOfertaFormSchema,
@@ -123,7 +127,17 @@ const EnviarOfertaCard = ({
       ofertaCondicionada: false,
     },
     validationSchema: createOfertaFormSchema(),
-    onSubmit: () => {
+    onSubmit: (values) => {
+      const montos = computeOfertaMontos({
+        montoTotal: factura.montoTotal,
+        porcentajeFinanciamiento: values.porcentajeFinanciamiento,
+        diasFinanciamiento: values.diasFinanciamiento,
+        tasa30Dias: values.tasa30Dias,
+        saldoPendiente: values.saldoPendiente,
+        montoComision: values.montoComision,
+        gastosAdministrativos: values.gastosAdministrativos,
+      });
+      if (montoAGirarEsNegativo(montos.montoAGirar)) return;
       setConfirmOpen(true);
     },
   });
@@ -159,6 +173,7 @@ const EnviarOfertaCard = ({
       : fallback;
 
   const handleConfirm = async () => {
+    if (montoAGirarEsNegativo(montosCalculados.montoAGirar)) return;
     try {
       setAlertStatus(null);
       await createOferta({
@@ -535,6 +550,9 @@ const EnviarOfertaCard = ({
             <Box sx={{ ...gridSx, mb: 1 }}>
               {COMPUTED_MONEY_FIELDS.map((field) => {
                 const emphasize = "emphasize" in field && field.emphasize;
+                const montoNegativo =
+                  field.key === "montoAGirar" &&
+                  montoAGirarEsNegativo(montosCalculados.montoAGirar);
                 return (
                   <StyledTextField
                     key={field.key}
@@ -552,9 +570,14 @@ const EnviarOfertaCard = ({
                         cursor: "not-allowed",
                         "& input": {
                           cursor: "not-allowed",
-                          ...(emphasize
-                            ? { color: "primary.main", fontWeight: 600 }
+                          ...(emphasize || montoNegativo
+                            ? { fontWeight: 600 }
                             : {}),
+                          ...(montoNegativo
+                            ? { color: "var(--color-fg-danger-primary)" }
+                            : emphasize
+                              ? { color: "primary.main" }
+                              : {}),
                         },
                       },
                     }}
@@ -563,6 +586,12 @@ const EnviarOfertaCard = ({
                 );
               })}
             </Box>
+
+            {montoAGirarEsNegativo(montosCalculados.montoAGirar) && (
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                {MONTO_A_GIRAR_NEGATIVO_MESSAGE}
+              </Alert>
+            )}
 
             <Typography
               variant="h6"
@@ -705,6 +734,7 @@ const EnviarOfertaCard = ({
             vigenciaOfertaDias={formik.values.vigenciaOfertaDias}
             submitDisabled={
               alertStatus === "success" ||
+              montoAGirarEsNegativo(montosCalculados.montoAGirar) ||
               !formik.isValid ||
               !formik.dirty ||
               !formik.values.vigenciaOfertaDias ||
