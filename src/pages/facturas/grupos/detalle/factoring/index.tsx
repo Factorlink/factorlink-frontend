@@ -54,6 +54,7 @@ import {
 } from "../../../../../utils/facturaGrupo";
 import {
   canEnviarOfertaAlGrupo,
+  facturaPuedeSeleccionarseParaOfertaGrupal,
   facturaTieneOfertaEnviada,
   getBorradoresPendientesEnvio,
   getFacturaGrupoOfertaDisplay,
@@ -332,17 +333,27 @@ const FacturaGrupoFactoringDetalle = () => {
   };
 
   const selectableFacturas = useMemo(
-    () => facturas.filter((factura) => !facturaTieneOfertaEnviada(factura)),
-    [facturas],
+    () =>
+      facturas.filter((factura) =>
+        facturaPuedeSeleccionarseParaOfertaGrupal(
+          factura,
+          Boolean(borradores[factura.id]),
+        ),
+      ),
+    [facturas, borradores],
   );
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const facturasSeleccionadas = useMemo(
     () =>
       facturas.filter(
         (factura) =>
-          selectedIdSet.has(factura.id) && !facturaTieneOfertaEnviada(factura),
+          selectedIdSet.has(factura.id) &&
+          facturaPuedeSeleccionarseParaOfertaGrupal(
+            factura,
+            Boolean(borradores[factura.id]),
+          ),
       ),
-    [facturas, selectedIdSet],
+    [facturas, selectedIdSet, borradores],
   );
   const allSelectableSelected =
     selectableFacturas.length > 0 &&
@@ -363,7 +374,15 @@ const FacturaGrupoFactoringDetalle = () => {
   }, [selectableFacturas]);
 
   const handleToggleSelectFactura = (factura: Factura) => {
-    if (facturaTieneOfertaEnviada(factura) || sendingOfertas) return;
+    if (
+      !facturaPuedeSeleccionarseParaOfertaGrupal(
+        factura,
+        Boolean(borradores[factura.id]),
+      ) ||
+      sendingOfertas
+    ) {
+      return;
+    }
     setSelectedIds((prev) =>
       prev.includes(factura.id)
         ? prev.filter((id) => id !== factura.id)
@@ -388,7 +407,7 @@ const FacturaGrupoFactoringDetalle = () => {
   };
 
   const handleOpenOfertaGrupal = () => {
-    if (facturasSeleccionadas.length === 0 || sendingOfertas) return;
+    if (facturasSeleccionadas.length < 2 || sendingOfertas) return;
     setGrupalSendError(null);
     setGrupalSendErrorReason(null);
     setOfertaGrupalOpen(true);
@@ -730,7 +749,7 @@ const FacturaGrupoFactoringDetalle = () => {
                   size="small"
                   startIcon={<Add />}
                   disabled={
-                    facturasSeleccionadas.length === 0 || sendingOfertas
+                    facturasSeleccionadas.length < 2 || sendingOfertas
                   }
                   onClick={handleOpenOfertaGrupal}
                   sx={{
@@ -795,7 +814,10 @@ const FacturaGrupoFactoringDetalle = () => {
                       </TableHead>
                       <TableBody>
                         {facturas.map((factura) => {
-                          const canSelect = !facturaTieneOfertaEnviada(factura);
+                          const canSelect = facturaPuedeSeleccionarseParaOfertaGrupal(
+                            factura,
+                            Boolean(borradores[factura.id]),
+                          );
                           const isSelected = selectedIdSet.has(factura.id);
                           return (
                           <TableRow
@@ -926,7 +948,7 @@ const FacturaGrupoFactoringDetalle = () => {
                     },
                   }}
                 >
-                  Selecciona una o más facturas sin oferta y haz clic en
+                  Selecciona al menos dos facturas sin oferta y haz clic en
                   &quot;Crear oferta grupal&quot; para aplicar las mismas
                   condiciones. También puedes guardar un borrador en cada
                   factura y enviarlo con &quot;Enviar oferta al grupo&quot;, o

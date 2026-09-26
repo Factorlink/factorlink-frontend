@@ -27,19 +27,6 @@ export const handleNonNegativeIntegerInputChange = (
   }
 };
 
-/** Al enfocar, si el valor es numéricamente 0 lo deja vacío para tipear de una vez. */
-export const clearZeroOnFocus = (
-  name: string,
-  value: unknown,
-  setFieldValue: (field: string, value: string) => void,
-) => {
-  if (value === "" || value === null || value === undefined) return;
-  const n = Number(value);
-  if (!Number.isNaN(n) && n === 0) {
-    setFieldValue(name, "");
-  }
-};
-
 export const TASA_RANGE_MESSAGE = "La tasa debe estar entre 0 y 100";
 export const TASA_DIARIA_MORA_RANGE_MESSAGE =
   "La tasa diaria de mora debe estar entre 0 y 100";

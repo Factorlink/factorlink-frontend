@@ -40,7 +40,6 @@ import {
 } from "../../utils/facturaGrupoOferta";
 import { montoAGirarEsNegativo } from "../../utils/ofertaCalculations";
 import {
-  clearZeroOnFocus,
   createOfertaFormSchema,
   handleDecimalRateInputChange,
   handleNonNegativeIntegerInputChange,
@@ -345,13 +344,6 @@ const OfertaGrupalForm = ({
                   formik.setFieldValue,
                 )
               }
-              onFocus={() =>
-                clearZeroOnFocus(
-                  "tasa30Dias",
-                  formik.values.tasa30Dias,
-                  formik.setFieldValue,
-                )
-              }
               onBlur={formik.handleBlur}
               onKeyDown={(e) =>
                 blockNonNumericKeys(
@@ -492,13 +484,6 @@ const OfertaGrupalForm = ({
                   formik.setFieldValue,
                 )
               }
-              onFocus={() =>
-                clearZeroOnFocus(
-                  "tasaDiariaMora",
-                  formik.values.tasaDiariaMora,
-                  formik.setFieldValue,
-                )
-              }
               onBlur={formik.handleBlur}
               onKeyDown={(e) =>
                 blockNonNumericKeys(
@@ -524,13 +509,6 @@ const OfertaGrupalForm = ({
               onChange={(e) =>
                 handleNonNegativeIntegerInputChange(
                   e as React.ChangeEvent<HTMLInputElement>,
-                  formik.setFieldValue,
-                )
-              }
-              onFocus={() =>
-                clearZeroOnFocus(
-                  "saldoPendiente",
-                  formik.values.saldoPendiente,
                   formik.setFieldValue,
                 )
               }

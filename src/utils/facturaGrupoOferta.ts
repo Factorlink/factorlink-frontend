@@ -92,11 +92,11 @@ export const buildOfertaGrupalInitialValues = (
   diasFinanciamiento: plazo || "",
   porcentajeFinanciamiento: 100,
   fechaCotizacion: new Date(),
-  tasa30Dias: 0,
+  tasa30Dias: "",
   montoComision: "",
   gastosAdministrativos: "",
-  saldoPendiente: "0",
-  tasaDiariaMora: 0,
+  saldoPendiente: "",
+  tasaDiariaMora: "",
   vigenciaOfertaDias: 3,
   comentario: "",
   ofertaCondicionada: false,
@@ -222,6 +222,13 @@ export const getFacturaGrupoOfertaDisplay = (
 
   return { kind: "creada", label: "Oferta creada" };
 };
+
+/** Misma regla que la columna Oferta: no se selecciona si el chip diría "Oferta creada". */
+export const facturaPuedeSeleccionarseParaOfertaGrupal = (
+  factura?: Factura | null,
+  hasBorradorLocal = false,
+) =>
+  getFacturaGrupoOfertaDisplay(factura, hasBorradorLocal).kind !== "creada";
 
 export const aggregateGrupoHistoryOfertas = (
   facturas: Factura[],

@@ -25,7 +25,6 @@ import {
   montoAGirarEsNegativo,
 } from "../../utils/ofertaCalculations";
 import {
-  clearZeroOnFocus,
   createOfertaFormSchema,
   handleDecimalRateInputChange,
   handleNonNegativeIntegerInputChange,
@@ -117,11 +116,11 @@ const EnviarOfertaCard = ({
       diasFinanciamiento: (factura.plazo || "") as number | string,
       porcentajeFinanciamiento: 100 as number | string,
       fechaCotizacion: today as Date | null,
-      tasa30Dias: 0 as number | string,
+      tasa30Dias: "" as number | string,
       montoComision: "",
       gastosAdministrativos: "",
-      saldoPendiente: "0",
-      tasaDiariaMora: 0 as number | string,
+      saldoPendiente: "",
+      tasaDiariaMora: "" as number | string,
       vigenciaOfertaDias: 3 as number | string,
       comentario: "",
       ofertaCondicionada: false,
@@ -386,13 +385,6 @@ const EnviarOfertaCard = ({
                     formik.setFieldValue,
                   )
                 }
-                onFocus={() =>
-                  clearZeroOnFocus(
-                    "tasa30Dias",
-                    formik.values.tasa30Dias,
-                    formik.setFieldValue,
-                  )
-                }
                 onBlur={formik.handleBlur}
                 onKeyDown={(e) =>
                   blockNonNumericKeys(
@@ -457,13 +449,6 @@ const EnviarOfertaCard = ({
                     formik.setFieldValue,
                   )
                 }
-                onFocus={() =>
-                  clearZeroOnFocus(
-                    "tasaDiariaMora",
-                    formik.values.tasaDiariaMora,
-                    formik.setFieldValue,
-                  )
-                }
                 onBlur={formik.handleBlur}
                 onKeyDown={(e) =>
                   blockNonNumericKeys(
@@ -516,13 +501,6 @@ const EnviarOfertaCard = ({
                 onChange={(e) =>
                   handleNonNegativeIntegerInputChange(
                     e as React.ChangeEvent<HTMLInputElement>,
-                    formik.setFieldValue,
-                  )
-                }
-                onFocus={() =>
-                  clearZeroOnFocus(
-                    "saldoPendiente",
-                    formik.values.saldoPendiente,
                     formik.setFieldValue,
                   )
                 }
