@@ -837,26 +837,37 @@ const Facturas = () => {
                   >
                     Eliminar facturas ({selectedIds.length})
                   </Button>
-                  {selectedIds.length >= MIN_GRUPO &&
-                    selectedIds.length <= MAX_GRUPO && (
-                      <Button
-                        variant="contained"
-                        startIcon={<CreateNewFolder />}
-                        onClick={() =>
-                          navigate("/facturas/grupos/nuevo", {
-                            state: { facturaIds: selectedIds },
-                          })
-                        }
-                        sx={{
-                          textTransform: "none",
-                          fontWeight: 600,
-                          borderRadius: "var(--radius-m)",
-                          color: "var(--color-fg-on-accent-primary)",
-                        }}
-                      >
-                        Crear grupo de cotización
-                      </Button>
-                    )}
+                  {selectedIds.length >= MIN_GRUPO && (
+                    <Tooltip
+                      title={
+                        selectedIds.length > MAX_GRUPO
+                          ? "Máximo 5 facturas por grupo"
+                          : ""
+                      }
+                      arrow
+                    >
+                      <span>
+                        <Button
+                          variant="contained"
+                          startIcon={<CreateNewFolder />}
+                          disabled={selectedIds.length > MAX_GRUPO}
+                          onClick={() =>
+                            navigate("/facturas/grupos/nuevo", {
+                              state: { facturaIds: selectedIds },
+                            })
+                          }
+                          sx={{
+                            textTransform: "none",
+                            fontWeight: 600,
+                            borderRadius: "var(--radius-m)",
+                            color: "var(--color-fg-on-accent-primary)",
+                          }}
+                        >
+                          Crear grupo de cotización
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  )}
                 </Box>
               </Box>
             )}
