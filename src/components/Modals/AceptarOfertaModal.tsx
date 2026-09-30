@@ -103,9 +103,8 @@ const AceptarOfertaModal = ({
   };
 
   const handleCancelError = () => {
-    setPhase("confirm");
-    setErrorMessage("");
-    setSiiPasswordCertificadoPersonal("");
+    resetForm();
+    onClose();
   };
 
   const handleSuccessClose = () => {

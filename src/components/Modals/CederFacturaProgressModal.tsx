@@ -222,29 +222,25 @@ const CederFacturaProgressModal = ({
       {!isLoading && (
         <>
           <DialogActions sx={{ justifyContent: "center", gap: 2, px: 4, pb: 2 }}>
-            <Button
-              variant="contained"
-              startIcon={<RefreshIcon />}
-              onClick={handleRetry}
-              disabled={attemptsExhausted}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                px: 3,
-                backgroundColor: "var(--color-bg-accent-primary)",
-                "&:hover": {
-                  backgroundColor: "var(--color-bg-accent-primary-hover)",
-                },
-                "&:disabled": {
-                  backgroundColor: "var(--color-bg-disabled-primary)",
+            {!attemptsExhausted && (
+              <Button
+                variant="contained"
+                startIcon={<RefreshIcon />}
+                onClick={handleRetry}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  px: 3,
+                  backgroundColor: "var(--color-bg-accent-primary)",
+                  "&:hover": {
+                    backgroundColor: "var(--color-bg-accent-primary-hover)",
+                  },
                   color: "var(--color-fg-on-accent-primary)",
-                  opacity: 0.7,
-                },
-                color: "var(--color-fg-on-accent-primary)",
-              }}
-            >
-              Reintentar
-            </Button>
+                }}
+              >
+                Reintentar
+              </Button>
+            )}
             <Button
               variant="outlined"
               onClick={onCancel}
