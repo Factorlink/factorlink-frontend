@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +28,10 @@ const LOADING_WARNING =
   "No cierres ni recargues la página para evitar la pérdida de información.";
 const ERROR_TITLE = "No pudimos ceder la factura";
 const DEFAULT_ERROR_MESSAGE = "Ocurrió un error al aceptar la oferta";
+const RETRY_LIMIT_HINT = "Puedes intentarlo hasta 3 veces.";
+const ATTEMPTS_EXHAUSTED_MESSAGE =
+  "Máximo de intentos alcanzado. No fue posible ceder la factura.";
+const MAX_CEDER_ATTEMPTS = 3;
 
 const CederFacturaProgressModal = ({
   open,
@@ -36,7 +40,21 @@ const CederFacturaProgressModal = ({
   onRetry,
   onCancel,
 }: CederFacturaProgressModalProps) => {
+  const [attempts, setAttempts] = useState(0);
   const isLoading = status === "loading";
+  const attemptsExhausted = attempts >= MAX_CEDER_ATTEMPTS;
+
+  useEffect(() => {
+    if (!open) {
+      setAttempts(0);
+    }
+  }, [open]);
+
+  const handleRetry = () => {
+    if (attemptsExhausted) return;
+    setAttempts((current) => current + 1);
+    onRetry();
+  };
 
   useEffect(() => {
     if (!open || !isLoading) return;
@@ -144,8 +162,20 @@ const CederFacturaProgressModal = ({
           {isLoading ? LOADING_TITLE : ERROR_TITLE}
         </Typography>
         <Typography variant="body2" sx={{ color: "var(--color-fg-default-secondary)" }}>
-          {isLoading ? LOADING_SUBTITLE : errorMessage || DEFAULT_ERROR_MESSAGE}
+          {isLoading
+            ? LOADING_SUBTITLE
+            : attemptsExhausted
+              ? ATTEMPTS_EXHAUSTED_MESSAGE
+              : errorMessage || DEFAULT_ERROR_MESSAGE}
         </Typography>
+        {!isLoading && !attemptsExhausted && (
+          <Typography
+            variant="body2"
+            sx={{ color: "var(--color-fg-default-secondary)", mt: 1 }}
+          >
+            {RETRY_LIMIT_HINT}
+          </Typography>
+        )}
 
         {isLoading && (
           <>
@@ -190,38 +220,62 @@ const CederFacturaProgressModal = ({
       </DialogContent>
 
       {!isLoading && (
-        <DialogActions sx={{ justifyContent: "center", gap: 2, px: 4, pb: 3 }}>
-          <Button
-            variant="contained"
-            startIcon={<RefreshIcon />}
-            onClick={onRetry}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              px: 3,
-              backgroundColor: "var(--color-bg-accent-primary)",
-              "&:hover": {
-                backgroundColor: "var(--color-bg-accent-primary-hover)",
-              },
-              color: "var(--color-fg-on-accent-primary)",
-            }}
-          >
-            Reintentar
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={onCancel}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              px: 3,
-              borderColor: "var(--color-border-default-primary)",
-              color: "var(--color-fg-default-primary)",
-            }}
-          >
-            Cancelar
-          </Button>
-        </DialogActions>
+        <>
+          <DialogActions sx={{ justifyContent: "center", gap: 2, px: 4, pb: 2 }}>
+            <Button
+              variant="contained"
+              startIcon={<RefreshIcon />}
+              onClick={handleRetry}
+              disabled={attemptsExhausted}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                px: 3,
+                backgroundColor: "var(--color-bg-accent-primary)",
+                "&:hover": {
+                  backgroundColor: "var(--color-bg-accent-primary-hover)",
+                },
+                "&:disabled": {
+                  backgroundColor: "var(--color-bg-disabled-primary)",
+                  color: "var(--color-fg-on-accent-primary)",
+                  opacity: 0.7,
+                },
+                color: "var(--color-fg-on-accent-primary)",
+              }}
+            >
+              Reintentar
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={onCancel}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                px: 3,
+                borderColor: "var(--color-border-default-primary)",
+                color: "var(--color-fg-default-primary)",
+              }}
+            >
+              Cancelar
+            </Button>
+          </DialogActions>
+          {!attemptsExhausted && attempts > 0 && (
+            <Typography
+              variant="caption"
+              sx={{ color: "var(--color-fg-default-secondary)", pb: 3 }}
+            >
+              Intento {attempts} de {MAX_CEDER_ATTEMPTS}
+            </Typography>
+          )}
+          {attemptsExhausted && (
+            <Typography
+              variant="caption"
+              sx={{ color: "var(--color-fg-danger-primary)", pb: 3, fontWeight: 600 }}
+            >
+              Máximo de intentos alcanzado
+            </Typography>
+          )}
+        </>
       )}
     </Dialog>
   );
