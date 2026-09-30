@@ -28,6 +28,7 @@ import {
   createOfertaFormSchema,
   handleDecimalRateInputChange,
   handleNonNegativeIntegerInputChange,
+  handlePositiveIntegerMax3InputChange,
   TASA_DIARIA_MORA_RANGE_MESSAGE,
   TASA_RANGE_MESSAGE,
 } from "../../utils/validations/oferta-fields";
@@ -306,7 +307,7 @@ const EnviarOfertaCard = ({
                 required
                 value={formik.values.diasFinanciamiento}
                 onChange={(e) =>
-                  handleNonNegativeIntegerInputChange(
+                  handlePositiveIntegerMax3InputChange(
                     e as React.ChangeEvent<HTMLInputElement>,
                     formik.setFieldValue,
                   )
@@ -472,7 +473,7 @@ const EnviarOfertaCard = ({
                 required
                 value={formik.values.vigenciaOfertaDias}
                 onChange={(e) =>
-                  handleNonNegativeIntegerInputChange(
+                  handlePositiveIntegerMax3InputChange(
                     e as React.ChangeEvent<HTMLInputElement>,
                     formik.setFieldValue,
                   )

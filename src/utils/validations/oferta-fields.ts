@@ -27,9 +27,44 @@ export const handleNonNegativeIntegerInputChange = (
   }
 };
 
-export const TASA_RANGE_MESSAGE = "La tasa debe estar entre 0 y 100";
-export const TASA_DIARIA_MORA_RANGE_MESSAGE =
-  "La tasa diaria de mora debe estar entre 0 y 100";
+/** Entero positivo de hasta 3 dígitos. Rechaza cero inicial. */
+export const handlePositiveIntegerMax3InputChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  setFieldValue: (field: string, value: string) => void,
+) => {
+  const { name, value } = e.target;
+  const filteredValue = value.replace(/[^0-9]/g, "");
+  if (filteredValue.startsWith("0") || filteredValue.length > 3) return;
+  setFieldValue(name, filteredValue);
+};
+
+export const rangeErrorMessage = (
+  fieldName: string,
+  min: number,
+  max: number,
+) => `${fieldName} debe estar entre ${min} y ${max}`;
+
+export const TASA_RANGE_MESSAGE = rangeErrorMessage("Tasa 30 días", 0, 100);
+export const TASA_DIARIA_MORA_RANGE_MESSAGE = rangeErrorMessage(
+  "Tasa diaria de mora",
+  0,
+  100,
+);
+const DIAS_FINANCIAMIENTO_RANGE_MESSAGE = rangeErrorMessage(
+  "Días de financiamiento",
+  1,
+  365,
+);
+const PORCENTAJE_FINANCIAMIENTO_RANGE_MESSAGE = rangeErrorMessage(
+  "Porcentaje de financiamiento",
+  1,
+  100,
+);
+const DIAS_VIGENCIA_RANGE_MESSAGE = rangeErrorMessage(
+  "Días de vigencia",
+  1,
+  365,
+);
 
 export const tasaValidation = yup
   .mixed()
@@ -111,12 +146,14 @@ export const optionalNonNegativeMoneyValidation = yup
 
 export const createOfertaFormSchema = () =>
   yup.object({
-    diasFinanciamiento: positiveIntegerValidation,
+    diasFinanciamiento: positiveIntegerValidation
+      .min(1, DIAS_FINANCIAMIENTO_RANGE_MESSAGE)
+      .max(365, DIAS_FINANCIAMIENTO_RANGE_MESSAGE),
     porcentajeFinanciamiento: yup
       .number()
       .required("El porcentaje de financiamiento es obligatorio")
-      .min(1, "Debe ser al menos 1%")
-      .max(100, "No puede superar el 100%"),
+      .min(1, PORCENTAJE_FINANCIAMIENTO_RANGE_MESSAGE)
+      .max(100, PORCENTAJE_FINANCIAMIENTO_RANGE_MESSAGE),
     fechaCotizacion: yup
       .date()
       .typeError("Ingresa una fecha válida")
@@ -133,8 +170,8 @@ export const createOfertaFormSchema = () =>
       .typeError("Debe ser un número entero")
       .required("Los días de vigencia son obligatorios")
       .integer("Debe ser un número entero")
-      .min(1, "Debe ser al menos 1")
-      .max(365, "No puede superar 365 días"),
+      .min(1, DIAS_VIGENCIA_RANGE_MESSAGE)
+      .max(365, DIAS_VIGENCIA_RANGE_MESSAGE),
     comentario: yup
       .string()
       .trim()
