@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Divider } from "@mui/material";
+import { Box, Typography, Button, Divider, CircularProgress } from "@mui/material";
 import { Description, PictureAsPdf, Cancel, Upload } from "@mui/icons-material";
 import type { Factura, FacturaArchivo } from "../../types/factura";
 import { isXmlUiEnabled } from "../../config/featureFlags";
@@ -18,6 +18,8 @@ interface DocumentosAsociadosCardProps {
     payload: FacturaAdjuntoUploadPayload,
   ) => Promise<FacturaArchivo>;
   onDeleteAdjunto?: (archivoId: string) => Promise<void>;
+  pdfFetchStatus?: "loading" | "error" | "missing";
+  onRetryPdf?: () => void;
 }
 
 const DocumentosAsociadosCard = ({
@@ -29,6 +31,8 @@ const DocumentosAsociadosCard = ({
   onAdjuntosChange,
   onUploadAdjunto,
   onDeleteAdjunto,
+  pdfFetchStatus,
+  onRetryPdf,
 }: DocumentosAsociadosCardProps) => {
   const showXmlUi = isXmlUiEnabled();
   const isCargada = factura.estado?.toLowerCase() === "cargada";
@@ -39,7 +43,9 @@ const DocumentosAsociadosCard = ({
   const canManageAdjuntos = hasAdjuntosHandlers;
   const showAdjuntos = canManageAdjuntos || adjuntosList.length > 0;
 
-  if (!hasFacturaPdf(factura)) {
+  const hasPdf = hasFacturaPdf(factura);
+
+  if (!hasPdf && !pdfFetchStatus) {
     return null;
   }
 
@@ -184,32 +190,74 @@ const DocumentosAsociadosCard = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 2,
           mb: 1,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <PictureAsPdf sx={{ color: "var(--color-fg-success-primary)" }} />
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
-              <Typography
-                role="button"
-                sx={{ color: "var(--color-fg-success-primary)", cursor: "pointer" }}
-                onClick={handleDownloadPdf}
-              >
-                {factura.facturaNameFilePDF || "Archivo PDF"}
+        {hasPdf ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <PictureAsPdf sx={{ color: "var(--color-fg-success-primary)" }} />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
+                <Typography
+                  role="button"
+                  sx={{ color: "var(--color-fg-success-primary)", cursor: "pointer" }}
+                  onClick={handleDownloadPdf}
+                >
+                  {factura.facturaNameFilePDF || "Archivo PDF"}
+                </Typography>
               </Typography>
-            </Typography>
-            <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
-              Documento cargado
-            </Typography>
+              <Typography variant="caption" sx={{ color: "var(--color-fg-default-secondary)" }}>
+                Documento cargado
+              </Typography>
+            </Box>
           </Box>
+        ) : pdfFetchStatus === "loading" ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <CircularProgress size={18} sx={{ color: "var(--color-fg-accent-primary)" }} />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
+                PDF de la factura
+              </Typography>
+              <Typography variant="caption" sx={{ color: "var(--color-fg-accent-primary)" }}>
+                Obteniendo...
+              </Typography>
+            </Box>
+          </Box>
+        ) : (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <PictureAsPdf sx={{ color: "var(--color-fg-default-tertiary)" }} />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "var(--color-fg-default-primary)" }}>
+                PDF de la factura
+              </Typography>
+              <Typography variant="caption" sx={{ color: "var(--color-fg-default-tertiary)" }}>
+                No disponible
+              </Typography>
+            </Box>
+          </Box>
+        )}
+        {!hasPdf && pdfFetchStatus === "error" && onRetryPdf && (
+          <Button
+            variant="outlined"
+            onClick={onRetryPdf}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              flexShrink: 0,
+            }}
+          >
+            Reintentar
+          </Button>
+        )}
+      </Box>
+      {hasPdf && (
+        <Box sx={{ pl: 2 }}>
+          <Typography variant="caption" sx={{ color: "var(--color-fg-success-primary)" }}>
+            PDF cargado correctamente
+          </Typography>
         </Box>
-      </Box>
-      <Box sx={{ pl: 2 }}>
-        <Typography variant="caption" sx={{ color: "var(--color-fg-success-primary)" }}>
-          PDF cargado correctamente
-        </Typography>
-      </Box>
+      )}
 
       {showAdjuntos && (
         <>
