@@ -66,6 +66,9 @@ export const FACTORING_STATES = {
   ACTIVO: "ACTIVO",
 }
 
+/** Tope compartido: días de financiamiento, vigencia de oferta y plazo de empresa. */
+export const MAX_DIAS_PLAZO = 185;
+
 export const FACTURAS_STATES = [
   { value: "CARGADA", label: "Cargada" },
   { value: "EN_MARKETPLACE", label: "En Marketplace" },

@@ -33,6 +33,8 @@ import type { OfertaGrupoBorrador } from "../../utils/facturaGrupoOferta";
 import type { FacturaGrupoFactoringDrawerTab } from "../../utils/facturaGrupo";
 import {
   isOfertaCondicionada,
+  normalizeOfertaEstado,
+  OFERTA_ESTADOS,
   puedeComentar,
 } from "../../utils/ofertaEstados";
 import { useFacturas } from "../../hooks/useFacturas";
@@ -194,6 +196,9 @@ const FacturaGrupoFactoringDetalleDrawer = ({
 
   const statusConfig = getFacturaStatusConfig(factura?.estado || "");
   const ofertaEnviada = factura?.ofertaFactoring ?? null;
+  const ofertaExpirada =
+    normalizeOfertaEstado(ofertaEnviada?.estado) === OFERTA_ESTADOS.EXPIRADA;
+  const ofertaVigente = Boolean(ofertaEnviada) && !ofertaExpirada;
   const plazo = grupoPlazo || factura?.plazo || 0;
 
   const refreshAfterOfertaChange = async () => {
@@ -221,7 +226,7 @@ const FacturaGrupoFactoringDetalleDrawer = ({
       );
     }
 
-    if (ofertaEnviada) {
+    if (ofertaVigente && ofertaEnviada) {
       return (
         <DetalleOfertaFactoring
           key={ofertaEnviada.id}
@@ -442,7 +447,7 @@ const FacturaGrupoFactoringDetalleDrawer = ({
               value="tu_oferta"
               icon={<RequestQuote sx={{ fontSize: 18 }} />}
               iconPosition="start"
-              label={ofertaEnviada ? "Tu oferta" : "Enviar oferta"}
+              label={ofertaVigente ? "Tu oferta" : "Enviar oferta"}
               disabled={sending}
             />
             <Tab

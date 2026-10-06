@@ -114,14 +114,20 @@ const FacturaGrupoOfertaCell = ({
     );
   }
 
+  const isExpirada = display.kind === "expirada";
+
   return (
     <Chip
       label={display.label}
       size="small"
       sx={{
         fontWeight: 500,
-        backgroundColor: "var(--color-bg-accent-secondary)",
-        color: "var(--color-fg-accent-primary)",
+        backgroundColor: isExpirada
+          ? "var(--color-bg-warning-secondary)"
+          : "var(--color-bg-accent-secondary)",
+        color: isExpirada
+          ? "var(--color-fg-warning-primary)"
+          : "var(--color-fg-accent-primary)",
       }}
     />
   );
@@ -161,10 +167,6 @@ const FacturaGrupoFactoringDetalle = () => {
   const [individualSendErrorOpen, setIndividualSendErrorOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [ofertaGrupalOpen, setOfertaGrupalOpen] = useState(false);
-  const [grupalSendError, setGrupalSendError] = useState<string | null>(null);
-  const [grupalSendErrorReason, setGrupalSendErrorReason] = useState<
-    string | null
-  >(null);
 
   const loadDetalle = useCallback(async () => {
     if (!id) {
@@ -408,8 +410,6 @@ const FacturaGrupoFactoringDetalle = () => {
 
   const handleOpenOfertaGrupal = () => {
     if (facturasSeleccionadas.length < 2 || sendingOfertas) return;
-    setGrupalSendError(null);
-    setGrupalSendErrorReason(null);
     setOfertaGrupalOpen(true);
   };
 
@@ -418,47 +418,21 @@ const FacturaGrupoFactoringDetalle = () => {
     setOfertaGrupalOpen(false);
   };
 
-  const handleCrearOfertaGrupal = async (
+  const handleGuardarBorradorGrupal = (
     borradoresGrupales: OfertaGrupoBorrador[],
   ) => {
-    if (!id || borradoresGrupales.length === 0) return;
-    try {
-      setGrupalSendError(null);
-      setGrupalSendErrorReason(null);
-      const ofertas = borradoresGrupales.map((borrador) =>
-        buildCreateOfertaPayload(borrador),
-      );
-      await createOfertasGrupoFacturas({
-        facturaGrupoId: id,
-        ofertas,
-      });
-      const sentIds = new Set(
-        borradoresGrupales.map((borrador) => borrador.facturaId),
-      );
-      setBorradores((prev) => {
-        const next = { ...prev };
-        sentIds.forEach((facturaId) => {
-          delete next[facturaId];
-        });
-        return next;
-      });
-      setSelectedIds([]);
-      setOfertaGrupalOpen(false);
-      setSendSuccessOpen(true);
-      await loadDetalle();
-    } catch (err) {
-      console.error("Error creating oferta grupal:", err);
-      const axiosError = err as {
-        response?: { data?: { message?: string; reason?: string } };
-        message?: string;
-      };
-      setGrupalSendError(
-        axiosError?.response?.data?.message ||
-          (err instanceof Error ? err.message : null) ||
-          "No se pudo crear la oferta grupal. Intente nuevamente.",
-      );
-      setGrupalSendErrorReason(axiosError?.response?.data?.reason || null);
-    }
+    if (borradoresGrupales.length === 0) return;
+    setBorradores((prev) => {
+      const next = { ...prev };
+      for (const borrador of borradoresGrupales) {
+        const factura = facturas.find((item) => item.id === borrador.facturaId);
+        if (facturaTieneOfertaEnviada(factura)) continue;
+        next[borrador.facturaId] = borrador;
+      }
+      return next;
+    });
+    setSelectedIds([]);
+    setOfertaGrupalOpen(false);
   };
 
   const handleEnviarOfertaIndividual = async (
@@ -949,11 +923,10 @@ const FacturaGrupoFactoringDetalle = () => {
                   }}
                 >
                   Selecciona al menos dos facturas sin oferta y haz clic en
-                  &quot;Crear oferta grupal&quot; para aplicar las mismas
-                  condiciones. También puedes guardar un borrador en cada
-                  factura y enviarlo con &quot;Enviar oferta al grupo&quot;, o
-                  enviar una oferta individual desde el detalle de cada
-                  factura.
+                  &quot;Crear oferta grupal&quot; para guardar un borrador con
+                  las mismas condiciones. Luego envíalo con &quot;Enviar oferta
+                  al grupo&quot;. También puedes guardar un borrador en cada
+                  factura o enviar una oferta individual desde el detalle.
                 </Alert>
               </>
             )}
@@ -1025,9 +998,7 @@ const FacturaGrupoFactoringDetalle = () => {
         factoringId={factoringId}
         plazo={grupo.plazo}
         sending={sendingOfertas}
-        error={grupalSendError}
-        errorReason={grupalSendErrorReason}
-        onCreate={handleCrearOfertaGrupal}
+        onCreate={handleGuardarBorradorGrupal}
       />
 
       <FacturaGrupoFactoringDetalleDrawer

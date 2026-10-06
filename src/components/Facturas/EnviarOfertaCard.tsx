@@ -14,6 +14,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
 import { StyledTextField, StyledDatePicker } from "../../pages/register/styles";
 import { useOfertas } from "../../hooks/useOfertas";
+import { MAX_DIAS_PLAZO } from "../../utils/consts";
 import type { Factura } from "../../types/factura";
 import ConfirmarOfertaModal from "../Modals/ConfirmarOfertaModal";
 import ResumenOfertaAside from "./ResumenOfertaAside";
@@ -322,7 +323,7 @@ const EnviarOfertaCard = ({
                 error={fieldError("diasFinanciamiento")}
                 helperText={fieldHelper(
                   "diasFinanciamiento",
-                  `Mínimo 1 día. Plazo solicitado: ${factura.plazo || 0} días`,
+                  `Mínimo 1 día, máximo ${MAX_DIAS_PLAZO}. Plazo solicitado: ${factura.plazo || 0} días`,
                 )}
               />
 
@@ -488,7 +489,7 @@ const EnviarOfertaCard = ({
                 error={fieldError("vigenciaOfertaDias")}
                 helperText={fieldHelper(
                   "vigenciaOfertaDias",
-                  "Mínimo 1 día, máximo 365. Por defecto 3",
+                  `Mínimo 1 día, máximo ${MAX_DIAS_PLAZO}. Por defecto 3`,
                 )}
               />
 

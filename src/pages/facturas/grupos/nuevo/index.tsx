@@ -60,6 +60,7 @@ import useAuthStore from "../../../../store/authStore";
 import type { Factura, FacturaGrupoVisibilidad } from "../../../../types/factura";
 import type { Factoring } from "../../../../types/factoring";
 import { hasFacturaPdf } from "../../../../utils/facturaDocuments";
+import { MAX_DIAS_PLAZO } from "../../../../utils/consts";
 import {
   appContentSx,
   tableScrollSx,
@@ -75,7 +76,7 @@ type NuevoGrupoLocationState = {
 const MIN_GRUPO = 2;
 const MAX_GRUPO = 5;
 const MIN_PLAZO = 1;
-const MAX_PLAZO = 180;
+const MAX_PLAZO = MAX_DIAS_PLAZO;
 const NOMBRE_MAX = 100;
 const FETCH_LIMIT = 100;
 
@@ -949,7 +950,7 @@ const NuevoGrupoCotizacion = () => {
                   plazo === 0
                     ? "El plazo es obligatorio"
                     : plazo > MAX_PLAZO
-                      ? "El plazo máximo es de 180 días"
+                      ? `El plazo máximo es de ${MAX_PLAZO} días`
                       : `Mínimo ${MIN_PLAZO} día, máximo ${MAX_PLAZO} días`
                 }
               />
