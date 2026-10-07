@@ -33,6 +33,7 @@ import {
   Description,
   ErrorOutline,
   InfoOutlined,
+  RequestQuote,
   Send,
   Visibility,
 } from "@mui/icons-material";
@@ -72,6 +73,11 @@ type GrupoFactoringLocationState = {
   from?: string;
   nombre?: string;
 };
+
+const MSG_CREAR_OFERTA_GRUPAL_REQUISITO =
+  "Debes seleccionar al menos dos facturas para crear una oferta grupal.";
+const MSG_ENVIAR_OFERTA_GRUPAL_REQUISITO =
+  "Debes crear al menos una oferta en borrador antes de enviarla al grupo.";
 
 const getMarketplaceBackPath = (from: unknown) => {
   if (typeof from === "string" && from.startsWith("/marketplace")) {
@@ -161,6 +167,9 @@ const FacturaGrupoFactoringDetalle = () => {
   const [individualSendErrorOpen, setIndividualSendErrorOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [ofertaGrupalOpen, setOfertaGrupalOpen] = useState(false);
+  const [requirementSnackbarMessage, setRequirementSnackbarMessage] = useState<
+    string | null
+  >(null);
 
   const loadDetalle = useCallback(async () => {
     if (!id) {
@@ -262,6 +271,10 @@ const FacturaGrupoFactoringDetalle = () => {
     setDrawerParams({ facturaId: factura.id, tab: "informacion", ofertaId: null });
   };
 
+  const handleEnviarOferta = (factura: Factura) => {
+    setDrawerParams({ facturaId: factura.id, tab: "tu_oferta", ofertaId: null });
+  };
+
   const handleCloseDrawer = () => {
     if (sendingOfertas) return;
     setDrawerParams({ facturaId: null });
@@ -292,7 +305,11 @@ const FacturaGrupoFactoringDetalle = () => {
   };
 
   const handleEnviarOfertaAlGrupo = () => {
-    if (!canEnviarOfertaAlGrupo(borradores, facturas) || !id) return;
+    if (sendingOfertas || !id) return;
+    if (!canEnviarOfertaAlGrupo(borradores, facturas)) {
+      setRequirementSnackbarMessage(MSG_ENVIAR_OFERTA_GRUPAL_REQUISITO);
+      return;
+    }
     setSendError(null);
     setSendErrorReason(null);
     setSendConfirmOpen(true);
@@ -403,7 +420,11 @@ const FacturaGrupoFactoringDetalle = () => {
   };
 
   const handleOpenOfertaGrupal = () => {
-    if (facturasSeleccionadas.length < 2 || sendingOfertas) return;
+    if (sendingOfertas) return;
+    if (facturasSeleccionadas.length < 2) {
+      setRequirementSnackbarMessage(MSG_CREAR_OFERTA_GRUPAL_REQUISITO);
+      return;
+    }
     setOfertaGrupalOpen(true);
   };
 
@@ -484,7 +505,6 @@ const FacturaGrupoFactoringDetalle = () => {
     () => getBorradoresPendientesEnvio(borradores, facturas),
     [borradores, facturas],
   );
-  const canSend = canEnviarOfertaAlGrupo(borradores, facturas);
   const borradoresCount = pendientesEnvio.length;
   const statusConfig = getFacturaStatusConfig(grupo?.estado || "");
   const tituloNombre =
@@ -716,9 +736,7 @@ const FacturaGrupoFactoringDetalle = () => {
                   variant="contained"
                   size="small"
                   startIcon={<Add />}
-                  disabled={
-                    facturasSeleccionadas.length < 2 || sendingOfertas
-                  }
+                  disabled={sendingOfertas}
                   onClick={handleOpenOfertaGrupal}
                   sx={{
                     textTransform: "none",
@@ -787,6 +805,11 @@ const FacturaGrupoFactoringDetalle = () => {
                             Boolean(borradores[factura.id]),
                           );
                           const isSelected = selectedIdSet.has(factura.id);
+                          const ofertaDisplay = getFacturaGrupoOfertaDisplay(
+                            factura,
+                            Boolean(borradores[factura.id]),
+                          );
+                          const verTuOferta = ofertaDisplay.kind === "creada";
                           return (
                           <TableRow
                             key={factura.id}
@@ -884,17 +907,38 @@ const FacturaGrupoFactoringDetalle = () => {
                               />
                             </TableCell>
                             <TableCell>
-                              <Tooltip title="Ver factura">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleVerDetalle(factura)}
-                                  sx={{
-                                    color: "var(--color-fg-default-secondary)",
-                                  }}
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                <Tooltip title="Ver factura">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleVerDetalle(factura)}
+                                    sx={{
+                                      color: "var(--color-fg-default-secondary)",
+                                    }}
+                                  >
+                                    <Visibility />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip
+                                  title={
+                                    verTuOferta
+                                      ? "Ver tu oferta"
+                                      : "Enviar oferta"
+                                  }
                                 >
-                                  <Visibility />
-                                </IconButton>
-                              </Tooltip>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleEnviarOferta(factura)}
+                                    sx={{
+                                      color: verTuOferta
+                                        ? "var(--color-fg-accent-primary)"
+                                        : "var(--color-fg-default-secondary)",
+                                    }}
+                                  >
+                                    {verTuOferta ? <RequestQuote /> : <Send />}
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
                             </TableCell>
                           </TableRow>
                           );
@@ -965,7 +1009,7 @@ const FacturaGrupoFactoringDetalle = () => {
               <Send />
             )
           }
-          disabled={!canSend || sendingOfertas}
+          disabled={sendingOfertas}
           onClick={handleEnviarOfertaAlGrupo}
           sx={{
             textTransform: "none",
@@ -1015,6 +1059,21 @@ const FacturaGrupoFactoringDetalle = () => {
         ofertaId={ofertaIdParam}
         onTabChange={handleDrawerTabChange}
       />
+
+      <Snackbar
+        open={Boolean(requirementSnackbarMessage)}
+        autoHideDuration={4000}
+        onClose={() => setRequirementSnackbarMessage(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="info"
+          onClose={() => setRequirementSnackbarMessage(null)}
+          sx={{ width: "100%" }}
+        >
+          {requirementSnackbarMessage}
+        </Alert>
+      </Snackbar>
 
       <Dialog
         open={sendConfirmOpen}
