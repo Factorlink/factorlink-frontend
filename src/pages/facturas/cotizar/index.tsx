@@ -50,14 +50,14 @@ import {
   shouldBlockForMissingXml,
 } from "../../../utils/facturaDocuments";
 import useAuthStore from "../../../store/authStore";
-import { MAX_DIAS_PLAZO } from "../../../utils/consts";
+import { MAX_DIAS_FINANCIAMIENTO } from "../../../utils/consts";
 
 const truncateToTwo = (num: number): number => {
   return Math.round(num * 100) / 100;
 };
 
 const MIN_PLAZO = 1;
-const MAX_PLAZO = MAX_DIAS_PLAZO;
+const MAX_PLAZO = MAX_DIAS_FINANCIAMIENTO;
 
 const CotizarFactura = () => {
   const {

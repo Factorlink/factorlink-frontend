@@ -29,7 +29,10 @@ import {
   MONTO_A_GIRAR_NEGATIVO_MESSAGE,
   montoAGirarEsNegativo,
 } from "../../utils/ofertaCalculations";
-import { MAX_DIAS_PLAZO } from "../../utils/consts";
+import {
+  MAX_DIAS_FINANCIAMIENTO,
+  MAX_DIAS_VIGENCIA_OFERTA,
+} from "../../utils/consts";
 import { formatMoney, parseDateOnly, toFiniteNumber } from "../../utils/ofertaFormatters";
 import {
   createOfertaFormSchema,
@@ -310,7 +313,7 @@ const FacturaGrupoOfertaForm = ({
                 error={fieldError("diasFinanciamiento")}
                 helperText={fieldHelper(
                   "diasFinanciamiento",
-                  `Mínimo 1 día, máximo ${MAX_DIAS_PLAZO}. Plazo solicitado: ${factura.plazo || 0} días`,
+                  `Mínimo 1 día, máximo ${MAX_DIAS_FINANCIAMIENTO}. Plazo solicitado: ${factura.plazo || 0} días`,
                 )}
               />
 
@@ -512,7 +515,7 @@ const FacturaGrupoOfertaForm = ({
                 error={fieldError("vigenciaOfertaDias")}
                 helperText={fieldHelper(
                   "vigenciaOfertaDias",
-                  `Mínimo 1 día, máximo ${MAX_DIAS_PLAZO}`,
+                  `Mínimo 1 día, máximo ${MAX_DIAS_VIGENCIA_OFERTA}`,
                 )}
               />
 

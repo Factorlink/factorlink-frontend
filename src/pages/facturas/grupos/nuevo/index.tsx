@@ -60,7 +60,7 @@ import useAuthStore from "../../../../store/authStore";
 import type { Factura, FacturaGrupoVisibilidad } from "../../../../types/factura";
 import type { Factoring } from "../../../../types/factoring";
 import { hasFacturaPdf } from "../../../../utils/facturaDocuments";
-import { MAX_DIAS_PLAZO } from "../../../../utils/consts";
+import { MAX_DIAS_FINANCIAMIENTO } from "../../../../utils/consts";
 import {
   appContentSx,
   tableScrollSx,
@@ -76,7 +76,7 @@ type NuevoGrupoLocationState = {
 const MIN_GRUPO = 2;
 const MAX_GRUPO = 5;
 const MIN_PLAZO = 1;
-const MAX_PLAZO = MAX_DIAS_PLAZO;
+const MAX_PLAZO = MAX_DIAS_FINANCIAMIENTO;
 const NOMBRE_MAX = 100;
 const FETCH_LIMIT = 100;
 

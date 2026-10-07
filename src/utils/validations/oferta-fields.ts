@@ -1,5 +1,8 @@
 import * as yup from "yup";
-import { MAX_DIAS_PLAZO } from "../consts";
+import {
+  MAX_DIAS_FINANCIAMIENTO,
+  MAX_DIAS_VIGENCIA_OFERTA,
+} from "../consts";
 
 const DECIMAL_RATE_REGEX = /^(0|[1-9]\d{0,2})(\.\d{0,2})?$/;
 
@@ -54,7 +57,7 @@ export const TASA_DIARIA_MORA_RANGE_MESSAGE = rangeErrorMessage(
 const DIAS_FINANCIAMIENTO_RANGE_MESSAGE = rangeErrorMessage(
   "Días de financiamiento",
   1,
-  MAX_DIAS_PLAZO,
+  MAX_DIAS_FINANCIAMIENTO,
 );
 const PORCENTAJE_FINANCIAMIENTO_RANGE_MESSAGE = rangeErrorMessage(
   "Porcentaje de financiamiento",
@@ -64,7 +67,7 @@ const PORCENTAJE_FINANCIAMIENTO_RANGE_MESSAGE = rangeErrorMessage(
 const DIAS_VIGENCIA_RANGE_MESSAGE = rangeErrorMessage(
   "Días de vigencia",
   1,
-  MAX_DIAS_PLAZO,
+  MAX_DIAS_VIGENCIA_OFERTA,
 );
 
 export const tasaValidation = yup
@@ -149,7 +152,7 @@ export const createOfertaFormSchema = () =>
   yup.object({
     diasFinanciamiento: positiveIntegerValidation
       .min(1, DIAS_FINANCIAMIENTO_RANGE_MESSAGE)
-      .max(MAX_DIAS_PLAZO, DIAS_FINANCIAMIENTO_RANGE_MESSAGE),
+      .max(MAX_DIAS_FINANCIAMIENTO, DIAS_FINANCIAMIENTO_RANGE_MESSAGE),
     porcentajeFinanciamiento: yup
       .number()
       .required("El porcentaje de financiamiento es obligatorio")
@@ -172,7 +175,7 @@ export const createOfertaFormSchema = () =>
       .required("Los días de vigencia son obligatorios")
       .integer("Debe ser un número entero")
       .min(1, DIAS_VIGENCIA_RANGE_MESSAGE)
-      .max(MAX_DIAS_PLAZO, DIAS_VIGENCIA_RANGE_MESSAGE),
+      .max(MAX_DIAS_VIGENCIA_OFERTA, DIAS_VIGENCIA_RANGE_MESSAGE),
     comentario: yup
       .string()
       .trim()

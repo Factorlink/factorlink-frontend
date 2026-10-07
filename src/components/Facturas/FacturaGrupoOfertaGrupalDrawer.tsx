@@ -47,7 +47,10 @@ import {
   TASA_DIARIA_MORA_RANGE_MESSAGE,
   TASA_RANGE_MESSAGE,
 } from "../../utils/validations/oferta-fields";
-import { MAX_DIAS_PLAZO } from "../../utils/consts";
+import {
+  MAX_DIAS_FINANCIAMIENTO,
+  MAX_DIAS_VIGENCIA_OFERTA,
+} from "../../utils/consts";
 
 const MONEY_FIELDS = [
   { name: "montoComision" as const, label: "Monto de comisión" },
@@ -217,8 +220,8 @@ const OfertaGrupalForm = ({
     formik.touched[name] ? (formik.errors[name] as string) || fallback : fallback;
 
   const diasHelper = plazo
-    ? `Mínimo 1 día, máximo ${MAX_DIAS_PLAZO}. Plazo del grupo: ${plazo} días`
-    : `Mínimo 1 día, máximo ${MAX_DIAS_PLAZO}`;
+    ? `Mínimo 1 día, máximo ${MAX_DIAS_FINANCIAMIENTO}. Plazo del grupo: ${plazo} días`
+    : `Mínimo 1 día, máximo ${MAX_DIAS_FINANCIAMIENTO}`;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
@@ -417,7 +420,7 @@ const OfertaGrupalForm = ({
               error={fieldError("vigenciaOfertaDias")}
               helperText={fieldHelper(
                 "vigenciaOfertaDias",
-                `Mínimo 1 día, máximo ${MAX_DIAS_PLAZO}`,
+                `Mínimo 1 día, máximo ${MAX_DIAS_VIGENCIA_OFERTA}`,
               )}
             />
 

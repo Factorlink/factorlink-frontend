@@ -66,8 +66,11 @@ export const FACTORING_STATES = {
   ACTIVO: "ACTIVO",
 }
 
-/** Tope compartido: días de financiamiento, vigencia de oferta y plazo de empresa. */
-export const MAX_DIAS_PLAZO = 185;
+/** Tope de días de financiamiento (oferta factoring) y plazo de cotización (empresa). */
+export const MAX_DIAS_FINANCIAMIENTO = 120;
+
+/** Tope de días de vigencia de la oferta (solo factoring). */
+export const MAX_DIAS_VIGENCIA_OFERTA = 185;
 
 export const FACTURAS_STATES = [
   { value: "CARGADA", label: "Cargada" },

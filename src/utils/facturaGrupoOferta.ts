@@ -35,7 +35,7 @@ export type OfertaGrupalPreviewRow = {
 };
 
 export type FacturaGrupoOfertaDisplay = {
-  kind: "sin_oferta" | "borrador" | "creada" | "expirada";
+  kind: "sin_oferta" | "borrador" | "creada";
   label: string;
 };
 
@@ -213,11 +213,7 @@ export const getFacturaGrupoOfertaDisplay = (
 
   const estado = getFacturaOfertaEstadoRaw(factura);
 
-  if (estado === OFERTA_ESTADOS.EXPIRADA) {
-    return { kind: "expirada", label: "Expirada" };
-  }
-
-  if (!estado) {
+  if (!estado || estado === OFERTA_ESTADOS.EXPIRADA) {
     return { kind: "sin_oferta", label: "Sin oferta" };
   }
 

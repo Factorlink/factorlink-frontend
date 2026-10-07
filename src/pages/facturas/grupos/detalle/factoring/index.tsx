@@ -114,20 +114,14 @@ const FacturaGrupoOfertaCell = ({
     );
   }
 
-  const isExpirada = display.kind === "expirada";
-
   return (
     <Chip
       label={display.label}
       size="small"
       sx={{
         fontWeight: 500,
-        backgroundColor: isExpirada
-          ? "var(--color-bg-warning-secondary)"
-          : "var(--color-bg-accent-secondary)",
-        color: isExpirada
-          ? "var(--color-fg-warning-primary)"
-          : "var(--color-fg-accent-primary)",
+        backgroundColor: "var(--color-bg-accent-secondary)",
+        color: "var(--color-fg-accent-primary)",
       }}
     />
   );
