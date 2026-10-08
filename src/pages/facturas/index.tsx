@@ -23,10 +23,8 @@ import {
   ListItemText,
   Tabs,
   Tab,
-  Alert,
   Button,
   Checkbox,
-  Snackbar,
   Tooltip,
 } from "@mui/material";
 import {
@@ -114,12 +112,6 @@ const TAB_ROUTES = [
   "/facturas/ofertas",
   "/facturas/cedidas",
 ];
-const MIN_GRUPO = 2;
-const MAX_GRUPO = 5;
-const MSG_CREAR_GRUPO_MIN =
-  "Debes seleccionar al menos dos facturas para crear un grupo de cotización.";
-const MSG_CREAR_GRUPO_MAX = "Máximo 5 facturas por grupo";
-
 const getTabFromPath = (pathname: string) => {
   const idx = TAB_ROUTES.indexOf(pathname);
   return idx >= 0 ? idx : 0;
@@ -178,9 +170,6 @@ const Facturas = () => {
   );
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
   const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
-  const [requirementSnackbarMessage, setRequirementSnackbarMessage] = useState<
-    string | null
-  >(null);
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -336,14 +325,6 @@ const Facturas = () => {
   };
 
   const handleCrearGrupoCotizacion = () => {
-    if (selectedIds.length < MIN_GRUPO) {
-      setRequirementSnackbarMessage(MSG_CREAR_GRUPO_MIN);
-      return;
-    }
-    if (selectedIds.length > MAX_GRUPO) {
-      setRequirementSnackbarMessage(MSG_CREAR_GRUPO_MAX);
-      return;
-    }
     navigate("/facturas/grupos/nuevo", {
       state: { facturaIds: selectedIds },
     });
@@ -839,8 +820,8 @@ const Facturas = () => {
                     variant="body2"
                     sx={{ color: "var(--color-fg-default-secondary)" }}
                   >
-                    Selecciona al menos {MIN_GRUPO} facturas para crear un
-                    grupo de cotización
+                    Puedes seleccionar facturas aquí o hacerlo en la página de
+                    crear grupo.
                   </Typography>
                 )}
               </Box>
@@ -1431,21 +1412,6 @@ const Facturas = () => {
           open={documentsRequiredModalOpen}
           onClose={() => setDocumentsRequiredModalOpen(false)}
         />
-
-        <Snackbar
-          open={Boolean(requirementSnackbarMessage)}
-          autoHideDuration={4000}
-          onClose={() => setRequirementSnackbarMessage(null)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            severity="info"
-            onClose={() => setRequirementSnackbarMessage(null)}
-            sx={{ width: "100%" }}
-          >
-            {requirementSnackbarMessage}
-          </Alert>
-        </Snackbar>
       </Box>
     </Layout>
   );
