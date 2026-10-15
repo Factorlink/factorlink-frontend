@@ -22,12 +22,14 @@ const SiiSyncPromptModal = () => {
     // No mostrar si ya está en la página de empresa
     if (location.pathname === "/edit/empresa") return;
 
-    // Mostrar solo si el contexto es "empresa" y empresaId es null
-    if (
+    // Empresa sin id, o con id pero enrolamiento aún pendiente
+    const needsSiiSync =
       currentRole &&
       currentRole.contexto === "empresa" &&
-      !currentRole.empresaId
-    ) {
+      (!currentRole.empresaId ||
+        currentRole.empresa?.estadoEnrolamiento === "PENDIENTE");
+
+    if (needsSiiSync) {
       setOpen(true);
     }
   }, [currentRole, location.pathname]);

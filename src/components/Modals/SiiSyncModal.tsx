@@ -51,7 +51,7 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
   const [alertMessage, setAlertMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const { user, setUser, currentRole } = useAuthStore();
+  const { user, setUser, setCurrentRole, currentRole } = useAuthStore();
   const { createEmpresaBySii, loading } = useEmpresa();
   const { getMyInfo } = useUsers();
 
@@ -60,13 +60,36 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
 
   const handleSyncSii = async (values: SiiSyncFormData) => {
     try {
-      await createEmpresaBySii({
+      const syncedEmpresa = await createEmpresaBySii({
         siiRut: values.siiRut.trim(),
         siiPassword: values.siiPassword,
       });
 
       const { user: updatedUser } = await getMyInfo();
-      setUser({ ...user!, roles: updatedUser.roles });
+      setUser({ ...user!, ...updatedUser, roles: updatedUser.roles });
+
+      const previousEmpresaId = currentRole?.empresaId;
+      const syncedEmpresaId =
+        syncedEmpresa?.id != null ? String(syncedEmpresa.id) : "";
+
+      const matchedRole =
+        updatedUser.roles.find(
+          (role) =>
+            role.contexto === "empresa" &&
+            previousEmpresaId &&
+            role.empresaId === previousEmpresaId,
+        ) ??
+        updatedUser.roles.find(
+          (role) =>
+            role.contexto === "empresa" &&
+            syncedEmpresaId &&
+            role.empresaId === syncedEmpresaId,
+        ) ??
+        updatedUser.roles.find((role) => role.contexto === "empresa");
+
+      if (matchedRole) {
+        setCurrentRole(matchedRole);
+      }
 
       setAlertStatus("success");
       setAlertMessage(
