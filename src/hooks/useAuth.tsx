@@ -2,6 +2,11 @@ import { useState } from "react";
 import api from "../lib/axios";
 import useAuthStore from "../store/authStore";
 import type { RegisterFormData } from "../types/outgoing/register-form-data";
+import type {
+  ValidateSiiRequest,
+  ValidateSiiResponseRaw,
+} from "../types/auth/validated-sii";
+import { normalizeValidateSiiResponse } from "../types/auth/validated-sii";
 
 interface LoginData {
   email: string;
@@ -11,6 +16,19 @@ interface LoginData {
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
   const { logout: clearAuth } = useAuthStore();
+
+  const validateSii = async (data: ValidateSiiRequest) => {
+    try {
+      setLoading(true);
+      const response = await api.post<ValidateSiiResponseRaw>(
+        "auth/validated-sii",
+        { rut: data.rut, password: data.password },
+      );
+      return normalizeValidateSiiResponse(response.data, data.rut);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const register = async (formData: RegisterFormData) => {
     try {
@@ -68,6 +86,7 @@ export const useAuth = () => {
   };
 
   return {
+    validateSii,
     register,
     login,
     logout,

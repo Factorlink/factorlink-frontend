@@ -1,13 +1,7 @@
-import RegisterForm from "../../../components/Register";
-import { ROLES } from "../../../utils/consts";
+import SiiRegisterWizard from "../../../components/Register/SiiRegisterWizard";
 
 const EmpresasRegister = () => {
-  return (
-    <RegisterForm
-      roleType={ROLES.EMPRESA_ADMIN}
-      tabLabel="Empresa"
-    />
-  );
+  return <SiiRegisterWizard />;
 };
 
 export default EmpresasRegister;
