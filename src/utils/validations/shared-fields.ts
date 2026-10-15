@@ -62,6 +62,21 @@ export const validateRutVerifier = (rut: string): boolean => {
 // Regex para formato RUT chileno
 export const RUT_REGEX = /^(\d{1,3}(?:\.\d{3}){2}-[\dkK])|(\d{7,8}-[\dkK])$/;
 
+/** Numeric RUT body (without verifier digit). */
+export const getRutBodyNumber = (rut: string): number | null => {
+  const cleanRut = rut.replace(/\./g, "").replace(/-/g, "");
+  if (cleanRut.length < 2) return null;
+  const body = cleanRut.slice(0, -1);
+  if (!/^\d+$/.test(body)) return null;
+  return parseInt(body, 10);
+};
+
+/** Chilean personal RUT: body strictly below 40.000.000. */
+export const isPersonalRut = (rut: string): boolean => {
+  const body = getRutBodyNumber(rut);
+  return body != null && body < 40_000_000;
+};
+
 // Validación de RUT requerido
 export const rutValidation = yup
   .string()
@@ -72,6 +87,16 @@ export const rutValidation = yup
     if (!value) return false;
     return validateRutVerifier(value);
   });
+
+/** RUT personal (titular) — mismo formato/DV que rutValidation, cuerpo < 40M. */
+export const personalRutValidation = rutValidation.test(
+  "rut-personal",
+  "Debes ingresar un RUT personal (menor a 40.000.000)",
+  (value) => {
+    if (!value) return false;
+    return isPersonalRut(value);
+  },
+);
 
 // Validaciones de campos compartidos
 export const firstNameValidation = yup

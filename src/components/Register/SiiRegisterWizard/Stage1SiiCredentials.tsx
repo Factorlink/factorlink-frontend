@@ -16,7 +16,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Link as RouterLink } from "react-router-dom";
 import { StyledTextField } from "../../../pages/register/styles";
 import {
-  rutValidation,
+  personalRutValidation,
   handleRutInputChange,
 } from "../../../utils/validations/shared-fields";
 import logo from "../../../assets/png/factorlink-logo.png";
@@ -41,7 +41,7 @@ interface Stage1SiiCredentialsProps {
 }
 
 const stage1Schema = yup.object({
-  siiRut: rutValidation,
+  siiRut: personalRutValidation,
   siiPassword: yup
     .string()
     .required("La contraseña del SII es obligatoria")

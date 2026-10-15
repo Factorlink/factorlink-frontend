@@ -23,6 +23,7 @@ import {
   handleRutInputChange,
 } from "../../utils/validations/shared-fields";
 import useAuthStore from "../../store/authStore";
+import type { Role } from "../../types/role";
 import siiLogo from "../../assets/png/sii-logo.png";
 import { useUsers } from "../../hooks/useUsers";
 
@@ -72,20 +73,21 @@ const SiiSyncModal = ({ open, onClose }: SiiSyncModalProps) => {
       const syncedEmpresaId =
         syncedEmpresa?.id != null ? String(syncedEmpresa.id) : "";
 
+      const roles: Role[] = updatedUser.roles ?? [];
       const matchedRole =
-        updatedUser.roles.find(
+        roles.find(
           (role) =>
             role.contexto === "empresa" &&
-            previousEmpresaId &&
+            Boolean(previousEmpresaId) &&
             role.empresaId === previousEmpresaId,
         ) ??
-        updatedUser.roles.find(
+        roles.find(
           (role) =>
             role.contexto === "empresa" &&
-            syncedEmpresaId &&
+            Boolean(syncedEmpresaId) &&
             role.empresaId === syncedEmpresaId,
         ) ??
-        updatedUser.roles.find((role) => role.contexto === "empresa");
+        roles.find((role) => role.contexto === "empresa");
 
       if (matchedRole) {
         setCurrentRole(matchedRole);

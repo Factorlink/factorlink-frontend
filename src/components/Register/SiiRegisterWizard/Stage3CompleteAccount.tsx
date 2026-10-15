@@ -95,13 +95,14 @@ const stage3Schema = yup.object({
     .required(),
 });
 
+/** Matches read-only fields in Empresa / SiiPersonalSync edit forms. */
 const readOnlyFieldSx = {
-  "& .MuiOutlinedInput-root": {
-    backgroundColor: "var(--color-bg-default-secondary)",
+  "& .MuiInputBase-input": {
+    color: "text.secondary",
+    cursor: "default",
   },
-  "& .MuiInputBase-input.Mui-disabled": {
-    WebkitTextFillColor: "var(--color-fg-default-primary)",
-    color: "var(--color-fg-default-primary)",
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "action.hover",
   },
 } as const;
 
@@ -317,7 +318,7 @@ const Stage3CompleteAccount = ({
               variant="outlined"
               label="RUT personal"
               value={validatedData.rut}
-              disabled
+              InputProps={{ readOnly: true }}
               sx={readOnlyFieldSx}
             />
             <StyledTextField
@@ -325,7 +326,7 @@ const Stage3CompleteAccount = ({
               variant="outlined"
               label="Nombre completo"
               value={fullName}
-              disabled
+              InputProps={{ readOnly: true }}
               sx={readOnlyFieldSx}
             />
           </Box>
@@ -351,7 +352,7 @@ const Stage3CompleteAccount = ({
             variant="outlined"
             label="Dirección"
             value={validatedData.direccion ?? ""}
-            disabled
+            InputProps={{ readOnly: true }}
             multiline
             minRows={2}
             sx={readOnlyFieldSx}
