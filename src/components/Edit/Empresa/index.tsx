@@ -220,7 +220,7 @@ const Empresa = ({onUpdateCredentials, readOnly = false }: EmpresaProps) => {
                   },
                 }}
               >
-                Actualizar credenciales
+                Cambiar contraseña
               </Button>
             </Box>
 
