@@ -6,6 +6,7 @@ import {
 } from "./ofertaCalculations";
 import { toFiniteNumber } from "./ofertaFormatters";
 import type { OfertaPayloadInput } from "./ofertaPayload";
+import { OFERTA_ESTADOS } from "./ofertaEstados";
 
 export type OfertaGrupoBorrador = OfertaPayloadInput;
 
@@ -51,8 +52,12 @@ export const hasOfertaGrupoBorrador = (
   facturaId?: string | null,
 ) => Boolean(facturaId && borradores[facturaId]);
 
-export const facturaTieneOfertaEnviada = (factura?: Factura | null) =>
-  Boolean(factura?.ofertaFactoring);
+/** Oferta vigente: el objeto existe y no está expirado. Rechazada e inactiva siguen contando. */
+export const facturaTieneOfertaEnviada = (factura?: Factura | null) => {
+  const oferta = factura?.ofertaFactoring;
+  if (!oferta) return false;
+  return normalizeEstado(oferta.estado) !== OFERTA_ESTADOS.EXPIRADA;
+};
 
 export const grupoTieneOfertaEnviada = (facturas: Factura[]) =>
   facturas.some((factura) => facturaTieneOfertaEnviada(factura));
@@ -208,7 +213,7 @@ export const getFacturaGrupoOfertaDisplay = (
 
   const estado = getFacturaOfertaEstadoRaw(factura);
 
-  if (!estado) {
+  if (!estado || estado === OFERTA_ESTADOS.EXPIRADA) {
     return { kind: "sin_oferta", label: "Sin oferta" };
   }
 

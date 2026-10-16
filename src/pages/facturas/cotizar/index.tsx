@@ -49,13 +49,14 @@ import {
   shouldBlockForMissingXml,
 } from "../../../utils/facturaDocuments";
 import useAuthStore from "../../../store/authStore";
+import { MAX_DIAS_FINANCIAMIENTO } from "../../../utils/consts";
 
 const truncateToTwo = (num: number): number => {
   return Math.round(num * 100) / 100;
 };
 
 const MIN_PLAZO = 1;
-const MAX_PLAZO = 180;
+const MAX_PLAZO = MAX_DIAS_FINANCIAMIENTO;
 
 const CotizarFactura = () => {
   const {
@@ -625,17 +626,17 @@ const CotizarFactura = () => {
                       }}
                       fullWidth
                       size="small"
-                      error={plazo > 180}
+                      error={plazo > MAX_PLAZO}
                       helperText={
-                        plazo > 180
-                          ? "El plazo máximo es de 180 días"
+                        plazo > MAX_PLAZO
+                          ? `El plazo máximo es de ${MAX_PLAZO} días`
                           : `Mínimo ${MIN_PLAZO} día, Máximo ${MAX_PLAZO} días`
                       }
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           "&.Mui-focused fieldset": {
                             borderColor:
-                              plazo > 180
+                              plazo > MAX_PLAZO
                                 ? "var(--color-border-danger-secondary)"
                                 : "var(--color-border-accent-primary)",
                           },

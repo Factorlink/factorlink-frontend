@@ -96,65 +96,86 @@ const OfertaRecibidaCard = ({
     },
   ];
 
+  const aceptarOfertaButton = (
+    <Button
+      type="button"
+      variant="contained"
+      fullWidth
+      startIcon={<CheckCircle />}
+      disabled={condicionada}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (condicionada) return;
+        onAceptar();
+      }}
+      sx={{
+        backgroundColor: "var(--color-bg-success-primary)",
+        color: "var(--color-fg-on-accent-primary)",
+        textTransform: "none",
+        fontWeight: 600,
+        borderRadius: 2,
+        py: 1.25,
+        "&:hover": {
+          backgroundColor: "var(--color-bg-success-primary-hover)",
+        },
+        "&.Mui-disabled": {
+          backgroundColor: "var(--color-bg-disabled-primary)",
+          color: "var(--color-fg-on-accent-primary)",
+          opacity: 0.7,
+        },
+      }}
+    >
+      Aceptar oferta
+    </Button>
+  );
+
+  const rechazarOfertaButton = (
+    <Button
+      type="button"
+      variant="outlined"
+      fullWidth
+      startIcon={<Cancel />}
+      onClick={(e) => {
+        e.stopPropagation();
+        onRechazar();
+      }}
+      sx={{
+        borderColor: "var(--color-fg-danger-primary)",
+        color: "var(--color-fg-danger-primary)",
+        textTransform: "none",
+        fontWeight: 600,
+        borderRadius: 2,
+        py: 1.25,
+        "&:hover": {
+          borderColor: "var(--color-border-danger-secondary)",
+          backgroundColor: "var(--color-bg-danger-secondary)",
+        },
+      }}
+    >
+      Rechazar oferta
+    </Button>
+  );
+
   const detailActions = mostrarAcciones ? (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-      {!condicionada && (
-        <Button
-          type="button"
-          variant="contained"
-          fullWidth
-          startIcon={<CheckCircle />}
-          onClick={(e) => {
-            e.stopPropagation();
-            onAceptar();
-          }}
-          sx={{
-            backgroundColor: "var(--color-bg-success-primary)",
-            color: "var(--color-fg-on-accent-primary)",
-            textTransform: "none",
-            fontWeight: 600,
-            borderRadius: 2,
-            py: 1.25,
-            "&:hover": {
-              backgroundColor: "var(--color-bg-success-primary-hover)",
-            },
-          }}
-        >
-          Aceptar oferta
-        </Button>
-      )}
-      <Button
-        type="button"
-        variant="outlined"
-        fullWidth
-        startIcon={<Cancel />}
-        onClick={(e) => {
-          e.stopPropagation();
-          onRechazar();
-        }}
-        sx={{
-          borderColor: "var(--color-fg-danger-primary)",
-          color: "var(--color-fg-danger-primary)",
-          textTransform: "none",
-          fontWeight: 600,
-          borderRadius: 2,
-          py: 1.25,
-          "&:hover": {
-            borderColor: "var(--color-border-danger-secondary)",
-            backgroundColor: "var(--color-bg-danger-secondary)",
-          },
-        }}
-      >
-        Rechazar oferta
-      </Button>
-      {condicionada && (
-        <Typography
-          variant="caption"
-          sx={{ color: "var(--color-fg-default-secondary)" }}
-        >
-          Responde en la conversación para negociar las condiciones. Podrás
-          aceptar la oferta cuando el factoring envíe la oferta final.
-        </Typography>
+      {condicionada ? (
+        <>
+          {rechazarOfertaButton}
+          {aceptarOfertaButton}
+          <Typography
+            variant="caption"
+            sx={{ color: "var(--color-fg-default-secondary)" }}
+          >
+            Esta oferta aún tiene condiciones por acordar. Usa la conversación
+            para negociar; cuando el factoring envíe la oferta final, podrás
+            aceptarla aquí.
+          </Typography>
+        </>
+      ) : (
+        <>
+          {aceptarOfertaButton}
+          {rechazarOfertaButton}
+        </>
       )}
     </Box>
   ) : undefined;

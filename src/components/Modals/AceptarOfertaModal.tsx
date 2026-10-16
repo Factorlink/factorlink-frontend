@@ -54,7 +54,15 @@ const buildResumenLine = (ofertaData: AceptarOfertaModalProps["ofertaData"]) => 
   return parts.join(" • ");
 };
 
-const digitsOnly = (value: string) => value.replace(/\D/g, "").slice(0, 4);
+const CERT_PASSWORD_MIN = 4;
+const CERT_PASSWORD_MAX = 12;
+
+/** Letras y números, entre 4 y 12 caracteres. */
+const sanitizeCertPassword = (value: string) =>
+  value.replace(/[^a-zA-Z0-9]/g, "").slice(0, CERT_PASSWORD_MAX);
+
+const isValidCertPassword = (value: string) =>
+  value.length >= CERT_PASSWORD_MIN && value.length <= CERT_PASSWORD_MAX;
 
 const AceptarOfertaModal = ({
   open,
@@ -64,7 +72,6 @@ const AceptarOfertaModal = ({
 }: AceptarOfertaModalProps) => {
   const [phase, setPhase] = useState<AcceptPhase>("confirm");
   const [errorMessage, setErrorMessage] = useState("");
-  const [comentario, setComentario] = useState("");
   const [siiPasswordCertificadoPersonal, setSiiPasswordCertificadoPersonal] =
     useState("");
   const { responderOferta } = useOfertas();
@@ -72,7 +79,6 @@ const AceptarOfertaModal = ({
   const resetForm = () => {
     setPhase("confirm");
     setErrorMessage("");
-    setComentario("");
     setSiiPasswordCertificadoPersonal("");
   };
 
@@ -81,7 +87,6 @@ const AceptarOfertaModal = ({
     try {
       await responderOferta(ofertaData.id, {
         estado: "aceptada",
-        comentarioEmpresa: comentario,
         siiPasswordCertificadoPersonal,
       });
       setPhase("success");
@@ -113,7 +118,7 @@ const AceptarOfertaModal = ({
     onClose();
   };
 
-  const canSubmit = siiPasswordCertificadoPersonal.length === 4;
+  const canSubmit = isValidCertPassword(siiPasswordCertificadoPersonal);
 
   return (
     <>
@@ -209,30 +214,30 @@ const AceptarOfertaModal = ({
               fullWidth
               value={siiPasswordCertificadoPersonal}
               onChange={(e) =>
-                setSiiPasswordCertificadoPersonal(digitsOnly(e.target.value))
+                setSiiPasswordCertificadoPersonal(
+                  sanitizeCertPassword(e.target.value),
+                )
               }
-              placeholder="4 dígitos"
+              placeholder="4 a 12 caracteres"
               sx={{ mt: 2 }}
               inputProps={{
-                maxLength: 4,
-                inputMode: "numeric",
+                maxLength: CERT_PASSWORD_MAX,
                 autoComplete: "off",
                 "aria-label": "siiPasswordCertificadoPersonal",
               }}
             />
-
-            <TextField
-              label="Comentario (opcional)"
-              multiline
-              minRows={3}
-              maxRows={5}
-              fullWidth
-              value={comentario}
-              onChange={(e) => setComentario(e.target.value)}
-              placeholder="Escribe un comentario para el factoring..."
-              sx={{ mt: 2 }}
-              inputProps={{ maxLength: 500 }}
-            />
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                mt: 1,
+                color: "var(--color-fg-default-secondary)",
+                lineHeight: 1.5,
+              }}
+            >
+              Tu clave del certificado personal no se guarda en FactorLink. Solo
+              se usa para completar la cesión de la factura.
+            </Typography>
           </Box>
         </DialogContent>
 

@@ -112,9 +112,6 @@ const TAB_ROUTES = [
   "/facturas/ofertas",
   "/facturas/cedidas",
 ];
-const MIN_GRUPO = 2;
-const MAX_GRUPO = 5;
-
 const getTabFromPath = (pathname: string) => {
   const idx = TAB_ROUTES.indexOf(pathname);
   return idx >= 0 ? idx : 0;
@@ -324,6 +321,12 @@ const Facturas = () => {
         next[factura.id] = toMonto(factura.montoTotal);
       });
       return next;
+    });
+  };
+
+  const handleCrearGrupoCotizacion = () => {
+    navigate("/facturas/grupos/nuevo", {
+      state: { facturaIds: selectedIds },
     });
   };
 
@@ -770,55 +773,67 @@ const Facturas = () => {
               onClearFilters={handleClearFilters}
               loading={loading}
             />
-            {selectedIds.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 2,
+                mb: 2,
+                px: 2,
+                py: 1.5,
+                borderRadius: "var(--radius-m)",
+                backgroundColor: "var(--color-bg-accent-secondary)",
+              }}
+            >
+              <Box>
+                {selectedIds.length > 0 ? (
+                  <>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 700,
+                        color: "var(--color-fg-accent-primary)",
+                      }}
+                    >
+                      {selectedIds.length}{" "}
+                      {selectedIds.length === 1
+                        ? "factura seleccionada"
+                        : "facturas seleccionadas"}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "var(--color-fg-default-primary)" }}
+                    >
+                      Monto total:{" "}
+                      {formatCurrency(
+                        selectedIds.reduce(
+                          (sum, id) => sum + (selectedMontos[id] ?? 0),
+                          0,
+                        ),
+                      )}
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "var(--color-fg-default-secondary)" }}
+                  >
+                    Puedes seleccionar facturas aquí o hacerlo en la página de
+                    crear grupo.
+                  </Typography>
+                )}
+              </Box>
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  alignItems: "flex-end",
+                  gap: 1,
                   flexWrap: "wrap",
-                  gap: 2,
-                  mb: 2,
-                  px: 2,
-                  py: 1.5,
-                  borderRadius: "var(--radius-m)",
-                  backgroundColor: "var(--color-bg-accent-secondary)",
                 }}
               >
-                <Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 700,
-                      color: "var(--color-fg-accent-primary)",
-                    }}
-                  >
-                    {selectedIds.length}{" "}
-                    {selectedIds.length === 1
-                      ? "factura seleccionada"
-                      : "facturas seleccionadas"}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "var(--color-fg-default-primary)" }}
-                  >
-                    Monto total:{" "}
-                    {formatCurrency(
-                      selectedIds.reduce(
-                        (sum, id) => sum + (selectedMontos[id] ?? 0),
-                        0,
-                      ),
-                    )}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "flex-end",
-                    gap: 1,
-                    flexWrap: "wrap",
-                  }}
-                >
+                {selectedIds.length > 0 && (
                   <Button
                     variant="outlined"
                     startIcon={<Delete />}
@@ -837,40 +852,22 @@ const Facturas = () => {
                   >
                     Eliminar facturas ({selectedIds.length})
                   </Button>
-                  {selectedIds.length >= MIN_GRUPO && (
-                    <Tooltip
-                      title={
-                        selectedIds.length > MAX_GRUPO
-                          ? "Máximo 5 facturas por grupo"
-                          : ""
-                      }
-                      arrow
-                    >
-                      <span>
-                        <Button
-                          variant="contained"
-                          startIcon={<CreateNewFolder />}
-                          disabled={selectedIds.length > MAX_GRUPO}
-                          onClick={() =>
-                            navigate("/facturas/grupos/nuevo", {
-                              state: { facturaIds: selectedIds },
-                            })
-                          }
-                          sx={{
-                            textTransform: "none",
-                            fontWeight: 600,
-                            borderRadius: "var(--radius-m)",
-                            color: "var(--color-fg-on-accent-primary)",
-                          }}
-                        >
-                          Crear grupo de cotización
-                        </Button>
-                      </span>
-                    </Tooltip>
-                  )}
-                </Box>
+                )}
+                <Button
+                  variant="contained"
+                  startIcon={<CreateNewFolder />}
+                  onClick={handleCrearGrupoCotizacion}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    borderRadius: "var(--radius-m)",
+                    color: "var(--color-fg-on-accent-primary)",
+                  }}
+                >
+                  Crear grupo de cotización
+                </Button>
               </Box>
-            )}
+            </Box>
             {/* Table */}
             <TableContainer component={Paper} sx={tableShellSx}>
               {loading ? (
