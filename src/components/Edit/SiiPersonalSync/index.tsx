@@ -2,7 +2,6 @@ import { Box, Button, Chip, Typography } from "@mui/material";
 import SyncIcon from "@mui/icons-material/Sync";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import LinkOffIcon from "@mui/icons-material/LinkOff";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { StyledTextField } from "../../../pages/register/styles";
@@ -14,7 +13,6 @@ interface SiiPersonalSyncProps {
   isLinked: boolean;
   onLink?: () => void;
   onUpdate?: () => void;
-  onUnlink?: () => void;
 }
 
 const getBenefits = () => {
@@ -38,7 +36,6 @@ const SiiPersonalSync = ({
   isLinked,
   onLink,
   onUpdate,
-  onUnlink,
 }: SiiPersonalSyncProps) => {
   const { currentRole } = useAuthStore();
   const empresa = currentRole?.empresa;
@@ -212,42 +209,21 @@ const SiiPersonalSync = ({
                 </Typography>
               </Box>
             </Box>
-            <Box sx={{ display: "flex", gap: 1.5 }}>
-              <Button
-                variant="outlined"
-                startIcon={<EditOutlinedIcon />}
-                onClick={onUpdate}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: "var(--radius-m)",
-                  fontWeight: 500,
-                  borderColor: "divider",
-                  color: "text.primary",
-                  "&:hover": { borderColor: "text.secondary" },
-                }}
-              >
-                Actualizar
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<LinkOffIcon />}
-                onClick={onUnlink}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: "var(--radius-m)",
-                  fontWeight: 500,
-                  backgroundColor: "error.main",
-                  color: "common.white",
-                  boxShadow: "none",
-                  "&:hover": {
-                    backgroundColor: "error.dark",
-                    boxShadow: "none",
-                  },
-                }}
-              >
-                Desvincular
-              </Button>
-            </Box>
+            <Button
+              variant="outlined"
+              startIcon={<EditOutlinedIcon />}
+              onClick={onUpdate}
+              sx={{
+                textTransform: "none",
+                borderRadius: "var(--radius-m)",
+                fontWeight: 500,
+                borderColor: "divider",
+                color: "text.primary",
+                "&:hover": { borderColor: "text.secondary" },
+              }}
+            >
+              Actualizar
+            </Button>
           </Box>
         ) : (
           <Button

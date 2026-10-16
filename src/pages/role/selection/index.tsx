@@ -1,23 +1,13 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Typography,
-  Card,
-  CardActionArea,
-  IconButton,
-} from "@mui/material";
-import { Add } from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
 import useAuthStore from "../../../store/authStore";
 import type { Role } from "../../../types/role";
 import Layout from "../../../components/Layout";
 import RoleCard from "./components/role-card";
-import SiiSyncModal from "../../../components/Modals/SiiSyncModal";
 
 const RoleSelection = () => {
   const navigate = useNavigate();
   const { user, currentRole, setCurrentRole } = useAuthStore();
-  const [siiModalOpen, setSiiModalOpen] = useState(false);
 
   const handleSelectRole = (role: Role) => {
     setCurrentRole(role);
@@ -115,84 +105,9 @@ const RoleSelection = () => {
                 }
               />
             ))}
-
-            {(currentRole?.contexto === "empresa" ||
-              user?.roles?.some((role) => role.contexto === "empresa")) && (
-              <Card
-                sx={{
-                  width: "100%",
-                  maxWidth: 280,
-                  borderRadius: "var(--radius-l)",
-                  backgroundColor: "transparent",
-                  border: "2px dashed color-mix(in srgb, var(--color-fg-on-neutral-primary) 35%, transparent)",
-                  boxShadow: "none",
-                  transition:
-                    "border-color var(--duration-fast) var(--easing-ease), background-color var(--duration-fast) var(--easing-ease)",
-                  "&:hover": {
-                    backgroundColor:
-                      "color-mix(in srgb, var(--color-fg-on-neutral-primary) 8%, transparent)",
-                    borderColor:
-                      "color-mix(in srgb, var(--color-fg-on-neutral-primary) 55%, transparent)",
-                  },
-                }}
-              >
-                <CardActionArea
-                  onClick={() => setSiiModalOpen(true)}
-                  sx={{
-                    p: 3,
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: 180,
-                  }}
-                >
-                  <IconButton
-                    sx={{
-                      backgroundColor:
-                        "color-mix(in srgb, var(--color-fg-on-neutral-primary) 15%, transparent)",
-                      color: "var(--color-fg-on-neutral-primary)",
-                      mb: 2,
-                      "&:hover": {
-                        backgroundColor:
-                          "color-mix(in srgb, var(--color-fg-on-neutral-primary) 25%, transparent)",
-                      },
-                    }}
-                  >
-                    <Add sx={{ fontSize: 32 }} />
-                  </IconButton>
-                  <Typography
-                    sx={{
-                      color: "var(--color-fg-on-neutral-primary)",
-                      fontFamily: "var(--font-heading)",
-                      fontWeight: 500,
-                      fontSize: "var(--font-size-m)",
-                      mb: 0.5,
-                    }}
-                  >
-                    Agregar Empresa
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: "var(--color-fg-on-neutral-primary)",
-                      opacity: 0.65,
-                      fontSize: "var(--font-size-s)",
-                    }}
-                  >
-                    Sincroniza con SII
-                  </Typography>
-                </CardActionArea>
-              </Card>
-            )}
           </Box>
         </Box>
       </Box>
-
-      <SiiSyncModal
-        open={siiModalOpen}
-        onClose={() => setSiiModalOpen(false)}
-      />
     </Layout>
   );
 };

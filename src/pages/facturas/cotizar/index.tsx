@@ -34,7 +34,6 @@ import type { Factoring } from "../../../types/factoring";
 import { useFacturas } from "../../../hooks/useFacturas";
 import { useFactoring } from "../../../hooks/useFactoring";
 import UploadXmlModal from "../../../components/Modals/UploadXmlModal";
-import ObtenerFacturaSiiModal from "../../../components/Modals/ObtenerFacturaSiiModal";
 import FacturaEnviadaCotizarModal from "../../../components/Modals/FacturaEnviadaCotizarModal";
 import SiiPersonalSyncPromptModal from "../../../components/Modals/SiiPersonalSyncPromptModal";
 import FacturaResumenCard, {
@@ -121,13 +120,16 @@ const CotizarFactura = () => {
         setPdfGate("error");
         return;
       }
-      applyFacturaData(fetched);
+      setFactura((current) => (current ? { ...current, ...fetched } : fetched));
+      setAdjuntos(fetched.archivos ?? []);
       setPdfGate("ready");
     } catch (err) {
       console.error("Error fetching PDF from SII:", err);
       if (!isMountedRef.current) return;
       setPdfGate("error");
     }
+    // fetchXMLContent is recreated every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchFactorings = async () => {
@@ -270,6 +272,10 @@ const CotizarFactura = () => {
     const xmlValidation = validateXmlMatch();
     if (!xmlValidation.valid) return xmlValidation.message;
 
+    if (pdfGate === "loading") {
+      return "Esperá a que se obtenga el PDF de la factura";
+    }
+
     const pdfValidation = validatePdfUploaded();
     if (!pdfValidation.valid) return pdfValidation.message;
 
@@ -322,8 +328,8 @@ const CotizarFactura = () => {
     }
   };
 
-  const handleCancelPdfGate = () => {
-    navigate(`/facturas/${id}`);
+  const handleDismissPersonalSiiPrompt = () => {
+    setNeedsPersonalSii(false);
   };
 
   const handleGoToFacturas = () => {
@@ -399,7 +405,7 @@ const CotizarFactura = () => {
     );
   }
 
-  if (pdfGate === "ready" && !factura) {
+  if (!factura) {
     return (
       <Layout>
         <Box sx={appContentSx}>
@@ -427,7 +433,14 @@ const CotizarFactura = () => {
   }
 
   const showXmlUi = isXmlUiEnabled();
-  const showForm = pdfGate === "ready" && Boolean(factura);
+  const showForm = Boolean(factura);
+  const pdfFetchStatus = hasFacturaPdf(factura)
+    ? undefined
+    : pdfGate === "loading"
+      ? "loading"
+      : pdfGate === "error"
+        ? "error"
+        : "missing";
 
   return (
     <Layout>
@@ -482,6 +495,10 @@ const CotizarFactura = () => {
                   <DocumentosAsociadosCard
                     factura={factura}
                     onDownloadPdf={handleDownloadPdf}
+                    pdfFetchStatus={pdfFetchStatus}
+                    onRetryPdf={
+                      pdfFetchStatus === "error" ? obtainPdfFromSii : undefined
+                    }
                     {...(showXmlUi
                       ? {
                           onUploadXmlClick: () => setUploadXmlModalOpen(true),
@@ -842,23 +859,9 @@ const CotizarFactura = () => {
           </>
         )}
 
-        <ObtenerFacturaSiiModal
-          open={
-            !needsPersonalSii &&
-            Boolean(factura) &&
-            (pdfGate === "loading" || pdfGate === "error")
-          }
-          status={pdfGate === "error" ? "error" : "loading"}
-          onRetry={obtainPdfFromSii}
-          onCancel={handleCancelPdfGate}
-          errorTitle="No encontramos el PDF de esta factura"
-          errorSubtitle="Pulsa Reintentar para obtener el documento desde el SII. Puedes intentarlo hasta 3 veces."
-          showDismissAfterMs={30000}
-        />
-
         <SiiPersonalSyncPromptModal
           open={needsPersonalSii}
-          onClose={handleCancelPdfGate}
+          onClose={handleDismissPersonalSiiPrompt}
         />
 
         <FacturaEnviadaCotizarModal
