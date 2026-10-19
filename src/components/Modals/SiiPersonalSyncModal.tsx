@@ -25,6 +25,7 @@ import {
 } from "../../utils/validations/shared-fields";
 import useAuthStore from "../../store/authStore";
 import type { Role } from "../../types/role";
+import { normalizeEmpresaSiiPersonal } from "../../types/empresa";
 
 interface SiiPersonalSyncFormData {
   siiRutPersonal: string;
@@ -69,7 +70,7 @@ const SiiPersonalSyncModal = ({
 
       useAuthStore.getState().setCurrentRole({
         ...currentRole,
-        empresa: response,
+        empresa: normalizeEmpresaSiiPersonal(response),
       } as Role);
 
       setAlertStatus("success");

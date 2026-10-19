@@ -68,9 +68,6 @@ const mapLoginError = (error: unknown): string => {
   return "Ocurrió un error. Intenta nuevamente";
 };
 
-const getPostAuthPath = (rolesLength: number) =>
-  rolesLength === 1 ? "/dashboard" : "/role-selection";
-
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -81,7 +78,7 @@ const Login = () => {
 
   useEffect(() => {
     if (!accessToken || !user) return;
-    navigate(getPostAuthPath(user.roles.length), { replace: true });
+    navigate("/role-selection", { replace: true });
   }, [accessToken, user, navigate]);
 
   const formik = useFormik({
@@ -97,14 +94,11 @@ const Login = () => {
           password: values.password,
         });
 
-        if (response.user.roles.length === 1) {
-          useAuthStore.getState().setCurrentRole(response.user.roles[0]);
-        }
-
         useAuthStore.getState().setAccessToken(response.accessToken);
         useAuthStore.getState().setRefreshToken(response.refreshToken);
         useAuthStore.getState().setUser(response.user);
-        navigate(getPostAuthPath(response.user.roles.length), { replace: true });
+        useAuthStore.getState().setCurrentRole(null);
+        navigate("/role-selection", { replace: true });
       } catch (error: unknown) {
         setErrorMessage(mapLoginError(error));
         setModalOpen(true);

@@ -6,11 +6,13 @@ import Empresa from "../../../components/Edit/Empresa";
 import SiiSyncModal from "../../../components/Modals/SiiSyncModal";
 import SiiPersonalSyncModal from "../../../components/Modals/SiiPersonalSyncModal";
 import useAuthStore from "../../../store/authStore";
+import { isSiiPersonalLinked } from "../../../types/empresa";
 
 const EmpresaTab = () => {
   const { currentRole } = useAuthStore();
   const empresa = currentRole?.empresa;
-  const isPersonalLinked = empresa?.siiRutPersonal != null;
+  const isPersonalLinked = isSiiPersonalLinked(empresa);
+  const isEmpresaActiva = empresa?.estadoEnrolamiento === "ACTIVO";
 
   const [siiSyncModalOpen, setSiiSyncModalOpen] = useState(false);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
@@ -28,8 +30,8 @@ const EmpresaTab = () => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {currentRole?.nivel && currentRole?.nivel === 1 && <SiiSync />}
-      {currentRole?.nivel && currentRole?.nivel !== 1 && (
+      {!isEmpresaActiva && <SiiSync />}
+      {isEmpresaActiva && (
         <Empresa
           onUpdateCredentials={() => setSiiSyncModalOpen(true)}
           readOnly={true}

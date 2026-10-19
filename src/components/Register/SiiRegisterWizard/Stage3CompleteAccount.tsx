@@ -141,7 +141,7 @@ const Stage3CompleteAccount = ({
   const handleContinue = () => {
     setModalOpen(false);
     onRegistered();
-    navigate("/dashboard");
+    navigate("/role-selection");
   };
 
   const formik = useFormik<Stage3FormValues>({
@@ -196,13 +196,10 @@ const Stage3CompleteAccount = ({
           password: payload.password,
         });
 
-        if (response.user.roles.length === 1) {
-          useAuthStore.getState().setCurrentRole(response.user.roles[0]);
-        }
-
         useAuthStore.getState().setAccessToken(response.accessToken);
         useAuthStore.getState().setRefreshToken(response.refreshToken);
         useAuthStore.getState().setUser(response.user);
+        useAuthStore.getState().setCurrentRole(null);
 
         setModalStatus("success");
         setModalOpen(true);

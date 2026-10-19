@@ -81,7 +81,7 @@ const RegisterForm = ({
 
   const handleContinue = () => {
     setModalOpen(false);
-    navigate("/dashboard");
+    navigate("/role-selection");
   };
 
   const handleRegister = async (values: RegisterFormData) => {
@@ -92,15 +92,12 @@ const RegisterForm = ({
         password: values.password,
       });
 
-      if (response.user.roles.length === 1) {
-        useAuthStore.getState().setCurrentRole(response.user.roles[0]);
-      }
-
       setModalStatus("success");
       setModalOpen(true);
       useAuthStore.getState().setAccessToken(response.accessToken);
       useAuthStore.getState().setRefreshToken(response.refreshToken);
       useAuthStore.getState().setUser(response.user);
+      useAuthStore.getState().setCurrentRole(null);
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string } };

@@ -19,10 +19,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useEmpresa } from "../../../hooks/useEmpresa";
 import { StyledTextField } from "../../../pages/register/styles";
-import {
-  rutValidation,
-  handleRutInputChange,
-} from "../../../utils/validations/shared-fields";
+import { rutValidation } from "../../../utils/validations/shared-fields";
 import useAuthStore from "../../../store/authStore";
 import type { Role } from "../../../types/role";
 import siiLogo from "../../../assets/png/sii-logo.png";
@@ -32,6 +29,16 @@ interface SiiSyncFormData {
   siiRut: string;
   siiPassword: string;
 }
+
+const readOnlyFieldSx = {
+  "& .MuiInputBase-input": {
+    color: "text.secondary",
+    cursor: "default",
+  },
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "action.hover",
+  },
+} as const;
 
 const siiSyncSchema = yup.object({
   siiRut: rutValidation,
@@ -49,6 +56,8 @@ const SiiSync = () => {
 
   const { currentRole } = useAuthStore();
   const { createEmpresaBySii, loading } = useEmpresa();
+  const empresaRut =
+    currentRole?.empresa?.rut || currentRole?.empresa?.siiRut || "";
 
   const handleSyncSii = async (values: SiiSyncFormData) => {
     try {
@@ -94,16 +103,13 @@ const SiiSync = () => {
 
   const formik = useFormik<SiiSyncFormData>({
     initialValues: {
-      siiRut: "",
+      siiRut: empresaRut,
       siiPassword: "",
     },
+    enableReinitialize: true,
     validationSchema: siiSyncSchema,
     onSubmit: handleSyncSii,
   });
-
-  const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleRutInputChange(e, formik.setFieldValue);
-  };
 
   return (
     <>
@@ -142,14 +148,10 @@ const SiiSync = () => {
             <StyledTextField
               fullWidth
               label="RUT del SII"
-              placeholder="12.345.678-9"
               name="siiRut"
               value={formik.values.siiRut}
-              error={formik.touched.siiRut && Boolean(formik.errors.siiRut)}
-              helperText={formik.touched.siiRut && formik.errors.siiRut}
-              onChange={handleRutChange}
-              onBlur={formik.handleBlur}
-              disabled={loading}
+              InputProps={{ readOnly: true }}
+              sx={readOnlyFieldSx}
             />
 
             <StyledTextField

@@ -49,6 +49,7 @@ import {
   shouldBlockForMissingXml,
 } from "../../../utils/facturaDocuments";
 import useAuthStore from "../../../store/authStore";
+import { isSiiPersonalLinked } from "../../../types/empresa";
 import { MAX_DIAS_FINANCIAMIENTO } from "../../../utils/consts";
 
 const truncateToTwo = (num: number): number => {
@@ -159,7 +160,7 @@ const CotizarFactura = () => {
         return;
       }
       applyFacturaData(data);
-      if (!Boolean(currentRole?.empresa?.siiRutPersonal)) {
+      if (!isSiiPersonalLinked(currentRole?.empresa)) {
         setNeedsPersonalSii(true);
         return;
       }
@@ -170,7 +171,7 @@ const CotizarFactura = () => {
     } finally {
       setLoadingFactura(false);
     }
-  }, [id, currentRole?.empresa?.siiRutPersonal, obtainPdfFromSii, navigate]);
+  }, [id, currentRole?.empresa, obtainPdfFromSii, navigate]);
 
   useEffect(() => {
     if (id) {

@@ -156,15 +156,33 @@ const SiiPersonalSync = ({
           >
             <Box>
               {[
-                { label: "RUT Personal", value: empresa?.siiRutPersonal || "" },
+                {
+                  label: "RUT Personal",
+                  value:
+                    empresa?.siiPersonal?.siiRutPersonal ||
+                    empresa?.siiRutPersonal ||
+                    "",
+                },
                 {
                   label: "Razón Social",
-                  value: empresa?.siiRazonSocialPersonal || "",
+                  value:
+                    empresa?.siiPersonal?.siiRazonSocialPersonal ||
+                    empresa?.siiRazonSocialPersonal ||
+                    "",
                 },
-                { label: "Email", value: empresa?.siiEmailPersonal || "" },
+                {
+                  label: "Email",
+                  value:
+                    empresa?.siiPersonal?.siiEmailPersonal ||
+                    empresa?.siiEmailPersonal ||
+                    "",
+                },
                 {
                   label: "Dirección",
-                  value: empresa?.siiDireccionPersonal || "",
+                  value:
+                    empresa?.siiPersonal?.siiDireccionPersonal ||
+                    empresa?.siiDireccionPersonal ||
+                    "",
                 },
               ].map((field) => (
                 <StyledTextField
