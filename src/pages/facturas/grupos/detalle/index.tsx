@@ -314,7 +314,10 @@ const FacturaGrupoDetalle = () => {
         nombre: grupo.nombre || "Grupo",
         cantidadFacturas: facturas.length,
         montoTotal: total,
-        porcentajeFinanciamiento: grupo.porcentajeFinanciamiento ?? 0,
+        porcentajeFinanciamiento: (() => {
+          const n = Number(grupo.porcentajeFinanciamiento ?? 0);
+          return Number.isFinite(n) ? n : 0;
+        })(),
         montoAFinanciar: financiar,
         plazo: grupo.plazo ?? 0,
       });
