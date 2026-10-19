@@ -47,7 +47,6 @@ import SyncFacturasSiiModal from "../../components/Modals/SyncFacturasSiiModal";
 import DeleteFacturaModal from "../../components/Modals/DeleteFacturaModal";
 import BulkDeleteFacturasModal from "../../components/Modals/BulkDeleteFacturasModal";
 import RemoveMarketplaceModal from "../../components/Modals/RemoveMarketplaceModal";
-import DocumentsRequiredModal from "../../components/Modals/DocumentsRequiredModal";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import FacturasFilters, {
   isArrayFilterKey,
@@ -169,7 +168,6 @@ const Facturas = () => {
     {},
   );
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] = useState(false);
-  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] = useState(false);
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -264,11 +262,7 @@ const Facturas = () => {
 
   const goToCotizar = (factura: Factura) => {
     if (!canEnviarFacturaIndividualACotizar(factura)) return;
-    if (currentRole && currentRole.nivel >= 3) {
-      navigate(`/facturas/${factura.id}/cotizar`);
-    } else {
-      setDocumentsRequiredModalOpen(true);
-    }
+    navigate(`/facturas/${factura.id}/cotizar`);
   };
 
   const handleEnviarCotizar = () => {
@@ -1408,10 +1402,6 @@ const Facturas = () => {
           />
         )}
 
-        <DocumentsRequiredModal
-          open={documentsRequiredModalOpen}
-          onClose={() => setDocumentsRequiredModalOpen(false)}
-        />
       </Box>
     </Layout>
   );

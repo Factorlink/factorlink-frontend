@@ -21,6 +21,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import GroupsIcon from "@mui/icons-material/Groups";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { formatCurrency } from "../Facturas/FacturaResumenCard";
+import LegalDocumentsPendingWarning from "./LegalDocumentsPendingWarning";
 
 export type GrupoEnviadoCotizarSummary = {
   nombre: string;
@@ -34,6 +35,7 @@ export type GrupoEnviadoCotizarSummary = {
 interface GrupoEnviadoCotizarModalProps {
   open: boolean;
   summary: GrupoEnviadoCotizarSummary;
+  showLegalDocumentsWarning?: boolean;
   onGoToFacturas: () => void;
   onVerGrupo: () => void;
 }
@@ -77,6 +79,7 @@ const SummaryRow = ({
 const GrupoEnviadoCotizarModal = ({
   open,
   summary,
+  showLegalDocumentsWarning = false,
   onGoToFacturas,
   onVerGrupo,
 }: GrupoEnviadoCotizarModalProps) => {
@@ -140,15 +143,13 @@ const GrupoEnviadoCotizarModal = ({
             mb: 1,
           }}
         >
-          ¡Grupo enviado a cotizar!
+          ¡Cotización enviada al Marketplace!
         </Typography>
         <Typography
           variant="body2"
           sx={{ color: "var(--color-fg-default-secondary)", mb: 3 }}
         >
-          {summary.cantidadFacturas === 1
-            ? "La factura seleccionada ha sido enviada al marketplace y está disponible para que los factoring interesados envíen sus ofertas."
-            : `Las ${summary.cantidadFacturas} facturas seleccionadas han sido enviadas al marketplace y están disponibles para que los factoring interesados envíen sus ofertas.`}
+          Tu cotización fue enviada correctamente.
         </Typography>
 
         <Box
@@ -241,6 +242,8 @@ const GrupoEnviadoCotizarModal = ({
           Recibirás notificaciones cuando los factoring envíen ofertas para este
           grupo.
         </Alert>
+
+        {showLegalDocumentsWarning && <LegalDocumentsPendingWarning />}
       </DialogContent>
 
       <DialogActions

@@ -38,8 +38,10 @@ import {
 } from "@mui/icons-material";
 import Layout from "../../../../components/Layout";
 import SectionPanel from "../../../../components/SectionPanel";
-import DocumentsRequiredModal from "../../../../components/Modals/DocumentsRequiredModal";
 import FacturaDetalleDrawer from "../../../../components/Facturas/FacturaDetalleDrawer";
+import GrupoEnviadoCotizarModal, {
+  type GrupoEnviadoCotizarSummary,
+} from "../../../../components/Modals/GrupoEnviadoCotizarModal";
 import type { FacturaDetalleTab } from "../../../../components/Facturas/FacturaDetalleTabs";
 import { formatCurrency } from "../../../../components/Facturas/FacturaResumenCard";
 import { useFacturaGrupos } from "../../../../hooks/useFacturaGrupos";
@@ -115,8 +117,9 @@ const FacturaGrupoDetalle = () => {
   const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
-  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
-    useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successSummary, setSuccessSummary] =
+    useState<GrupoEnviadoCotizarSummary | null>(null);
   const detalleFacturaId = searchParams.get("facturaId");
   const detalleOpen = Boolean(detalleFacturaId);
   const drawerTab =
@@ -288,21 +291,34 @@ const FacturaGrupoDetalle = () => {
   };
 
   const openSendConfirm = () => {
-    if (!currentRole || currentRole.nivel < 3) {
-      setDocumentsRequiredModalOpen(true);
-      return;
-    }
     setSendError(null);
     setSendConfirmOpen(true);
   };
 
   const handleSendToMarketplace = async () => {
-    if (!id) return;
+    if (!id || !grupo) return;
     try {
       setSending(true);
       setSendError(null);
       await sendFacturaGrupoToMarketplace(id);
       setSendConfirmOpen(false);
+      const total =
+        facturas.length > 0
+          ? facturas.reduce((sum, f) => {
+              const n = parseFloat(f.montoTotal);
+              return sum + (Number.isFinite(n) ? n : 0);
+            }, 0)
+          : getFacturaGrupoMontoTotal(grupo);
+      const financiar = getFacturaGrupoMontoFinanciar(grupo);
+      setSuccessSummary({
+        nombre: grupo.nombre || "Grupo",
+        cantidadFacturas: facturas.length,
+        montoTotal: total,
+        porcentajeFinanciamiento: grupo.porcentajeFinanciamiento ?? 0,
+        montoAFinanciar: financiar,
+        plazo: grupo.plazo ?? 0,
+      });
+      setSuccessOpen(true);
       await loadDetalle();
     } catch (err) {
       console.error("Error sending factura grupo to marketplace:", err);
@@ -1051,10 +1067,22 @@ const FacturaGrupoDetalle = () => {
         </DialogActions>
       </Dialog>
 
-      <DocumentsRequiredModal
-        open={documentsRequiredModalOpen}
-        onClose={() => setDocumentsRequiredModalOpen(false)}
-      />
+      {successSummary && (
+        <GrupoEnviadoCotizarModal
+          open={successOpen}
+          summary={successSummary}
+          showLegalDocumentsWarning={
+            currentRole?.nivel == null || currentRole.nivel < 3
+          }
+          onGoToFacturas={() => {
+            setSuccessOpen(false);
+            navigate("/facturas");
+          }}
+          onVerGrupo={() => {
+            setSuccessOpen(false);
+          }}
+        />
+      )}
 
       <FacturaDetalleDrawer
         open={detalleOpen}

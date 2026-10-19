@@ -870,6 +870,9 @@ const CotizarFactura = () => {
           folio={factura?.folio ?? ""}
           montoTotal={factura?.montoTotal ?? "0"}
           visibilidad={visibilidad}
+          showLegalDocumentsWarning={
+            currentRole?.nivel == null || currentRole.nivel < 3
+          }
           onGoToFacturas={handleGoToFacturas}
         />
 

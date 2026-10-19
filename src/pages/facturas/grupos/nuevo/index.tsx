@@ -47,7 +47,6 @@ import {
 } from "@mui/icons-material";
 import Layout from "../../../../components/Layout";
 import SectionPanel from "../../../../components/SectionPanel";
-import DocumentsRequiredModal from "../../../../components/Modals/DocumentsRequiredModal";
 import GrupoEnviadoCotizarModal, {
   type GrupoEnviadoCotizarSummary,
 } from "../../../../components/Modals/GrupoEnviadoCotizarModal";
@@ -153,8 +152,6 @@ const NuevoGrupoCotizacion = () => {
   const [createdGrupoId, setCreatedGrupoId] = useState<string | null>(null);
   const [successSummary, setSuccessSummary] =
     useState<GrupoEnviadoCotizarSummary | null>(null);
-  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
-    useState(false);
   const [detalleFacturaId, setDetalleFacturaId] = useState<string | null>(null);
   const [detalleOpen, setDetalleOpen] = useState(false);
 
@@ -462,10 +459,6 @@ const NuevoGrupoCotizacion = () => {
   };
 
   const handleEnviarACotizar = async () => {
-    if (!currentRole || currentRole.nivel < 3) {
-      setDocumentsRequiredModalOpen(true);
-      return;
-    }
     if (isBusy || submitPhase === "success") return;
 
     if (createdGrupoId) {
@@ -478,7 +471,7 @@ const NuevoGrupoCotizacion = () => {
       setSubmitError(validationError);
       return;
     }
-    if (!currentRole.empresaId) return;
+    if (!currentRole?.empresaId) return;
 
     const trimmedNombre = nombre.trim();
     const summary: GrupoEnviadoCotizarSummary = {
@@ -1214,6 +1207,9 @@ const NuevoGrupoCotizacion = () => {
         <GrupoEnviadoCotizarModal
           open={submitPhase === "success"}
           summary={successSummary}
+          showLegalDocumentsWarning={
+            currentRole?.nivel == null || currentRole.nivel < 3
+          }
           onGoToFacturas={handleGoToFacturas}
           onVerGrupo={handleVerGrupo}
         />
@@ -1289,11 +1285,6 @@ const NuevoGrupoCotizacion = () => {
         onClose={() => setMaxSnackbarOpen(false)}
         message="Máximo 5 facturas por grupo"
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      />
-
-      <DocumentsRequiredModal
-        open={documentsRequiredModalOpen}
-        onClose={() => setDocumentsRequiredModalOpen(false)}
       />
 
       <FacturaDetalleDrawer

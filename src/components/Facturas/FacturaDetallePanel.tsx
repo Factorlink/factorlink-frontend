@@ -5,10 +5,8 @@ import { Send, Delete, Settings } from "@mui/icons-material";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import type { Factura } from "../../types/factura";
 import { useFacturas } from "../../hooks/useFacturas";
-import useAuthStore from "../../store/authStore";
 import DeleteFacturaModal from "../Modals/DeleteFacturaModal";
 import RemoveMarketplaceModal from "../Modals/RemoveMarketplaceModal";
-import DocumentsRequiredModal from "../Modals/DocumentsRequiredModal";
 import FacturaDetalleInformacion, {
   FacturaDetalleDocumentos,
 } from "./FacturaDetalleInformacion";
@@ -45,14 +43,11 @@ const FacturaDetallePanel = ({
   onOfertasOpenChange,
 }: FacturaDetallePanelProps) => {
   const navigate = useNavigate();
-  const { currentRole } = useAuthStore();
   const { refreshFactura } = useFacturas();
   const isPage = variant === "page";
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [removeMarketplaceModalOpen, setRemoveMarketplaceModalOpen] =
-    useState(false);
-  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
     useState(false);
 
   const isCargada = factura.estado?.toLowerCase() === "cargada";
@@ -93,11 +88,7 @@ const FacturaDetallePanel = ({
 
   const handleEnviarCotizar = () => {
     if (!canEnviarCotizar) return;
-    if (currentRole && currentRole.nivel >= 3) {
-      navigate(`/facturas/${factura.id}/cotizar`);
-    } else {
-      setDocumentsRequiredModalOpen(true);
-    }
+    navigate(`/facturas/${factura.id}/cotizar`);
   };
 
   const refreshCurrentFactura = async () => {
@@ -317,10 +308,6 @@ const FacturaDetallePanel = ({
         }}
       />
 
-      <DocumentsRequiredModal
-        open={documentsRequiredModalOpen}
-        onClose={() => setDocumentsRequiredModalOpen(false)}
-      />
     </>
   );
 };

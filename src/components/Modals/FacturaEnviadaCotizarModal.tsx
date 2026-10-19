@@ -16,12 +16,14 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { formatCurrency } from "../Facturas/FacturaResumenCard";
+import LegalDocumentsPendingWarning from "./LegalDocumentsPendingWarning";
 
 interface FacturaEnviadaCotizarModalProps {
   open: boolean;
   folio: string;
   montoTotal: string;
   visibilidad: "TODOS" | "SELECCIONADOS";
+  showLegalDocumentsWarning?: boolean;
   onGoToFacturas: () => void;
 }
 
@@ -89,6 +91,7 @@ const FacturaEnviadaCotizarModal = ({
   folio,
   montoTotal,
   visibilidad,
+  showLegalDocumentsWarning = false,
   onGoToFacturas,
 }: FacturaEnviadaCotizarModalProps) => {
   return (
@@ -148,10 +151,16 @@ const FacturaEnviadaCotizarModal = ({
           sx={{
             fontWeight: 700,
             color: "var(--color-fg-default-primary)",
-            mb: 3,
+            mb: 1,
           }}
         >
-          ¡Factura enviada a cotizar con éxito!
+          ¡Cotización enviada al Marketplace!
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{ color: "var(--color-fg-default-secondary)", mb: 3 }}
+        >
+          Tu cotización fue enviada correctamente.
         </Typography>
 
         <Box
@@ -201,6 +210,8 @@ const FacturaEnviadaCotizarModal = ({
             value={visibilidadLabel(visibilidad)}
           />
         </Box>
+
+        {showLegalDocumentsWarning && <LegalDocumentsPendingWarning />}
       </DialogContent>
 
       <DialogActions sx={{ px: 4, pb: 3, pt: 1 }}>
