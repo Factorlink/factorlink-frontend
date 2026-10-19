@@ -1,4 +1,5 @@
 import { useState, useEffect, type FC } from "react";
+import { Navigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -54,7 +55,7 @@ const Invitations: FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const { getMyInfo } = useUsers();
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, currentRole } = useAuthStore();
 
   const {
     getPendingInvites,
@@ -129,8 +130,13 @@ const Invitations: FC = () => {
   };
 
   useEffect(() => {
+    if (!currentRole || currentRole.contexto === "empresa") return;
     fetchInvitations();
-  }, []);
+  }, [currentRole?.contexto]);
+
+  if (!currentRole || currentRole.contexto === "empresa") {
+    return <Navigate to="/role-selection" replace />;
+  }
 
   const pendingCount =
     invitations.empresas.length + invitations.factorings.length;

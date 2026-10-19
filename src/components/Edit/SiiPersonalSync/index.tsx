@@ -1,7 +1,7 @@
 import { Box, Button, Chip, Typography } from "@mui/material";
 import SyncIcon from "@mui/icons-material/Sync";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { StyledTextField } from "../../../pages/register/styles";
@@ -31,6 +31,16 @@ const getBenefits = () => {
     "Consulta de estado de cesión en SII",
   ];
 };
+
+const readOnlyFieldSx = {
+  "& .MuiInputBase-input": {
+    color: "text.secondary",
+    cursor: "default",
+  },
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "action.hover",
+  },
+} as const;
 
 const SiiPersonalSync = ({
   isLinked,
@@ -76,11 +86,14 @@ const SiiPersonalSync = ({
               variant="h6"
               sx={{ color: "text.primary", fontWeight: 600 }}
             >
-              Cuenta Personal SII Vinculada
+              {isLinked
+                ? "Cuenta Personal SII Vinculada"
+                : "Cuenta Personal SII"}
             </Typography>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              Vincula tu cuenta personal del SII para habilitar acciones
-              avanzadas
+              {isLinked
+                ? "Tu cuenta personal del SII ya está vinculada. Ahora puedes realizar las acciones avanzadas desde la plataforma."
+                : "Vincula tu cuenta personal del SII para habilitar acciones avanzadas"}
             </Typography>
           </Box>
         </Box>
@@ -107,19 +120,29 @@ const SiiPersonalSync = ({
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-            <HelpOutlineIcon sx={{ fontSize: 20, color: "primary.main" }} />
+            {isLinked ? (
+              <CheckCircleOutlineIcon
+                sx={{ fontSize: 20, color: "success.main" }}
+              />
+            ) : (
+              <HelpOutlineIcon sx={{ fontSize: 20, color: "primary.main" }} />
+            )}
             <Typography
               variant="subtitle2"
               sx={{ color: "text.primary", fontWeight: 600 }}
             >
-              ¿Para qué sirve vincular tu cuenta personal del SII?
+              {isLinked
+                ? "Acciones que ahora puedes realizar"
+                : "¿Para qué sirve vincular tu cuenta personal del SII?"}
             </Typography>
           </Box>
-          <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
-            Al vincular tu cuenta personal del SII a tu empresa, podrás realizar
-            acciones adicionales de forma automática directamente desde la
-            plataforma.
-          </Typography>
+          {!isLinked && (
+            <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
+              Al vincular tu cuenta personal del SII a tu empresa, podrás realizar
+              acciones adicionales de forma automática directamente desde la
+              plataforma.
+            </Typography>
+          )}
           <Box
             sx={{
               display: "grid",
@@ -191,15 +214,7 @@ const SiiPersonalSync = ({
                   label={field.label}
                   value={field.value}
                   InputProps={{ readOnly: true }}
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      color: "text.secondary",
-                      cursor: "default",
-                    },
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "action.hover",
-                    },
-                  }}
+                  sx={readOnlyFieldSx}
                 />
               ))}
             </Box>
@@ -228,19 +243,25 @@ const SiiPersonalSync = ({
               </Box>
             </Box>
             <Button
-              variant="outlined"
-              startIcon={<EditOutlinedIcon />}
+              variant="contained"
+              startIcon={<VpnKeyOutlinedIcon />}
               onClick={onUpdate}
               sx={{
                 textTransform: "none",
                 borderRadius: "var(--radius-m)",
                 fontWeight: 500,
-                borderColor: "divider",
-                color: "text.primary",
-                "&:hover": { borderColor: "text.secondary" },
+                backgroundColor: "var(--color-bg-accent-primary)",
+                color: "common.white",
+                px: 3,
+                py: 1.2,
+                boxShadow: "none",
+                "&:hover": {
+                  backgroundColor: "var(--color-bg-accent-primary-hover)",
+                  boxShadow: "none",
+                },
               }}
             >
-              Actualizar
+              Cambiar contraseña
             </Button>
           </Box>
         ) : (

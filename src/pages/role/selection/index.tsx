@@ -5,12 +5,19 @@ import type { Role } from "../../../types/role";
 import Layout from "../../../components/Layout";
 import RoleCard from "./components/role-card";
 
+const isPendingEmpresaEnrollment = (role: Role) =>
+  role.contexto === "empresa" &&
+  (!role.empresaId || role.empresa?.estadoEnrolamiento === "PENDIENTE");
+
 const RoleSelection = () => {
   const navigate = useNavigate();
   const { user, currentRole, setCurrentRole } = useAuthStore();
 
   const handleSelectRole = (role: Role) => {
     setCurrentRole(role);
+    if (isPendingEmpresaEnrollment(role)) {
+      return;
+    }
     navigate("/dashboard");
   };
 
@@ -69,42 +76,47 @@ const RoleSelection = () => {
               maxWidth: 1200,
             }}
           >
-            {rolesList.map((role) => (
-              <RoleCard
-                key={
-                  role.contexto === "empresa"
-                    ? role.empresaId
-                    : role.factoringId
-                }
-                roleId={
-                  role.contexto === "empresa"
-                    ? role.empresaId
-                    : role.factoringId
-                }
-                currentRoleId={
-                  currentRole?.contexto === "empresa"
-                    ? currentRole?.empresaId
-                    : currentRole?.factoringId
-                }
-                handleSelectRole={() => handleSelectRole(role)}
-                razonSocial={
-                  role.contexto === "empresa"
-                    ? role.empresa?.razonSocial
-                    : role.factoring?.razonSocial
-                }
-                roleName={role.role}
-                email={
-                  role.contexto === "empresa"
-                    ? role.empresa?.email
-                    : role.factoring?.email
-                }
-                rut={
-                  role.contexto === "empresa"
-                    ? role.empresa?.rut
-                    : role.factoring?.rut
-                }
-              />
-            ))}
+            {rolesList.map((role) => {
+              const pending = isPendingEmpresaEnrollment(role);
+              const roleId =
+                role.contexto === "empresa"
+                  ? role.empresaId ||
+                    role.empresa?.rut ||
+                    `empresa-${role.role}`
+                  : role.factoringId;
+              const currentRoleId =
+                currentRole?.contexto === "empresa"
+                  ? currentRole?.empresaId ||
+                    currentRole?.empresa?.rut ||
+                    (currentRole ? `empresa-${currentRole.role}` : undefined)
+                  : currentRole?.factoringId;
+
+              return (
+                <RoleCard
+                  key={roleId}
+                  roleId={roleId}
+                  currentRoleId={currentRoleId}
+                  handleSelectRole={() => handleSelectRole(role)}
+                  razonSocial={
+                    role.contexto === "empresa"
+                      ? role.empresa?.razonSocial
+                      : role.factoring?.razonSocial
+                  }
+                  roleName={role.role}
+                  email={
+                    role.contexto === "empresa"
+                      ? role.empresa?.email
+                      : role.factoring?.email
+                  }
+                  rut={
+                    role.contexto === "empresa"
+                      ? role.empresa?.rut
+                      : role.factoring?.rut
+                  }
+                  isPendingEnrollment={pending}
+                />
+              );
+            })}
           </Box>
         </Box>
       </Box>

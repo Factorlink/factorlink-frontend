@@ -88,11 +88,15 @@ const Profile = ({
       text: "Editar Información",
       action: handleEditProfile,
     },
-    {
-      icon: <MailOutline fontSize="small" />,
-      text: "Invitaciones",
-      action: handleInvitations,
-    },
+    ...(currentRole && currentRole.contexto !== "empresa"
+      ? [
+          {
+            icon: <MailOutline fontSize="small" />,
+            text: "Invitaciones",
+            action: handleInvitations,
+          },
+        ]
+      : []),
     {
       icon: <SwitchAccount fontSize="small" />,
       text: "Cambiar de Rol",

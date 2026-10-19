@@ -22,6 +22,7 @@ interface RoleCardProps {
   roleName: string;
   email?: string;
   rut?: string;
+  isPendingEnrollment?: boolean;
 }
 
 const RoleCard = ({
@@ -32,8 +33,15 @@ const RoleCard = ({
   roleName,
   email,
   rut,
+  isPendingEnrollment = false,
 }: RoleCardProps) => {
   const isSelected = currentRoleId === roleId;
+
+  const borderColor = isSelected
+    ? "var(--color-border-accent-primary)"
+    : isPendingEnrollment
+      ? "var(--color-border-warning-secondary)"
+      : "var(--color-border-default-primary)";
 
   return (
     <Card
@@ -45,9 +53,10 @@ const RoleCard = ({
         boxShadow: "var(--shadow-card)",
         transition:
           "transform var(--duration-fast) var(--easing-ease), box-shadow var(--duration-fast) var(--easing-ease)",
-        border: isSelected
-          ? "2px solid var(--color-border-accent-primary)"
-          : "1px solid var(--color-border-default-primary)",
+        border:
+          isSelected || isPendingEnrollment
+            ? `2px solid ${borderColor}`
+            : `1px solid ${borderColor}`,
         "&:hover": {
           transform: "translateY(-4px)",
           boxShadow: "var(--shadow-popover)",
@@ -67,8 +76,12 @@ const RoleCard = ({
             sx={{
               width: 48,
               height: 48,
-              backgroundColor: "var(--color-bg-accent-secondary)",
-              color: "var(--color-fg-accent-primary)",
+              backgroundColor: isPendingEnrollment
+                ? "var(--color-bg-warning-secondary)"
+                : "var(--color-bg-accent-secondary)",
+              color: isPendingEnrollment
+                ? "var(--color-fg-warning-primary)"
+                : "var(--color-fg-accent-primary)",
               borderRadius: "var(--radius-m)",
             }}
           >
@@ -102,6 +115,22 @@ const RoleCard = ({
             />
           </Box>
         </Box>
+
+        {isPendingEnrollment && (
+          <Chip
+            label="Pendiente de enrolar"
+            size="small"
+            sx={{
+              mb: 1.5,
+              fontWeight: 600,
+              fontSize: "var(--font-size-xs)",
+              height: 24,
+              backgroundColor: "var(--color-bg-warning-secondary)",
+              color: "var(--color-fg-warning-primary)",
+              borderRadius: "var(--radius-m)",
+            }}
+          />
+        )}
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>

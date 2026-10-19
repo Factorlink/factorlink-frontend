@@ -19,10 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import SyncIcon from "@mui/icons-material/Sync";
 import { useEmpresa } from "../../hooks/useEmpresa";
 import { StyledTextField } from "../../pages/register/styles";
-import {
-  rutValidation,
-  handleRutInputChange,
-} from "../../utils/validations/shared-fields";
+import { rutValidation } from "../../utils/validations/shared-fields";
 import useAuthStore from "../../store/authStore";
 import type { Role } from "../../types/role";
 import { normalizeEmpresaSiiPersonal } from "../../types/empresa";
@@ -37,6 +34,16 @@ interface SiiPersonalSyncModalProps {
   onClose: () => void;
   isUpdate?: boolean;
 }
+
+const readOnlyFieldSx = {
+  "& .MuiInputBase-input": {
+    color: "text.secondary",
+    cursor: "default",
+  },
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "action.hover",
+  },
+} as const;
 
 const siiPersonalSyncSchema = yup.object({
   siiRutPersonal: rutValidation,
@@ -57,8 +64,14 @@ const SiiPersonalSyncModal = ({
   const [alertMessage, setAlertMessage] = useState("");
   const [showPasswordSii, setShowPasswordSii] = useState(false);
 
-  const { currentRole } = useAuthStore();
+  const { user, currentRole } = useAuthStore();
   const { syncPersonalDataSii, loading } = useEmpresa();
+
+  const personalRut =
+    currentRole?.empresa?.siiPersonal?.siiRutPersonal ||
+    currentRole?.empresa?.siiRutPersonal ||
+    user?.rut ||
+    "";
 
   const handleSubmit = async (values: SiiPersonalSyncFormData) => {
     try {
@@ -76,7 +89,7 @@ const SiiPersonalSyncModal = ({
       setAlertStatus("success");
       setAlertMessage(
         isUpdate
-          ? "Las credenciales personales del SII han sido actualizadas correctamente."
+          ? "La contraseña de tu cuenta personal del SII ha sido actualizada correctamente."
           : "Tu cuenta personal del SII ha sido vinculada correctamente.",
       );
       formik.resetForm();
@@ -102,16 +115,13 @@ const SiiPersonalSyncModal = ({
 
   const formik = useFormik<SiiPersonalSyncFormData>({
     initialValues: {
-      siiRutPersonal: "",
+      siiRutPersonal: personalRut,
       siiPasswordPersonal: "",
     },
+    enableReinitialize: true,
     validationSchema: siiPersonalSyncSchema,
     onSubmit: handleSubmit,
   });
-
-  const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleRutInputChange(e, formik.setFieldValue);
-  };
 
   return (
     <Dialog
@@ -152,7 +162,7 @@ const SiiPersonalSyncModal = ({
           </Box>
           <Typography variant="h6" fontWeight={600}>
             {isUpdate
-              ? "Actualizar cuenta personal SII"
+              ? "Cambiar contraseña SII personal"
               : "Vincular cuenta personal SII"}
           </Typography>
         </Box>
@@ -170,8 +180,8 @@ const SiiPersonalSyncModal = ({
 
         <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
           {isUpdate
-            ? "Actualiza las credenciales de tu cuenta personal del SII."
-            : "Ingresa las credenciales de tu cuenta personal del SII para habilitar las funcionalidades avanzadas."}
+            ? "Ingresa la nueva contraseña de tu cuenta personal del SII."
+            : "Confirma tu RUT personal e ingresa la contraseña del SII para habilitar las funcionalidades avanzadas."}
         </Typography>
 
         {alertStatus !== "success" && (
@@ -179,19 +189,10 @@ const SiiPersonalSyncModal = ({
             <StyledTextField
               fullWidth
               label="RUT Personal"
-              placeholder="12.345.678-9"
               name="siiRutPersonal"
               value={formik.values.siiRutPersonal}
-              error={
-                formik.touched.siiRutPersonal &&
-                Boolean(formik.errors.siiRutPersonal)
-              }
-              helperText={
-                formik.touched.siiRutPersonal && formik.errors.siiRutPersonal
-              }
-              onChange={handleRutChange}
-              onBlur={formik.handleBlur}
-              disabled={loading}
+              InputProps={{ readOnly: true }}
+              sx={readOnlyFieldSx}
             />
 
             <StyledTextField
@@ -258,7 +259,7 @@ const SiiPersonalSyncModal = ({
               {loading ? (
                 <CircularProgress size={24} sx={{ color: "white" }} />
               ) : isUpdate ? (
-                "Actualizar"
+                "Cambiar contraseña"
               ) : (
                 "Vincular"
               )}
