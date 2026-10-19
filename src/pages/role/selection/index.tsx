@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 import useAuthStore from "../../../store/authStore";
 import type { Role } from "../../../types/role";
 import Layout from "../../../components/Layout";
 import RoleCard from "./components/role-card";
+import DemoCard from "./components/demo-card";
+import DemoVideoModal from "../../../components/Modals/DemoVideoModal";
 
 const isPendingEmpresaEnrollment = (role: Role) =>
   role.contexto === "empresa" &&
@@ -12,6 +15,7 @@ const isPendingEmpresaEnrollment = (role: Role) =>
 const RoleSelection = () => {
   const navigate = useNavigate();
   const { user, currentRole, setCurrentRole } = useAuthStore();
+  const [demoOpen, setDemoOpen] = useState(false);
 
   const handleSelectRole = (role: Role) => {
     setCurrentRole(role);
@@ -21,7 +25,11 @@ const RoleSelection = () => {
     navigate("/dashboard");
   };
 
-  const rolesList: Role[] = user?.roles || [];
+  const rolesList: Role[] = (user?.roles || []).filter(
+    (role) =>
+      role.contexto !== "empresa" ||
+      (role.empresaId != null && role.empresaId !== ""),
+  );
 
   return (
     <Layout hideSuite hideMenu hideNotifications>
@@ -69,57 +77,77 @@ const RoleSelection = () => {
 
           <Box
             sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 3,
-              justifyContent: "center",
-              maxWidth: 1200,
+              width: "100%",
+              maxWidth: "100%",
+              overflowX: "auto",
+              overflowY: "hidden",
+              pb: 1,
+              // Soft edges on horizontal scroll
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "thin",
             }}
           >
-            {rolesList.map((role) => {
-              const pending = isPendingEmpresaEnrollment(role);
-              const roleId =
-                role.contexto === "empresa"
-                  ? role.empresaId ||
-                    role.empresa?.rut ||
-                    `empresa-${role.role}`
-                  : role.factoringId;
-              const currentRoleId =
-                currentRole?.contexto === "empresa"
-                  ? currentRole?.empresaId ||
-                    currentRole?.empresa?.rut ||
-                    (currentRole ? `empresa-${currentRole.role}` : undefined)
-                  : currentRole?.factoringId;
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "nowrap",
+                gap: 3,
+                width: "max-content",
+                minWidth: "100%",
+                justifyContent: "center",
+                px: { xs: 1, sm: 2 },
+                boxSizing: "border-box",
+              }}
+            >
+              {rolesList.map((role) => {
+                const pending = isPendingEmpresaEnrollment(role);
+                const roleId =
+                  role.contexto === "empresa"
+                    ? role.empresaId ||
+                      role.empresa?.rut ||
+                      `empresa-${role.role}`
+                    : role.factoringId;
+                const currentRoleId =
+                  currentRole?.contexto === "empresa"
+                    ? currentRole?.empresaId ||
+                      currentRole?.empresa?.rut ||
+                      (currentRole ? `empresa-${currentRole.role}` : undefined)
+                    : currentRole?.factoringId;
 
-              return (
-                <RoleCard
-                  key={roleId}
-                  roleId={roleId}
-                  currentRoleId={currentRoleId}
-                  handleSelectRole={() => handleSelectRole(role)}
-                  razonSocial={
-                    role.contexto === "empresa"
-                      ? role.empresa?.razonSocial
-                      : role.factoring?.razonSocial
-                  }
-                  roleName={role.role}
-                  email={
-                    role.contexto === "empresa"
-                      ? role.empresa?.email
-                      : role.factoring?.email
-                  }
-                  rut={
-                    role.contexto === "empresa"
-                      ? role.empresa?.rut
-                      : role.factoring?.rut
-                  }
-                  isPendingEnrollment={pending}
-                />
-              );
-            })}
+                return (
+                  <RoleCard
+                    key={roleId}
+                    roleId={roleId}
+                    currentRoleId={currentRoleId}
+                    handleSelectRole={() => handleSelectRole(role)}
+                    razonSocial={
+                      role.contexto === "empresa"
+                        ? role.empresa?.razonSocial
+                        : role.factoring?.razonSocial
+                    }
+                    roleName={role.role}
+                    email={
+                      role.contexto === "empresa"
+                        ? role.empresa?.email
+                        : role.factoring?.email
+                    }
+                    rut={
+                      role.contexto === "empresa"
+                        ? role.empresa?.rut
+                        : role.factoring?.rut
+                    }
+                    isPendingEnrollment={pending}
+                  />
+                );
+              })}
+
+              <DemoCard onClick={() => setDemoOpen(true)} />
+            </Box>
           </Box>
         </Box>
       </Box>
+
+      <DemoVideoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
     </Layout>
   );
 };

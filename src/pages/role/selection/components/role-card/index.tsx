@@ -1,6 +1,10 @@
 import { Card, CardActionArea, Box, Avatar, Chip, Typography } from "@mui/material";
 import { Business, Badge, Email } from "@mui/icons-material";
 import { ROLES, ROLE_NAMES } from "../../../../../utils/consts";
+import {
+  ROLE_SELECTION_CARD_HEIGHT,
+  ROLE_SELECTION_CARD_WIDTH,
+} from "../cardSizes";
 
 /** Role chip colors — semantic tokens (accent / success / neutral). */
 const roleColors: Record<string, string> = {
@@ -46,8 +50,12 @@ const RoleCard = ({
   return (
     <Card
       sx={{
-        width: "100%",
-        maxWidth: 280,
+        width: ROLE_SELECTION_CARD_WIDTH,
+        minWidth: ROLE_SELECTION_CARD_WIDTH,
+        height: ROLE_SELECTION_CARD_HEIGHT,
+        flexShrink: 0,
+        display: "flex",
+        flexDirection: "column",
         borderRadius: "var(--radius-l)",
         backgroundColor: "var(--color-bg-default-primary)",
         boxShadow: "var(--shadow-card)",
@@ -63,19 +71,29 @@ const RoleCard = ({
         },
       }}
     >
-      <CardActionArea onClick={handleSelectRole} sx={{ p: 3 }}>
+      <CardActionArea
+        onClick={handleSelectRole}
+        sx={{
+          p: 2,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "stretch",
+          boxSizing: "border-box",
+        }}
+      >
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 2,
-            mb: 2,
+            gap: 1.5,
+            mb: 1,
           }}
         >
           <Avatar
             sx={{
-              width: 48,
-              height: 48,
+              width: 40,
+              height: 40,
               backgroundColor: isPendingEnrollment
                 ? "var(--color-bg-warning-secondary)"
                 : "var(--color-bg-accent-secondary)",
@@ -116,23 +134,31 @@ const RoleCard = ({
           </Box>
         </Box>
 
-        {isPendingEnrollment && (
-          <Chip
-            label="Pendiente de enrolar"
-            size="small"
-            sx={{
-              mb: 1.5,
-              fontWeight: 600,
-              fontSize: "var(--font-size-xs)",
-              height: 24,
-              backgroundColor: "var(--color-bg-warning-secondary)",
-              color: "var(--color-fg-warning-primary)",
-              borderRadius: "var(--radius-m)",
-            }}
-          />
-        )}
+        <Box sx={{ minHeight: 22, mb: 1 }}>
+          {isPendingEnrollment ? (
+            <Chip
+              label="Pendiente de enrolar"
+              size="small"
+              sx={{
+                fontWeight: 600,
+                fontSize: "var(--font-size-xs)",
+                height: 22,
+                backgroundColor: "var(--color-bg-warning-secondary)",
+                color: "var(--color-fg-warning-primary)",
+                borderRadius: "var(--radius-m)",
+              }}
+            />
+          ) : null}
+        </Box>
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            mt: "auto",
+          }}
+        >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Badge
               sx={{
