@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogTitle,
@@ -20,8 +21,10 @@ import {
   isInformed,
   type OptionalValue,
 } from "../../utils/ofertaFormatters";
+import { isLegalDocumentsCessionError } from "../../utils/legalDocumentsCession";
 import CederFacturaProgressModal from "./CederFacturaProgressModal";
 import FacturaCedidaModal from "./FacturaCedidaModal";
+import LegalDocumentsCessionBlockedModal from "./LegalDocumentsCessionBlockedModal";
 
 interface AceptarOfertaModalProps {
   open: boolean;
@@ -38,7 +41,7 @@ interface AceptarOfertaModalProps {
   };
 }
 
-type AcceptPhase = "confirm" | "loading" | "error" | "success";
+type AcceptPhase = "confirm" | "loading" | "error" | "docsBlocked" | "success";
 
 const buildResumenLine = (ofertaData: AceptarOfertaModalProps["ofertaData"]) => {
   const parts = [
@@ -75,6 +78,7 @@ const AceptarOfertaModal = ({
   const [siiPasswordCertificadoPersonal, setSiiPasswordCertificadoPersonal] =
     useState("");
   const { responderOferta } = useOfertas();
+  const navigate = useNavigate();
 
   const resetForm = () => {
     setPhase("confirm");
@@ -91,6 +95,10 @@ const AceptarOfertaModal = ({
       });
       setPhase("success");
     } catch (error: unknown) {
+      if (isLegalDocumentsCessionError(error)) {
+        setPhase("docsBlocked");
+        return;
+      }
       const axiosError = error as {
         response?: { data?: { message?: string } };
       };
@@ -116,6 +124,17 @@ const AceptarOfertaModal = ({
     resetForm();
     onSuccess?.();
     onClose();
+  };
+
+  const handleDocsBlockedUnderstood = () => {
+    resetForm();
+    onClose();
+  };
+
+  const handleViewLegalDocuments = () => {
+    resetForm();
+    onClose();
+    navigate("/edit/documentos-legales");
   };
 
   const canSubmit = isValidCertPassword(siiPasswordCertificadoPersonal);
@@ -300,6 +319,12 @@ const AceptarOfertaModal = ({
         montoAFinanciar={ofertaData.montoAFinanciar}
         tasa30Dias={ofertaData.tasa30Dias}
         onClose={handleSuccessClose}
+      />
+
+      <LegalDocumentsCessionBlockedModal
+        open={open && phase === "docsBlocked"}
+        onUnderstood={handleDocsBlockedUnderstood}
+        onViewDocuments={handleViewLegalDocuments}
       />
     </>
   );
