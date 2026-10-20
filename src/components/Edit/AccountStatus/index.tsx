@@ -41,7 +41,7 @@ const AccountStatus = ({ isActive }: AccountStatusProps) => {
 
           <Typography variant="body2" sx={{ color: "text.secondary" }}>
             {isActive
-              ? "Tu cuenta está activa y puedes acceder a todas las funcionalidades disponibles según tu nivel de verificación."
+              ? "Tu cuenta está activa y puedes acceder a las funcionalidades disponibles según tus permisos."
               : "Tu cuenta está actualmente inactiva. Algunas funcionalidades pueden estar restringidas."}
           </Typography>
 

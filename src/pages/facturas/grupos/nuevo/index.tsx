@@ -59,6 +59,7 @@ import useAuthStore from "../../../../store/authStore";
 import type { Factura, FacturaGrupoVisibilidad } from "../../../../types/factura";
 import type { Factoring } from "../../../../types/factoring";
 import { hasFacturaPdf } from "../../../../utils/facturaDocuments";
+import { hasPendingLegalDocuments } from "../../../../utils/facturaGrupo";
 import { MAX_DIAS_FINANCIAMIENTO } from "../../../../utils/consts";
 import {
   appContentSx,
@@ -1207,9 +1208,7 @@ const NuevoGrupoCotizacion = () => {
         <GrupoEnviadoCotizarModal
           open={submitPhase === "success"}
           summary={successSummary}
-          showLegalDocumentsWarning={
-            currentRole?.nivel == null || currentRole.nivel < 3
-          }
+          showLegalDocumentsWarning={hasPendingLegalDocuments(currentRole)}
           onGoToFacturas={handleGoToFacturas}
           onVerGrupo={handleVerGrupo}
         />

@@ -1,5 +1,10 @@
 import type { Factura, FacturaGrupo } from "../types/factura";
 
+/** Legal docs are treated as pending until the empresa role reaches nivel 3. */
+export const hasPendingLegalDocuments = (
+  role?: { nivel?: number } | null,
+) => role?.nivel == null || role.nivel < 3;
+
 const toMonto = (value: string | number | null | undefined) => {
   const n = typeof value === "string" ? parseFloat(value) : Number(value);
   return Number.isFinite(n) ? n : 0;

@@ -43,7 +43,6 @@ import {
 } from "@mui/icons-material";
 import Layout from "../../../../components/Layout";
 import SectionPanel from "../../../../components/SectionPanel";
-import DocumentsRequiredModal from "../../../../components/Modals/DocumentsRequiredModal";
 import FacturaDetalleDrawer from "../../../../components/Facturas/FacturaDetalleDrawer";
 import { formatCurrency } from "../../../../components/Facturas/FacturaResumenCard";
 import { useFacturas } from "../../../../hooks/useFacturas";
@@ -176,8 +175,6 @@ const EditarGrupoCotizacion = () => {
   const [maxSnackbarOpen, setMaxSnackbarOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [documentsRequiredModalOpen, setDocumentsRequiredModalOpen] =
-    useState(false);
   const [detalleFacturaId, setDetalleFacturaId] = useState<string | null>(null);
   const [detalleOpen, setDetalleOpen] = useState(false);
 
@@ -497,10 +494,6 @@ const EditarGrupoCotizacion = () => {
   };
 
   const handleGuardar = async () => {
-    if (!currentRole || currentRole.nivel < 3) {
-      setDocumentsRequiredModalOpen(true);
-      return;
-    }
     if (!grupoId || saving) return;
 
     const validationError = getValidationError();
@@ -1319,11 +1312,6 @@ const EditarGrupoCotizacion = () => {
         onClose={() => setMaxSnackbarOpen(false)}
         message="Máximo 5 facturas por grupo"
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      />
-
-      <DocumentsRequiredModal
-        open={documentsRequiredModalOpen}
-        onClose={() => setDocumentsRequiredModalOpen(false)}
       />
 
       <FacturaDetalleDrawer

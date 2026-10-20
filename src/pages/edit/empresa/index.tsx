@@ -37,7 +37,7 @@ const EmpresaTab = () => {
           readOnly={true}
         />
       )}
-      {currentRole?.nivel && currentRole?.nivel !== 1 && (
+      {isEmpresaActiva && (
         <Box id="sii-personal-sync-card">
           <SiiPersonalSync
             isLinked={isPersonalLinked}

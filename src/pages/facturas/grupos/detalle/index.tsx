@@ -51,6 +51,7 @@ import { getFacturaStatusConfig } from "../../../../theme";
 import {
   getFacturaGrupoMontoFinanciar,
   getFacturaGrupoMontoTotal,
+  hasPendingLegalDocuments,
   parseFacturaGrupoEmpresaTab,
 } from "../../../../utils/facturaGrupo";
 import {
@@ -1074,9 +1075,7 @@ const FacturaGrupoDetalle = () => {
         <GrupoEnviadoCotizarModal
           open={successOpen}
           summary={successSummary}
-          showLegalDocumentsWarning={
-            currentRole?.nivel == null || currentRole.nivel < 3
-          }
+          showLegalDocumentsWarning={hasPendingLegalDocuments(currentRole)}
           onGoToFacturas={() => {
             setSuccessOpen(false);
             navigate("/facturas");

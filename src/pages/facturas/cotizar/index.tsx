@@ -51,6 +51,7 @@ import {
 import useAuthStore from "../../../store/authStore";
 import { isSiiPersonalLinked } from "../../../types/empresa";
 import { MAX_DIAS_FINANCIAMIENTO } from "../../../utils/consts";
+import { hasPendingLegalDocuments } from "../../../utils/facturaGrupo";
 
 const truncateToTwo = (num: number): number => {
   return Math.round(num * 100) / 100;
@@ -870,9 +871,7 @@ const CotizarFactura = () => {
           folio={factura?.folio ?? ""}
           montoTotal={factura?.montoTotal ?? "0"}
           visibilidad={visibilidad}
-          showLegalDocumentsWarning={
-            currentRole?.nivel == null || currentRole.nivel < 3
-          }
+          showLegalDocumentsWarning={hasPendingLegalDocuments(currentRole)}
           onGoToFacturas={handleGoToFacturas}
         />
 

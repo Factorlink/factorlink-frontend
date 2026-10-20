@@ -232,8 +232,11 @@ const DocumentsTable = () => {
   };
 
   const canOperate = () => {
-      return (Number(currentRole?.nivel) || 0) >= 2 ||  currentRole?.factoring?.estadoEnrolamiento;
+    if (currentRole?.contexto === "empresa") {
+      return currentRole.empresa?.estadoEnrolamiento === "ACTIVO";
     }
+    return Boolean(currentRole?.factoring?.estadoEnrolamiento);
+  };
 
   useEffect(() => {
     fetchDocuments();
