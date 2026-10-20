@@ -52,7 +52,8 @@ const RoleCard = ({
       sx={{
         width: ROLE_SELECTION_CARD_WIDTH,
         minWidth: ROLE_SELECTION_CARD_WIDTH,
-        height: ROLE_SELECTION_CARD_HEIGHT,
+        height: isPendingEnrollment ? "auto" : ROLE_SELECTION_CARD_HEIGHT,
+        minHeight: ROLE_SELECTION_CARD_HEIGHT,
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
@@ -74,7 +75,7 @@ const RoleCard = ({
       <CardActionArea
         onClick={handleSelectRole}
         sx={{
-          p: 2,
+          p: 1.5,
           height: "100%",
           display: "flex",
           flexDirection: "column",
@@ -134,29 +135,28 @@ const RoleCard = ({
           </Box>
         </Box>
 
-        <Box sx={{ minHeight: 22, mb: 1 }}>
-          {isPendingEnrollment ? (
-            <Chip
-              label="Pendiente de enrolar"
-              size="small"
-              sx={{
-                fontWeight: 600,
-                fontSize: "var(--font-size-xs)",
-                height: 22,
-                backgroundColor: "var(--color-bg-warning-secondary)",
-                color: "var(--color-fg-warning-primary)",
-                borderRadius: "var(--radius-m)",
-              }}
-            />
-          ) : null}
-        </Box>
+        {isPendingEnrollment ? (
+          <Chip
+            label="Pendiente de enrolar"
+            size="small"
+            sx={{
+              fontWeight: 600,
+              fontSize: "var(--font-size-xs)",
+              height: 22,
+              mb: 0.5,
+              alignSelf: "flex-start",
+              backgroundColor: "var(--color-bg-warning-secondary)",
+              color: "var(--color-fg-warning-primary)",
+              borderRadius: "var(--radius-m)",
+            }}
+          />
+        ) : null}
 
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 1,
-            mt: "auto",
+            gap: 0.5,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>

@@ -34,7 +34,7 @@ const DemoCard = ({ onClick }: DemoCardProps) => {
       <CardActionArea
         onClick={onClick}
         sx={{
-          p: 2,
+          p: 1.5,
           height: "100%",
           display: "flex",
           flexDirection: "column",
@@ -87,11 +87,8 @@ const DemoCard = ({ onClick }: DemoCardProps) => {
           </Box>
         </Box>
 
-        <Box sx={{ minHeight: 22, mb: 1 }} />
-
         <Typography
           sx={{
-            mt: "auto",
             color: "var(--color-fg-default-secondary)",
             fontSize: "var(--font-size-s)",
           }}

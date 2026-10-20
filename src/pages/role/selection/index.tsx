@@ -95,7 +95,7 @@ const RoleSelection = () => {
                 width: "max-content",
                 minWidth: "100%",
                 justifyContent: "center",
-                px: { xs: 1, sm: 2 },
+                p: "20px",
                 boxSizing: "border-box",
               }}
             >
