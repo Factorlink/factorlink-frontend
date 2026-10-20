@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../lib/axios";
-import type { Empresa } from "../types/empresa";
+import type { Empresa, EmpresaSocio } from "../types/empresa";
 import type { SiiEmpresa } from "../types/sii";
 
 interface RequestSyncSii {
@@ -101,6 +101,18 @@ export const useEmpresa = () => {
     }
   };
 
+  const getEmpresaSocios = async (empresaId: string): Promise<EmpresaSocio[]> => {
+    try {
+      setLoading(true);
+      const response = await api.get(`empresas/${empresaId}/socios`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const unsyncPersonalDataSii = async (empresaId: string) => {
     try {
       setLoading(true);
@@ -125,5 +137,6 @@ export const useEmpresa = () => {
     createEmpresaBySii,
     syncPersonalDataSii,
     unsyncPersonalDataSii,
+    getEmpresaSocios,
   };
 };

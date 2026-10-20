@@ -11,6 +11,19 @@ export interface SiiPersonal {
   createdAt?: string;
 }
 
+export type EmpresaSocioTipo = "SOCIO" | "CONTRIBUYENTE" | string;
+
+export interface EmpresaSocio {
+  id: string;
+  empresaId: string;
+  rutSocio: string;
+  nombreSocio: string;
+  tipo: EmpresaSocioTipo;
+  exist_users: boolean;
+  email?: string | null;
+  message?: string | null;
+}
+
 export interface Empresa {
   createdAt?: string;
   direccion?: string;

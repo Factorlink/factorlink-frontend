@@ -3,6 +3,7 @@ import { Box } from "@mui/material";
 import SiiSync from "../../../components/Edit/SiiSync";
 import SiiPersonalSync from "../../../components/Edit/SiiPersonalSync";
 import Empresa from "../../../components/Edit/Empresa";
+import EmpresaSocios from "../../../components/Edit/EmpresaSocios";
 import SiiSyncModal from "../../../components/Modals/SiiSyncModal";
 import SiiPersonalSyncModal from "../../../components/Modals/SiiPersonalSyncModal";
 import useAuthStore from "../../../store/authStore";
@@ -37,6 +38,7 @@ const EmpresaTab = () => {
           readOnly={true}
         />
       )}
+      {isEmpresaActiva && <EmpresaSocios />}
       {isEmpresaActiva && (
         <Box id="sii-personal-sync-card">
           <SiiPersonalSync
