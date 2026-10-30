@@ -11,41 +11,37 @@ const Edit = () => {
   const location = useLocation();
   const { currentRole } = useAuthStore();
 
-  const buildTabs = () => {
-    const empresaRoles = [ROLES.EMPRESA_ADMIN, ROLES.EMPRESA_USUARIO];
-    const factoringRoles = [ROLES.FACTORING_ADMIN, ROLES.FACTORING_ANALISTA];
-    const adminRoles = [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN];
+  const role = currentRole?.role || "";
+  const empresaRoles = [ROLES.EMPRESA_ADMIN, ROLES.EMPRESA_USUARIO];
+  const factoringRoles = [ROLES.FACTORING_ADMIN, ROLES.FACTORING_ANALISTA];
+  const adminRoles = [ROLES.EMPRESA_ADMIN, ROLES.FACTORING_ADMIN];
 
-    const tabs: Array<{ label: string; path: string }> = [
-      { label: "Usuario", path: "/edit/usuario" },
-    ];
+  const tabs: Array<{ label: string; path: string }> = [
+    { label: "Usuario", path: "/edit/usuario" },
+  ];
 
-    if (empresaRoles.includes(currentRole?.role || "")) {
-      tabs.push({ label: "Empresa", path: "/edit/empresa" });
-    }
+  if (empresaRoles.includes(role)) {
+    tabs.push({ label: "Empresa", path: "/edit/empresa" });
+  }
 
-    if (factoringRoles.includes(currentRole?.role || "")) {
-      tabs.push({ label: "Factoring", path: "/edit/factoring" });
-    }
+  if (factoringRoles.includes(role)) {
+    tabs.push({ label: "Factoring", path: "/edit/factoring" });
+  }
 
-    if (adminRoles.includes(currentRole?.role || "") && currentRole?.isMaster) {
-      tabs.push({ label: "Gestión Usuarios", path: "/edit/usuarios" });
-      tabs.push({ label: "Documentos Legales", path: "/edit/documentos-legales" });
-    }
+  if (role === ROLES.FACTORING_ADMIN && currentRole?.isMaster) {
+    tabs.push({ label: "Gestión Usuarios", path: "/edit/usuarios" });
+  }
 
-    return tabs;
-  };
+  if (adminRoles.includes(role) && currentRole?.isMaster) {
+    tabs.push({ label: "Documentos Legales", path: "/edit/documentos-legales" });
+  }
 
   const getTabValue = () => {
-    const tabs = buildTabs();
-    const index = tabs.findIndex((t) =>
-      location.pathname === t.path,
-    );
+    const index = tabs.findIndex((t) => location.pathname === t.path);
     return index >= 0 ? index : 0;
   };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    const tabs = buildTabs();
     const target = tabs[newValue];
     if (target) navigate(target.path);
   };
@@ -53,8 +49,13 @@ const Edit = () => {
   useEffect(() => {
     if (location.pathname === "/edit") {
       navigate("/edit/usuario", { replace: true });
+      return;
     }
-  }, [location.pathname, navigate]);
+    const allowed = tabs.some((t) => location.pathname === t.path);
+    if (!allowed) {
+      navigate("/edit/usuario", { replace: true });
+    }
+  }, [location.pathname, navigate, role, currentRole?.isMaster]);
 
   return (
     <Layout>
@@ -67,7 +68,7 @@ const Edit = () => {
             scrollButtons="auto"
             allowScrollButtonsMobile
           >
-            {buildTabs().map((t) => (
+            {tabs.map((t) => (
               <Tab key={t.path} label={t.label} />
             ))}
           </Tabs>

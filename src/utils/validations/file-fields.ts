@@ -16,6 +16,39 @@ export const ALLOWED_MIME_TYPES = [
 // Extensiones permitidas
 export const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
 
+/** Backend limit for legal-document display names, including extension. */
+export const MAX_NOMBRE_ARCHIVO = 30;
+
+export const splitFileName = (
+  fileName: string,
+): { stem: string; extension: string } => {
+  const trimmed = fileName.trim();
+  const lastDot = trimmed.lastIndexOf('.');
+  if (lastDot < 0 || lastDot === trimmed.length - 1) {
+    return { stem: trimmed, extension: '' };
+  }
+  const extension = trimmed.slice(lastDot);
+  if (!ALLOWED_EXTENSIONS.includes(extension.toLowerCase())) {
+    return { stem: trimmed, extension: '' };
+  }
+  return { stem: trimmed.slice(0, lastDot), extension };
+};
+
+/** Truncate the stem so stem + extension fits in maxLength. */
+export const truncateFileNameKeepExtension = (
+  fileName: string,
+  maxLength = MAX_NOMBRE_ARCHIVO,
+): string => {
+  const trimmed = fileName.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+
+  const { stem, extension } = splitFileName(trimmed);
+  if (!extension || extension.length >= maxLength) {
+    return trimmed.slice(0, maxLength);
+  }
+  return `${stem.slice(0, maxLength - extension.length)}${extension}`;
+};
+
 // Validar tamaño de archivo
 export const validateFileSize = (file: File): { valid: boolean; error?: string } => {
   if (file.size > MAX_FILE_SIZE) {

@@ -225,8 +225,22 @@ const Stage3CompleteAccount = ({
     handlePasswordInputChange(e, formik.setFieldValue);
   };
 
+  const passwordOk =
+    formik.values.passwordMode === "sii" ||
+    (!formik.errors.password &&
+      !formik.errors.confirmPassword &&
+      Boolean(formik.values.password) &&
+      Boolean(formik.values.confirmPassword));
+
   const canSubmit =
-    formik.isValid && formik.values.termsAccepted && !loading;
+    !formik.errors.email &&
+    !formik.errors.phone &&
+    Boolean(formik.values.email) &&
+    Boolean(formik.values.phone) &&
+    formik.values.termsAccepted &&
+    !formik.errors.termsAccepted &&
+    passwordOk &&
+    !loading;
 
   return (
     <Box sx={authCenteredPageTopSx}>
@@ -425,11 +439,19 @@ const Stage3CompleteAccount = ({
               value={formik.values.passwordMode}
               onChange={(e) => {
                 const mode = e.target.value as PasswordMode;
-                void formik.setFieldValue("passwordMode", mode);
+                const next: Stage3FormValues = {
+                  ...formik.values,
+                  passwordMode: mode,
+                  password: mode === "sii" ? "" : formik.values.password,
+                  confirmPassword:
+                    mode === "sii" ? "" : formik.values.confirmPassword,
+                };
+                void formik.setValues(next);
                 if (mode === "sii") {
-                  void formik.setFieldValue("password", "");
-                  void formik.setFieldValue("confirmPassword", "");
+                  void formik.setFieldTouched("password", false, false);
+                  void formik.setFieldTouched("confirmPassword", false, false);
                 }
+                void formik.validateForm(next);
               }}
             >
               <FormControlLabel

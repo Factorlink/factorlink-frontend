@@ -138,6 +138,7 @@ const Stage1SiiCredentials = ({
             placeholder="Ej: 12.345.678-9"
             id="siiRut"
             name="siiRut"
+            inputProps={{ maxLength: 20 }}
             value={formik.values.siiRut}
             error={formik.touched.siiRut && Boolean(formik.errors.siiRut)}
             helperText={formik.touched.siiRut && formik.errors.siiRut}

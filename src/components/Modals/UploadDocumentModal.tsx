@@ -31,6 +31,9 @@ import {
   validateFileExtension,
   formatFileSize,
   MAX_FILE_SIZE,
+  MAX_NOMBRE_ARCHIVO,
+  splitFileName,
+  truncateFileNameKeepExtension,
 } from "../../utils/validations/file-fields";
 
 interface UploadDocumentModalProps {
@@ -68,6 +71,15 @@ const UploadDocumentModal = ({
       then: (schema) =>
         schema
           .required("El nombre del documento es requerido")
+          .max(
+            MAX_NOMBRE_ARCHIVO,
+            `El nombre no puede exceder ${MAX_NOMBRE_ARCHIVO} caracteres`,
+          )
+          .test(
+            "non-empty-stem",
+            "El nombre del documento es requerido",
+            (value) => Boolean(value && splitFileName(value).stem.trim()),
+          )
           .test(
             "valid-extension",
             "Extensión no permitida",
@@ -104,7 +116,11 @@ const UploadDocumentModal = ({
     reader.onload = () => {
       const base64String = reader.result as string;
       formik.setFieldValue("archivoBase64", base64String, true);
-      formik.setFieldValue("nombreArchivo", file.name.slice(0, 30), true);
+      formik.setFieldValue(
+        "nombreArchivo",
+        truncateFileNameKeepExtension(file.name),
+        true,
+      );
     };
     reader.onerror = () => {
       setAlertStatus("error");
@@ -301,15 +317,16 @@ const UploadDocumentModal = ({
                 error={formik.touched.nombreArchivo && Boolean(formik.errors.nombreArchivo)}
                 helperText={
                   (formik.touched.nombreArchivo && formik.errors.nombreArchivo) ||
-                  `${formik.values.nombreArchivo.length}/30 caracteres`
+                  `${formik.values.nombreArchivo.length}/${MAX_NOMBRE_ARCHIVO} caracteres`
                 }
                 value={formik.values.nombreArchivo}
                 onChange={(e) => {
-                  if (e.target.value.length > 30) return;
-                  formik.handleChange(e);
+                  const nextName = truncateFileNameKeepExtension(e.target.value);
+                  void formik.setFieldValue("nombreArchivo", nextName, true);
                 }}
                 onBlur={formik.handleBlur}
                 disabled={loading}
+                inputProps={{ maxLength: MAX_NOMBRE_ARCHIVO }}
                 sx={{
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
