@@ -59,7 +59,6 @@ import useAuthStore from "../../../../store/authStore";
 import type { Factura, FacturaGrupoVisibilidad } from "../../../../types/factura";
 import type { Factoring } from "../../../../types/factoring";
 import { hasFacturaPdf } from "../../../../utils/facturaDocuments";
-import { hasPendingLegalDocuments } from "../../../../utils/facturaGrupo";
 import { MAX_DIAS_FINANCIAMIENTO } from "../../../../utils/consts";
 import {
   appContentSx,
@@ -153,6 +152,7 @@ const NuevoGrupoCotizacion = () => {
   const [createdGrupoId, setCreatedGrupoId] = useState<string | null>(null);
   const [successSummary, setSuccessSummary] =
     useState<GrupoEnviadoCotizarSummary | null>(null);
+  const [messageWarning, setMessageWarning] = useState<string | null>(null);
   const [detalleFacturaId, setDetalleFacturaId] = useState<string | null>(null);
   const [detalleOpen, setDetalleOpen] = useState(false);
 
@@ -451,7 +451,8 @@ const NuevoGrupoCotizacion = () => {
   const sendCreatedGrupo = async (grupoId: string) => {
     setSubmitPhase("sending");
     try {
-      await sendFacturaGrupoToMarketplace(grupoId);
+      const marketplaceResponse = await sendFacturaGrupoToMarketplace(grupoId);
+      setMessageWarning(marketplaceResponse?.message_warning || null);
       setSubmitPhase("success");
     } catch (err) {
       console.error("Error sending factura grupo to marketplace:", err);
@@ -1208,7 +1209,7 @@ const NuevoGrupoCotizacion = () => {
         <GrupoEnviadoCotizarModal
           open={submitPhase === "success"}
           summary={successSummary}
-          showLegalDocumentsWarning={hasPendingLegalDocuments(currentRole)}
+          messageWarning={messageWarning}
           onGoToFacturas={handleGoToFacturas}
           onVerGrupo={handleVerGrupo}
         />

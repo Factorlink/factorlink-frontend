@@ -1,6 +1,10 @@
 import { useState } from "react";
 import api from "../lib/axios";
-import type { Factura, FacturaArchivo } from "../types/factura";
+import type {
+  Factura,
+  FacturaArchivo,
+  SendToMarketplaceResponse,
+} from "../types/factura";
 
 export type GetFacturasParams = {
   page: number;
@@ -230,10 +234,16 @@ export const useFacturas = () => {
     }
   };
 
-  const sendToMarketplace = async (id: string, payload: SendToMarketplacePayload) => {
+  const sendToMarketplace = async (
+    id: string,
+    payload: SendToMarketplacePayload,
+  ): Promise<SendToMarketplaceResponse> => {
     try {
       setLoading(true);
-      const response = await api.post(`/facturas/${id}/send-to-marketplace`, payload);
+      const response = await api.post<SendToMarketplaceResponse>(
+        `/facturas/${id}/send-to-marketplace`,
+        payload,
+      );
       return response.data;
     } catch (error) {
       throw error;

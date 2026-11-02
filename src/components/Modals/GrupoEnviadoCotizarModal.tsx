@@ -35,7 +35,7 @@ export type GrupoEnviadoCotizarSummary = {
 interface GrupoEnviadoCotizarModalProps {
   open: boolean;
   summary: GrupoEnviadoCotizarSummary;
-  showLegalDocumentsWarning?: boolean;
+  messageWarning?: string | null;
   onGoToFacturas: () => void;
   onVerGrupo: () => void;
 }
@@ -79,7 +79,7 @@ const SummaryRow = ({
 const GrupoEnviadoCotizarModal = ({
   open,
   summary,
-  showLegalDocumentsWarning = false,
+  messageWarning,
   onGoToFacturas,
   onVerGrupo,
 }: GrupoEnviadoCotizarModalProps) => {
@@ -243,7 +243,9 @@ const GrupoEnviadoCotizarModal = ({
           grupo.
         </Alert>
 
-        {showLegalDocumentsWarning && <LegalDocumentsPendingWarning />}
+        {messageWarning ? (
+          <LegalDocumentsPendingWarning message={messageWarning} />
+        ) : null}
       </DialogContent>
 
       <DialogActions

@@ -1,8 +1,8 @@
 import { Alert, AlertTitle } from "@mui/material";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 
-/** Non-error warning shown after marketplace publish when legal docs are still pending. */
-const LegalDocumentsPendingWarning = () => (
+/** Non-error warning shown after marketplace publish when the API returns message_warning. */
+const LegalDocumentsPendingWarning = ({ message }: { message: string }) => (
   <Alert
     severity="warning"
     icon={<WarningAmberOutlinedIcon />}
@@ -13,8 +13,7 @@ const LegalDocumentsPendingWarning = () => (
     }}
   >
     <AlertTitle sx={{ fontWeight: 700 }}>Documentos legales pendientes</AlertTitle>
-    Recuerda que debes adjuntar los documentos legales de tu empresa y esperar su
-    aprobación para poder ceder facturas en Factorlink.
+    {message}
   </Alert>
 );
 

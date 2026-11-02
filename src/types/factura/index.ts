@@ -34,6 +34,10 @@ export type UpdateFacturaGrupoPayload = Omit<
     "empresaId"
 >;
 
+export type SendToMarketplaceResponse = {
+    message_warning?: string | null;
+};
+
 export interface FacturaGrupo {
     id: string;
     nombre?: string;

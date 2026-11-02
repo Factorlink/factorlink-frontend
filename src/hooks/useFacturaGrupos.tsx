@@ -5,6 +5,7 @@ import type {
   Factura,
   FacturaGrupo,
   FacturaGrupoVisibilidad,
+  SendToMarketplaceResponse,
   UpdateFacturaGrupoPayload,
 } from "../types/factura";
 
@@ -150,10 +151,12 @@ export const useFacturaGrupos = () => {
     }
   };
 
-  const sendFacturaGrupoToMarketplace = async (id: string) => {
+  const sendFacturaGrupoToMarketplace = async (
+    id: string,
+  ): Promise<SendToMarketplaceResponse> => {
     try {
       setLoading(true);
-      const response = await api.post(
+      const response = await api.post<SendToMarketplaceResponse>(
         `/factura-grupos/${id}/send-to-marketplace`,
       );
       return response.data;

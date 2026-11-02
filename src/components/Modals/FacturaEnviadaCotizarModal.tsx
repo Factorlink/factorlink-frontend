@@ -23,7 +23,7 @@ interface FacturaEnviadaCotizarModalProps {
   folio: string;
   montoTotal: string;
   visibilidad: "TODOS" | "SELECCIONADOS";
-  showLegalDocumentsWarning?: boolean;
+  messageWarning?: string | null;
   onGoToFacturas: () => void;
 }
 
@@ -91,7 +91,7 @@ const FacturaEnviadaCotizarModal = ({
   folio,
   montoTotal,
   visibilidad,
-  showLegalDocumentsWarning = false,
+  messageWarning,
   onGoToFacturas,
 }: FacturaEnviadaCotizarModalProps) => {
   return (
@@ -211,7 +211,9 @@ const FacturaEnviadaCotizarModal = ({
           />
         </Box>
 
-        {showLegalDocumentsWarning && <LegalDocumentsPendingWarning />}
+        {messageWarning ? (
+          <LegalDocumentsPendingWarning message={messageWarning} />
+        ) : null}
       </DialogContent>
 
       <DialogActions sx={{ px: 4, pb: 3, pt: 1 }}>

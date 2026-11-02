@@ -45,13 +45,11 @@ import GrupoEnviadoCotizarModal, {
 import type { FacturaDetalleTab } from "../../../../components/Facturas/FacturaDetalleTabs";
 import { formatCurrency } from "../../../../components/Facturas/FacturaResumenCard";
 import { useFacturaGrupos } from "../../../../hooks/useFacturaGrupos";
-import useAuthStore from "../../../../store/authStore";
 import type { Factura, FacturaGrupo } from "../../../../types/factura";
 import { getFacturaStatusConfig } from "../../../../theme";
 import {
   getFacturaGrupoMontoFinanciar,
   getFacturaGrupoMontoTotal,
-  hasPendingLegalDocuments,
   parseFacturaGrupoEmpresaTab,
 } from "../../../../utils/facturaGrupo";
 import {
@@ -95,7 +93,6 @@ const FacturaGrupoDetalle = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { currentRole } = useAuthStore();
   const {
     getFacturaGrupoById,
     getFacturaGrupoFacturas,
@@ -121,6 +118,7 @@ const FacturaGrupoDetalle = () => {
   const [successOpen, setSuccessOpen] = useState(false);
   const [successSummary, setSuccessSummary] =
     useState<GrupoEnviadoCotizarSummary | null>(null);
+  const [messageWarning, setMessageWarning] = useState<string | null>(null);
   const detalleFacturaId = searchParams.get("facturaId");
   const detalleOpen = Boolean(detalleFacturaId);
   const drawerTab =
@@ -301,7 +299,8 @@ const FacturaGrupoDetalle = () => {
     try {
       setSending(true);
       setSendError(null);
-      await sendFacturaGrupoToMarketplace(id);
+      const marketplaceResponse = await sendFacturaGrupoToMarketplace(id);
+      setMessageWarning(marketplaceResponse?.message_warning || null);
       setSendConfirmOpen(false);
       const total =
         facturas.length > 0
@@ -1075,7 +1074,7 @@ const FacturaGrupoDetalle = () => {
         <GrupoEnviadoCotizarModal
           open={successOpen}
           summary={successSummary}
-          showLegalDocumentsWarning={hasPendingLegalDocuments(currentRole)}
+          messageWarning={messageWarning}
           onGoToFacturas={() => {
             setSuccessOpen(false);
             navigate("/facturas");

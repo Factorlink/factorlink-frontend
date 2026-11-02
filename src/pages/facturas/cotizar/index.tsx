@@ -51,8 +51,6 @@ import {
 import useAuthStore from "../../../store/authStore";
 import { isSiiPersonalLinked } from "../../../types/empresa";
 import { MAX_DIAS_FINANCIAMIENTO } from "../../../utils/consts";
-import { hasPendingLegalDocuments } from "../../../utils/facturaGrupo";
-
 const truncateToTwo = (num: number): number => {
   return Math.round(num * 100) / 100;
 };
@@ -95,6 +93,7 @@ const CotizarFactura = () => {
   >("idle");
   const [needsPersonalSii, setNeedsPersonalSii] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
+  const [messageWarning, setMessageWarning] = useState<string | null>(null);
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -316,11 +315,12 @@ const CotizarFactura = () => {
         montoFinanciar: calculatedMontoFinanciar,
       });
 
-      await sendToMarketplace(id!, {
+      const marketplaceResponse = await sendToMarketplace(id!, {
         visibilidad,
         factoringIds: visibilidad === "TODOS" ? [] : selectedFactorings,
       });
 
+      setMessageWarning(marketplaceResponse?.message_warning || null);
       setSuccessOpen(true);
     } catch (err) {
       console.error("Error sending factura to marketplace:", err);
@@ -871,7 +871,7 @@ const CotizarFactura = () => {
           folio={factura?.folio ?? ""}
           montoTotal={factura?.montoTotal ?? "0"}
           visibilidad={visibilidad}
-          showLegalDocumentsWarning={hasPendingLegalDocuments(currentRole)}
+          messageWarning={messageWarning}
           onGoToFacturas={handleGoToFacturas}
         />
 
