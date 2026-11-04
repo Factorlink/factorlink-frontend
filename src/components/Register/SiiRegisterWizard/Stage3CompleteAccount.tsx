@@ -9,9 +9,6 @@ import {
   Checkbox,
   FormControlLabel,
   Link,
-  Radio,
-  RadioGroup,
-  FormControl,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -54,12 +51,9 @@ import {
   authTitleSx,
 } from "../../../theme";
 
-type PasswordMode = "sii" | "new";
-
 interface Stage3FormValues {
   email: string;
   phone: string;
-  passwordMode: PasswordMode;
   password: string;
   confirmPassword: string;
   termsAccepted: boolean;
@@ -67,7 +61,7 @@ interface Stage3FormValues {
 
 interface Stage3CompleteAccountProps {
   validatedData: ValidatedSiiData;
-  /** SII password kept in wizard memory only — used when passwordMode === "sii". */
+  /** SII password kept in wizard memory only — sent as password_sii_personal on register. */
   siiPassword: string;
   onRegistered: () => void;
 }
@@ -75,17 +69,8 @@ interface Stage3CompleteAccountProps {
 const stage3Schema = yup.object({
   email: emailValidation,
   phone: phoneValidation,
-  passwordMode: yup.mixed<PasswordMode>().oneOf(["sii", "new"]).required(),
-  password: yup.string().when("passwordMode", {
-    is: "new",
-    then: () => passwordValidation,
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  confirmPassword: yup.string().when("passwordMode", {
-    is: "new",
-    then: () => confirmPasswordValidation,
-    otherwise: (schema) => schema.notRequired(),
-  }),
+  password: passwordValidation,
+  confirmPassword: confirmPasswordValidation,
   termsAccepted: yup
     .boolean()
     .oneOf(
@@ -148,7 +133,6 @@ const Stage3CompleteAccount = ({
     initialValues: {
       email: validatedData.email ?? "",
       phone: "",
-      passwordMode: "sii",
       password: "",
       confirmPassword: "",
       termsAccepted: false,
@@ -157,17 +141,7 @@ const Stage3CompleteAccount = ({
     validateOnMount: true,
     validationSchema: stage3Schema,
     onSubmit: async (values) => {
-      const password =
-        values.passwordMode === "sii" ? siiPassword : values.password;
-
-      if (!password) {
-        setErrorMessage(
-          "No hay contraseña disponible. Vuelve a conectar con el SII.",
-        );
-        setModalStatus("error");
-        setModalOpen(true);
-        return;
-      }
+      const password = values.password;
 
       const payload: RegisterFormData = {
         firstName: validatedData.firstName,
@@ -226,11 +200,10 @@ const Stage3CompleteAccount = ({
   };
 
   const passwordOk =
-    formik.values.passwordMode === "sii" ||
-    (!formik.errors.password &&
-      !formik.errors.confirmPassword &&
-      Boolean(formik.values.password) &&
-      Boolean(formik.values.confirmPassword));
+    !formik.errors.password &&
+    !formik.errors.confirmPassword &&
+    Boolean(formik.values.password) &&
+    Boolean(formik.values.confirmPassword);
 
   const canSubmit =
     !formik.errors.email &&
@@ -428,162 +401,79 @@ const Stage3CompleteAccount = ({
                 lineHeight: 1.5,
               }}
             >
-              Puedes usar la misma contraseña de tu SII o crear una nueva
-              contraseña para acceder a tu cuenta en Factorlink.
+              Crea una contraseña para acceder a tu cuenta en Factorlink.
             </Typography>
           </Box>
 
-          <FormControl component="fieldset" sx={{ mb: 2 }}>
-            <RadioGroup
-              name="passwordMode"
-              value={formik.values.passwordMode}
-              onChange={(e) => {
-                const mode = e.target.value as PasswordMode;
-                const next: Stage3FormValues = {
-                  ...formik.values,
-                  passwordMode: mode,
-                  password: mode === "sii" ? "" : formik.values.password,
-                  confirmPassword:
-                    mode === "sii" ? "" : formik.values.confirmPassword,
-                };
-                void formik.setValues(next);
-                if (mode === "sii") {
-                  void formik.setFieldTouched("password", false, false);
-                  void formik.setFieldTouched("confirmPassword", false, false);
-                }
-                void formik.validateForm(next);
-              }}
-            >
-              <FormControlLabel
-                value="sii"
-                control={<Radio sx={authCheckboxSx} disabled={loading} />}
-                disabled={loading}
-                sx={{ alignItems: "flex-start", mb: 1 }}
-                label={
-                  <Box sx={{ pt: 0.5 }}>
-                    <Typography sx={{ fontWeight: 600, fontSize: "var(--font-size-s)" }}>
-                      Usar la misma contraseña del SII
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: "var(--font-size-xs)",
-                        color: "var(--color-fg-default-secondary)",
-                      }}
-                    >
-                      Tu contraseña del SII también será tu contraseña para
-                      Factorlink.
-                    </Typography>
-                  </Box>
-                }
-              />
-              <FormControlLabel
-                value="new"
-                control={<Radio sx={authCheckboxSx} disabled={loading} />}
-                disabled={loading}
-                sx={{ alignItems: "flex-start" }}
-                label={
-                  <Box sx={{ pt: 0.5 }}>
-                    <Typography sx={{ fontWeight: 600, fontSize: "var(--font-size-s)" }}>
-                      Crear una nueva contraseña
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: "var(--font-size-xs)",
-                        color: "var(--color-fg-default-secondary)",
-                      }}
-                    >
-                      Define una contraseña diferente para acceder a tu cuenta.
-                    </Typography>
-                  </Box>
-                }
-              />
-            </RadioGroup>
-          </FormControl>
-
-          {formik.values.passwordMode === "new" ? (
-            <>
-              <StyledTextField
-                fullWidth
-                variant="outlined"
-                label="Nueva contraseña"
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={formik.values.password}
-                error={
-                  formik.touched.password && Boolean(formik.errors.password)
-                }
-                helperText={formik.touched.password && formik.errors.password}
-                onChange={handlePasswordChange}
-                onBlur={formik.handleBlur}
-                disabled={loading}
-                autoComplete="new-password"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label={
-                          showPassword
-                            ? "Ocultar contraseña"
-                            : "Mostrar contraseña"
-                        }
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        edge="end"
-                        size="small"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                fullWidth
-                variant="outlined"
-                label="Confirmar contraseña"
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                value={formik.values.confirmPassword}
-                error={
-                  formik.touched.confirmPassword &&
-                  Boolean(formik.errors.confirmPassword)
-                }
-                helperText={
-                  formik.touched.confirmPassword &&
-                  formik.errors.confirmPassword
-                }
-                onChange={handlePasswordChange}
-                onBlur={formik.handleBlur}
-                disabled={loading}
-                autoComplete="new-password"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label={
-                          showConfirmPassword
-                            ? "Ocultar contraseña"
-                            : "Mostrar contraseña"
-                        }
-                        onClick={() =>
-                          setShowConfirmPassword((prev) => !prev)
-                        }
-                        edge="end"
-                        size="small"
-                      >
-                        {showConfirmPassword ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </>
-          ) : null}
+          <StyledTextField
+            fullWidth
+            variant="outlined"
+            label="Nueva contraseña"
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={formik.values.password}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
+            onChange={handlePasswordChange}
+            onBlur={formik.handleBlur}
+            disabled={loading}
+            autoComplete="new-password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={
+                      showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                    }
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                    size="small"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <StyledTextField
+            fullWidth
+            variant="outlined"
+            label="Confirmar contraseña"
+            id="confirmPassword"
+            name="confirmPassword"
+            type={showConfirmPassword ? "text" : "password"}
+            value={formik.values.confirmPassword}
+            error={
+              formik.touched.confirmPassword &&
+              Boolean(formik.errors.confirmPassword)
+            }
+            helperText={
+              formik.touched.confirmPassword && formik.errors.confirmPassword
+            }
+            onChange={handlePasswordChange}
+            onBlur={formik.handleBlur}
+            disabled={loading}
+            autoComplete="new-password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={
+                      showConfirmPassword
+                        ? "Ocultar contraseña"
+                        : "Mostrar contraseña"
+                    }
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    edge="end"
+                    size="small"
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
 
           <FormControlLabel
             sx={{ alignItems: "flex-start", mb: 2, mt: 1 }}
@@ -698,8 +588,8 @@ const Stage3CompleteAccount = ({
             <Typography color="text.secondary">{errorMessage}</Typography>
           ) : (
             <Typography color="text.secondary">
-              Tu cuenta fue creada correctamente. Continúa para ir al
-              dashboard.
+              Tu cuenta fue creada correctamente. Continúa para seleccionar tu
+              entidad.
             </Typography>
           )}
         </DialogContent>
